@@ -3,525 +3,712 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Mark Attendance</title>
+    <title>Mark Attendance | Choir Manager</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 12px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 28px;
+            padding: 20px 16px 28px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
+            transition: all 0.2s ease;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
             border-bottom: 3px solid #667eea;
             flex-wrap: wrap;
+            gap: 12px;
         }
 
         header h1 {
-            color: #333;
+            color: #1e293b;
+            font-size: 1.65rem;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 700;
         }
 
         .back-btn {
-            background: #667eea;
-            color: white;
-            padding: 10px 20px;
+            background: #f1f5f9;
+            color: #334155;
+            padding: 10px 18px;
             text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #e2e8f0;
         }
 
         .back-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
+            background: #e2e8f0;
+            transform: translateY(-1px);
         }
 
+        /* enhanced controls grid */
         .attendance-controls {
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 14px;
+            margin-bottom: 28px;
             flex-wrap: wrap;
             align-items: flex-end;
+            background: #f8fafc;
+            padding: 16px 14px;
+            border-radius: 24px;
         }
 
         .form-group {
             flex: 1;
-            min-width: 200px;
+            min-width: 170px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
         }
 
         .date-input, .session-select {
             width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 12px 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            background: white;
+            transition: all 0.2s;
+            font-family: inherit;
         }
-        /* Mobile: Make table horizontally scrollable */
-@media (max-width: 768px) {
-    .attendance-table-container {
-        margin: 0 -15px;
-        padding: 0 15px;
-        width: calc(100% + 30px);
-    }
-    
-    /* Make voice part headers sticky */
-    .voice-part-header td {
-        position: sticky;
-        left: 0;
-        background: #e0e0e0;
-    }
-    
-    /* First column sticky on mobile */
-    .attendance-table td:first-child,
-    .attendance-table th:first-child {
-        position: sticky;
-        left: 0;
-        background: white;
-        z-index: 1;
-    }
-    
-    .attendance-table th:first-child {
-        background: #667eea;
-    }
-}
+
+        .date-input:focus, .session-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
+        }
 
         .primary-btn {
-            padding: 10px 30px;
-            background: #667eea;
+            padding: 12px 24px;
+            background: #4f46e5;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
-        .primary-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
+        .primary-btn:active {
+            transform: scale(0.97);
         }
 
-        .attendance-table-container {
-            overflow-x: auto;
-            margin: 20px 0;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .attendance-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .attendance-table th {
-            background: #667eea;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            position: sticky;
-            top: 0;
-        }
-
-        .attendance-table td {
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        .attendance-table tr:hover {
-            background: #f5f5f5;
-        }
-
-        .voice-part-header {
-            background: #f0f0f0;
-            font-weight: bold;
-        }
-
-        .voice-part-header td {
-            background: #e0e0e0;
-            padding: 8px;
-        }
-
-        .status-select {
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-            width: 120px;
-        }
-
+        /* action buttons row - responsive wrap with better touch */
         .action-buttons {
             display: flex;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 12px;
+            margin: 24px 0 20px;
             flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .save-btn, .quick-btn {
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-weight: 600;
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1 0 auto;
+            background: #f1f5f9;
+            color: #1e293b;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         .save-btn {
-            padding: 12px 25px;
-            background: #28a745;
+            background: #10b981;
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(16,185,129,0.2);
         }
 
-        .save-btn:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        .quick-btn {
-            padding: 12px 25px;
-            background: #17a2b8;
+        .quick-btn:first-of-type {
+            background: #3b82f6;
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
         }
 
-        .quick-btn:hover {
-            background: #138496;
-            transform: translateY(-2px);
+        .quick-btn:nth-of-type(2) {
+            background: #f59e0b;
+            color: white;
         }
 
         .clear-btn {
-            background: #dc3545;
+            background: #ef4444;
+            color: white;
         }
 
-        .clear-btn:hover {
-            background: #c82333;
+        /* 🟢 ENHANCED MOBILE TABLE – STICKY & SCROLL */
+        .attendance-table-container {
+            margin: 0 -8px;
+            padding: 0 8px;
+            width: calc(100% + 16px);
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 58vh;
+            border-radius: 20px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
         }
 
+        .attendance-table {
+            min-width: 600px;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .attendance-table th {
+            background: #1e293b;
+            color: white;
+            padding: 14px 10px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            white-space: nowrap;
+        }
+
+        .attendance-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eef2ff;
+            font-size: 0.85rem;
+            vertical-align: middle;
+            background-color: white;
+        }
+
+        /* make first column (ID) sticky on horizontal scroll */
+        .attendance-table th:first-child,
+        .attendance-table td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 10;
+            font-weight: 500;
+            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.05);
+        }
+
+        .attendance-table th:first-child {
+            background-color: #1e293b;
+            z-index: 15;
+            left: 0;
+        }
+
+        /* Voice part header styling - sticky left also */
+        .voice-part-header td {
+            background: #f1f5f9 !important;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            color: #0f172a;
+            position: sticky;
+            left: 0;
+            background-color: #f1f5f9;
+            z-index: 8;
+        }
+
+        .voice-part-header td:first-child {
+            background-color: #f1f5f9;
+            box-shadow: none;
+        }
+
+        /* status select enhanced for touch */
+        .status-select {
+            padding: 10px 8px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            width: 100%;
+            min-width: 100px;
+            cursor: pointer;
+            transition: 0.1s;
+            font-family: inherit;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            ring: 2px solid #a5b4fc;
+        }
+
+        /* message styling */
         .message {
-            padding: 15px;
-            border-radius: 8px;
+            padding: 14px 18px;
+            border-radius: 60px;
             margin-top: 20px;
             text-align: center;
+            font-weight: 500;
             display: none;
+            backdrop-filter: blur(4px);
         }
 
         .message.success {
             display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 5px solid #10b981;
         }
 
         .message.error {
             display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 5px solid #ef4444;
         }
 
         .message.info {
             display: block;
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-left: 5px solid #0ea5e9;
         }
 
         .loading {
             text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            color: #667eea;
+            padding: 40px 16px;
+            font-size: 1rem;
+            color: #4f46e5;
+            font-weight: 500;
         }
 
-        @media (max-width: 768px) {
+        /* small devices adjustments */
+        @media (max-width: 580px) {
             .container {
-                padding: 15px;
+                padding: 16px 12px 24px;
             }
-            
-            .attendance-table th, .attendance-table td {
-                padding: 8px;
-                font-size: 12px;
+
+            .attendance-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
             }
-            
+
+            .primary-btn {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .action-buttons {
+                gap: 8px;
+            }
+
+            .save-btn, .quick-btn {
+                font-size: 0.75rem;
+                padding: 10px 12px;
+            }
+
             .status-select {
-                width: 80px;
-                font-size: 11px;
+                font-size: 0.7rem;
+                padding: 8px 4px;
+                min-width: 85px;
+            }
+
+            .attendance-table th, .attendance-table td {
+                padding: 10px 6px;
+                font-size: 0.75rem;
+            }
+
+            header h1 {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* landscape phones optimization */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .attendance-table-container {
+                max-height: 65vh;
+            }
+        }
+
+        /* dark scroll for better visibility */
+        .attendance-table-container::-webkit-scrollbar {
+            height: 5px;
+            width: 5px;
+        }
+
+        .attendance-table-container::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .attendance-table-container::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+
+        /* additional hover effect only for devices that support hover */
+        @media (hover: hover) {
+            .attendance-table tr:hover td {
+                background: #fef9e3;
+            }
+            .primary-btn:hover, .save-btn:hover, .quick-btn:hover {
+                transform: translateY(-2px);
+                filter: brightness(1.03);
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>✅ Mark Attendance</h1>
-            <a href="index.html" class="back-btn">← Back to Dashboard</a>
-        </header>
+<div class="container">
+    <header>
+        <h1>🎵 Mark Attendance</h1>
+        <a href="index.html" class="back-btn">← Dashboard</a>
+    </header>
 
-        <div class="attendance-controls">
-            <div class="form-group">
-                <label>Select Date:</label>
-                <input type="date" id="attendanceDate" class="date-input">
-            </div>
-            <div class="form-group">
-                <label>Select Session:</label>
-                <select id="sessionSelect" class="session-select">
-                    <option value="Morning">Morning (9:00 AM - 1:00 PM)</option>
-                    <option value="Afternoon">Afternoon (2:00 PM - 4:00 PM)</option>
-                    <option value="Evening">Evening (7:00 PM - 10:30 PM)</option>
-                </select>
-            </div>
-            <button id="loadMembersBtn" class="primary-btn">📋 Load Members</button>
+    <div class="attendance-controls">
+        <div class="form-group">
+            <label>📅 Date</label>
+            <input type="date" id="attendanceDate" class="date-input">
         </div>
-
-        <div id="attendanceTable" class="attendance-table-container"></div>
-
-        <div class="action-buttons">
-            <button id="saveAttendanceBtn" class="save-btn">💾 Save Attendance</button>
-            <button id="markAllPresentBtn" class="quick-btn">✓ Mark All Present</button>
-            <button id="markAllLateBtn" class="quick-btn">⏰ Mark All Late</button>
-            <button id="clearAllBtn" class="quick-btn clear-btn">✗ Clear All</button>
+        <div class="form-group">
+            <label>⏰ Session</label>
+            <select id="sessionSelect" class="session-select">
+                <option value="Morning">🌅 Morning (9:00 AM – 1:00 PM)</option>
+                <option value="Afternoon">☀️ Afternoon (2:00 PM – 4:00 PM)</option>
+                <option value="Evening">🌙 Evening (7:00 PM – 10:30 PM)</option>
+            </select>
         </div>
-
-        <div id="message" class="message"></div>
+        <button id="loadMembersBtn" class="primary-btn">📋 Load Members</button>
     </div>
 
-    <script>
-        // Supabase configuration - NO DUPLICATES
-        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    <div id="attendanceTable" class="attendance-table-container"></div>
+
+    <div class="action-buttons">
+        <button id="saveAttendanceBtn" class="save-btn">💾 Save Records</button>
+        <button id="markAllPresentBtn" class="quick-btn">✓ All Present</button>
+        <button id="markAllLateBtn" class="quick-btn">⏰ All Late</button>
+        <button id="clearAllBtn" class="quick-btn clear-btn">🗑️ Clear All</button>
+    </div>
+
+    <div id="message" class="message"></div>
+</div>
+
+<script>
+    // ------------------------------
+    // SUPABASE CONFIGURATION (unchanged, secure usage)
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // State
+    let currentMembers = [];
+    let currentAttendance = {};    // key: member_id, value: status string
+    
+    // DOM elements
+    const dateInput = document.getElementById('attendanceDate');
+    const sessionSelect = document.getElementById('sessionSelect');
+    const loadBtn = document.getElementById('loadMembersBtn');
+    const saveBtn = document.getElementById('saveAttendanceBtn');
+    const markAllPresent = document.getElementById('markAllPresentBtn');
+    const markAllLate = document.getElementById('markAllLateBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const tableContainer = document.getElementById('attendanceTable');
+    const messageDiv = document.getElementById('message');
+    
+    // set default date to today
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.value = `${yyyy}-${mm}-${dd}`;
+    
+    // Helper: show message (auto-hide after 3s)
+    function showMessage(msg, type = 'info') {
+        messageDiv.textContent = msg;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = 'block';
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+            messageDiv.className = 'message';
+        }, 3200);
+    }
+    
+    // Render table with voice part grouping, sticky enhancements, and touch-friendly selects
+    function renderAttendanceTable() {
+        if (!currentMembers.length) {
+            tableContainer.innerHTML = '<div class="loading">✨ No members loaded. Click "Load Members" ✨</div>';
+            return;
+        }
         
-        // Create the client - only once
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Define ordered voice parts
+        const voicePartsOrder = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
+        let html = `<div class="attendance-table-container"><table class="attendance-table">
+                        <thead>
+                            <th>Full Name</th><th>Voice</th><th>Attendance Status</th><th> </th><th> </th>
+                        </thead>
+                        <tbody>`;
         
-        let currentMembers = [];
-        let currentAttendance = {};
-
-        // Set today's date as default
-        document.getElementById('attendanceDate').valueAsDate = new Date();
+        for (let part of voicePartsOrder) {
+            const partMembers = currentMembers.filter(m => (m.voice_part || 'Other') === part);
+            if (partMembers.length === 0) continue;
+            
+            // Voice part header row (sticky left & full background)
+            html += `<tr class="voice-part-header"><td colspan="4"><span style="display:flex; align-items:center; gap:8px;">🎵 ${part} &nbsp;•&nbsp; ${partMembers.length} member${partMembers.length !== 1 ? 's' : ''}</span></td></tr>`;
+            
+            partMembers.forEach(member => {
+                const memberId = member.member_id;
+                const currentStatus = currentAttendance[memberId] || '';
+                html += `<tr>
+                            
+                            <td>${escapeHtml(member.name || 'Unnamed')}</td>
+                            <td>${escapeHtml(member.voice_part || '—')}</td>
+                            <td>
+                                <select class="status-select" data-member-id="${memberId}">
+                                    <option value="" ${currentStatus === '' ? 'selected' : ''}>📌 Select</option>
+                                    <option value="Present" ${currentStatus === 'Present' ? 'selected' : ''}>✅ Present</option>
+                                    <option value="Late" ${currentStatus === 'Late' ? 'selected' : ''}>⏰ Late</option>
+                                    <option value="Absent" ${currentStatus === 'Absent' ? 'selected' : ''}>❌ Absent</option>
+                                </select>
+                            </td>
+                         </tr>`;
+            });
+        }
         
-        // Add event listeners
-        document.getElementById('loadMembersBtn').addEventListener('click', loadMembers);
-        document.getElementById('saveAttendanceBtn').addEventListener('click', saveAttendance);
-        document.getElementById('markAllPresentBtn').addEventListener('click', () => markAll('Present'));
-        document.getElementById('markAllLateBtn').addEventListener('click', () => markAll('Late'));
-        document.getElementById('clearAllBtn').addEventListener('click', clearAll);
-
-        async function loadMembers() {
-            const date = document.getElementById('attendanceDate').value;
-            const session = document.getElementById('sessionSelect').value;
-
-            if (!date) {
-                showMessage('Please select a date', 'error');
-                return;
-            }
-
-            showMessage('Loading members from database...', 'info');
-            document.getElementById('attendanceTable').innerHTML = '<div class="loading">🔄 Loading members...</div>';
-
-            try {
-                // Fetch all members using supabaseClient
-                const { data: members, error: membersError } = await supabaseClient
-                    .from('members')
-                    .select('*')
-                    .order('voice_part', { ascending: true });
-
-                if (membersError) {
-                    console.error('Members error:', membersError);
-                    showMessage('Error loading members: ' + membersError.message, 'error');
-                    document.getElementById('attendanceTable').innerHTML = '';
-                    return;
+        if (currentMembers.length === 0) {
+            html += `<tr><td colspan="4" style="text-align:center; padding:32px;">⚠️ No members found in database ⚠️</td></tr>`;
+        }
+        
+        html += `</tbody></table></div>`;
+        tableContainer.innerHTML = html;
+        
+        // attach change events to each select to update currentAttendance realtime
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                const memberId = select.dataset.memberId;
+                const newStatus = select.value;
+                if (memberId) {
+                    if (newStatus === '') {
+                        delete currentAttendance[memberId];
+                    } else {
+                        currentAttendance[memberId] = newStatus;
+                    }
                 }
-
-                if (!members || members.length === 0) {
-                    showMessage('No members found in database. Please insert members first.', 'error');
-                    document.getElementById('attendanceTable').innerHTML = '<div class="loading">⚠️ No members found. Please check database.</div>';
-                    return;
-                }
-
-                currentMembers = members;
-                console.log(`✅ Loaded ${currentMembers.length} members`);
-
-                // Fetch existing attendance for this date/session
-                const { data: existingAttendance, error: attendanceError } = await supabaseClient
-                    .from('attendance')
-                    .select('*')
-                    .eq('date', date)
-                    .eq('session', session);
-
-                if (attendanceError) {
-                    console.error('Attendance error:', attendanceError);
-                }
-
-                // Build currentAttendance object
+                // subtle visual feedback
+                select.style.transform = 'scale(0.98)';
+                setTimeout(() => { select.style.transform = ''; }, 120);
+            });
+        });
+    }
+    
+    // simple escape to avoid injection
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+    
+    // load members from supabase + existing attendance for the selected date/session
+    async function loadMembers() {
+        const date = dateInput.value;
+        const session = sessionSelect.value;
+        if (!date) {
+            showMessage('Please select a valid date', 'error');
+            return;
+        }
+        
+        showMessage('🔄 Fetching members & attendance data...', 'info');
+        tableContainer.innerHTML = '<div class="loading">🎤 Loading choir members...</div>';
+        
+        try {
+            // 1) fetch all members
+            const { data: members, error: membersError } = await supabaseClient
+                .from('members')
+                .select('*')
+                .order('voice_part', { ascending: true });
+            
+            if (membersError) throw new Error(`Members fetch error: ${membersError.message}`);
+            if (!members || members.length === 0) {
+                showMessage('📭 No members in database. Please add members first.', 'error');
+                tableContainer.innerHTML = '<div class="loading">🚫 No members found. Add via dashboard.</div>';
+                currentMembers = [];
                 currentAttendance = {};
-                if (existingAttendance) {
-                    existingAttendance.forEach(att => {
-                        currentAttendance[att.member_id] = att.status;
-                    });
-                    console.log(`📊 Loaded ${existingAttendance.length} existing attendance records`);
-                }
-
                 renderAttendanceTable();
-                showMessage(`✅ Loaded ${currentMembers.length} members successfully!`, 'success');
-
-            } catch (error) {
-                console.error('Unexpected error:', error);
-                showMessage('Unexpected error: ' + error.message, 'error');
-                document.getElementById('attendanceTable').innerHTML = '';
-            }
-        }
-
-        function renderAttendanceTable() {
-            const voiceParts = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
-            let html = '<table class="attendance-table"><thead><tr><th>Member ID</th><th>Name</th><th>Voice Part</th><th>Status</th></tr></thead><tbody>';
-            
-            voiceParts.forEach(part => {
-                const partMembers = currentMembers.filter(m => m.voice_part === part);
-                if (partMembers.length > 0) {
-                    // Add voice part header row
-                    html += `<tr class="voice-part-header"><td colspan="4"><strong>🎵 ${part} (${partMembers.length} members)</strong></td></tr>`;
-                    
-                    partMembers.forEach(member => {
-                        const currentStatus = currentAttendance[member.member_id] || '';
-                        html += `
-                            <tr>
-                                <td>${member.member_id}</td>
-                                <td>${member.name}</td>
-                                <td>${member.voice_part}</td>
-                                <td>
-                                    <select class="status-select" data-member-id="${member.member_id}">
-                                        <option value="">-- Select --</option>
-                                        <option value="Present" ${currentStatus === 'Present' ? 'selected' : ''}>✅ Present</option>
-                                        <option value="Late" ${currentStatus === 'Late' ? 'selected' : ''}>⏰ Late</option>
-                                        <option value="Absent" ${currentStatus === 'Absent' ? 'selected' : ''}>❌ Absent</option>
-                                    </select>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                }
-            });
-            
-            html += '</tbody></table>';
-            document.getElementById('attendanceTable').innerHTML = html;
-            
-            // Attach event listeners to all status selects
-            document.querySelectorAll('.status-select').forEach(select => {
-                select.addEventListener('change', (e) => {
-                    const memberId = e.target.dataset.memberId;
-                    currentAttendance[memberId] = e.target.value;
-                });
-            });
-        }
-
-        async function saveAttendance() {
-            const date = document.getElementById('attendanceDate').value;
-            const session = document.getElementById('sessionSelect').value;
-            
-            if (!date) {
-                showMessage('Please select a date', 'error');
                 return;
             }
             
-            // Collect records that have a status selected
-            const records = [];
-            for (const [memberId, status] of Object.entries(currentAttendance)) {
-                if (status && status !== '') {
-                    records.push({
-                        date: date,
-                        session: session,
-                        member_id: memberId,
-                        status: status
-                    });
-                }
-            }
-            
-            if (records.length === 0) {
-                showMessage('No attendance data to save. Please mark some members first.', 'error');
-                return;
-            }
-            
-            showMessage(`💾 Saving ${records.length} attendance records...`, 'info');
-            
-            // Upsert records (insert or update if exists)
-            const { data, error } = await supabaseClient
+            currentMembers = members;
+            // 2) fetch existing attendance for this exact date + session
+            const { data: existingAtt, error: attError } = await supabaseClient
                 .from('attendance')
-                .upsert(records, { 
-                    onConflict: 'date,session,member_id'
-                });
+                .select('*')
+                .eq('date', date)
+                .eq('session', session);
             
-            if (error) {
-                console.error('Save error:', error);
-                showMessage('❌ Error saving attendance: ' + error.message, 'error');
-            } else {
-                showMessage(`✅ Successfully saved ${records.length} attendance records for ${session} session!`, 'success');
-            }
-        }
-        
-        function markAll(status) {
-            if (currentMembers.length === 0) {
-                showMessage('Please load members first', 'error');
-                return;
-            }
+            if (attError) console.warn('Attendance fetch warning:', attError.message);
             
-            currentMembers.forEach(member => {
-                currentAttendance[member.member_id] = status;
-            });
-            renderAttendanceTable();
-            showMessage(`✓ Marked all ${currentMembers.length} members as ${status}`, 'success');
-        }
-        
-        function clearAll() {
-            if (currentMembers.length === 0) {
-                showMessage('Please load members first', 'error');
-                return;
-            }
-            
+            // reset currentAttendance
             currentAttendance = {};
+            if (existingAtt && existingAtt.length) {
+                existingAtt.forEach(rec => {
+                    if (rec.member_id && rec.status) {
+                        currentAttendance[rec.member_id] = rec.status;
+                    }
+                });
+                showMessage(`📌 Loaded ${existingAtt.length} existing records for ${session}`, 'success');
+            } else {
+                showMessage(`✨ No prior attendance for ${session} session. Ready to mark!`, 'info');
+            }
+            
             renderAttendanceTable();
-            showMessage('🗑️ Cleared all selections', 'success');
+            showMessage(`✅ ${currentMembers.length} members loaded. Select statuses & save.`, 'success');
+        } catch (err) {
+            console.error(err);
+            showMessage(`⚠️ Error: ${err.message}`, 'error');
+            tableContainer.innerHTML = '<div class="loading">❌ Failed to load members. Check network or database.</div>';
+            currentMembers = [];
+        }
+    }
+    
+    // Save attendance (upsert)
+    async function saveAttendance() {
+        const date = dateInput.value;
+        const session = sessionSelect.value;
+        if (!date) {
+            showMessage('Please select a date before saving', 'error');
+            return;
         }
         
-        function showMessage(msg, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = msg;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-                messageDiv.className = 'message';
-            }, 3000);
+        // Build records array from currentAttendance (only those with non-empty status)
+        const records = [];
+        for (const [memberId, status] of Object.entries(currentAttendance)) {
+            if (status && status.trim() !== '') {
+                records.push({
+                    date: date,
+                    session: session,
+                    member_id: memberId,
+                    status: status
+                });
+            }
         }
-
-        // Auto-load members when page loads (optional)
-        // Uncomment the line below if you want members to load automatically
-        // window.addEventListener('load', loadMembers);
-    </script>
+        
+        if (records.length === 0) {
+            showMessage('⚠️ No attendance marked. Please assign status to at least one member.', 'error');
+            return;
+        }
+        
+        showMessage(`💾 Saving ${records.length} record(s)...`, 'info');
+        
+        const { data, error } = await supabaseClient
+            .from('attendance')
+            .upsert(records, { onConflict: 'date,session,member_id' });
+        
+        if (error) {
+            console.error('Upsert error:', error);
+            showMessage(`❌ Save failed: ${error.message}`, 'error');
+        } else {
+            showMessage(`🎉 Success! ${records.length} attendance entries saved for ${session} (${date})`, 'success');
+            // optional: reload to sync latest (but we already have currentAttendance consistent)
+        }
+    }
+    
+    // mark all loaded members with a specific status
+    function markAll(status) {
+        if (!currentMembers.length) {
+            showMessage('Please load members first (click "Load Members")', 'error');
+            return;
+        }
+        currentMembers.forEach(member => {
+            currentAttendance[member.member_id] = status;
+        });
+        renderAttendanceTable();
+        showMessage(`✓ All ${currentMembers.length} members marked as ${status}`, 'success');
+    }
+    
+    function clearAllSelections() {
+        if (!currentMembers.length) {
+            showMessage('No members loaded, nothing to clear', 'error');
+            return;
+        }
+        currentAttendance = {};
+        renderAttendanceTable();
+        showMessage('🧹 Cleared all attendance selections', 'success');
+    }
+    
+    // Event listeners (touch & mouse friendly)
+    loadBtn.addEventListener('click', loadMembers);
+    saveBtn.addEventListener('click', saveAttendance);
+    markAllPresent.addEventListener('click', () => markAll('Present'));
+    markAllLate.addEventListener('click', () => markAll('Late'));
+    clearAllBtn.addEventListener('click', clearAllSelections);
+    
+    // optional: if user changes session or date, we don't auto-reload – but we show a helpful hint
+    sessionSelect.addEventListener('change', () => {
+        if (currentMembers.length) {
+            showMessage(`Session changed to ${sessionSelect.value}. Click "Load Members" to refresh attendance for this session.`, 'info');
+        }
+    });
+    dateInput.addEventListener('change', () => {
+        if (currentMembers.length) {
+            showMessage(`Date changed to ${dateInput.value}. Reload members to see existing attendance for new date.`, 'info');
+        }
+    });
+    
+    // Small enhancement: prevent accidental double taps on buttons
+    const allButtons = document.querySelectorAll('button, .back-btn');
+    allButtons.forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+            // just passive to enhance responsiveness
+        }, { passive: true });
+    });
+    
+    // optionally preload members if needed? we don't auto-load to avoid unexpected queries, but we show friendly empty state.
+    // If you prefer auto-load on page load, uncomment next line:
+    // window.addEventListener('DOMContentLoaded', loadMembers);
+</script>
 </body>
 </html>

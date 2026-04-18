@@ -11,866 +11,786 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #11b6ae 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 12px;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 28px;
+            padding: 20px 16px 28px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
             border-bottom: 3px solid #667eea;
             flex-wrap: wrap;
+            gap: 12px;
         }
 
         header h1 {
-            color: #333;
+            color: #1e293b;
+            font-size: 1.65rem;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 700;
         }
 
         .back-btn {
-            background: #667eea;
-            color: white;
-            padding: 10px 20px;
+            background: #f1f5f9;
+            color: #334155;
+            padding: 10px 18px;
             text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #e2e8f0;
         }
 
-        .back-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
+        .back-btn:active {
+            transform: scale(0.96);
         }
-        @media (max-width: 768px) {
-    .report-tabs {
-        flex-direction: column;
-        gap: 5px;
-    }
-    
-    .tab-btn {
-        width: 100%;
-        text-align: center;
-    }
-    
-    .daily-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 5px;
-    }
-    
-    .daily-stats {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .daily-stat {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px;
-        border-bottom: 1px solid #eee;
-    }
-    
-    .daily-stat .stat-label {
-        margin-top: 0;
-    }
-}
 
+        /* TABS - Fully responsive */
         .report-tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e0e0e0;
+            gap: 6px;
+            margin-bottom: 28px;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 60px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .tab-btn {
-            padding: 12px 30px;
-            background: none;
+            padding: 10px 22px;
+            background: transparent;
             border: none;
-            font-size: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            color: #666;
-            font-weight: 500;
+            transition: all 0.2s;
+            color: #475569;
+            border-radius: 40px;
+            white-space: nowrap;
         }
 
         .tab-btn.active {
-            color: #667eea;
-            border-bottom: 3px solid #667eea;
-            margin-bottom: -2px;
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        .tab-btn:hover {
-            color: #667eea;
+        .tab-btn:active {
+            transform: scale(0.96);
         }
 
         .tab-content {
             display: none;
+            animation: fadeIn 0.25s ease;
         }
 
         .tab-content.active {
             display: block;
-            animation: fadeIn 0.3s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Controls grid - mobile first */
         .report-controls {
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 28px;
             flex-wrap: wrap;
             align-items: flex-end;
+            background: #f8fafc;
+            padding: 18px 14px;
+            border-radius: 28px;
         }
 
         .form-group {
             flex: 1;
-            min-width: 200px;
+            min-width: 170px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 0.8rem;
         }
 
         .date-input, .week-select, .session-select {
             width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 12px 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            background: white;
+            font-family: inherit;
         }
 
         .primary-btn, .secondary-btn, .pdf-btn {
-            padding: 10px 30px;
+            padding: 12px 22px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
         }
 
         .primary-btn {
-            background: #667eea;
+            background: #4f46e5;
             color: white;
-        }
-
-        .primary-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
+            box-shadow: 0 2px 6px rgba(79,70,229,0.2);
         }
 
         .secondary-btn {
-            background: #28a745;
+            background: #10b981;
             color: white;
-        }
-
-        .secondary-btn:hover {
-            background: #218838;
-            transform: translateY(-2px);
         }
 
         .pdf-btn {
-            background: #dc3545;
+            background: #ef4444;
             color: white;
         }
 
-        .pdf-btn:hover {
-            background: #c82333;
-            transform: translateY(-2px);
+        .primary-btn:active, .secondary-btn:active, .pdf-btn:active {
+            transform: scale(0.97);
         }
 
+        /* Report container & cards */
         .report-container {
-            margin-top: 30px;
+            margin-top: 8px;
         }
 
-        /* Daily Report Styles */
+        /* PDF styles (also used inside report) */
         .report-for-pdf {
-            padding: 40px;
+            padding: 20px 16px;
             background: white;
             font-family: 'Segoe UI', Arial, sans-serif;
         }
 
         .report-header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
+            margin-bottom: 24px;
+            padding: 18px 12px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-radius: 10px;
+            border-radius: 24px;
         }
 
         .session-report {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
+            background: #f8fafc;
+            padding: 18px 16px;
+            border-radius: 24px;
             margin-bottom: 20px;
-            border-left: 5px solid #667eea;
-            page-break-inside: avoid;
+            border-left: 5px solid #4f46e5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        /* Weekly Summary Styles */
-        .weekly-summary {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-
-        .week-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
+        /* Stats summary - flexible grid */
         .stats-summary {
-            display: flex;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
             margin: 15px 0;
-            flex-wrap: wrap;
         }
 
         .stat-card {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
-            flex: 1;
-            min-width: 120px;
+            padding: 12px 8px;
+            border-radius: 20px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .stat-card.present { border-top: 4px solid #28a745; }
-        .stat-card.late { border-top: 4px solid #ffc107; }
-        .stat-card.absent { border-top: 4px solid #dc3545; }
-        .stat-card.percentage { border-top: 4px solid #667eea; }
-        .stat-card.total { border-top: 4px solid #17a2b8; }
+        .stat-card.present { border-top: 4px solid #10b981; }
+        .stat-card.late { border-top: 4px solid #f59e0b; }
+        .stat-card.absent { border-top: 4px solid #ef4444; }
+        .stat-card.percentage { border-top: 4px solid #4f46e5; }
+        .stat-card.total { border-top: 4px solid #06b6d4; }
 
         .stat-number {
             font-size: 28px;
-            font-weight: bold;
+            font-weight: 800;
         }
 
         .stat-label {
-            color: #666;
-            margin-top: 5px;
-            font-size: 14px;
+            color: #475569;
+            margin-top: 6px;
+            font-size: 12px;
+            font-weight: 500;
         }
 
-        .percentage .stat-number { color: #667eea; }
-        .present .stat-number { color: #28a745; }
-        .late .stat-number { color: #ffc107; }
-        .absent .stat-number { color: #dc3545; }
-        .total .stat-number { color: #17a2b8; }
+        .absentee-list, .late-list {
+            margin-top: 16px;
+            padding: 14px;
+            background: white;
+            border-radius: 20px;
+        }
+
+        .absentee-list h4, .late-list h4 {
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .absentee-list h4 { color: #dc2626; }
+        .late-list h4 { color: #ea580c; }
+
+        .absentee-list ul, .late-list ul {
+            margin-left: 18px;
+            margin-top: 8px;
+        }
+
+        .absentee-list li, .late-list li {
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #eef2ff;
+            word-break: break-word;
+        }
+
+        /* Weekly specific enhancements */
+        .weekly-summary {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+        }
+
+        .week-header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 20px;
+            margin-bottom: 18px;
+        }
 
         .daily-breakdown {
-            margin-top: 20px;
+            margin-top: 16px;
         }
 
         .daily-card {
             background: white;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            border-radius: 20px;
+            margin-bottom: 14px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
 
         .daily-header {
-            background: #667eea;
-            color: white;
-            padding: 12px 15px;
-            cursor: pointer;
+            background: #eef2ff;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .daily-header:hover {
-            background: #5a67d8;
+            font-weight: 600;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .daily-stats {
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            padding: 14px;
+            background: white;
             flex-wrap: wrap;
-            padding: 15px;
-            background: #f8f9fa;
         }
 
         .daily-stat {
-            text-align: center;
             flex: 1;
+            text-align: center;
+            min-width: 70px;
         }
 
         .daily-stat-value {
             font-size: 20px;
-            font-weight: bold;
+            font-weight: 800;
         }
-
-        .absentee-list, .late-list {
-            margin-top: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-        }
-
-        .absentee-list h4, .late-list h4 {
-            margin-bottom: 10px;
-        }
-
-        .absentee-list h4 { color: #dc3545; }
-        .late-list h4 { color: #ffc107; }
-
-        .absentee-list ul, .late-list ul {
-            margin-left: 20px;
-            margin-top: 10px;
-        }
-
-        .absentee-list li, .late-list li {
-            margin: 5px 0;
-            padding: 5px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .trend-up { color: #28a745; }
-        .trend-down { color: #dc3545; }
-        .trend-steady { color: #ffc107; }
 
         .footer-note {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            font-size: 12px;
-            color: #999;
+            margin-top: 28px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 11px;
+            color: #64748b;
         }
 
         .loading {
             text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            color: #667eea;
+            padding: 48px 20px;
+            font-size: 1rem;
+            color: #4f46e5;
+            font-weight: 500;
         }
 
-        hr {
-            margin: 20px 0;
-            border: none;
-            border-top: 2px solid #ddd;
-        }
-
-        @media (max-width: 768px) {
+        /* Mobile media queries - extra polish */
+        @media (max-width: 640px) {
+            body {
+                padding: 8px;
+            }
             .container {
-                padding: 15px;
+                padding: 16px 12px 24px;
             }
-            
+            .report-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .primary-btn, .secondary-btn, .pdf-btn {
+                width: 100%;
+                justify-content: center;
+            }
             .stats-summary {
-                flex-direction: column;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
-            
+            .tab-btn {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+                white-space: normal;
+                flex: 1;
+                text-align: center;
+            }
+            .report-tabs {
+                border-radius: 40px;
+                gap: 4px;
+            }
+            .stat-number {
+                font-size: 24px;
+            }
+            .daily-header {
+                flex-direction: column;
+                text-align: center;
+            }
             .daily-stats {
-                flex-direction: column;
+                justify-content: space-around;
             }
+        }
+
+        @media (max-width: 480px) {
+            .stats-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+            .session-report h3 {
+                font-size: 1rem;
+            }
+            .absentee-list li, .late-list li {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* touch optimization */
+        button, .back-btn {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .report-header h2, .report-header h3 {
+            word-break: break-word;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📊 Attendance Reports</h1>
-            <a href="index.html" class="back-btn">← Back to Dashboard</a>
-        </header>
+<div class="container">
+    <header>
+        <h1>🎵 Attendance Reports</h1>
+        <a href="index.html" class="back-btn">← Dashboard</a>
+    </header>
 
-        <div class="report-tabs">
-            <button class="tab-btn active" onclick="switchTab('daily')">📅 Daily Report</button>
-            <button class="tab-btn" onclick="switchTab('weekly')">📈 Weekly Summary</button>
-        </div>
-
-        <!-- Daily Report Tab -->
-        <div id="dailyTab" class="tab-content active">
-            <div class="report-controls">
-                <div class="form-group">
-                    <label>Select Date:</label>
-                    <input type="date" id="reportDate" class="date-input">
-                </div>
-                <button id="generateReportBtn" class="primary-btn">📋 Generate Report</button>
-                <button id="exportPDFBtn" class="pdf-btn">📄 Export as PDF</button>
-                <button id="exportTextBtn" class="secondary-btn">📝 Export as Text</button>
-            </div>
-            <div id="reportContent" class="report-container"></div>
-        </div>
-
-        <!-- Weekly Summary Tab -->
-        <div id="weeklyTab" class="tab-content">
-            <div class="report-controls">
-                <div class="form-group">
-                    <label>Select Week:</label>
-                    <input type="week" id="weekSelect" class="week-select">
-                </div>
-                <button id="generateWeeklyBtn" class="primary-btn">📊 Generate Weekly Summary</button>
-                <button id="exportWeeklyPDFBtn" class="pdf-btn">📄 Export Weekly PDF</button>
-            </div>
-            <div id="weeklyContent" class="report-container"></div>
-        </div>
+    <div class="report-tabs">
+        <button class="tab-btn active" data-tab="daily">📅 Daily Report</button>
+        <button class="tab-btn" data-tab="weekly">📈 Weekly Summary</button>
     </div>
 
-    <script>
-        // Supabase configuration
-        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
-        
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        let currentReportHtml = '';
-        let currentDate = '';
-        let currentWeeklyHtml = '';
+    <!-- Daily Report Tab -->
+    <div id="dailyTab" class="tab-content active">
+        <div class="report-controls">
+            <div class="form-group">
+                <label>📅 Select Date</label>
+                <input type="date" id="reportDate" class="date-input">
+            </div>
+            <button id="generateReportBtn" class="primary-btn">📋 Generate Report</button>
+            <button id="exportPDFBtn" class="pdf-btn">📄 PDF Export</button>
+            <button id="exportTextBtn" class="secondary-btn">📝 Text Export</button>
+        </div>
+        <div id="reportContent" class="report-container"></div>
+    </div>
 
-        // Set default dates
-        document.getElementById('reportDate').valueAsDate = new Date();
-        
-        // Set default week to current week
+    <!-- Weekly Summary Tab -->
+    <div id="weeklyTab" class="tab-content">
+        <div class="report-controls">
+            <div class="form-group">
+                <label>📆 Select Week</label>
+                <input type="week" id="weekSelect" class="week-select">
+            </div>
+            <button id="generateWeeklyBtn" class="primary-btn">📊 Generate Weekly</button>
+            <button id="exportWeeklyPDFBtn" class="pdf-btn">📄 Weekly PDF</button>
+        </div>
+        <div id="weeklyContent" class="report-container"></div>
+    </div>
+</div>
+
+<script>
+    // Supabase configuration
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentReportHtml = '';
+    let currentDate = '';
+    let currentWeeklyHtml = '';
+
+    // Helper: set default date/today
+    const todayInput = document.getElementById('reportDate');
+    if (todayInput) {
         const today = new Date();
-        const year = today.getFullYear();
-        const weekNumber = getWeekNumber(today);
-        document.getElementById('weekSelect').value = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        todayInput.value = `${yyyy}-${mm}-${dd}`;
+    }
 
-        // Tab switching
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            if (tab === 'daily') {
-                document.querySelector('.tab-btn:first-child').classList.add('active');
-                document.getElementById('dailyTab').classList.add('active');
-            } else {
-                document.querySelector('.tab-btn:last-child').classList.add('active');
-                document.getElementById('weeklyTab').classList.add('active');
-            }
+    // Set default week
+    function getCurrentWeekValue() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const oneJan = new Date(year, 0, 1);
+        const weekNum = Math.ceil(((now - oneJan) / 86400000 + oneJan.getDay() + 1) / 7);
+        return `${year}-W${String(weekNum).padStart(2, '0')}`;
+    }
+    const weekSelect = document.getElementById('weekSelect');
+    if (weekSelect) weekSelect.value = getCurrentWeekValue();
+
+    // Tab switching (enhanced, event-based)
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        const activeTab = document.getElementById(`${tabId}Tab`);
+        if (activeTab) activeTab.classList.add('active');
+        const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.dataset.tab === tabId);
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tabName = btn.dataset.tab;
+            if (tabName === 'daily') switchTab('daily');
+            else if (tabName === 'weekly') switchTab('weekly');
+        });
+    });
+
+    // Helper: get week dates (Mon to Sun)
+    function getWeekDates(weekValue) {
+        const [year, week] = weekValue.split('-W');
+        const jan4 = new Date(year, 0, 4);
+        const jan4Day = jan4.getDay() || 7;
+        const monOffset = jan4Day === 1 ? 0 : 1 - jan4Day;
+        const firstMonday = new Date(year, 0, 4 + monOffset);
+        const startDate = new Date(firstMonday);
+        startDate.setDate(firstMonday.getDate() + (parseInt(week) - 1) * 7);
+        const weekDates = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(startDate);
+            d.setDate(startDate.getDate() + i);
+            weekDates.push(d.toISOString().split('T')[0]);
         }
+        return weekDates;
+    }
 
-        function getWeekNumber(date) {
-            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-            const dayNum = d.getUTCDay() || 7;
-            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-        }
+    // ---------- DAILY REPORT ----------
+    document.getElementById('generateReportBtn')?.addEventListener('click', generateReport);
+    document.getElementById('exportPDFBtn')?.addEventListener('click', exportToPDF);
+    document.getElementById('exportTextBtn')?.addEventListener('click', exportToText);
 
-        function getWeekDates(weekValue) {
-            const [year, week] = weekValue.split('-W');
-            const date = new Date(year, 0, 1);
-            const days = (week - 1) * 7;
-            date.setDate(date.getDate() + days - date.getDay() + 1);
-            const weekDates = [];
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(date);
-                d.setDate(date.getDate() + i);
-                weekDates.push(d.toISOString().split('T')[0]);
-            }
-            return weekDates;
-        }
+    async function generateReport() {
+        const date = document.getElementById('reportDate').value;
+        if (!date) { alert('Please select a date'); return; }
+        currentDate = date;
+        const reportDiv = document.getElementById('reportContent');
+        reportDiv.innerHTML = '<div class="loading">📊 Loading daily report...</div>';
 
-        // DAILY REPORT FUNCTIONS
-        document.getElementById('generateReportBtn').addEventListener('click', generateReport);
-        document.getElementById('exportPDFBtn').addEventListener('click', exportToPDF);
-        document.getElementById('exportTextBtn').addEventListener('click', exportToText);
+        try {
+            const { data: allMembers, error: membersError } = await supabaseClient
+                .from('members')
+                .select('member_id, name, voice_part');
+            if (membersError) throw membersError;
+            if (!allMembers || allMembers.length === 0) throw new Error('No members found in database.');
 
-        async function generateReport() {
-            const date = document.getElementById('reportDate').value;
-            if (!date) {
-                alert('Please select a date');
-                return;
-            }
-            
-            currentDate = date;
-            document.getElementById('reportContent').innerHTML = '<div class="loading">📊 Generating report...</div>';
+            const totalMembers = allMembers.length;
+            const memberMap = Object.fromEntries(allMembers.map(m => [m.member_id, { name: m.name, voice_part: m.voice_part }]));
 
-            try {
-                const { data: allMembers, error: membersError } = await supabaseClient
-                    .from('members')
-                    .select('member_id, name, voice_part');
-                
-                if (membersError) throw membersError;
+            const sessions = ['Morning', 'Afternoon', 'Evening'];
+            const sessionNames = {
+                'Morning': '🌅 Morning (9:00 AM - 1:00 PM)',
+                'Afternoon': '☀️ Afternoon (2:00 PM - 4:00 PM)',
+                'Evening': '🌙 Evening (7:00 PM - 10:30 PM)'
+            };
 
-                const totalMembers = allMembers.length;
-                const memberMap = {};
-                allMembers.forEach(m => {
-                    memberMap[m.member_id] = { name: m.name, voice_part: m.voice_part };
+            let reportHtml = `
+                <div id="pdfContent" class="report-for-pdf">
+                    <div class="report-header">
+                        <h2>🎵 UNIVERSITY OF EMBU STUDENTS' CHOIR</h2>
+                        <h3>98th Music Festival 2026</h3>
+                        <h4>DAILY ATTENDANCE REPORT</h4>
+                        <p>📅 Date: ${date}</p>
+                        <p>👥 Total Members Expected: ${totalMembers}</p>
+                    </div>
+            `;
+
+            for (const session of sessions) {
+                const { data: attendanceRecords, error: attError } = await supabaseClient
+                    .from('attendance')
+                    .select('member_id, status')
+                    .eq('date', date)
+                    .eq('session', session);
+                if (attError) continue;
+
+                const presentMembers = [], lateMembers = [], absentMembers = [];
+                const recordedSet = new Set();
+
+                attendanceRecords?.forEach(rec => {
+                    recordedSet.add(rec.member_id);
+                    const member = memberMap[rec.member_id];
+                    if (member) {
+                        if (rec.status === 'Present') presentMembers.push(member);
+                        else if (rec.status === 'Late') lateMembers.push(member);
+                        else if (rec.status === 'Absent') absentMembers.push(member);
+                    }
                 });
 
-                const sessions = ['Morning', 'Afternoon', 'Evening'];
-                const sessionNames = {
-                    'Morning': '🌅 Morning Session (9:00 AM - 1:00 PM)',
-                    'Afternoon': '☀️ Afternoon Session (2:00 PM - 4:00 PM)',
-                    'Evening': '🌙 Evening Session (7:00 PM - 10:30 PM)'
-                };
-                
-                let reportHtml = `
-                    <div id="pdfContent" class="report-for-pdf">
-                        <div class="report-header">
-                            <h2>🎵 UNIVERSITY OF EMBU STUDENTS' CHOIR</h2>
-                            <h3>98th Music Festival 2026</h3>
-                            <h4>DAILY ATTENDANCE REPORT</h4>
-                            <p>Date: ${date}</p>
-                            <p>Total Members Expected: ${totalMembers}</p>
+                allMembers.forEach(member => {
+                    if (!recordedSet.has(member.member_id)) {
+                        absentMembers.push({ name: member.name, voice_part: member.voice_part });
+                    }
+                });
+
+                const presentCount = presentMembers.length;
+                const lateCount = lateMembers.length;
+                const absentCount = absentMembers.length;
+                const attended = presentCount + lateCount;
+                const attendancePercent = totalMembers ? ((attended / totalMembers) * 100).toFixed(1) : 0;
+
+                reportHtml += `
+                    <div class="session-report">
+                        <h3>${sessionNames[session]}</h3>
+                        <div class="stats-summary">
+                            <div class="stat-card present"><div class="stat-number">${presentCount}</div><div class="stat-label">✅ Present</div></div>
+                            <div class="stat-card late"><div class="stat-number">${lateCount}</div><div class="stat-label">⏰ Late</div></div>
+                            <div class="stat-card absent"><div class="stat-number">${absentCount}</div><div class="stat-label">❌ Absent</div></div>
+                            <div class="stat-card percentage"><div class="stat-number">${attendancePercent}%</div><div class="stat-label">📈 Attendance</div></div>
                         </div>
                 `;
-                
-                for (const session of sessions) {
-                    const { data: attendanceRecords, error: attendanceError } = await supabaseClient
-                        .from('attendance')
-                        .select('member_id, status')
-                        .eq('date', date)
-                        .eq('session', session);
-                    
-                    if (attendanceError) continue;
-                    
-                    const presentMembers = [];
-                    const lateMembers = [];
-                    const absentMembers = [];
-                    const recordedMembers = new Set();
-                    
-                    attendanceRecords.forEach(record => {
-                        recordedMembers.add(record.member_id);
-                        const memberInfo = memberMap[record.member_id];
-                        if (memberInfo) {
-                            if (record.status === 'Present') presentMembers.push(memberInfo);
-                            else if (record.status === 'Late') lateMembers.push(memberInfo);
-                            else if (record.status === 'Absent') absentMembers.push(memberInfo);
-                        }
-                    });
-                    
-                    allMembers.forEach(member => {
-                        if (!recordedMembers.has(member.member_id)) {
-                            absentMembers.push({ name: member.name, voice_part: member.voice_part });
-                        }
-                    });
-                    
-                    const presentCount = presentMembers.length;
-                    const lateCount = lateMembers.length;
-                    const absentCount = absentMembers.length;
-                    const attendedCount = presentCount + lateCount;
-                    const attendancePercentage = totalMembers > 0 ? ((attendedCount / totalMembers) * 100).toFixed(1) : 0;
-                    
-                    reportHtml += `
-                        <div class="session-report">
-                            <h3>${sessionNames[session]}</h3>
-                            <div class="stats-summary">
-                                <div class="stat-card present"><div class="stat-number">${presentCount}</div><div class="stat-label">✅ Present</div></div>
-                                <div class="stat-card late"><div class="stat-number">${lateCount}</div><div class="stat-label">⏰ Late</div></div>
-                                <div class="stat-card absent"><div class="stat-number">${absentCount}</div><div class="stat-label">❌ Absent</div></div>
-                                <div class="stat-card percentage"><div class="stat-number">${attendancePercentage}%</div><div class="stat-label">📈 Attendance</div></div>
-                            </div>
-                    `;
-                    
-                    if (absentMembers.length > 0) {
-                        reportHtml += `<div class="absentee-list"><h4>❌ ABSENTEES (${absentMembers.length})</h4><ul>${absentMembers.map(m => `<li>${m.name} (${m.voice_part})</li>`).join('')}</ul></div>`;
-                    }
-                    
-                    if (lateMembers.length > 0) {
-                        reportHtml += `<div class="late-list"><h4>⏰ LATE ARRIVALS (${lateMembers.length})</h4><ul>${lateMembers.map(m => `<li>${m.name} (${m.voice_part})</li>`).join('')}</ul></div>`;
-                    }
-                    
-                    reportHtml += `</div>`;
+                if (absentMembers.length) {
+                    reportHtml += `<div class="absentee-list"><h4>❌ ABSENTEES (${absentMembers.length})</h4><ul>${absentMembers.map(m => `<li>${escapeHtml(m.name)} (${escapeHtml(m.voice_part)})</li>`).join('')}</ul></div>`;
                 }
-                
-                reportHtml += `<div class="footer-note"><p>Report generated on: ${new Date().toLocaleString()}</p></div></div>`;
-                
-                currentReportHtml = reportHtml;
-                document.getElementById('reportContent').innerHTML = reportHtml;
-                
-            } catch (error) {
-                console.error('Report generation error:', error);
-                document.getElementById('reportContent').innerHTML = `<div class="loading" style="color: red;">❌ Error: ${error.message}</div>`;
+                if (lateMembers.length) {
+                    reportHtml += `<div class="late-list"><h4>⏰ LATE ARRIVALS (${lateMembers.length})</h4><ul>${lateMembers.map(m => `<li>${escapeHtml(m.name)} (${escapeHtml(m.voice_part)})</li>`).join('')}</ul></div>`;
+                }
+                reportHtml += `</div>`;
             }
+
+            reportHtml += `<div class="footer-note"><p>📌 Report generated: ${new Date().toLocaleString()}</p></div></div>`;
+            currentReportHtml = reportHtml;
+            reportDiv.innerHTML = reportHtml;
+        } catch (err) {
+            console.error(err);
+            reportDiv.innerHTML = `<div class="loading" style="color:#dc2626;">❌ Error: ${err.message}</div>`;
         }
+    }
 
-        // WEEKLY SUMMARY FUNCTIONS
-        document.getElementById('generateWeeklyBtn').addEventListener('click', generateWeeklySummary);
-        document.getElementById('exportWeeklyPDFBtn').addEventListener('click', exportWeeklyPDF);
+    // ---------- WEEKLY SUMMARY ----------
+    document.getElementById('generateWeeklyBtn')?.addEventListener('click', generateWeeklySummary);
+    document.getElementById('exportWeeklyPDFBtn')?.addEventListener('click', exportWeeklyPDF);
 
-        async function generateWeeklySummary() {
-            const weekValue = document.getElementById('weekSelect').value;
-            if (!weekValue) {
-                alert('Please select a week');
-                return;
+    async function generateWeeklySummary() {
+        const weekValue = document.getElementById('weekSelect').value;
+        if (!weekValue) { alert('Please select a week'); return; }
+        const weeklyDiv = document.getElementById('weeklyContent');
+        weeklyDiv.innerHTML = '<div class="loading">📈 Building weekly summary...</div>';
+
+        try {
+            const weekDates = getWeekDates(weekValue);
+            const [year, week] = weekValue.split('-W');
+            const { data: allMembers, error: membersError } = await supabaseClient.from('members').select('member_id, name, voice_part');
+            if (membersError) throw membersError;
+            const totalMembers = allMembers.length;
+            const memberMap = Object.fromEntries(allMembers.map(m => [m.member_id, { name: m.name, voice_part: m.voice_part }]));
+
+            const { data: weekAttendance, error: attError } = await supabaseClient
+                .from('attendance')
+                .select('*')
+                .in('date', weekDates);
+            if (attError) throw attError;
+
+            let totalPresent = 0, totalLate = 0, totalAbsent = 0, totalPossible = 0;
+            const dailyStats = [];
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+            for (let i = 0; i < weekDates.length; i++) {
+                const date = weekDates[i];
+                const dayAttendance = weekAttendance?.filter(a => a.date === date) || [];
+                let dayPresent = 0, dayLate = 0;
+                const recordedSet = new Set();
+                dayAttendance.forEach(rec => {
+                    recordedSet.add(rec.member_id);
+                    if (rec.status === 'Present') dayPresent++;
+                    else if (rec.status === 'Late') dayLate++;
+                });
+                const dayAbsent = totalMembers - recordedSet.size;
+                dailyStats.push({
+                    date, dayName: dayNames[i], present: dayPresent, late: dayLate, absent: dayAbsent,
+                    percentage: totalMembers ? (((dayPresent + dayLate) / totalMembers) * 100).toFixed(1) : 0
+                });
+                totalPresent += dayPresent;
+                totalLate += dayLate;
+                totalAbsent += dayAbsent;
+                totalPossible += totalMembers;
             }
+            const overallPercent = totalPossible ? (((totalPresent + totalLate) / totalPossible) * 100).toFixed(1) : 0;
+            const bestDay = [...dailyStats].sort((a,b) => b.percentage - a.percentage)[0];
+            const worstDay = [...dailyStats].sort((a,b) => a.percentage - b.percentage)[0];
+            const avgDailyPercent = totalMembers ? ((totalPresent + totalLate) / 7 / totalMembers * 100).toFixed(1) : 0;
 
-            document.getElementById('weeklyContent').innerHTML = '<div class="loading">📈 Generating weekly summary...</div>';
-
-            try {
-                const weekDates = getWeekDates(weekValue);
-                const [year, week] = weekValue.split('-W');
-                
-                // Get all members
-                const { data: allMembers, error: membersError } = await supabaseClient
-                    .from('members')
-                    .select('member_id, name, voice_part');
-                
-                if (membersError) throw membersError;
-                
-                const totalMembers = allMembers.length;
-                const memberMap = {};
-                allMembers.forEach(m => {
-                    memberMap[m.member_id] = { name: m.name, voice_part: m.voice_part };
-                });
-                
-                // Get attendance for all dates in the week
-                const { data: weekAttendance, error: attendanceError } = await supabaseClient
-                    .from('attendance')
-                    .select('*')
-                    .in('date', weekDates);
-                
-                if (attendanceError) throw attendanceError;
-                
-                // Calculate weekly stats
-                let totalPresent = 0;
-                let totalLate = 0;
-                let totalAbsent = 0;
-                let totalPossible = 0;
-                
-                const dailyStats = [];
-                const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                
-                for (let i = 0; i < weekDates.length; i++) {
-                    const date = weekDates[i];
-                    const dayAttendance = weekAttendance?.filter(a => a.date === date) || [];
-                    
-                    let dayPresent = 0, dayLate = 0, dayAbsent = 0;
-                    const recordedMembers = new Set();
-                    
-                    dayAttendance.forEach(record => {
-                        recordedMembers.add(record.member_id);
-                        if (record.status === 'Present') dayPresent++;
-                        else if (record.status === 'Late') dayLate++;
-                        else if (record.status === 'Absent') dayAbsent++;
-                    });
-                    
-                    const dayAbsentCount = totalMembers - recordedMembers.size;
-                    dayAbsent += dayAbsentCount;
-                    
-                    dailyStats.push({
-                        date,
-                        dayName: dayNames[i],
-                        present: dayPresent,
-                        late: dayLate,
-                        absent: dayAbsent,
-                        percentage: ((dayPresent + dayLate) / totalMembers * 100).toFixed(1)
-                    });
-                    
-                    totalPresent += dayPresent;
-                    totalLate += dayLate;
-                    totalAbsent += dayAbsent;
-                    totalPossible += totalMembers;
+            // Top performers
+            const memberAttendance = {};
+            allMembers.forEach(m => { memberAttendance[m.member_id] = { name: m.name, voice_part: m.voice_part, attended: 0, totalDays: 0 }; });
+            weekAttendance?.forEach(rec => {
+                if (memberAttendance[rec.member_id]) {
+                    if (rec.status === 'Present' || rec.status === 'Late') memberAttendance[rec.member_id].attended++;
+                    memberAttendance[rec.member_id].totalDays++;
                 }
-                
-                const overallPercentage = totalPossible > 0 ? ((totalPresent + totalLate) / totalPossible * 100).toFixed(1) : 0;
-                
-                // Find best and worst days
-                const bestDay = [...dailyStats].sort((a, b) => b.percentage - a.percentage)[0];
-                const worstDay = [...dailyStats].sort((a, b) => a.percentage - b.percentage)[0];
-                
-                // Find top performers (members with best attendance)
-                const memberAttendance = {};
-                allMembers.forEach(member => {
-                    memberAttendance[member.member_id] = { name: member.name, voice_part: member.voice_part, present: 0, late: 0, total: 0 };
-                });
-                
-                weekAttendance.forEach(record => {
-                    if (memberAttendance[record.member_id]) {
-                        if (record.status === 'Present') memberAttendance[record.member_id].present++;
-                        else if (record.status === 'Late') memberAttendance[record.member_id].late++;
-                        memberAttendance[record.member_id].total++;
-                    }
-                });
-                
-                const topPerformers = Object.values(memberAttendance)
-                    .filter(m => m.total > 0)
-                    .sort((a, b) => (b.present + b.late) - (a.present + a.late))
-                    .slice(0, 5);
-                
-                let weeklyHtml = `
-                    <div id="weeklyPdfContent" class="report-for-pdf">
-                        <div class="report-header">
-                            <h2>🎵 UNIVERSITY OF EMBU STUDENTS' CHOIR</h2>
-                            <h3>98th Music Festival 2026</h3>
-                            <h4>WEEKLY ATTENDANCE SUMMARY</h4>
-                            <p>Week ${week}, ${year}</p>
-                            <p>${weekDates[0]} to ${weekDates[6]}</p>
-                        </div>
-                        
-                        <div class="weekly-summary">
-                            <div class="week-header">
-                                <h3>📊 Overall Weekly Statistics</h3>
-                            </div>
-                            <div class="stats-summary">
-                                <div class="stat-card total"><div class="stat-number">${totalMembers}</div><div class="stat-label">Total Members</div></div>
-                                <div class="stat-card present"><div class="stat-number">${totalPresent}</div><div class="stat-label">Total Present</div></div>
-                                <div class="stat-card late"><div class="stat-number">${totalLate}</div><div class="stat-label">Total Late</div></div>
-                                <div class="stat-card absent"><div class="stat-number">${totalAbsent}</div><div class="stat-label">Total Absent</div></div>
-                                <div class="stat-card percentage"><div class="stat-number">${overallPercentage}%</div><div class="stat-label">Weekly Attendance</div></div>
-                            </div>
-                        </div>
-                        
-                        <div class="weekly-summary">
-                            <div class="week-header">
-                                <h3>⭐ Key Insights</h3>
-                            </div>
-                            <div class="stats-summary">
-                                <div class="stat-card"><div class="stat-number">${bestDay?.dayName || 'N/A'}</div><div class="stat-label">Best Day</div><div class="stat-label">${bestDay?.percentage || 0}% attendance</div></div>
-                                <div class="stat-card"><div class="stat-number">${worstDay?.dayName || 'N/A'}</div><div class="stat-label">Worst Day</div><div class="stat-label">${worstDay?.percentage || 0}% attendance</div></div>
-                                <div class="stat-card"><div class="stat-number">${((totalPresent + totalLate) / 7 / totalMembers * 100).toFixed(1)}%</div><div class="stat-label">Daily Average</div></div>
-                            </div>
-                        </div>
-                        
-                        <div class="weekly-summary">
-                            <div class="week-header">
-                                <h3>📅 Daily Breakdown</h3>
-                            </div>
-                            <div class="daily-breakdown">
-                                ${dailyStats.map(day => `
-                                    <div class="daily-card">
-                                        <div class="daily-header">
-                                            <span>${day.dayName} - ${day.date}</span>
-                                            <span>📈 ${day.percentage}%</span>
-                                        </div>
-                                        <div class="daily-stats">
-                                            <div class="daily-stat"><div class="daily-stat-value" style="color: #28a745;">${day.present}</div><div class="stat-label">Present</div></div>
-                                            <div class="daily-stat"><div class="daily-stat-value" style="color: #ffc107;">${day.late}</div><div class="stat-label">Late</div></div>
-                                            <div class="daily-stat"><div class="daily-stat-value" style="color: #dc3545;">${day.absent}</div><div class="stat-label">Absent</div></div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        
-                        <div class="weekly-summary">
-                            <div class="week-header">
-                                <h3>🏆 Top 5 Performers (Best Attendance)</h3>
-                            </div>
-                            <div class="absentee-list">
-                                <ul>
-                                    ${topPerformers.map(p => `<li>${p.name} (${p.voice_part}) - ${((p.present + p.late) / 7 * 100).toFixed(0)}% attendance</li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <div class="footer-note">
-                            <p>Report generated on: ${new Date().toLocaleString()}</p>
+            });
+            const topPerformers = Object.values(memberAttendance)
+                .filter(p => p.totalDays > 0)
+                .sort((a,b) => b.attended - a.attended)
+                .slice(0,5);
+
+            let weeklyHtml = `
+                <div id="weeklyPdfContent" class="report-for-pdf">
+                    <div class="report-header">
+                        <h2>🎵 UNIVERSITY OF EMBU STUDENTS' CHOIR</h2>
+                        <h3>98th Music Festival 2026</h3>
+                        <h4>WEEKLY ATTENDANCE SUMMARY</h4>
+                        <p>🗓️ Week ${week}, ${year}</p>
+                        <p>📆 ${weekDates[0]} to ${weekDates[6]}</p>
+                    </div>
+                    <div class="weekly-summary">
+                        <div class="week-header"><h3>📊 Overall Stats</h3></div>
+                        <div class="stats-summary">
+                            <div class="stat-card total"><div class="stat-number">${totalMembers}</div><div class="stat-label">Total Members</div></div>
+                            <div class="stat-card present"><div class="stat-number">${totalPresent}</div><div class="stat-label">Total Present</div></div>
+                            <div class="stat-card late"><div class="stat-number">${totalLate}</div><div class="stat-label">Total Late</div></div>
+                            <div class="stat-card absent"><div class="stat-number">${totalAbsent}</div><div class="stat-label">Total Absent</div></div>
+                            <div class="stat-card percentage"><div class="stat-number">${overallPercent}%</div><div class="stat-label">Weekly Attendance</div></div>
                         </div>
                     </div>
-                `;
-                
-                currentWeeklyHtml = weeklyHtml;
-                document.getElementById('weeklyContent').innerHTML = weeklyHtml;
-                
-            } catch (error) {
-                console.error('Weekly summary error:', error);
-                document.getElementById('weeklyContent').innerHTML = `<div class="loading" style="color: red;">❌ Error: ${error.message}</div>`;
-            }
+                    <div class="weekly-summary">
+                        <div class="week-header"><h3>⭐ Key Insights</h3></div>
+                        <div class="stats-summary">
+                            <div class="stat-card"><div class="stat-number">${bestDay?.dayName || 'N/A'}</div><div class="stat-label">Best Day</div><div class="stat-label">${bestDay?.percentage || 0}%</div></div>
+                            <div class="stat-card"><div class="stat-number">${worstDay?.dayName || 'N/A'}</div><div class="stat-label">Worst Day</div><div class="stat-label">${worstDay?.percentage || 0}%</div></div>
+                            <div class="stat-card"><div class="stat-number">${avgDailyPercent}%</div><div class="stat-label">Daily Average</div></div>
+                        </div>
+                    </div>
+                    <div class="weekly-summary">
+                        <div class="week-header"><h3>📅 Daily Breakdown</h3></div>
+                        <div class="daily-breakdown">
+                            ${dailyStats.map(day => `
+                                <div class="daily-card">
+                                    <div class="daily-header"><span>${day.dayName} (${day.date})</span><span>📈 ${day.percentage}%</span></div>
+                                    <div class="daily-stats">
+                                        <div class="daily-stat"><div class="daily-stat-value" style="color:#10b981;">${day.present}</div><div class="stat-label">Present</div></div>
+                                        <div class="daily-stat"><div class="daily-stat-value" style="color:#f59e0b;">${day.late}</div><div class="stat-label">Late</div></div>
+                                        <div class="daily-stat"><div class="daily-stat-value" style="color:#ef4444;">${day.absent}</div><div class="stat-label">Absent</div></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="weekly-summary">
+                        <div class="week-header"><h3>🏆 Top 5 Performers</h3></div>
+                        <div class="absentee-list"><ul>${topPerformers.map(p => `<li>${escapeHtml(p.name)} (${escapeHtml(p.voice_part)}) - ${((p.attended / 7) * 100).toFixed(0)}% attendance</li>`).join('')}</ul></div>
+                    </div>
+                    <div class="footer-note"><p>📅 Report: ${new Date().toLocaleString()}</p></div>
+                </div>
+            `;
+            currentWeeklyHtml = weeklyHtml;
+            weeklyDiv.innerHTML = weeklyHtml;
+        } catch (err) {
+            console.error(err);
+            weeklyDiv.innerHTML = `<div class="loading" style="color:#dc2626;">❌ Error: ${err.message}</div>`;
         }
+    }
 
-        async function exportToPDF() {
-            if (!currentReportHtml) {
-                alert('Please generate a report first');
-                return;
-            }
-            
-            const exportBtn = document.getElementById('exportPDFBtn');
-            const originalText = exportBtn.textContent;
-            exportBtn.textContent = '⏳ Generating PDF...';
-            exportBtn.disabled = true;
-            
-            const pdfContainer = document.createElement('div');
-            pdfContainer.innerHTML = currentReportHtml;
-            
-            const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: `attendance_report_${currentDate}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-            
-            await html2pdf().set(opt).from(pdfContainer).save();
-            
-            exportBtn.textContent = originalText;
-            exportBtn.disabled = false;
-        }
+    // PDF & Text exports
+    async function exportToPDF() {
+        if (!currentReportHtml) { alert('Generate a daily report first'); return; }
+        const btn = document.getElementById('exportPDFBtn');
+        const orig = btn.innerText;
+        btn.innerText = '⏳ Generating...'; btn.disabled = true;
+        const container = document.createElement('div'); container.innerHTML = currentReportHtml;
+        await html2pdf().set({ margin: 0.5, filename: `attendance_${currentDate}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(container).save();
+        btn.innerText = orig; btn.disabled = false;
+    }
 
-        async function exportWeeklyPDF() {
-            if (!currentWeeklyHtml) {
-                alert('Please generate a weekly summary first');
-                return;
-            }
-            
-            const weekValue = document.getElementById('weekSelect').value;
-            const exportBtn = document.getElementById('exportWeeklyPDFBtn');
-            const originalText = exportBtn.textContent;
-            exportBtn.textContent = '⏳ Generating PDF...';
-            exportBtn.disabled = true;
-            
-            const pdfContainer = document.createElement('div');
-            pdfContainer.innerHTML = currentWeeklyHtml;
-            
-            const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: `weekly_summary_${weekValue}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-            
-            await html2pdf().set(opt).from(pdfContainer).save();
-            
-            exportBtn.textContent = originalText;
-            exportBtn.disabled = false;
-        }
+    async function exportWeeklyPDF() {
+        if (!currentWeeklyHtml) { alert('Generate weekly summary first'); return; }
+        const btn = document.getElementById('exportWeeklyPDFBtn');
+        const orig = btn.innerText;
+        btn.innerText = '⏳ PDF...'; btn.disabled = true;
+        const container = document.createElement('div'); container.innerHTML = currentWeeklyHtml;
+        const weekVal = document.getElementById('weekSelect').value;
+        await html2pdf().set({ margin: 0.5, filename: `weekly_${weekVal}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(container).save();
+        btn.innerText = orig; btn.disabled = false;
+    }
 
-        function exportToText() {
-            if (!currentReportHtml) {
-                alert('Please generate a report first');
-                return;
-            }
-            
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = currentReportHtml;
-            let textContent = tempDiv.innerText || tempDiv.textContent;
-            textContent = textContent.replace(/[^\w\s\n\-\(\)\.\%\:]/g, '');
-            
-            const blob = new Blob([textContent], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `attendance_report_${currentDate}.txt`;
-            link.click();
-            URL.revokeObjectURL(link.href);
-        }
-        
-        // Auto-generate daily report on load
-        window.addEventListener('load', () => {
-            generateReport();
-        });
-    </script>
+    function exportToText() {
+        if (!currentReportHtml) { alert('Generate a daily report first'); return; }
+        const temp = document.createElement('div'); temp.innerHTML = currentReportHtml;
+        let text = temp.innerText || temp.textContent;
+        const blob = new Blob([text], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `attendance_report_${currentDate}.txt`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    // Auto-load daily report on start
+    window.addEventListener('load', () => { generateReport(); });
+</script>
 </body>
 </html>

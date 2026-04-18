@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Member List Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: monospace; padding: 20px; max-width: 900px; margin: 0 auto; }
+        .success { color: green; background: #e8f5e9; padding: 10px; border-radius: 5px; }
+        .error { color: red; background: #ffebee; padding: 10px; border-radius: 5px; }
+        .warning { color: orange; background: #fff3e0; padding: 10px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Member List Debugger</h1>
+    
+    <div id="status">Loading...</div>
+    <div id="membersList"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function loadMembers() {
+            const statusDiv = document.getElementById('status');
+            const membersDiv = document.getElementById('membersList');
+            
+            statusDiv.innerHTML = '🔄 Fetching members from Supabase...';
+            
+            try {
+                // Try to fetch members
+                const { data: members, error: membersError } = await supabase
+                    .from('members')
+                    .select('*')
+                    .order('voice_part', { ascending: true });
+                
+                if (membersError) {
+                    statusDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ Error fetching members:</strong><br>
+                            Message: ${membersError.message}<br>
+                            Code: ${membersError.code}<br>
+                            Details: ${membersError.details || 'None'}
+                        </div>
+                        <br>
+                        <div class="warning">
+                            <strong>🔧 Troubleshooting Steps:</strong>
+                            <ol>
+                                <li>Go to Supabase Dashboard → Table Editor → members</li>
+                                <li>Click "Authentication" tab</li>
+                                <li>If RLS is enabled, run this in SQL Editor:<br>
+                                    <pre>ALTER TABLE members DISABLE ROW LEVEL SECURITY;
+ALTER TABLE attendance DISABLE ROW LEVEL SECURITY;</pre>
+                                </li>
+                                <li>Also verify members exist: 
+                                    <pre>SELECT COUNT(*) FROM members;</pre>
+                                </li>
+                            </ol>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Check if members exist
+                if (!members || members.length === 0) {
+                    statusDiv.innerHTML = `
+                        <div class="warning">
+                            ⚠️ No members found in database!<br><br>
+                            Run this SQL in Supabase SQL Editor to insert members:
+                            <pre>INSERT INTO members (member_id, name, voice_part) VALUES
+('M001', 'David Bob Oketch', 'Director'),
+('M002', 'Scarlet Adhiambo', 'Soprano');
+-- ... add all 73 members</pre>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Success! Display members
+                statusDiv.innerHTML = `<div class="success">✅ Success! Found ${members.length} members in database.</div>`;
+                
+                // Group by voice part
+                const grouped = {};
+                members.forEach(m => {
+                    if (!grouped[m.voice_part]) grouped[m.voice_part] = [];
+                    grouped[m.voice_part].push(m);
+                });
+                
+                // Display table
+                let tableHtml = '<table><thead><tr><th>Member ID</th><th>Name</th><th>Voice Part</th></tr></thead><tbody>';
+                
+                const order = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
+                order.forEach(part => {
+                    if (grouped[part]) {
+                        grouped[part].forEach(member => {
+                            tableHtml += `
+                                <tr>
+                                    <td>${member.member_id}</td>
+                                    <td>${member.name}</td>
+                                    <td>${member.voice_part}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                });
+                
+                tableHtml += '</tbody></table>';
+                membersDiv.innerHTML = tableHtml;
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Unexpected error: ${error.message}</div>`;
+            }
+        }
+        
+        // Run when page loads
+        loadMembers();
+    </script>
+</body>
+</html>

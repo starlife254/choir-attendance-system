@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            color: #333;
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .attendance-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .date-input, .session-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .primary-btn {
+            padding: 10px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .primary-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .attendance-table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .attendance-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+
+        .attendance-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .attendance-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .voice-part-header {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .voice-part-header td {
+            background: #e0e0e0;
+            padding: 8px;
+        }
+
+        .status-select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            width: 120px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .save-btn {
+            padding: 12px 25px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .quick-btn {
+            padding: 12px 25px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        .clear-btn {
+            background: #dc3545;
+        }
+
+        .clear-btn:hover {
+            background: #c82333;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .message.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            display: block;
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .attendance-table th, .attendance-table td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            .status-select {
+                width: 80px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✅ Mark Attendance</h1>
+            <a href="index.html" class="back-btn">← Back to Dashboard</a>
+        </header>
+
+        <div class="attendance-controls">
+            <div class="form-group">
+                <label>Select Date:</label>
+                <input type="date" id="attendanceDate" class="date-input">
+            </div>
+            <div class="form-group">
+                <label>Select Session:</label>
+                <select id="sessionSelect" class="session-select">
+                    <option value="Morning">Morning (9:00 AM - 1:00 PM)</option>
+                    <option value="Afternoon">Afternoon (2:00 PM - 4:00 PM)</option>
+                    <option value="Evening">Evening (7:00 PM - 10:30 PM)</option>
+                </select>
+            </div>
+            <button id="loadMembersBtn" class="primary-btn">📋 Load Members</button>
+        </div>
+
+        <div id="attendanceTable" class="attendance-table-container"></div>
+
+        <div class="action-buttons">
+            <button id="saveAttendanceBtn" class="save-btn">💾 Save Attendance</button>
+            <button id="markAllPresentBtn" class="quick-btn">✓ Mark All Present</button>
+            <button id="markAllLateBtn" class="quick-btn">⏰ Mark All Late</button>
+            <button id="clearAllBtn" class="quick-btn clear-btn">✗ Clear All</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        // Supabase configuration - NO DUPLICATES
+        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+        
+        // Create the client - only once
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentMembers = [];
+        let currentAttendance = {};
+
+        // Set today's date as default
+        document.getElementById('attendanceDate').valueAsDate = new Date();
+        
+        // Add event listeners
+        document.getElementById('loadMembersBtn').addEventListener('click', loadMembers);
+        document.getElementById('saveAttendanceBtn').addEventListener('click', saveAttendance);
+        document.getElementById('markAllPresentBtn').addEventListener('click', () => markAll('Present'));
+        document.getElementById('markAllLateBtn').addEventListener('click', () => markAll('Late'));
+        document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+
+        async function loadMembers() {
+            const date = document.getElementById('attendanceDate').value;
+            const session = document.getElementById('sessionSelect').value;
+
+            if (!date) {
+                showMessage('Please select a date', 'error');
+                return;
+            }
+
+            showMessage('Loading members from database...', 'info');
+            document.getElementById('attendanceTable').innerHTML = '<div class="loading">🔄 Loading members...</div>';
+
+            try {
+                // Fetch all members using supabaseClient
+                const { data: members, error: membersError } = await supabaseClient
+                    .from('members')
+                    .select('*')
+                    .order('voice_part', { ascending: true });
+
+                if (membersError) {
+                    console.error('Members error:', membersError);
+                    showMessage('Error loading members: ' + membersError.message, 'error');
+                    document.getElementById('attendanceTable').innerHTML = '';
+                    return;
+                }
+
+                if (!members || members.length === 0) {
+                    showMessage('No members found in database. Please insert members first.', 'error');
+                    document.getElementById('attendanceTable').innerHTML = '<div class="loading">⚠️ No members found. Please check database.</div>';
+                    return;
+                }
+
+                currentMembers = members;
+                console.log(`✅ Loaded ${currentMembers.length} members`);
+
+                // Fetch existing attendance for this date/session
+                const { data: existingAttendance, error: attendanceError } = await supabaseClient
+                    .from('attendance')
+                    .select('*')
+                    .eq('date', date)
+                    .eq('session', session);
+
+                if (attendanceError) {
+                    console.error('Attendance error:', attendanceError);
+                }
+
+                // Build currentAttendance object
+                currentAttendance = {};
+                if (existingAttendance) {
+                    existingAttendance.forEach(att => {
+                        currentAttendance[att.member_id] = att.status;
+                    });
+                    console.log(`📊 Loaded ${existingAttendance.length} existing attendance records`);
+                }
+
+                renderAttendanceTable();
+                showMessage(`✅ Loaded ${currentMembers.length} members successfully!`, 'success');
+
+            } catch (error) {
+                console.error('Unexpected error:', error);
+                showMessage('Unexpected error: ' + error.message, 'error');
+                document.getElementById('attendanceTable').innerHTML = '';
+            }
+        }
+
+        function renderAttendanceTable() {
+            const voiceParts = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
+            let html = '<table class="attendance-table"><thead><tr><th>Member ID</th><th>Name</th><th>Voice Part</th><th>Status</th></tr></thead><tbody>';
+            
+            voiceParts.forEach(part => {
+                const partMembers = currentMembers.filter(m => m.voice_part === part);
+                if (partMembers.length > 0) {
+                    // Add voice part header row
+                    html += `<tr class="voice-part-header"><td colspan="4"><strong>🎵 ${part} (${partMembers.length} members)</strong></td></tr>`;
+                    
+                    partMembers.forEach(member => {
+                        const currentStatus = currentAttendance[member.member_id] || '';
+                        html += `
+                            <tr>
+                                <td>${member.member_id}</td>
+                                <td>${member.name}</td>
+                                <td>${member.voice_part}</td>
+                                <td>
+                                    <select class="status-select" data-member-id="${member.member_id}">
+                                        <option value="">-- Select --</option>
+                                        <option value="Present" ${currentStatus === 'Present' ? 'selected' : ''}>✅ Present</option>
+                                        <option value="Late" ${currentStatus === 'Late' ? 'selected' : ''}>⏰ Late</option>
+                                        <option value="Absent" ${currentStatus === 'Absent' ? 'selected' : ''}>❌ Absent</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('attendanceTable').innerHTML = html;
+            
+            // Attach event listeners to all status selects
+            document.querySelectorAll('.status-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const memberId = e.target.dataset.memberId;
+                    currentAttendance[memberId] = e.target.value;
+                });
+            });
+        }
+
+        async function saveAttendance() {
+            const date = document.getElementById('attendanceDate').value;
+            const session = document.getElementById('sessionSelect').value;
+            
+            if (!date) {
+                showMessage('Please select a date', 'error');
+                return;
+            }
+            
+            // Collect records that have a status selected
+            const records = [];
+            for (const [memberId, status] of Object.entries(currentAttendance)) {
+                if (status && status !== '') {
+                    records.push({
+                        date: date,
+                        session: session,
+                        member_id: memberId,
+                        status: status
+                    });
+                }
+            }
+            
+            if (records.length === 0) {
+                showMessage('No attendance data to save. Please mark some members first.', 'error');
+                return;
+            }
+            
+            showMessage(`💾 Saving ${records.length} attendance records...`, 'info');
+            
+            // Upsert records (insert or update if exists)
+            const { data, error } = await supabaseClient
+                .from('attendance')
+                .upsert(records, { 
+                    onConflict: 'date,session,member_id'
+                });
+            
+            if (error) {
+                console.error('Save error:', error);
+                showMessage('❌ Error saving attendance: ' + error.message, 'error');
+            } else {
+                showMessage(`✅ Successfully saved ${records.length} attendance records for ${session} session!`, 'success');
+            }
+        }
+        
+        function markAll(status) {
+            if (currentMembers.length === 0) {
+                showMessage('Please load members first', 'error');
+                return;
+            }
+            
+            currentMembers.forEach(member => {
+                currentAttendance[member.member_id] = status;
+            });
+            renderAttendanceTable();
+            showMessage(`✓ Marked all ${currentMembers.length} members as ${status}`, 'success');
+        }
+        
+        function clearAll() {
+            if (currentMembers.length === 0) {
+                showMessage('Please load members first', 'error');
+                return;
+            }
+            
+            currentAttendance = {};
+            renderAttendanceTable();
+            showMessage('🗑️ Cleared all selections', 'success');
+        }
+        
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = msg;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+                messageDiv.className = 'message';
+            }, 3000);
+        }
+
+        // Auto-load members when page loads (optional)
+        // Uncomment the line below if you want members to load automatically
+        // window.addEventListener('load', loadMembers);
+    </script>
+</body>
+</html>

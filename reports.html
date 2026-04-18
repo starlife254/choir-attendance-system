@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Attendance Reports - University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -56,6 +56,40 @@
             background: #5a67d8;
             transform: translateY(-2px);
         }
+        @media (max-width: 768px) {
+    .report-tabs {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .daily-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 5px;
+    }
+    
+    .daily-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .daily-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .daily-stat .stat-label {
+        margin-top: 0;
+    }
+}
 
         .report-tabs {
             display: flex;

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Mark Attendance</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -83,6 +83,34 @@
             border-radius: 8px;
             font-size: 16px;
         }
+        /* Mobile: Make table horizontally scrollable */
+@media (max-width: 768px) {
+    .attendance-table-container {
+        margin: 0 -15px;
+        padding: 0 15px;
+        width: calc(100% + 30px);
+    }
+    
+    /* Make voice part headers sticky */
+    .voice-part-header td {
+        position: sticky;
+        left: 0;
+        background: #e0e0e0;
+    }
+    
+    /* First column sticky on mobile */
+    .attendance-table td:first-child,
+    .attendance-table th:first-child {
+        position: sticky;
+        left: 0;
+        background: white;
+        z-index: 1;
+    }
+    
+    .attendance-table th:first-child {
+        background: #667eea;
+    }
+}
 
         .primary-btn {
             padding: 10px 30px;

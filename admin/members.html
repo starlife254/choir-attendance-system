@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>My Attendance | Member Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 12px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
+            margin-bottom: 70px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header h1 { color: #1e293b; font-size: 1.5rem; }
+        .logout-btn {
+            background: #f5f5f500;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .search-section {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .search-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        .search-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .member-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .member-list-item {
+            background: white;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .back-btn {
+            background: #f1f5f9;
+            color: #335545;
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 60px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .member-list-item:hover {
+            background: #eef2ff;
+            transform: translateX(5px);
+            border-color: #667eea;
+        }
+        .member-list-item.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        .member-list-name {
+            font-weight: bold;
+        }
+        .member-list-voice {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .select-hint {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .welcome-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+            display: none;
+        }
+        .welcome-card.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .stat-number { font-size: 32px; font-weight: bold; }
+        .stat-label { color: #666; font-size: 13px; margin-top: 5px; }
+        .stat-card.present .stat-number { color: #10b981; }
+        .stat-card.late .stat-number { color: #f59e0b; }
+        .stat-card.absent .stat-number { color: #ef4444; }
+        .stat-card.percentage .stat-number { color: #667eea; }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            display: none;
+        }
+        .chart-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .penalty-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .penalty-amount { font-size: 18px; font-weight: bold; color: #dc2626; }
+        .penalty-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-paid { background: #d1fae5; color: #059669; }
+        .empty-state { text-align: center; padding: 40px; color: #666; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 11px;
+            gap: 4px;
+            padding: 5px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .bottom-nav-item span:first-child { font-size: 22px; }
+        .bottom-nav-item.active { color: #667eea; background: #f0f0ff; }
+        @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Member Attendance Portal</h1>
+            <button class="logout-btn" id="logoutBtn"></button>
+          <a href="index.html" class="back-btn">← Dashboard</a>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-title">🔍 Find Your Name</div>
+            <input type="text" id="searchInput" class="search-input" placeholder="Type your name to search...">
+            <div id="memberList" class="member-list">
+                <div class="empty-state">Loading members...</div>
+            </div>
+            <div class="select-hint">✨ Click on your name to view your attendance stats</div>
+        </div>
+
+        <!-- Member Details Section (Hidden until member selected) -->
+        <div id="welcomeCard" class="welcome-card"></div>
+        <div id="statsGrid" class="stats-grid"></div>
+        <div id="chartContainer" class="chart-container">
+            <div class="section-title">📈 Attendance Trend (Last 30 Days)</div>
+            <canvas id="trendChart"></canvas>
+        </div>
+        <div id="penaltiesContainer" class="chart-container">
+            <div class="section-title">💰 Penalties & Fines</div>
+            <div id="penaltiesList"></div>
+            <div id="penaltySummary" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="bottom-nav-item active" onclick="scrollToTop()"><span>📊</span><span>My Stats</span></div>
+        <div class="bottom-nav-item" id="bottomLogoutBtn"><span>🚪</span><span>Logout</span></div>
+    </div>
+
+    <script>
+        // Supabase configuration - using unique variable name
+        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let trendChart;
+        let allMembers = [];
+        let selectedMember = null;
+
+        // Logout function
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = '../login.html';
+        }
+
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Load all members for the list
+        async function loadMembersList() {
+            const { data: members, error } = await supabaseClient
+                .from('members')
+                .select('member_id, name, voice_part')
+                .order('name', { ascending: true });
+            
+            if (error) {
+                console.error('Error loading members:', error);
+                document.getElementById('memberList').innerHTML = '<div class="empty-state">❌ Error loading members</div>';
+                return;
+            }
+            
+            allMembers = members;
+            displayMembers(allMembers);
+        }
+
+        // Display members in the list
+        function displayMembers(members) {
+            const container = document.getElementById('memberList');
+            if (!members || members.length === 0) {
+                container.innerHTML = '<div class="empty-state">🔍 No members found</div>';
+                return;
+            }
+            
+            container.innerHTML = members.map(m => `
+                <div class="member-list-item" onclick="selectMember('${m.member_id}')">
+                    <div>
+                        <div class="member-list-name">${escapeHtml(m.name)}</div>
+                        <div class="member-list-voice">${m.voice_part}</div>
+                    </div>
+                    <div>👉</div>
+                </div>
+            `).join('');
+        }
+
+        // Search/filter members
+        function searchMembers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allMembers.filter(m => 
+                m.name.toLowerCase().includes(searchTerm) || 
+                m.voice_part.toLowerCase().includes(searchTerm)
+            );
+            displayMembers(filtered);
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // Select a member and load their data
+        async function selectMember(memberId) {
+            selectedMember = allMembers.find(m => m.member_id === memberId);
+            if (!selectedMember) return;
+            
+            // Highlight selected member
+            document.querySelectorAll('.member-list-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event?.target?.closest('.member-list-item')?.classList.add('selected');
+            
+            // Show welcome card and charts
+            document.getElementById('welcomeCard').classList.add('active');
+            document.getElementById('chartContainer').classList.add('active');
+            document.getElementById('penaltiesContainer').classList.add('active');
+            
+            // Load member data
+            await loadMemberData(selectedMember);
+        }
+
+        // Load attendance data for selected member
+        async function loadMemberData(member) {
+            if (!member) return;
+
+            document.getElementById('welcomeCard').innerHTML = `
+                <div class="member-name">Welcome, ${member.name}!</div>
+                <div style="display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap;">
+                    <span style="background:rgba(255,255,255,0.2); padding:6px 14px; border-radius:40px;">🎭 ${member.voice_part}</span>
+                    <span style="background:rgba(255,255,255,0.2); padding:6px 14px; border-radius:40px;">🆔 ${member.member_id}</span>
+                </div>
+            `;
+
+            // Get attendance history
+            const { data: attendance } = await supabaseClient
+                .from('attendance')
+                .select('*')
+                .eq('member_id', member.member_id)
+                .order('date', { ascending: true });
+
+            const present = attendance?.filter(a => a.status === 'Present').length || 0;
+            const late = attendance?.filter(a => a.status === 'Late').length || 0;
+            const absent = attendance?.filter(a => a.status === 'Absent').length || 0;
+            const total = present + late + absent;
+            const percentage = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label">✅ Present</div></div>
+                <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label">⏰ Late</div></div>
+                <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label">❌ Absent</div></div>
+                <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label">Attendance Rate</div></div>
+            `;
+
+            // Create trend chart (last 30 days)
+            const last30Days = [];
+            const presentData = [];
+            const lateData = [];
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                last30Days.push(dateStr.substring(5));
+                
+                const dayAttendance = attendance?.filter(a => a.date === dateStr) || [];
+                presentData.push(dayAttendance.filter(a => a.status === 'Present').length);
+                lateData.push(dayAttendance.filter(a => a.status === 'Late').length);
+            }
+
+            if (trendChart) trendChart.destroy();
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last30Days,
+                    datasets: [
+                        { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true },
+                        { label: 'Late', data: lateData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.3, fill: true }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: true }
+            });
+
+            // Load penalties
+            await loadPenalties(member.member_id);
+        }
+
+        // Load penalties for selected member
+        async function loadPenalties(memberId) {
+            const { data: penalties } = await supabaseClient
+                .from('penalties')
+                .select('*')
+                .eq('member_id', memberId)
+                .order('date', { ascending: false });
+
+            const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
+            const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
+
+            document.getElementById('penaltySummary').innerHTML = `
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <div><strong>💰 Total Fines:</strong> KSh ${pendingTotal + paidTotal}</div>
+                    <div><strong>⏳ Pending:</strong> KSh ${pendingTotal}</div>
+                    <div><strong>✅ Paid:</strong> KSh ${paidTotal}</div>
+                </div>
+            `;
+
+            if (!penalties?.length) {
+                document.getElementById('penaltiesList').innerHTML = '<div class="empty-state">🎉 No penalties recorded! Keep up the good attendance!</div>';
+                return;
+            }
+
+            document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
+                <div class="penalty-item">
+                    <div>
+                        <div><strong>${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</strong></div>
+                        <div style="font-size: 13px; color: #666;">${p.date} • ${p.session || ''}</div>
+                        ${p.reason ? `<div style="font-size: 11px; color: #666;">📝 ${p.reason}</div>` : ''}
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="penalty-amount">KSh ${p.amount}</div>
+                        <div class="penalty-status ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status.toUpperCase()}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Check authentication and load
+        async function init() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = '../login.html';
+                return;
+            }
+            
+            await loadMembersList();
+        }
+
+        // Event listeners
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('bottomLogoutBtn').addEventListener('click', logout);
+        document.getElementById('searchInput').addEventListener('input', searchMembers);
+        
+        // Start the app
+        init();
+    </script>
+</body>
+</html>

@@ -72,7 +72,6 @@
             transform: translateY(-1px);
         }
 
-        /* enhanced controls grid */
         .attendance-controls {
             display: flex;
             gap: 14px;
@@ -135,7 +134,6 @@
             transform: scale(0.97);
         }
 
-        /* action buttons row - responsive wrap with better touch */
         .action-buttons {
             display: flex;
             gap: 12px;
@@ -179,7 +177,6 @@
             color: white;
         }
 
-        /* 🟢 ENHANCED MOBILE TABLE – STICKY & SCROLL */
         .attendance-table-container {
             margin: 0 -8px;
             padding: 0 8px;
@@ -193,7 +190,7 @@
         }
 
         .attendance-table {
-            min-width: 600px;
+            min-width: 750px;
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
@@ -224,7 +221,6 @@
             background-color: white;
         }
 
-        /* make first column (ID) sticky on horizontal scroll */
         .attendance-table th:first-child,
         .attendance-table td:first-child {
             position: sticky;
@@ -241,7 +237,6 @@
             left: 0;
         }
 
-        /* Voice part header styling - sticky left also */
         .voice-part-header td {
             background: #f1f5f9 !important;
             font-weight: 700;
@@ -259,8 +254,7 @@
             box-shadow: none;
         }
 
-        /* status select enhanced for touch */
-        .status-select {
+        .status-select, .apology-select {
             padding: 10px 8px;
             border-radius: 40px;
             border: 1px solid #cbd5e1;
@@ -274,13 +268,35 @@
             font-family: inherit;
         }
 
-        .status-select:focus {
+        .apology-select {
+            min-width: 110px;
+            background: #fef9e3;
+        }
+
+        .status-select:focus, .apology-select:focus {
             outline: none;
             border-color: #4f46e5;
             ring: 2px solid #a5b4fc;
         }
 
-        /* message styling */
+        .penalty-indicator {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        .penalty-yes {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .penalty-no {
+            background: #d1fae5;
+            color: #059669;
+        }
+
         .message {
             padding: 14px 18px;
             border-radius: 60px;
@@ -320,7 +336,16 @@
             font-weight: 500;
         }
 
-        /* small devices adjustments */
+        .fine-badge {
+            background: #fef3c7;
+            color: #d97706;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 12px;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
+
         @media (max-width: 580px) {
             .container {
                 padding: 16px 12px 24px;
@@ -346,7 +371,7 @@
                 padding: 10px 12px;
             }
 
-            .status-select {
+            .status-select, .apology-select {
                 font-size: 0.7rem;
                 padding: 8px 4px;
                 min-width: 85px;
@@ -362,14 +387,12 @@
             }
         }
 
-        /* landscape phones optimization */
         @media (max-width: 768px) and (orientation: landscape) {
             .attendance-table-container {
                 max-height: 65vh;
             }
         }
 
-        /* dark scroll for better visibility */
         .attendance-table-container::-webkit-scrollbar {
             height: 5px;
             width: 5px;
@@ -385,7 +408,6 @@
             border-radius: 10px;
         }
 
-        /* additional hover effect only for devices that support hover */
         @media (hover: hover) {
             .attendance-table tr:hover td {
                 background: #fef9e3;
@@ -434,14 +456,15 @@
 
 <script>
     // ------------------------------
-    // SUPABASE CONFIGURATION (unchanged, secure usage)
+    // SUPABASE CONFIGURATION
     const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     // State
     let currentMembers = [];
-    let currentAttendance = {};    // key: member_id, value: status string
+    let currentAttendance = {};
+    let currentApology = {};
     
     // DOM elements
     const dateInput = document.getElementById('attendanceDate');
@@ -454,6 +477,9 @@
     const tableContainer = document.getElementById('attendanceTable');
     const messageDiv = document.getElementById('message');
     
+    // Store scroll position
+    let savedScrollTop = 0;
+    
     // set default date to today
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -461,29 +487,98 @@
     const dd = String(today.getDate()).padStart(2, '0');
     dateInput.value = `${yyyy}-${mm}-${dd}`;
     
-    // Helper: show message (auto-hide after 3s)
     function showMessage(msg, type = 'info') {
         messageDiv.textContent = msg;
         messageDiv.className = `message ${type}`;
         messageDiv.style.display = 'block';
+        // Auto scroll to message on mobile
+        setTimeout(() => {
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
         setTimeout(() => {
             messageDiv.style.display = 'none';
             messageDiv.className = 'message';
-        }, 3200);
+        }, 3000);
     }
     
-    // Render table with voice part grouping, sticky enhancements, and touch-friendly selects
+    // Save current scroll position
+    function saveScrollPosition() {
+        const container = document.querySelector('.attendance-table-container');
+        if (container) {
+            savedScrollTop = container.scrollTop;
+        }
+    }
+    
+    // Restore scroll position
+    function restoreScrollPosition() {
+        const container = document.querySelector('.attendance-table-container');
+        if (container && savedScrollTop > 0) {
+            setTimeout(() => {
+                container.scrollTop = savedScrollTop;
+            }, 10);
+        }
+    }
+    
+    function getPenaltyAmount(status, apology) {
+        if (status === 'Present') return 0;
+        if (status === 'Late' && apology === 'without_apology') return 20;
+        if (status === 'Absent' && apology === 'without_apology') return 50;
+        return 0;
+    }
+    
+    function getPenaltyText(status, apology) {
+        const amount = getPenaltyAmount(status, apology);
+        if (amount === 0) return '✅ No fine';
+        return `💰 KSh ${amount}`;
+    }
+    
+    // Update only the changed row instead of full re-render
+    function updateSingleRow(memberId) {
+        const member = currentMembers.find(m => m.member_id === memberId);
+        if (!member) return;
+        
+        const currentStatus = currentAttendance[memberId] || '';
+        const currentApologyStatus = currentApology[memberId] || '';
+        const apologyDisabled = (currentStatus === '' || currentStatus === 'Present');
+        const penaltyAmount = getPenaltyAmount(currentStatus, currentApologyStatus);
+        const penaltyText = getPenaltyText(currentStatus, currentApologyStatus);
+        
+        // Find the row and update it
+        const row = document.querySelector(`tr[data-member-id="${memberId}"]`);
+        if (row) {
+            const statusSelect = row.querySelector('.status-select');
+            const apologySelect = row.querySelector('.apology-select');
+            const penaltySpan = row.querySelector('.penalty-indicator');
+            
+            if (statusSelect) statusSelect.value = currentStatus;
+            if (apologySelect) {
+                apologySelect.value = currentApologyStatus;
+                apologySelect.disabled = apologyDisabled;
+                apologySelect.style.opacity = apologyDisabled ? '0.5' : '1';
+            }
+            if (penaltySpan) {
+                penaltySpan.textContent = penaltyText;
+                penaltySpan.className = `penalty-indicator ${penaltyAmount > 0 ? 'penalty-yes' : 'penalty-no'}`;
+            }
+        }
+    }
+    
     function renderAttendanceTable() {
         if (!currentMembers.length) {
             tableContainer.innerHTML = '<div class="loading">✨ No members loaded. Click "Load Members" ✨</div>';
             return;
         }
         
-        // Define ordered voice parts
         const voicePartsOrder = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
         let html = `<div class="attendance-table-container"><table class="attendance-table">
                         <thead>
-                            <th>Full Name</th><th>Voice</th><th>Attendance Status</th><th> </th><th> </th>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Voice</th>
+                                <th>Attendance Status</th>
+                                <th>Apology Status</th>
+                                <th>Fine</th>
+                            </tr>
                         </thead>
                         <tbody>`;
         
@@ -491,14 +586,17 @@
             const partMembers = currentMembers.filter(m => (m.voice_part || 'Other') === part);
             if (partMembers.length === 0) continue;
             
-            // Voice part header row (sticky left & full background)
-            html += `<tr class="voice-part-header"><td colspan="4"><span style="display:flex; align-items:center; gap:8px;">🎵 ${part} &nbsp;•&nbsp; ${partMembers.length} member${partMembers.length !== 1 ? 's' : ''}</span></td></tr>`;
+            html += `<tr class="voice-part-header"><td colspan="5"><span style="display:flex; align-items:center; gap:8px;">🎵 ${part} &nbsp;•&nbsp; ${partMembers.length} member${partMembers.length !== 1 ? 's' : ''}</span></td></tr>`;
             
             partMembers.forEach(member => {
                 const memberId = member.member_id;
                 const currentStatus = currentAttendance[memberId] || '';
-                html += `<tr>
-                            
+                const currentApologyStatus = currentApology[memberId] || '';
+                const apologyDisabled = (currentStatus === '' || currentStatus === 'Present');
+                const penaltyAmount = getPenaltyAmount(currentStatus, currentApologyStatus);
+                const penaltyText = getPenaltyText(currentStatus, currentApologyStatus);
+                
+                html += `<tr data-member-id="${memberId}">
                             <td>${escapeHtml(member.name || 'Unnamed')}</td>
                             <td>${escapeHtml(member.voice_part || '—')}</td>
                             <td>
@@ -509,37 +607,69 @@
                                     <option value="Absent" ${currentStatus === 'Absent' ? 'selected' : ''}>❌ Absent</option>
                                 </select>
                             </td>
-                         </tr>`;
+                            <td>
+                                <select class="apology-select" data-apology-member-id="${memberId}" ${apologyDisabled ? 'disabled' : ''} style="${apologyDisabled ? 'opacity:0.5;' : ''}">
+                                    <option value="">-- Select --</option>
+                                    <option value="with_apology" ${currentApologyStatus === 'with_apology' ? 'selected' : ''}>🙏 With Apology</option>
+                                    <option value="without_apology" ${currentApologyStatus === 'without_apology' ? 'selected' : ''}>⚠️ Without Apology</option>
+                                </select>
+                            </td>
+                            <td>
+                                <span class="penalty-indicator ${penaltyAmount > 0 ? 'penalty-yes' : 'penalty-no'}">
+                                    ${penaltyText}
+                                </span>
+                            </td>
+                        </tr>`;
             });
-        }
-        
-        if (currentMembers.length === 0) {
-            html += `<tr><td colspan="4" style="text-align:center; padding:32px;">⚠️ No members found in database ⚠️</td></tr>`;
         }
         
         html += `</tbody></table></div>`;
         tableContainer.innerHTML = html;
         
-        // attach change events to each select to update currentAttendance realtime
+        // Attach status change events - NO RE-RENDER, just update data
         document.querySelectorAll('.status-select').forEach(select => {
             select.addEventListener('change', (e) => {
+                e.stopPropagation();
                 const memberId = select.dataset.memberId;
                 const newStatus = select.value;
                 if (memberId) {
+                    saveScrollPosition();
                     if (newStatus === '') {
                         delete currentAttendance[memberId];
+                        delete currentApology[memberId];
                     } else {
                         currentAttendance[memberId] = newStatus;
+                        if (newStatus === 'Present') {
+                            delete currentApology[memberId];
+                        }
                     }
+                    // Update only this row instead of full re-render
+                    updateSingleRow(memberId);
+                    restoreScrollPosition();
                 }
-                // subtle visual feedback
-                select.style.transform = 'scale(0.98)';
-                setTimeout(() => { select.style.transform = ''; }, 120);
+            });
+        });
+        
+        // Attach apology change events
+        document.querySelectorAll('.apology-select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const memberId = select.dataset.apologyMemberId;
+                const newApology = select.value;
+                if (memberId && currentAttendance[memberId]) {
+                    saveScrollPosition();
+                    if (newApology === '') {
+                        delete currentApology[memberId];
+                    } else {
+                        currentApology[memberId] = newApology;
+                    }
+                    updateSingleRow(memberId);
+                    restoreScrollPosition();
+                }
             });
         });
     }
     
-    // simple escape to avoid injection
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>]/g, function(m) {
@@ -547,12 +677,9 @@
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
         });
     }
     
-    // load members from supabase + existing attendance for the selected date/session
     async function loadMembers() {
         const date = dateInput.value;
         const session = sessionSelect.value;
@@ -561,11 +688,10 @@
             return;
         }
         
-        showMessage('🔄 Fetching members & attendance data...', 'info');
+        showMessage('🔄 Fetching members...', 'info');
         tableContainer.innerHTML = '<div class="loading">🎤 Loading choir members...</div>';
         
         try {
-            // 1) fetch all members
             const { data: members, error: membersError } = await supabaseClient
                 .from('members')
                 .select('*')
@@ -573,16 +699,16 @@
             
             if (membersError) throw new Error(`Members fetch error: ${membersError.message}`);
             if (!members || members.length === 0) {
-                showMessage('📭 No members in database. Please add members first.', 'error');
-                tableContainer.innerHTML = '<div class="loading">🚫 No members found. Add via dashboard.</div>';
+                showMessage('📭 No members in database.', 'error');
                 currentMembers = [];
                 currentAttendance = {};
+                currentApology = {};
                 renderAttendanceTable();
                 return;
             }
             
             currentMembers = members;
-            // 2) fetch existing attendance for this exact date + session
+            
             const { data: existingAtt, error: attError } = await supabaseClient
                 .from('attendance')
                 .select('*')
@@ -591,30 +717,44 @@
             
             if (attError) console.warn('Attendance fetch warning:', attError.message);
             
-            // reset currentAttendance
+            const { data: existingPenalties, error: penError } = await supabaseClient
+                .from('penalties')
+                .select('member_id, status')
+                .eq('date', date)
+                .eq('session', session);
+            
+            if (penError) console.warn('Penalties fetch warning:', penError.message);
+            
             currentAttendance = {};
+            currentApology = {};
+            
             if (existingAtt && existingAtt.length) {
                 existingAtt.forEach(rec => {
                     if (rec.member_id && rec.status) {
                         currentAttendance[rec.member_id] = rec.status;
                     }
                 });
-                showMessage(`📌 Loaded ${existingAtt.length} existing records for ${session}`, 'success');
-            } else {
-                showMessage(`✨ No prior attendance for ${session} session. Ready to mark!`, 'info');
+            }
+            
+            if (existingPenalties && existingPenalties.length) {
+                existingPenalties.forEach(pen => {
+                    if (pen.status === 'pending') {
+                        currentApology[pen.member_id] = 'without_apology';
+                    } else if (pen.status === 'paid') {
+                        currentApology[pen.member_id] = 'with_apology';
+                    }
+                });
             }
             
             renderAttendanceTable();
-            showMessage(`✅ ${currentMembers.length} members loaded. Select statuses & save.`, 'success');
+            showMessage(`✅ ${currentMembers.length} members loaded.`, 'success');
         } catch (err) {
             console.error(err);
             showMessage(`⚠️ Error: ${err.message}`, 'error');
-            tableContainer.innerHTML = '<div class="loading">❌ Failed to load members. Check network or database.</div>';
             currentMembers = [];
         }
     }
     
-    // Save attendance (upsert)
     async function saveAttendance() {
         const date = dateInput.value;
         const session = sessionSelect.value;
@@ -623,8 +763,9 @@
             return;
         }
         
-        // Build records array from currentAttendance (only those with non-empty status)
         const records = [];
+        const penaltyRecords = [];
+        
         for (const [memberId, status] of Object.entries(currentAttendance)) {
             if (status && status.trim() !== '') {
                 records.push({
@@ -633,82 +774,105 @@
                     member_id: memberId,
                     status: status
                 });
+                
+                const apology = currentApology[memberId] || '';
+                const penaltyAmount = getPenaltyAmount(status, apology);
+                
+                if (penaltyAmount > 0) {
+                    penaltyRecords.push({
+                        member_id: memberId,
+                        date: date,
+                        session: session,
+                        penalty_type: status === 'Late' ? 'late' : 'absent',
+                        amount: penaltyAmount,
+                        status: 'pending',
+                        reason: `${status} without apology`
+                    });
+                } else if (status !== 'Present' && apology === 'with_apology') {
+                    penaltyRecords.push({
+                        member_id: memberId,
+                        date: date,
+                        session: session,
+                        penalty_type: status === 'Late' ? 'late' : 'absent',
+                        amount: 0,
+                        status: 'paid',
+                        reason: `${status} with apology - no fine`
+                    });
+                }
             }
         }
         
         if (records.length === 0) {
-            showMessage('⚠️ No attendance marked. Please assign status to at least one member.', 'error');
+            showMessage('⚠️ No attendance marked.', 'error');
             return;
         }
         
+        // Disable save button to prevent double-click
+        saveBtn.disabled = true;
+        saveBtn.textContent = '💾 Saving...';
         showMessage(`💾 Saving ${records.length} record(s)...`, 'info');
         
-        const { data, error } = await supabaseClient
+        const { error: attError } = await supabaseClient
             .from('attendance')
             .upsert(records, { onConflict: 'date,session,member_id' });
         
-        if (error) {
-            console.error('Upsert error:', error);
-            showMessage(`❌ Save failed: ${error.message}`, 'error');
-        } else {
-            showMessage(`🎉 Success! ${records.length} attendance entries saved for ${session} (${date})`, 'success');
-            // optional: reload to sync latest (but we already have currentAttendance consistent)
-        }
-    }
-    
-    // mark all loaded members with a specific status
-    function markAll(status) {
-        if (!currentMembers.length) {
-            showMessage('Please load members first (click "Load Members")', 'error');
+        if (attError) {
+            console.error('Upsert error:', attError);
+            showMessage(`❌ Save failed: ${attError.message}`, 'error');
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Save Records';
             return;
         }
+        
+        for (const penalty of penaltyRecords) {
+            const { error: penError } = await supabaseClient
+                .from('penalties')
+                .upsert(penalty, { onConflict: 'member_id,date,session' });
+            if (penError) console.warn('Penalty save warning:', penError);
+        }
+        
+        showMessage(`✅ Saved ${records.length} records for ${session}!`, 'success');
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Save Records';
+    }
+    
+    function markAll(status) {
+        if (!currentMembers.length) {
+            showMessage('Please load members first', 'error');
+            return;
+        }
+        saveScrollPosition();
         currentMembers.forEach(member => {
             currentAttendance[member.member_id] = status;
+            if (status === 'Present') {
+                delete currentApology[member.member_id];
+            } else {
+                currentApology[member.member_id] = 'without_apology';
+            }
         });
         renderAttendanceTable();
+        restoreScrollPosition();
         showMessage(`✓ All ${currentMembers.length} members marked as ${status}`, 'success');
     }
     
     function clearAllSelections() {
         if (!currentMembers.length) {
-            showMessage('No members loaded, nothing to clear', 'error');
+            showMessage('No members loaded', 'error');
             return;
         }
+        saveScrollPosition();
         currentAttendance = {};
+        currentApology = {};
         renderAttendanceTable();
-        showMessage('🧹 Cleared all attendance selections', 'success');
+        restoreScrollPosition();
+        showMessage('🧹 Cleared all selections', 'success');
     }
     
-    // Event listeners (touch & mouse friendly)
     loadBtn.addEventListener('click', loadMembers);
     saveBtn.addEventListener('click', saveAttendance);
     markAllPresent.addEventListener('click', () => markAll('Present'));
     markAllLate.addEventListener('click', () => markAll('Late'));
     clearAllBtn.addEventListener('click', clearAllSelections);
-    
-    // optional: if user changes session or date, we don't auto-reload – but we show a helpful hint
-    sessionSelect.addEventListener('change', () => {
-        if (currentMembers.length) {
-            showMessage(`Session changed to ${sessionSelect.value}. Click "Load Members" to refresh attendance for this session.`, 'info');
-        }
-    });
-    dateInput.addEventListener('change', () => {
-        if (currentMembers.length) {
-            showMessage(`Date changed to ${dateInput.value}. Reload members to see existing attendance for new date.`, 'info');
-        }
-    });
-    
-    // Small enhancement: prevent accidental double taps on buttons
-    const allButtons = document.querySelectorAll('button, .back-btn');
-    allButtons.forEach(btn => {
-        btn.addEventListener('touchstart', (e) => {
-            // just passive to enhance responsiveness
-        }, { passive: true });
-    });
-    
-    // optionally preload members if needed? we don't auto-load to avoid unexpected queries, but we show friendly empty state.
-    // If you prefer auto-load on page load, uncomment next line:
-    // window.addEventListener('DOMContentLoaded', loadMembers);
 </script>
 </body>
 </html>

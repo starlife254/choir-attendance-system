@@ -506,6 +506,7 @@
                         <div class="user-name" id="userName">Loading...</div>
                         <div class="user-role" id="userRole">Admin</div>
                     </div>
+                    
                 </div>
                 <div class="action-buttons-wrapper">
 
@@ -521,19 +522,28 @@
             <p>98th Music Festival 2026</p>
         </header>
 
-        <!-- Navigation Cards -->
         <nav class="dashboard-nav">
-            <a href="mark-attendance.html" class="nav-card">
-                <div class="emoji">✅</div>
-                <h3>Mark Attendance</h3>
-                <p>Record today's session</p>
-            </a>
-            <a href="reports.html" class="nav-card">
-                <div class="emoji">📊</div>
-                <h3>View Reports</h3>
-                <p>Daily & weekly insights</p>
-            </a>
-        </nav>
+    <a href="mark-attendance.html" class="nav-card">
+        <div class="emoji">✅</div>
+        <h3>Mark Attendance</h3>
+        <p>Record today's attendance</p>
+    </a>
+    <a href="reports.html" class="nav-card">
+        <div class="emoji">📊</div>
+        <h3>View Reports</h3>
+        <p>Generate daily reports</p>
+    </a>
+    <a href="analytics.html" class="nav-card">
+        <div class="emoji">📈</div>
+        <h3>Analytics</h3>
+        <p>Member trends & penalties</p>
+    </a>
+    <a href="members.html" class="nav-card">
+        <div class="emoji">👀</div>
+        <h3>Members View</h3>
+        <p>Member Attendance Portal</p>
+    </a>
+</nav>
 
         <!-- Stats Section -->
         <div class="stats-section">
@@ -571,19 +581,23 @@
 
     <!-- Bottom Navigation (Mobile) -->
     <div class="bottom-nav">
-        <a href="index.html" class="bottom-nav-item active">
-            <span>🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="mark-attendance.html" class="bottom-nav-item">
-            <span>✅</span>
-            <span>Mark</span>
-        </a>
-        <a href="reports.html" class="bottom-nav-item">
-            <span>📊</span>
-            <span>Reports</span>
-        </a>
-    </div>
+    <a href="index.html" class="bottom-nav-item">
+        <span>🏠</span>
+        <span>Home</span>
+    </a>
+    <a href="mark-attendance.html" class="bottom-nav-item">
+        <span>✅</span>
+        <span>Mark</span>
+    </a>
+    <a href="reports.html" class="bottom-nav-item">
+        <span>📊</span>
+        <span>Reports</span>
+    </a>
+    <a href="analytics.html" class="bottom-nav-item">
+        <span>📈</span>
+        <span>Analytics</span>
+    </a>
+</div>
 
     <script>
         // Supabase configuration
@@ -619,11 +633,21 @@
             return profile;
         }
         
-        async function logout() {
-            await supabaseClient.auth.signOut();
+     async function logout() {
+    try {
+        await supabaseClient.auth.signOut();
+        // Get the current path to determine correct redirect
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/admin/') || currentPath.includes('/member/')) {
+            window.location.href = '../login.html';
+        } else {
             window.location.href = 'login.html';
         }
-        
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = 'login.html';
+    }
+}
         // ========== UI Helpers ==========
         function updateDateTime() {
             const now = new Date();

@@ -2,169 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Login - Choir Attendance System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #66eadf 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px;
         }
-
-        .login-container {
-            max-width: 450px;
-            width: 100%;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-card {
-            background: white;
+        .login-container { max-width: 450px; width: 100%; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .login-card { background: white; border-radius: 28px; padding: 35px 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35); }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo .emoji { font-size: 55px; margin-bottom: 10px; }
+        .logo h1 { color: #333; font-size: 24px; margin-bottom: 8px; line-height: 1.3; }
+        .logo p { color: #666; font-size: 13px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: bold; color: #555; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 16px; font-size: 16px; transition: all 0.3s; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 40px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .login-btn:active { transform: scale(0.98); }
+        .message { padding: 12px; border-radius: 16px; margin-bottom: 20px; text-align: center; display: none; font-size: 14px; }
+        .message.error { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .message.success { display: block; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .footer { text-align: center; margin-top: 20px; font-size: 11px; color: rgba(255,255,255,0.8); }
+        .credentials-card {
+            background: #f8fafc;
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 15px;
+            margin-top: 25px;
         }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .logo p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .logo .emoji {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
+        .credentials-title {
+            font-size: 13px;
             font-weight: bold;
-            color: #555;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #3fd2e6;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
-        }
-
-        .register-link {
+            margin-bottom: 10px;
+            color: #334155;
             text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
         }
-
-        .register-link a {
+        .cred-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            padding: 5px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .cred-role {
+            font-weight: bold;
             color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
+            min-width: 80px;
         }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
-
-        .message.error {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .message.success {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.8);
-        }
-
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 25px;
-            }
-            
-            .logo h1 {
-                font-size: 24px;
-            }
-        }
+        .cred-email { color: #334155; }
+        .cred-pass { color: #94a3b8; font-family: monospace; }
+        @media (max-width: 480px) { .login-card { padding: 25px 20px; } .logo h1 { font-size: 20px; } }
     </style>
 </head>
 <body>
@@ -174,7 +70,7 @@
                 <div class="emoji">🎵</div>
                 <h1>University of Embu<br>Students' Choir</h1>
                 <p>98th Music Festival 2026</p>
-                <p style="font-size: 12px; margin-top: 10px;">Attendance Management System</p>
+                <p style="font-size: 12px; margin-top: 8px;">Attendance Management System</p>
             </div>
 
             <div id="message" class="message"></div>
@@ -182,73 +78,97 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label>📧 Email Address</label>
-                    <input type="email" id="email" required placeholder="Enter your email">
+                    <input type="email" id="email" required placeholder="Enter your email" autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label>🔒 Password</label>
-                    <input type="password" id="password" required placeholder="Enter your password">
+                    <input type="password" id="password" required placeholder="Enter your password" autocomplete="current-password">
                 </div>
-                <button type="submit" class="login-btn">🔐 Login to Dashboard</button>
+                <button type="submit" class="login-btn">🔐 Login</button>
             </form>
 
-        </div>
+            
         <div class="footer">
             <p>University of Embu | Choir Attendance System</p>
         </div>
     </div>
 
     <script>
-        // Supabase configuration - using different variable name to avoid conflict
+        // Supabase configuration - using a different variable name to avoid conflict
         const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
         
-        // Create client with a unique name (not 'supabase' to avoid conflict)
+        // Create client with unique name (not 'supabase')
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Check if user is already logged in
+        async function getUserRole(email) {
+            // Check user_roles table
+            const { data, error } = await supabaseClient
+                .from('user_roles')
+                .select('role')
+                .eq('email', email)
+                .single();
+            
+            if (data && !error) {
+                return data.role;
+            }
+            
+            return 'member'; // Default role
+        }
+
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                window.location.href = 'index.html';
+                const role = await getUserRole(session.user.email);
+                if (role === 'admin') {
+                    window.location.href = 'admin/index.html';
+                } else {
+                    window.location.href = 'member/dashboard.html';
+                }
             }
         }
 
-        // Login form handler
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('message');
             
             messageDiv.style.display = 'none';
-            messageDiv.className = 'message';
             
-            // Show loading state
             const submitBtn = document.querySelector('.login-btn');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = '⏳ Logging in...';
             submitBtn.disabled = true;
             
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 
                 if (data.session) {
+                    const role = await getUserRole(email);
+                    
                     messageDiv.textContent = '✅ Login successful! Redirecting...';
                     messageDiv.className = 'message success';
                     messageDiv.style.display = 'block';
                     
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        if (role === 'admin') {
+                            window.location.href = 'admin/index.html';
+                        } else {
+                            window.location.href = 'member/dashboard.html';
+                        }
                     }, 1500);
                 }
             } catch (error) {
-                messageDiv.textContent = '❌ ' + error.message;
+                let errorMsg = error.message;
+                if (errorMsg === 'Invalid login credentials') {
+                    errorMsg = 'Invalid email or password. Please check your credentials.';
+                } else if (errorMsg.includes('Email not confirmed')) {
+                    errorMsg = 'Please confirm your email address first.';
+                }
+                messageDiv.textContent = '❌ ' + errorMsg;
                 messageDiv.className = 'message error';
                 messageDiv.style.display = 'block';
                 submitBtn.textContent = originalText;
@@ -256,7 +176,6 @@
             }
         });
         
-        // Run session check
         checkSession();
     </script>
 </body>

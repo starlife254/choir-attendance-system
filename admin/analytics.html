@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Member Analytics | Choir Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 12px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
+            margin-bottom: 70px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header h1 { color: #1e293b; font-size: 1.5rem; }
+        .back-btn {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 60px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 24px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .member-list { max-height: 500px; overflow-y: auto; }
+        .member-item {
+            background: #f8fafc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid #667eea;
+        }
+        .member-item:hover { background: #eef2ff; transform: translateX(5px); }
+        .member-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        .member-stats { display: flex; gap: 15px; font-size: 12px; flex-wrap: wrap; }
+        .stat-badge { padding: 2px 8px; border-radius: 12px; }
+        .stat-badge.present { background: #d1fae5; color: #065f46; }
+        .stat-badge.late { background: #fef3c7; color: #92400e; }
+        .stat-badge.absent { background: #fee2e2; color: #991b1b; }
+        .stat-badge.pending { background: #fef3c7; color: #d97706; }
+        .stat-badge.paid { background: #d1fae5; color: #059669; }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 60px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .summary-number { font-size: 28px; font-weight: bold; }
+        .summary-label { font-size: 12px; opacity: 0.9; margin-top: 5px; }
+        
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            padding: 10px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            background: white;
+            cursor: pointer;
+        }
+        .penalty-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .penalty-item:hover { background: #eef2ff; transform: translateX(5px); }
+        .penalty-amount { font-size: 18px; font-weight: bold; color: #dc2626; }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 11px;
+            gap: 4px;
+            padding: 5px 15px;
+            border-radius: 10px;
+        }
+        .bottom-nav-item span:first-child { font-size: 22px; }
+        .bottom-nav-item.active { color: #667eea; background: #f0f0ff; }
+        .empty-state { text-align: center; padding: 40px; color: #666; }
+        .success-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: 500; }
+        .warning-btn { background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: 500; }
+        
+        @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
+        @media (max-width: 480px) { .summary-stats { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 Member Analytics</h1>
+            <a href="index.html" class="back-btn">← Dashboard</a>
+        </div>
+        
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('group')">👥 Group Trends</button>
+            <button class="tab-btn" onclick="switchTab('members')">👤 Members List</button>
+            <button class="tab-btn" onclick="switchTab('penalties')">💰 Penalties & Fines</button>
+        </div>
+
+        <!-- Group Trends Tab -->
+        <div id="groupTab" class="tab-content active">
+            <div class="filter-group">
+                <select id="groupWeekSelect" class="filter-select" onchange="loadGroupTrends()">
+                    <option value="7">Last 7 days</option>
+                    <option value="14" selected>Last 14 days</option>
+                    <option value="30">Last 30 days</option>
+                </select>
+               </div>
+            <div class="summary-stats" id="groupSummary"></div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div id="topPerformers"></div>
+        </div>
+
+        <!-- Members List Tab -->
+        <div id="membersTab" class="tab-content">
+            <input type="text" id="memberSearch" class="search-input" placeholder="🔍 Search member by name..." onkeyup="filterMembers()">
+            <div id="memberList" class="member-list">Loading members...</div>
+        </div>
+
+        <!-- Penalties Tab -->
+        <div id="penaltiesTab" class="tab-content">
+            <div class="filter-group">
+                <select id="penaltyStatusFilter" class="filter-select" onchange="loadPenalties()">
+                    <option value="all">All Penalties</option>
+                    <option value="pending">Pending Only</option>
+                    <option value="paid">Paid Only</option>
+                </select>
+               </div>
+            <div class="summary-stats" id="penaltySummary"></div>
+            <div id="penaltiesList"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="bottom-nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="mark-attendance.html" class="bottom-nav-item"><span>✅</span><span>Mark</span></a>
+        <a href="reports.html" class="bottom-nav-item"><span>📊</span><span>Reports</span></a>
+        <a href="analytics.html" class="bottom-nav-item active"><span>📈</span><span>Analytics</span></a>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let trendChart;
+        let allMembers = [];
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'group') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('groupTab').classList.add('active');
+                loadGroupTrends();
+            } else if (tab === 'members') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('membersTab').classList.add('active');
+                loadMembersList();
+            } else {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('penaltiesTab').classList.add('active');
+                loadPenalties();
+            }
+        }
+
+        async function loadGroupTrends() {
+            const days = parseInt(document.getElementById('groupWeekSelect').value);
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - days);
+            
+            const { data: attendance } = await supabaseClient
+                .from('attendance')
+                .select('date, status')
+                .gte('date', startDate.toISOString().split('T')[0]);
+            
+            const dailyStats = {};
+            attendance?.forEach(record => {
+                if (!dailyStats[record.date]) dailyStats[record.date] = { present: 0, late: 0 };
+                if (record.status === 'Present') dailyStats[record.date].present++;
+                else if (record.status === 'Late') dailyStats[record.date].late++;
+            });
+            
+            const dates = Object.keys(dailyStats).sort();
+            const presentData = dates.map(d => dailyStats[d].present);
+            const lateData = dates.map(d => dailyStats[d].late);
+            
+            if (trendChart) trendChart.destroy();
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: dates, datasets: [
+                    { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true },
+                    { label: 'Late', data: lateData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.3, fill: true }
+                ]},
+                options: { responsive: true, maintainAspectRatio: true }
+            });
+            
+            await loadGroupSummary();
+            await loadTopPerformers(startDate);
+        }
+
+        async function loadGroupSummary() {
+            const { count: totalMembers } = await supabaseClient.from('members').select('*', { count: 'exact', head: true });
+            const { data: penalties } = await supabaseClient.from('penalties').select('status, amount');
+            
+            const totalPending = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0) || 0;
+            const totalPaid = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + (p.amount || 0), 0) || 0;
+            
+            document.getElementById('groupSummary').innerHTML = `
+                <div class="summary-card">👥 ${totalMembers || 0}<div class="summary-label">Total Members</div></div>
+                <div class="summary-card">💰 KSh ${totalPending + totalPaid}<div class="summary-label">Total Fines</div></div>
+                <div class="summary-card" style="background:#f59e0b;color:#333;">⏳ KSh ${totalPending}<div class="summary-label">Pending</div></div>
+                <div class="summary-card" style="background:#10b981;">✅ KSh ${totalPaid}<div class="summary-label">Collected</div></div>
+            `;
+        }
+
+        async function loadTopPerformers(startDate) {
+            const { data: attendance } = await supabaseClient
+                .from('attendance')
+                .select('member_id, status, members(name, voice_part)')
+                .gte('date', startDate.toISOString().split('T')[0]);
+            
+            if (!attendance?.length) {
+                document.getElementById('topPerformers').innerHTML = '<div class="chart-container"><h3>🏆 Top Performers</h3><div class="empty-state">No attendance data yet.</div></div>';
+                return;
+            }
+            
+            const memberStats = {};
+            attendance.forEach(record => {
+                if (!memberStats[record.member_id]) {
+                    memberStats[record.member_id] = { name: record.members?.name, voice: record.members?.voice_part, present: 0, late: 0, total: 0 };
+                }
+                if (record.status === 'Present') memberStats[record.member_id].present++;
+                else if (record.status === 'Late') memberStats[record.member_id].late++;
+                memberStats[record.member_id].total++;
+            });
+            
+            const performers = Object.values(memberStats).sort((a, b) => ((b.present + b.late) / b.total) - ((a.present + a.late) / a.total)).slice(0, 5);
+            
+            document.getElementById('topPerformers').innerHTML = `
+                <div class="chart-container">
+                    <h3>🏆 Top 5 Performers</h3>
+                    ${performers.map((p, i) => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #e2e8f0;">
+                            <div><strong>${i+1}. ${p.name}</strong> <span style="color:#666; font-size:12px;">(${p.voice})</span></div>
+                            <div><span style="color:#10b981;">✅ ${p.present}</span> / <span style="color:#f59e0b;">⏰ ${p.late}</span> / 📊 ${((p.present + p.late) / p.total * 100).toFixed(0)}%</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function loadMembersList() {
+            const { data: members } = await supabaseClient.from('members').select('*').order('voice_part');
+            if (!members) return;
+            allMembers = members;
+            
+            const { data: attendance } = await supabaseClient.from('attendance').select('member_id, status');
+            const memberAttendance = {};
+            attendance?.forEach(a => {
+                if (!memberAttendance[a.member_id]) memberAttendance[a.member_id] = { present: 0, late: 0, absent: 0 };
+                if (a.status === 'Present') memberAttendance[a.member_id].present++;
+                else if (a.status === 'Late') memberAttendance[a.member_id].late++;
+                else if (a.status === 'Absent') memberAttendance[a.member_id].absent++;
+            });
+            
+            displayMembers(allMembers, memberAttendance);
+        }
+
+        function displayMembers(members, attendanceStats = {}) {
+            const container = document.getElementById('memberList');
+            container.innerHTML = members.map(m => {
+                const stats = attendanceStats[m.member_id] || { present: 0, late: 0, absent: 0 };
+                return `
+                    <div class="member-item" onclick="viewMember('${m.member_id}')">
+                        <div class="member-name">${escapeHtml(m.name)}</div>
+                        <div class="member-stats">
+                            <span>🎭 ${m.voice_part}</span>
+                            <span class="stat-badge present">✅ ${stats.present}</span>
+                            <span class="stat-badge late">⏰ ${stats.late}</span>
+                            <span class="stat-badge absent">❌ ${stats.absent}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+        function filterMembers() { displayMembers(allMembers.filter(m => m.name.toLowerCase().includes(document.getElementById('memberSearch').value.toLowerCase()))); }
+        function viewMember(memberId) { window.location.href = `member-detail.html?id=${memberId}`; }
+
+        async function loadPenalties() {
+            const statusFilter = document.getElementById('penaltyStatusFilter').value;
+            let query = supabaseClient.from('penalties').select('*, members(name, voice_part)').order('date', { ascending: false });
+            if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+            
+            const { data: penalties } = await query;
+            
+            const totalPending = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0) || 0;
+            const totalPaid = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + (p.amount || 0), 0) || 0;
+            
+            document.getElementById('penaltySummary').innerHTML = `
+                <div class="summary-card" style="background:#dc2626;">💰 KSh ${totalPending + totalPaid}<div class="summary-label">Total Fines</div></div>
+                <div class="summary-card" style="background:#f59e0b;color:#333;">⏳ KSh ${totalPending}<div class="summary-label">Pending</div></div>
+                <div class="summary-card" style="background:#10b981;">✅ KSh ${totalPaid}<div class="summary-label">Collected</div></div>
+            `;
+            
+            if (!penalties?.length) {
+                document.getElementById('penaltiesList').innerHTML = `
+                    <div class="empty-state">
+                        🎉 No penalties recorded!<br><br>
+                        <button onclick="syncPenaltiesFromAttendance()" class="success-btn">🔄 Sync Penalties from Attendance</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
+                <div class="penalty-item" onclick="viewMember('${p.member_id}')">
+                    <div>
+                        <div class="member-name">${p.members?.name || 'Unknown Member'}</div>
+                        <div class="member-stats">
+                            <span>🎭 ${p.members?.voice_part || '—'}</span>
+                            <span>${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</span>
+                            <span>📅 ${p.date}</span>
+                            <span>${p.session || ''}</span>
+                            ${p.has_apology ? '<span class="stat-badge paid">🙏 With Apology</span>' : '<span class="stat-badge pending">⚠️ No Apology</span>'}
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="stat-badge ${p.status === 'pending' ? 'pending' : 'paid'}">${p.status.toUpperCase()}</div>
+                        <div class="penalty-amount">KSh ${p.amount}</div>
+                        ${p.status === 'pending' ? `<button class="pay-btn" onclick="event.stopPropagation(); markPenaltyPaid('${p.id}')" style="background:#10b981; color:white; border:none; padding:5px 12px; border-radius:20px; margin-top:5px;">Mark Paid</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function syncPenaltiesFromAttendance() {
+            const { data: attendance } = await supabaseClient.from('attendance').select('member_id, date, session, status');
+            if (!attendance?.length) { alert('No attendance records found.'); return; }
+            
+            // First, clear existing penalties to avoid duplicates
+            await supabaseClient.from('penalties').delete().neq('id', 0);
+            
+            let added = 0, lateCount = 0, absentCount = 0;
+            
+            for (const record of attendance) {
+                if (record.status === 'Late') {
+                    const { error } = await supabaseClient.from('penalties').insert({
+                        member_id: record.member_id,
+                        date: record.date,
+                        session: record.session,
+                        penalty_type: 'late',
+                        amount: 20,
+                        status: 'pending',
+                        has_apology: false,
+                        reason: 'Late without apology'
+                    });
+                    if (!error) { added++; lateCount++; }
+                } else if (record.status === 'Absent') {
+                    const { error } = await supabaseClient.from('penalties').insert({
+                        member_id: record.member_id,
+                        date: record.date,
+                        session: record.session,
+                        penalty_type: 'absent',
+                        amount: 50,
+                        status: 'pending',
+                        has_apology: false,
+                        reason: 'Absent without apology'
+                    });
+                    if (!error) { added++; absentCount++; }
+                }
+            }
+            
+            alert(`✅ Penalty Sync Complete!\n\n📊 Summary:\n• Late records: ${lateCount} (KSh 20 each = KSh ${lateCount * 20})\n• Absent records: ${absentCount} (KSh 50 each = KSh ${absentCount * 50})\n• Total penalties added: ${added}\n\n💰 Total fines: KSh ${(lateCount * 20) + (absentCount * 50)}`);
+            
+            await loadPenalties();
+            await loadGroupTrends();
+        }
+
+        async function markPenaltyPaid(penaltyId) {
+            const { error } = await supabaseClient.from('penalties').update({ status: 'paid' }).eq('id', penaltyId);
+            if (error) { alert('Error: ' + error.message); } 
+            else { alert('✅ Penalty marked as paid!'); loadPenalties(); loadGroupTrends(); }
+        }
+
+        async function clearAllPenalties() {
+            if (confirm('⚠️ WARNING: This will delete ALL penalty records. This action cannot be undone. Are you sure?')) {
+                await supabaseClient.from('penalties').delete().neq('id', 0);
+                alert('✅ All penalties have been cleared.');
+                loadPenalties();
+                loadGroupTrends();
+            }
+        }
+
+        loadGroupTrends();
+    </script>
+</body>
+</html>

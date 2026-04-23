@@ -15,6 +15,7 @@
             align-items: center;
             justify-content: center;
             padding: 15px;
+            flex-direction: column;
         }
         .login-container { max-width: 450px; width: 100%; animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -32,35 +33,53 @@
         .message { padding: 12px; border-radius: 16px; margin-bottom: 20px; text-align: center; display: none; font-size: 14px; }
         .message.error { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
         .message.success { display: block; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .footer { text-align: center; margin-top: 20px; font-size: 11px; color: rgba(255,255,255,0.8); }
-        .credentials-card {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 15px;
-            margin-top: 25px;
-        }
-        .credentials-title {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #334155;
+        
+        /* Developer Footer */
+        .developer-footer {
             text-align: center;
+            margin-top: 20px;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 60px;
+            width: 100%;
+            max-width: 450px;
         }
-        .cred-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            padding: 5px 0;
-            border-bottom: 1px solid #e2e8f0;
+        .developer-footer p {
+            color: white;
+            font-size: 12px;
+            letter-spacing: 0.5px;
         }
-        .cred-role {
+        .developer-footer .heart {
+            color: #ff6b6b;
+            display: inline-block;
+            animation: pulse 1.5s ease infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        .developer-name {
             font-weight: bold;
-            color: #667eea;
-            min-width: 80px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
         }
-        .cred-email { color: #334155; }
-        .cred-pass { color: #94a3b8; font-family: monospace; }
-        @media (max-width: 480px) { .login-card { padding: 25px 20px; } .logo h1 { font-size: 20px; } }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        @media (max-width: 480px) { 
+            .login-card { padding: 25px 20px; } 
+            .logo h1 { font-size: 20px; }
+            .developer-footer p { font-size: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -86,9 +105,20 @@
                 </div>
                 <button type="submit" class="login-btn">🔐 Login</button>
             </form>
-
-            
-        <div class="footer">
+        </div>
+        
+        <!-- Developer Credit Footer -->
+        <div class="developer-footer">
+            <p>
+                Developed  <span  by 
+                <span class="developer-name">UoEM STARLIFE</span>
+            </p>
+            <p style="font-size: 10px; margin-top: 5px; opacity: 0.8;">
+                © 2026 | All Rights Reserved
+            </p>
+        </div>
+        
+        <div class="footer-note">
             <p>University of Embu | Choir Attendance System</p>
         </div>
     </div>

@@ -214,6 +214,7 @@
             color: var(--text-secondary);
             display: flex; align-items: center; gap: 6px;
         }
+        
 
         .topbar-chip i { font-size: 14px; }
 
@@ -223,6 +224,7 @@
             font-size: 22px; color: var(--text-primary);
             cursor: pointer; padding: 4px;
         }
+        
 
         /* ── CONTENT ── */
         .content {
@@ -574,6 +576,33 @@
             .kpi-grid   { grid-template-columns: 1fr 1fr; gap: 10px; }
             .quick-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
         }
+        /* Mobile logout button in topbar */
+.mobile-logout-btn {
+    display: none;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: inherit;
+    transition: background 0.18s, transform 0.12s;
+}
+
+.mobile-logout-btn:hover {
+    background: #fecaca;
+    transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+    .mobile-logout-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+}
     </style>
 </head>
 <body>
@@ -650,6 +679,9 @@
             </div>
         </div>
         <div class="topbar-right">
+            <button class="mobile-logout-btn" onclick="logout()">
+        <i class="ti ti-logout"></i> Logout
+    </button>
             <div class="topbar-chip">
                 <i class="ti ti-refresh"></i> Auto-refresh on
             </div>

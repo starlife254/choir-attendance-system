@@ -163,19 +163,71 @@
         .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
         .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; text-transform: capitalize; }
 
-        .logout-link {
-            display: flex; align-items: center; gap: 8px;
-            padding: 9px 12px;
-            border-radius: 10px;
-            color: var(--red);
-            font-size: 13px; cursor: pointer;
-            margin-top: 4px;
-            transition: background .12s;
-        }
+        /* Mobile logout button in topbar - visible on mobile */
+.mobile-logout-btn {
+    display: none;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: inherit;
+    transition: background 0.18s, transform 0.12s;
+    align-items: center;
+    gap: 6px;
+}
 
-        .logout-link:hover { background: var(--red-light); }
-        .logout-link i { font-size: 17px; }
+.mobile-logout-btn:hover {
+    background: #fecaca;
+    transform: scale(1.02);
+}
 
+/* Sidebar logout link - visible on desktop */
+.logout-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    color: var(--red);
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background .12s;
+}
+
+.logout-link:hover { 
+    background: var(--red-light); 
+}
+
+.logout-link i { 
+    font-size: 17px; 
+}
+
+/* On mobile: hide sidebar logout, show topbar logout */
+@media (max-width: 768px) {
+    .sidebar-bottom .logout-link {
+        display: none;
+    }
+    
+    .mobile-logout-btn {
+        display: flex;
+    }
+}
+
+/* On desktop: hide mobile logout, show sidebar logout */
+@media (min-width: 769px) {
+    .mobile-logout-btn {
+        display: none !important;
+    }
+    
+    .sidebar-bottom .logout-link {
+        display: flex;
+    }
+}
         /* ── MAIN ── */
         .main {
             margin-left: var(--sidebar-w);
@@ -617,6 +669,9 @@
         <div class="logo-title">University of Embu Choir</div>
         <div class="logo-sub">Attendance System · 98th Festival</div>
     </div>
+    <button class="mobile-logout-btn" onclick="logout()">
+    <i class="ti ti-logout"></i> Logout
+</button>
 
     <nav class="sidebar-nav">
         <div class="nav-section-label">Main</div>
@@ -679,9 +734,7 @@
             </div>
         </div>
         <div class="topbar-right">
-            <button class="mobile-logout-btn" onclick="logout()">
-        <i class="ti ti-logout"></i> Logout
-    </button>
+      
             <div class="topbar-chip">
                 <i class="ti ti-refresh"></i> Auto-refresh on
             </div>

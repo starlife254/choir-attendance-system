@@ -687,7 +687,7 @@
 <nav class="bottom-nav">
     <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
     <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
-    <a href="reports.html" class="bottom-nav-item active"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
     <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
 </nav>
 
@@ -751,15 +751,15 @@
     // ── AUTH ──
     async function checkAuth() {
         const { data: { session } } = await sb.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return null; }
+        if (!session) { window.location.href = '../login.html'; return null; }
         return session;
     }
 
     async function logout() {
         try {
             await sb.auth.signOut();
-            window.location.href = 'login.html';
-        } catch { window.location.href = 'login.html'; }
+           window.location.href = '../login.html';
+        } catch { window.location.href = '../login.html'; }
     }
 
     // ── USER INFO ──

@@ -625,7 +625,6 @@
     <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
     <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
 </nav>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -875,13 +874,13 @@
     // ── AUTH ──
     async function checkAuth() {
         const { data: { session } } = await sb.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return null; }
+        if (!session) { window.location.href = '../login.html'; return null; }
         return session;
     }
 
     async function logout() {
         try { await sb.auth.signOut(); } catch(e) { console.warn(e); }
-        window.location.href = 'login.html';
+        window.location.href = '../login.html';
     }
 
     // ── USER INFO ──

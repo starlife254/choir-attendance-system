@@ -134,8 +134,10 @@
         .logout-link {
             display: flex; align-items: center; gap: 8px;
             padding: 9px 12px; border-radius: 10px;
-            color: var(--red); font-size: 13px; cursor: pointer;
-            margin-top: 4px; transition: background .12s;
+            color: var(--red);
+            font-size: 13px; cursor: pointer;
+            margin-top: 4px;
+            transition: background .12s;
         }
 
         .logout-link:hover { background: var(--red-light); }
@@ -625,6 +627,7 @@
     <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
     <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
 </nav>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -638,7 +641,7 @@
         <p>This will mark the fine as <strong>paid</strong> and close the penalty record.</p>
         <div class="modal-buttons">
             <button class="btn-cancel-modal" onclick="closeModals()">Cancel</button>
-            <button class="btn-confirm-modal" id="confirmYesBtn">Yes, confirm</button>
+            <button class="btn-confirm-modal" id="confirmYesBtn" onclick="if(pendingAction){doConfirm(pendingAction.paymentId,pendingAction.penaltyId)}">Yes, confirm</button>
         </div>
     </div>
 </div>
@@ -653,7 +656,7 @@
         <p>The member's fine will remain <strong>unpaid</strong> and they'll need to resubmit.</p>
         <div class="modal-buttons">
             <button class="btn-cancel-modal" onclick="closeModals()">Cancel</button>
-            <button class="btn-reject-modal" id="rejectYesBtn">Yes, reject</button>
+            <button class="btn-reject-modal" id="rejectYesBtn" onclick="if(pendingAction){doReject(pendingAction.paymentId)}">Yes, reject</button>
         </div>
     </div>
 </div>
@@ -730,10 +733,11 @@
             return; 
         }
 
-        if (penaltyId) {
+        if (penaltyId && penaltyId !== 'null' && penaltyId !== 'undefined') {
             await sb.from('penalties').update({ status: 'paid' }).eq('id', penaltyId);
         }
 
+        closeModals();
         showToast('Payment confirmed and fine marked paid!', 'success');
         await loadPayments();
     }
@@ -757,6 +761,7 @@
             return; 
         }
 
+        closeModals();
         showToast('Payment rejected', 'error');
         await loadPayments();
     }
@@ -913,21 +918,6 @@
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
-
-    // ── MODAL BUTTON EVENT LISTENERS ──
-    document.getElementById('confirmYesBtn').onclick = async function() {
-        if (!pendingAction || pendingAction.type !== 'confirm') return;
-        const action = pendingAction;
-        closeModals();
-        await doConfirm(action.paymentId, action.penaltyId);
-    };
-
-    document.getElementById('rejectYesBtn').onclick = async function() {
-        if (!pendingAction || pendingAction.type !== 'reject') return;
-        const action = pendingAction;
-        closeModals();
-        await doReject(action.paymentId);
-    };
 
     // ── INIT ──
     document.getElementById('statusFilter').addEventListener('change', () => loadPayments());

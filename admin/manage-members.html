@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Manage Members | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5; --indigo-light: #eef2ff;
+            --green: #10b981; --green-light: #d1fae5;
+            --amber: #f59e0b; --amber-light: #fef9c3;
+            --red: #ef4444; --red-light: #fee2e2;
+            --blue: #3b82f6; --blue-light: #dbeafe;
+            --bg: #f8fafc; --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        /* MAIN */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        /* CONTENT */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* TABS */
+        .tabs-bar { display: flex; gap: 4px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 5px; margin-bottom: 24px; width: fit-content; }
+        .tab-btn { padding: 8px 20px; background: transparent; border: none; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 9px; color: var(--text-secondary); display: flex; align-items: center; gap: 7px; transition: background .12s, color .12s; white-space: nowrap; }
+        .tab-btn i { font-size: 15px; }
+        .tab-btn.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .tab-content { display: none; animation: fadeIn .22s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* FORM */
+        .form-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 20px; max-width: 540px; }
+        .form-panel h3 { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+        .form-panel h3 i { font-size: 16px; color: var(--indigo); }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary); font-size: 12px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px;
+            font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary); outline: none; transition: border-color .15s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--indigo); }
+        .voice-select { padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; }
+        hr { margin: 20px 0; border: none; border-top: 0.5px solid var(--border); }
+
+        /* BUTTONS */
+        .action-btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .btn-green  { background: var(--green);  color: #fff; }
+        .btn-red    { background: var(--red);    color: #fff; }
+        .btn-amber  { background: var(--amber);  color: #fff; }
+        .btn-blue   { background: var(--blue);   color: #fff; }
+
+        /* FILTERS */
+        .filters-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+        .search-input { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; flex: 1; min-width: 200px; font-size: 13px; background: var(--bg); font-family: inherit; outline: none; }
+        .search-input:focus { border-color: var(--indigo); }
+        .voice-filter { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; font-family: inherit; outline: none; cursor: pointer; }
+
+        /* TABLE */
+        .table-wrapper { overflow-x: auto; max-height: 520px; overflow-y: auto; border-radius: 14px; border: 0.5px solid var(--border); }
+        .members-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .members-table th, .members-table td { padding: 11px 14px; text-align: left; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+        .members-table th { background: var(--bg); font-weight: 600; position: sticky; top: 0; font-size: 12px; color: var(--text-secondary); }
+        .members-table tr:last-child td { border-bottom: none; }
+
+        .status-badge { padding: 3px 10px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .status-active  { background: var(--green-light); color: #059669; }
+        .status-alumni  { background: var(--blue-light);  color: #0369a1; }
+        .status-removed { background: var(--red-light);   color: #dc2626; }
+
+        .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        /* MESSAGE */
+        .message { padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 13px; }
+        .message.success { background: var(--green-light); color: #065f46; }
+        .message.error   { background: var(--red-light);   color: #991b1b; }
+        .message.info    { background: var(--blue-light);  color: #0369a1; }
+
+        /* BOTTOM NAV */
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
+            .tabs-bar { width: 100%; flex-wrap: wrap; }
+            .row-actions { flex-direction: column; }
+        }
+        button { cursor: pointer; touch-action: manipulation; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item active"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="doLogout()"><i class="ti ti-logout"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="ti ti-menu-2"></i></button>
+            <div class="topbar-left">
+                <h2>Manage Members</h2>
+                <p>Add, edit, and manage choir membership</p>
+            </div>
+        </div>
+        <div class="topbar-right"><div class="topbar-chip" id="topTime">--:--</div></div>
+    </header>
+
+    <main class="content">
+        <div class="tabs-bar">
+            <button class="tab-btn active" onclick="switchTab('add')" data-tab="add"><i class="ti ti-user-plus"></i> Add member</button>
+            <button class="tab-btn" onclick="switchTab('manage')" data-tab="manage"><i class="ti ti-list"></i> Active members</button>
+            <button class="tab-btn" onclick="switchTab('alumni')" data-tab="alumni"><i class="ti ti-school"></i> Alumni</button>
+        </div>
+
+        <!-- ADD TAB -->
+        <div id="addTab" class="tab-content active">
+            <div id="addMessage" class="message" style="display:none"></div>
+            <div class="form-panel">
+                <h3><i class="ti ti-user-plus"></i> Add new member</h3>
+                <div class="form-group"><label>Full name *</label><input type="text" id="newName" placeholder="e.g., John Doe"></div>
+                <div class="form-group"><label>Voice part *</label>
+                    <select id="newVoicePart">
+                        <option value="Soprano">🎤 Soprano</option>
+                        <option value="Alto">🎤 Alto</option>
+                        <option value="Tenor">🎤 Tenor</option>
+                        <option value="Bass">🎤 Bass</option>
+                        <option value="Director">🎵 Director</option>
+                        <option value="Brass">🎺 Brass</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Email address</label><input type="email" id="newEmail" placeholder="member@choir.com"></div>
+                <div class="form-group"><label>Phone number</label><input type="tel" id="newPhone" placeholder="e.g., 0712345678"></div>
+                <div class="form-group"><label>Student ID (optional)</label><input type="text" id="newStudentId" placeholder="e.g., UoEM/ABC123"></div>
+                <div class="form-group"><label>Joined date</label><input type="date" id="newJoinedDate"></div>
+                <button onclick="addMember()" class="action-btn btn-green"><i class="ti ti-user-plus"></i> Add member</button>
+            </div>
+        </div>
+
+        <!-- MANAGE TAB -->
+        <div id="manageTab" class="tab-content">
+            <div id="manageMessage" class="message" style="display:none"></div>
+            <div class="filters-row">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search by name, email or student ID…" onkeyup="filterMembers()">
+                <select id="voiceFilter" class="voice-filter" onchange="filterMembers()">
+                    <option value="all">All voice parts</option>
+                    <option value="Soprano">Soprano</option>
+                    <option value="Alto">Alto</option>
+                    <option value="Tenor">Tenor</option>
+                    <option value="Bass">Bass</option>
+                    <option value="Director">Director</option>
+                    <option value="Brass">Brass</option>
+                </select>
+            </div>
+            <div class="table-wrapper">
+                <table class="members-table">
+                    <thead><tr><th>Name</th><th>Voice Part</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="membersList"><tr><td colspan="6">Loading members…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ALUMNI TAB -->
+        <div id="alumniTab" class="tab-content">
+            <div id="alumniMessage" class="message" style="display:none"></div>
+            <div class="filters-row">
+                <input type="text" id="alumniSearchInput" class="search-input" placeholder="🔍 Search alumni…" onkeyup="filterAlumni()">
+            </div>
+            <div class="table-wrapper">
+                <table class="members-table">
+                    <thead><tr><th>Name</th><th>Voice Part</th><th>Email</th><th>Graduation Year</th><th>Actions</th></tr></thead>
+                    <tbody id="alumniList"><tr><td colspan="5">Loading alumni…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let allMembers = [], alumniMembers = [];
+
+    document.getElementById('newJoinedDate').value = new Date().toISOString().split('T')[0];
+
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+    setInterval(tick,1000); tick();
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+    function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+    async function doLogout() { try { await supabaseClient.auth.signOut(); } catch {} window.location.href = 'login.html'; }
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            const { data: p } = await supabaseClient.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (p) { if (p.full_name) { const f=p.full_name.split(' ')[0]; document.getElementById('userName').textContent=f; document.getElementById('userAvatar').textContent=f.charAt(0).toUpperCase(); } if (p.role) document.getElementById('userRole').textContent=p.role; }
+        } catch(e) { console.warn(e); }
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+        document.getElementById(`${tab}Tab`).classList.add('active');
+        if (tab === 'manage') loadActiveMembers();
+        if (tab === 'alumni') loadAlumniMembers();
+    }
+
+    async function addMember() {
+        const name = document.getElementById('newName').value.trim();
+        const voicePart = document.getElementById('newVoicePart').value;
+        const email = document.getElementById('newEmail').value.trim();
+        const phone = document.getElementById('newPhone').value.trim();
+        const studentId = document.getElementById('newStudentId').value.trim();
+        const joinedDate = document.getElementById('newJoinedDate').value;
+        if (!name) { showMessage('addMessage', 'Please enter member name', 'error'); return; }
+        const prefix = voicePart.substring(0,3).toUpperCase();
+        const memberId = `${prefix}${Date.now().toString().slice(-6)}`;
+        const { error } = await supabaseClient.from('members').insert({ member_id: memberId, name, voice_part: voicePart, email: email||null, contact: phone||null, student_id: studentId||null, joined_date: joinedDate, status: 'active' }).select();
+        if (error) { showMessage('addMessage', 'Error adding member: ' + error.message, 'error'); }
+        else {
+            showMessage('addMessage', `✅ Member "${name}" added successfully!`, 'success');
+            document.getElementById('newName').value = '';
+            document.getElementById('newEmail').value = '';
+            document.getElementById('newPhone').value = '';
+            document.getElementById('newStudentId').value = '';
+            document.getElementById('newJoinedDate').value = new Date().toISOString().split('T')[0];
+            loadActiveMembers();
+        }
+    }
+
+    async function loadActiveMembers() {
+        const { data, error } = await supabaseClient.from('members').select('*').eq('status','active').order('name');
+        if (error) { showMessage('manageMessage','Error loading members: '+error.message,'error'); return; }
+        allMembers = data;
+        displayMembers(allMembers);
+    }
+
+    async function loadAlumniMembers() {
+        const { data, error } = await supabaseClient.from('members').select('*').eq('status','alumni').order('graduation_year',{ascending:false}).order('name');
+        if (error) { showMessage('alumniMessage','Error loading alumni: '+error.message,'error'); return; }
+        alumniMembers = data;
+        displayAlumni(alumniMembers);
+    }
+
+    function displayMembers(members) {
+        const tbody = document.getElementById('membersList');
+        if (!members.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-tertiary)">No active members found</td></tr>'; return; }
+        tbody.innerHTML = members.map(m => `
+            <tr>
+                <td style="font-weight:500">${escapeHtml(m.name)}</td>
+                <td>${escapeHtml(m.voice_part)}</td>
+                <td>${escapeHtml(m.email||'-')}</td>
+                <td>${escapeHtml(m.contact||'-')}</td>
+                <td><span class="status-badge status-active">Active</span></td>
+                <td>
+                    <div class="row-actions">
+                        <button class="action-btn btn-amber" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name)}')"><i class="ti ti-school"></i> Alumni</button>
+                        <button class="action-btn btn-red"   onclick="removeMember('${m.member_id}','${escapeHtml(m.name)}')"><i class="ti ti-trash"></i> Remove</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function displayAlumni(members) {
+        const tbody = document.getElementById('alumniList');
+        if (!members.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-tertiary)">No alumni members found</td></tr>'; return; }
+        tbody.innerHTML = members.map(m => `
+            <tr>
+                <td style="font-weight:500">${escapeHtml(m.name)}</td>
+                <td>${escapeHtml(m.voice_part)}</td>
+                <td>${escapeHtml(m.email||'-')}</td>
+                <td>${escapeHtml(m.graduation_year||'-')}</td>
+                <td>
+                    <div class="row-actions">
+                        <button class="action-btn btn-blue" onclick="reactivateMember('${m.member_id}','${escapeHtml(m.name)}')"><i class="ti ti-refresh"></i> Reactivate</button>
+                        <button class="action-btn btn-red"  onclick="permanentlyRemove('${m.member_id}','${escapeHtml(m.name)}')"><i class="ti ti-trash"></i> Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function moveToAlumni(memberId, name) {
+        const graduationYear = prompt(`Enter graduation year for ${name}:`, new Date().getFullYear());
+        if (!graduationYear) return;
+        const { error } = await supabaseClient.from('members').update({ status: 'alumni', graduation_year: graduationYear, updated_at: new Date() }).eq('member_id', memberId);
+        if (error) showMessage('manageMessage','Error: '+error.message,'error');
+        else { showMessage('manageMessage',`✅ ${name} moved to alumni`,'success'); loadActiveMembers(); loadAlumniMembers(); }
+    }
+
+    async function reactivateMember(memberId, name) {
+        const { error } = await supabaseClient.from('members').update({ status: 'active', graduation_year: null, updated_at: new Date() }).eq('member_id', memberId);
+        if (error) showMessage('alumniMessage','Error: '+error.message,'error');
+        else { showMessage('alumniMessage',`✅ ${name} reactivated`,'success'); loadActiveMembers(); loadAlumniMembers(); }
+    }
+
+    async function removeMember(memberId, name) {
+        if (confirm(`⚠️ Remove "${name}" from active members?\n\nThey will no longer appear in attendance marking.`)) {
+            const { error } = await supabaseClient.from('members').update({ status: 'removed', updated_at: new Date() }).eq('member_id', memberId);
+            if (error) showMessage('manageMessage','Error: '+error.message,'error');
+            else { showMessage('manageMessage',`✅ ${name} removed from active members`,'success'); loadActiveMembers(); }
+        }
+    }
+
+    async function permanentlyRemove(memberId, name) {
+        if (confirm(`⚠️⚠️ PERMANENT DELETE!\n\nAre you ABSOLUTELY sure you want to permanently delete "${name}"?\n\nThis CANNOT be undone.`)) {
+            await supabaseClient.from('attendance').delete().eq('member_id', memberId);
+            await supabaseClient.from('penalties').delete().eq('member_id', memberId);
+            await supabaseClient.from('apology_requests').delete().eq('member_id', memberId);
+            await supabaseClient.from('user_members').delete().eq('member_id', memberId);
+            await supabaseClient.from('user_profiles').delete().eq('member_id', memberId);
+            const { error } = await supabaseClient.from('members').delete().eq('member_id', memberId);
+            if (error) showMessage('alumniMessage','Error: '+error.message,'error');
+            else { showMessage('alumniMessage',`✅ ${name} permanently deleted`,'success'); loadActiveMembers(); loadAlumniMembers(); }
+        }
+    }
+
+    function filterMembers() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const v = document.getElementById('voiceFilter').value;
+        let f = allMembers;
+        if (q) f = f.filter(m => m.name.toLowerCase().includes(q) || (m.email && m.email.toLowerCase().includes(q)) || (m.student_id && m.student_id.toLowerCase().includes(q)));
+        if (v !== 'all') f = f.filter(m => m.voice_part === v);
+        displayMembers(f);
+    }
+
+    function filterAlumni() {
+        const q = document.getElementById('alumniSearchInput').value.toLowerCase();
+        displayAlumni(alumniMembers.filter(m => m.name.toLowerCase().includes(q) || (m.email && m.email.toLowerCase().includes(q))));
+    }
+
+    function showMessage(elementId, msg, type) {
+        const d = document.getElementById(elementId);
+        d.innerHTML = msg;
+        d.className = `message ${type}`;
+        d.style.display = 'block';
+        setTimeout(() => { d.style.display = 'none'; d.className = 'message'; }, 5000);
+    }
+
+    async function checkAdmin() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+    }
+
+    async function init() { await checkAdmin(); await loadUserInfo(); loadActiveMembers(); }
+    init();
+    window.doLogout = doLogout;
+    window.addMember = addMember;
+    window.moveToAlumni = moveToAlumni;
+    window.reactivateMember = reactivateMember;
+    window.removeMember = removeMember;
+    window.permanentlyRemove = permanentlyRemove;
+    window.filterMembers = filterMembers;
+    window.filterAlumni = filterAlumni;
+    window.switchTab = switchTab;
+</script>
+</body>
+</html>

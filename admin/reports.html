@@ -3,488 +3,716 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Attendance Reports - University of Embu Choir</title>
+    <title>Attendance Reports | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
+        *, *::before, *::after {
+            margin: 0; padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
 
+        :root {
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --indigo-mid: #818cf8;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --cyan: #06b6d4;
+            --cyan-light: #cffafe;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #11b6ae 0%, #764ba2 100%);
+            background: var(--bg);
             min-height: 100vh;
-            padding: 12px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 28px;
-            padding: 20px 16px 28px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
-        }
-
-        header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            color: var(--text-primary);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 0.5px solid var(--border);
+            display: flex; flex-direction: column;
+            position: fixed; left: 0; top: 0; bottom: 0;
+            z-index: 50;
+            transition: transform .25s ease;
+        }
+
+        .sidebar-logo {
+            padding: 20px 16px 16px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: var(--indigo);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon i { color: #fff; font-size: 20px; }
+
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub   { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+
+        .nav-section-label {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase; letter-spacing: .8px;
+            padding: 10px 10px 4px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 10px;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 13px; cursor: pointer;
+            transition: background .12s, color .12s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+
+        .nav-item.active {
+            background: var(--indigo-light);
+            color: var(--indigo); font-weight: 600;
+        }
+
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--indigo); color: #fff;
+            font-size: 10px; font-weight: 600;
+            padding: 2px 8px; border-radius: 40px;
+        }
+
+        .sidebar-bottom {
+            padding: 12px 8px;
+            border-top: 0.5px solid var(--border);
+        }
+
+        .user-card {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            background: var(--bg);
+        }
+
+        .user-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--indigo);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0;
+        }
+
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+        .logout-link {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 12px; border-radius: 10px;
+            color: var(--red); font-size: 13px; cursor: pointer;
+            margin-top: 4px; transition: background .12s;
+        }
+
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+
+        /* ── MAIN ── */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 0.5px solid var(--border);
+            padding: 0 28px; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 10;
+        }
+
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p  { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .topbar-chip {
+            background: var(--bg); border: 0.5px solid var(--border);
+            border-radius: 40px; padding: 5px 12px;
+            font-size: 12px; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .topbar-chip i { font-size: 14px; }
+
+        .hamburger {
+            display: none; background: none; border: none;
+            font-size: 22px; color: var(--text-primary);
+            cursor: pointer; padding: 4px;
+        }
+
+        /* ── CONTENT ── */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* ── TABS ── */
+        .tabs-bar {
+            display: flex; gap: 4px;
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 12px; padding: 5px;
             margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 3px solid #667eea;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        header h1 {
-            color: #1e293b;
-            font-size: 1.65rem;
-            letter-spacing: -0.3px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            font-weight: 700;
-        }
-
-        .back-btn {
-            background: #f1f5f9;
-            color: #334155;
-            padding: 10px 18px;
-            text-decoration: none;
-            border-radius: 60px;
-            font-weight: 500;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .back-btn:active {
-            transform: scale(0.96);
-        }
-
-        /* TABS - Fully responsive */
-        .report-tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 28px;
-            background: #f1f5f9;
-            padding: 6px;
-            border-radius: 60px;
-            flex-wrap: wrap;
-            justify-content: center;
+            width: fit-content;
         }
 
         .tab-btn {
-            padding: 10px 22px;
-            background: transparent;
-            border: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #475569;
-            border-radius: 40px;
+            padding: 8px 20px;
+            background: transparent; border: none;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer; border-radius: 9px;
+            color: var(--text-secondary);
+            display: flex; align-items: center; gap: 7px;
+            transition: background .12s, color .12s;
             white-space: nowrap;
         }
 
+        .tab-btn i { font-size: 15px; }
+
         .tab-btn.active {
-            background: white;
-            color: #4f46e5;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: var(--indigo-light);
+            color: var(--indigo); font-weight: 600;
         }
 
-        .tab-btn:active {
-            transform: scale(0.96);
-        }
+        .tab-btn:active { transform: scale(0.97); }
 
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.25s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content { display: none; animation: fadeIn .22s ease; }
+        .tab-content.active { display: block; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(5px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Controls grid - mobile first */
-        .report-controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            background: #f8fafc;
-            padding: 18px 14px;
-            border-radius: 28px;
+        /* ── CONTROLS PANEL ── */
+        .controls-panel {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+            display: flex; align-items: flex-end;
+            gap: 12px; flex-wrap: wrap;
         }
 
-        .form-group {
-            flex: 1;
-            min-width: 170px;
-        }
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
 
         .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 0.8rem;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary);
+            display: flex; align-items: center; gap: 5px;
         }
 
-        .date-input, .week-select, .session-select {
-            width: 100%;
-            padding: 12px 12px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            background: white;
-            font-family: inherit;
+        .form-group label i { font-size: 14px; }
+
+        .form-input {
+            padding: 9px 14px;
+            border: 0.5px solid var(--border);
+            border-radius: 10px; font-size: 13px;
+            background: var(--bg); font-family: inherit;
+            color: var(--text-primary);
+            transition: border-color .15s;
+            outline: none;
         }
 
-        .primary-btn, .secondary-btn, .pdf-btn {
-            padding: 12px 22px;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.85rem;
+        .form-input:focus { border-color: var(--indigo); }
+
+        .action-btn {
+            padding: 9px 18px;
+            border: none; border-radius: 10px;
+            font-size: 13px; font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            justify-content: center;
+            display: inline-flex; align-items: center; gap: 7px;
+            transition: opacity .15s, transform .1s;
+            white-space: nowrap;
         }
 
-        .primary-btn {
-            background: #4f46e5;
-            color: white;
-            box-shadow: 0 2px 6px rgba(79,70,229,0.2);
+        .action-btn:hover  { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+
+        .btn-primary  { background: var(--indigo); color: #fff; }
+        .btn-red      { background: var(--red);    color: #fff; }
+        .btn-green    { background: var(--green);  color: #fff; }
+        .btn-amber    { background: var(--amber);  color: #fff; }
+        .btn-outline  {
+            background: transparent;
+            border: 0.5px solid var(--border);
+            color: var(--text-primary);
         }
 
-        .secondary-btn {
-            background: #10b981;
-            color: white;
-        }
+        /* ── REPORT CONTAINER ── */
+        .report-container { margin-top: 4px; }
 
-        .pdf-btn {
-            background: #ef4444;
-            color: white;
-        }
-
-        .primary-btn:active, .secondary-btn:active, .pdf-btn:active {
-            transform: scale(0.97);
-        }
-
-        /* Report container & cards */
-        .report-container {
-            margin-top: 8px;
-        }
-
-        /* PDF styles (also used inside report) */
-        .report-for-pdf {
-            padding: 20px 16px;
-            background: white;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-
-        .report-header {
-            text-align: center;
-            margin-bottom: 24px;
-            padding: 18px 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 24px;
-        }
-
-        .session-report {
-            background: #f8fafc;
-            padding: 18px 16px;
-            border-radius: 24px;
+        /* ── REPORT CONTENT STYLES ── */
+        .report-header-card {
+            background: var(--indigo);
+            border-radius: 16px;
+            padding: 20px 24px;
+            color: #fff;
             margin-bottom: 20px;
-            border-left: 5px solid #4f46e5;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        /* Stats summary - flexible grid */
-        .stats-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-            gap: 12px;
-            margin: 15px 0;
-        }
+        .report-header-card h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .report-header-card h3 { font-size: 13px; opacity: .8; font-weight: 400; }
+        .report-header-card .report-meta { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+        .report-header-card .report-meta span { font-size: 12px; opacity: .85; display: flex; align-items: center; gap: 5px; }
+        .report-header-card .report-meta i { font-size: 14px; }
 
-        .stat-card {
-            background: white;
-            padding: 12px 8px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .stat-card.present { border-top: 4px solid #10b981; }
-        .stat-card.late { border-top: 4px solid #f59e0b; }
-        .stat-card.absent { border-top: 4px solid #ef4444; }
-        .stat-card.percentage { border-top: 4px solid #4f46e5; }
-        .stat-card.total { border-top: 4px solid #06b6d4; }
-
-        .stat-number {
-            font-size: 28px;
-            font-weight: 800;
-        }
-
-        .stat-label {
-            color: #475569;
-            margin-top: 6px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .absentee-list, .late-list {
-            margin-top: 16px;
-            padding: 14px;
-            background: white;
-            border-radius: 20px;
-        }
-
-        .absentee-list h4, .late-list h4 {
-            margin-bottom: 12px;
-            font-size: 0.9rem;
-        }
-
-        .absentee-list h4 { color: #dc2626; }
-        .late-list h4 { color: #ea580c; }
-
-        .absentee-list ul, .late-list ul {
-            margin-left: 18px;
-            margin-top: 8px;
-        }
-
-        .absentee-list li, .late-list li {
-            margin: 8px 0;
-            padding: 5px 0;
-            border-bottom: 1px solid #eef2ff;
-            word-break: break-word;
-        }
-
-        /* Weekly specific enhancements */
-        .weekly-summary {
-            background: #f8fafc;
-            padding: 16px;
-            border-radius: 24px;
-            margin-bottom: 24px;
-        }
-
-        .week-header {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-            padding: 14px 16px;
-            border-radius: 20px;
-            margin-bottom: 18px;
-        }
-
-        .daily-breakdown {
-            margin-top: 16px;
-        }
-
-        .daily-card {
-            background: white;
-            border-radius: 20px;
-            margin-bottom: 14px;
+        .session-panel {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 16px;
             overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
 
-        .daily-header {
-            background: #eef2ff;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            flex-wrap: wrap;
-            gap: 8px;
+        .session-panel-header {
+            padding: 14px 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 0.5px solid var(--border);
+            background: var(--bg);
         }
 
-        .daily-stats {
-            display: flex;
+        .session-panel-header h3 {
+            font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .session-panel-header h3 i { font-size: 17px; }
+
+        .session-pct-badge {
+            background: var(--indigo-light);
+            color: var(--indigo);
+            font-size: 12px; font-weight: 700;
+            padding: 4px 12px; border-radius: 40px;
+        }
+
+        .session-panel-body { padding: 16px 18px; }
+
+        /* ── KPI ROW ── */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .kpi-mini {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 12px 14px;
+            text-align: center;
+            border-left: 3px solid transparent;
+        }
+
+        .kpi-mini.present { border-color: var(--green); }
+        .kpi-mini.late    { border-color: var(--amber); }
+        .kpi-mini.absent  { border-color: var(--red);   }
+        .kpi-mini.pct     { border-color: var(--indigo);}
+
+        .kpi-mini-value { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+        .kpi-mini-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+        /* ── MEMBER LISTS ── */
+        .member-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+
+        .member-list-box {
+            background: var(--bg);
+            border-radius: 12px;
             padding: 14px;
-            background: white;
-            flex-wrap: wrap;
         }
 
-        .daily-stat {
-            flex: 1;
+        .member-list-box h4 {
+            font-size: 12px; font-weight: 600;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .member-list-box h4 i { font-size: 14px; }
+        .member-list-box h4.absent-title { color: var(--red); }
+        .member-list-box h4.late-title   { color: var(--amber); }
+
+        .member-list-box ul { list-style: none; }
+        .member-list-box ul li {
+            padding: 6px 0;
+            border-bottom: 0.5px solid var(--border);
+            font-size: 12px; color: var(--text-primary);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .member-list-box ul li:last-child { border-bottom: none; }
+
+        .voice-badge {
+            font-size: 10px; font-weight: 600;
+            padding: 2px 8px; border-radius: 40px;
+            background: var(--indigo-light); color: var(--indigo);
+            white-space: nowrap; margin-left: 6px;
+        }
+
+        /* ── WEEKLY ── */
+        .weekly-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px; margin-bottom: 20px;
+        }
+
+        .weekly-kpi {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 14px; padding: 14px;
             text-align: center;
-            min-width: 70px;
         }
 
-        .daily-stat-value {
-            font-size: 20px;
-            font-weight: 800;
+        .weekly-kpi-value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+        .weekly-kpi-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+        .weekly-kpi-sub   { font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
+
+        .insights-row {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px; margin-bottom: 20px;
         }
 
-        .footer-note {
-            text-align: center;
-            margin-top: 28px;
-            padding-top: 16px;
-            border-top: 1px solid #e2e8f0;
-            font-size: 11px;
-            color: #64748b;
+        .insight-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 14px; padding: 16px;
+            display: flex; align-items: center; gap: 12px;
         }
 
-        .loading {
-            text-align: center;
-            padding: 48px 20px;
-            font-size: 1rem;
-            color: #4f46e5;
-            font-weight: 500;
+        .insight-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 18px;
         }
 
-        /* Mobile media queries - extra polish */
-        @media (max-width: 640px) {
-            body {
-                padding: 8px;
-            }
-            .container {
-                padding: 16px 12px 24px;
-            }
-            .report-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .primary-btn, .secondary-btn, .pdf-btn {
-                width: 100%;
-                justify-content: center;
-            }
-            .stats-summary {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            .tab-btn {
-                padding: 8px 14px;
-                font-size: 0.8rem;
-                white-space: normal;
-                flex: 1;
-                text-align: center;
-            }
-            .report-tabs {
-                border-radius: 40px;
-                gap: 4px;
-            }
-            .stat-number {
-                font-size: 24px;
-            }
-            .daily-header {
-                flex-direction: column;
-                text-align: center;
-            }
-            .daily-stats {
-                justify-content: space-around;
-            }
+        .insight-label { font-size: 11px; color: var(--text-secondary); }
+        .insight-value { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+        .insight-sub   { font-size: 10px; color: var(--text-tertiary); margin-top: 1px; }
+
+        .daily-cards-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+        .daily-row {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 12px; padding: 14px 16px;
+            display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+        }
+
+        .daily-day { min-width: 110px; }
+        .daily-day-name  { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .daily-day-date  { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+        .daily-bar-wrap { flex: 1; min-width: 100px; }
+        .daily-bar-bg {
+            height: 6px; background: var(--bg);
+            border-radius: 4px; overflow: hidden;
+        }
+
+        .daily-bar-fill { height: 100%; border-radius: 4px; background: var(--indigo); transition: width .5s ease; }
+        .daily-pct { font-size: 12px; font-weight: 600; color: var(--indigo); min-width: 36px; }
+
+        .daily-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 40px;
+            font-size: 11px; font-weight: 600;
+        }
+
+        .pill i { font-size: 12px; }
+        .pill-green  { background: var(--green-light);  color: #065f46; }
+        .pill-amber  { background: var(--amber-light);  color: #854d0e; }
+        .pill-red    { background: var(--red-light);    color: #991b1b; }
+        .pill-indigo { background: var(--indigo-light); color: var(--indigo); }
+        .pill-cyan   { background: var(--cyan-light);   color: #155e75; }
+
+        .performers-panel {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px; padding: 18px 20px;
+            margin-bottom: 20px;
+        }
+
+        .performers-panel h3 {
+            font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; gap: 7px;
+            margin-bottom: 14px;
+        }
+
+        .performers-panel h3 i { font-size: 16px; color: var(--amber); }
+
+        .performer-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 9px 0;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .performer-row:last-child { border-bottom: none; }
+
+        .performer-rank {
+            width: 24px; height: 24px; border-radius: 50%;
+            background: var(--indigo-light); color: var(--indigo);
+            font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .performer-name { font-size: 13px; font-weight: 500; color: var(--text-primary); flex: 1; }
+        .performer-voice { font-size: 11px; color: var(--text-secondary); }
+
+        /* ── FOOTER ── */
+        .report-footer {
+            text-align: center; padding: 16px 0 0;
+            font-size: 11px; color: var(--text-tertiary);
+            border-top: 0.5px solid var(--border); margin-top: 4px;
+        }
+
+        /* ── LOADING / EMPTY ── */
+        .loading-state {
+            text-align: center; padding: 48px 20px;
+            font-size: 13px; color: var(--text-secondary);
+        }
+
+        .loading-state i { font-size: 32px; display: block; margin-bottom: 10px; color: var(--indigo-mid); }
+
+        /* ── SIDEBAR OVERLAY (mobile) ── */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35); z-index: 40;
+        }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
+            justify-content: space-around;
+            padding: 8px 16px env(safe-area-inset-bottom, 12px);
+            box-shadow: 0 -1px 0 var(--border); z-index: 50;
+        }
+
+        .bottom-nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px;
+        }
+
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1024px) {
+            .kpi-row         { grid-template-columns: repeat(2, 1fr); }
+            .weekly-kpi-grid { grid-template-columns: repeat(3, 1fr); }
+            .insights-row    { grid-template-columns: 1fr 1fr; }
+            .member-lists    { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
+            .kpi-row         { grid-template-columns: 1fr 1fr; }
+            .weekly-kpi-grid { grid-template-columns: 1fr 1fr; }
+            .insights-row    { grid-template-columns: 1fr; }
+            .tabs-bar        { width: 100%; flex-wrap: wrap; }
+            .controls-panel  { flex-direction: column; align-items: stretch; }
+            .action-btn      { width: 100%; justify-content: center; }
         }
 
         @media (max-width: 480px) {
-            .stats-summary {
-                grid-template-columns: 1fr 1fr;
-            }
-            .session-report h3 {
-                font-size: 1rem;
-            }
-            .absentee-list li, .late-list li {
-                font-size: 0.8rem;
-            }
+            .weekly-kpi-grid { grid-template-columns: 1fr 1fr; }
+            .daily-row       { flex-direction: column; align-items: stretch; }
+            .daily-pills     { justify-content: flex-start; }
         }
 
-        /* touch optimization */
-        button, .back-btn {
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        .report-header h2, .report-header h3 {
-            word-break: break-word;
-        }
+        button { cursor: pointer; touch-action: manipulation; }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>🎵 Attendance Reports</h1>
-        <a href="index.html" class="back-btn">← Dashboard</a>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item active"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div>
+                <div class="user-name" id="userName">Loading…</div>
+                <div class="user-role" id="userRole">Admin</div>
+            </div>
+        </div>
+        <div class="logout-link" onclick="logout()">
+            <i class="ti ti-logout"></i> Log out
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <i class="ti ti-menu-2"></i>
+            </button>
+            <div class="topbar-left">
+                <h2>Attendance Reports</h2>
+                <p>Generate daily and weekly summaries</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <a href="penalties-report.html" class="topbar-chip" style="text-decoration:none;color:var(--red);border-color:rgba(239,68,68,.2);">
+                <i class="ti ti-cash" style="color:var(--red)"></i> Penalties
+            </a>
+            <div class="topbar-chip" id="topTime">--:--</div>
+        </div>
     </header>
 
-    <div class="report-tabs">
-        <button class="tab-btn active" data-tab="daily">📅 Daily Report</button>
-        <button class="tab-btn" data-tab="weekly">📈 Weekly Summary</button>
-    </div>
+    <main class="content">
 
-    <!-- Daily Report Tab -->
-    <div id="dailyTab" class="tab-content active">
-        <div class="report-controls">
-            <div class="form-group">
-                <label>📅 Select Date</label>
-                <input type="date" id="reportDate" class="date-input">
-            </div>
-            <button id="generateReportBtn" class="primary-btn">📋 Generate Report</button>
-            <button id="exportPDFBtn" class="pdf-btn">📄 PDF Export</button>
-            <button id="exportTextBtn" class="secondary-btn">📝 Text Export</button>
-            <a href="penalties-report.html" class="penalties-btn" style="background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 10px 25px; border-radius: 40px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; transition: all 0.2s;">
-    <span>💰</span> Penalties Report
-</a>
+        <!-- Tabs -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" data-tab="daily">
+                <i class="ti ti-calendar"></i> Daily report
+            </button>
+            <button class="tab-btn" data-tab="weekly">
+                <i class="ti ti-chart-bar"></i> Weekly summary
+            </button>
         </div>
-        <div id="reportContent" class="report-container"></div>
-    </div>
 
-    <!-- Weekly Summary Tab -->
-    <div id="weeklyTab" class="tab-content">
-        <div class="report-controls">
-            <div class="form-group">
-                <label>📆 Select Week</label>
-                <input type="week" id="weekSelect" class="week-select">
+        <!-- DAILY TAB -->
+        <div id="dailyTab" class="tab-content active">
+            <div class="controls-panel">
+                <div class="form-group">
+                    <label><i class="ti ti-calendar"></i> Select date</label>
+                    <input type="date" id="reportDate" class="form-input">
+                </div>
+                <button class="action-btn btn-primary" id="generateReportBtn">
+                    <i class="ti ti-refresh"></i> Generate
+                </button>
+                <button class="action-btn btn-red" id="exportPDFBtn">
+                    <i class="ti ti-file-type-pdf"></i> Export PDF
+                </button>
+                <button class="action-btn btn-green" id="exportTextBtn">
+                    <i class="ti ti-file-text"></i> Text export
+                </button>
             </div>
-            <button id="generateWeeklyBtn" class="primary-btn">📊 Generate Weekly</button>
-            <button id="exportWeeklyPDFBtn" class="pdf-btn">📄 Weekly PDF</button>
+            <div id="reportContent" class="report-container">
+                <div class="loading-state">
+                    <i class="ti ti-chart-bar"></i>
+                    Select a date and click Generate to view the report.
+                </div>
+            </div>
         </div>
-        <div id="weeklyContent" class="report-container"></div>
-    </div>
+
+        <!-- WEEKLY TAB -->
+        <div id="weeklyTab" class="tab-content">
+            <div class="controls-panel">
+                <div class="form-group">
+                    <label><i class="ti ti-calendar-week"></i> Select week</label>
+                    <input type="week" id="weekSelect" class="form-input">
+                </div>
+                <button class="action-btn btn-primary" id="generateWeeklyBtn">
+                    <i class="ti ti-refresh"></i> Generate
+                </button>
+                <button class="action-btn btn-red" id="exportWeeklyPDFBtn">
+                    <i class="ti ti-file-type-pdf"></i> Export PDF
+                </button>
+            </div>
+            <div id="weeklyContent" class="report-container">
+                <div class="loading-state">
+                    <i class="ti ti-trending-up"></i>
+                    Select a week and click Generate to view the summary.
+                </div>
+            </div>
+        </div>
+
+    </main>
 </div>
 
+<!-- Mobile Bottom Nav -->
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item active"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
+</nav>
+
 <script>
-    // Supabase configuration
+    // ── SUPABASE ──
     const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentReportHtml = '';
     let currentDate = '';
     let currentWeeklyHtml = '';
+    let currentWeekVal = '';
 
-    // Helper: set default date/today
-    const todayInput = document.getElementById('reportDate');
-    if (todayInput) {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        todayInput.value = `${yyyy}-${mm}-${dd}`;
+    // ── HELPERS ──
+    function esc(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
-    // Set default week
+    function todayStr() {
+        const d = new Date();
+        return d.toISOString().split('T')[0];
+    }
+
     function getCurrentWeekValue() {
         const now = new Date();
         const year = now.getFullYear();
@@ -492,28 +720,7 @@
         const weekNum = Math.ceil(((now - oneJan) / 86400000 + oneJan.getDay() + 1) / 7);
         return `${year}-W${String(weekNum).padStart(2, '0')}`;
     }
-    const weekSelect = document.getElementById('weekSelect');
-    if (weekSelect) weekSelect.value = getCurrentWeekValue();
 
-    // Tab switching (enhanced, event-based)
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        const activeTab = document.getElementById(`${tabId}Tab`);
-        if (activeTab) activeTab.classList.add('active');
-        const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.dataset.tab === tabId);
-        if (activeBtn) activeBtn.classList.add('active');
-    }
-
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const tabName = btn.dataset.tab;
-            if (tabName === 'daily') switchTab('daily');
-            else if (tabName === 'weekly') switchTab('weekly');
-        });
-    });
-
-    // Helper: get week dates (Mon to Sun)
     function getWeekDates(weekValue) {
         const [year, week] = weekValue.split('-W');
         const jan4 = new Date(year, 0, 4);
@@ -522,278 +729,406 @@
         const firstMonday = new Date(year, 0, 4 + monOffset);
         const startDate = new Date(firstMonday);
         startDate.setDate(firstMonday.getDate() + (parseInt(week) - 1) * 7);
-        const weekDates = [];
+        const dates = [];
         for (let i = 0; i < 7; i++) {
             const d = new Date(startDate);
             d.setDate(startDate.getDate() + i);
-            weekDates.push(d.toISOString().split('T')[0]);
+            dates.push(d.toISOString().split('T')[0]);
         }
-        return weekDates;
+        return dates;
     }
 
-    // ---------- DAILY REPORT ----------
-    document.getElementById('generateReportBtn')?.addEventListener('click', generateReport);
-    document.getElementById('exportPDFBtn')?.addEventListener('click', exportToPDF);
-    document.getElementById('exportTextBtn')?.addEventListener('click', exportToText);
+    function tick() {
+        document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ── DEFAULT VALUES ──
+    document.getElementById('reportDate').value = todayStr();
+    document.getElementById('weekSelect').value = getCurrentWeekValue();
+
+    setInterval(tick, 1000); tick();
+
+    // ── AUTH ──
+    async function checkAuth() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return null; }
+        return session;
+    }
+
+    async function logout() {
+        try {
+            await sb.auth.signOut();
+            window.location.href = 'login.html';
+        } catch { window.location.href = 'login.html'; }
+    }
+
+    // ── USER INFO ──
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const emailName = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = emailName;
+            document.getElementById('userAvatar').textContent = (emailName.charAt(0) || 'A').toUpperCase();
+            const { data: profile } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (profile) {
+                if (profile.full_name) {
+                    const first = profile.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = first;
+                    document.getElementById('userAvatar').textContent = first.charAt(0).toUpperCase();
+                }
+                if (profile.role) document.getElementById('userRole').textContent = profile.role;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ── TABS ──
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`${tab}Tab`).classList.add('active');
+        });
+    });
+
+    // ── SIDEBAR ──
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    // ── DAILY REPORT ──
+    const sessionDefs = [
+        { key: 'Morning',   label: 'Morning Session',   sub: '9:00 AM – 1:00 PM',   icon: 'ti-sunrise', color: '#f59e0b' },
+        { key: 'Afternoon', label: 'Afternoon Session', sub: '2:00 PM – 4:00 PM',   icon: 'ti-sun',     color: '#4f46e5' },
+        { key: 'Evening',   label: 'Evening Session',   sub: '7:00 PM – 10:30 PM',  icon: 'ti-moon',    color: '#7c3aed' },
+    ];
 
     async function generateReport() {
         const date = document.getElementById('reportDate').value;
-        if (!date) { alert('Please select a date'); return; }
+        if (!date) { alert('Please select a date.'); return; }
         currentDate = date;
-        const reportDiv = document.getElementById('reportContent');
-        reportDiv.innerHTML = '<div class="loading">📊 Loading daily report...</div>';
+        const div = document.getElementById('reportContent');
+        div.innerHTML = `<div class="loading-state"><i class="ti ti-loader ti-spin"></i> Loading daily report…</div>`;
 
         try {
-            const { data: allMembers, error: membersError } = await supabaseClient
-                .from('members')
-                .select('member_id, name, voice_part');
-            if (membersError) throw membersError;
-            if (!allMembers || allMembers.length === 0) throw new Error('No members found in database.');
+            const { data: members, error: mErr } = await sb.from('members').select('member_id, name, voice_part');
+            if (mErr) throw mErr;
+            if (!members || members.length === 0) throw new Error('No members found.');
+            const total = members.length;
+            const memberMap = Object.fromEntries(members.map(m => [m.member_id, m]));
 
-            const totalMembers = allMembers.length;
-            const memberMap = Object.fromEntries(allMembers.map(m => [m.member_id, { name: m.name, voice_part: m.voice_part }]));
-
-            const sessions = ['Morning', 'Afternoon', 'Evening'];
-            const sessionNames = {
-                'Morning': '🌅 Morning (9:00 AM - 1:00 PM)',
-                'Afternoon': '☀️ Afternoon (2:00 PM - 4:00 PM)',
-                'Evening': '🌙 Evening (7:00 PM - 10:30 PM)'
-            };
-
-            let reportHtml = `
-                <div id="pdfContent" class="report-for-pdf">
-                    <div class="report-header">
-                        <h2>🎵 UNIVERSITY OF EMBU STUDENTS' CHOIR</h2>
-                        <h3>98th Music Festival 2026</h3>
-                        <h4>DAILY ATTENDANCE REPORT</h4>
-                        <p>📅 Date: ${date}</p>
-                        <p>👥 Total Members Expected: ${totalMembers}</p>
-                    </div>
-            `;
-
-            for (const session of sessions) {
-                const { data: attendanceRecords, error: attError } = await supabaseClient
-                    .from('attendance')
-                    .select('member_id, status')
-                    .eq('date', date)
-                    .eq('session', session);
-                if (attError) continue;
-
-                const presentMembers = [], lateMembers = [], absentMembers = [];
-                const recordedSet = new Set();
-
-                attendanceRecords?.forEach(rec => {
-                    recordedSet.add(rec.member_id);
-                    const member = memberMap[rec.member_id];
-                    if (member) {
-                        if (rec.status === 'Present') presentMembers.push(member);
-                        else if (rec.status === 'Late') lateMembers.push(member);
-                        else if (rec.status === 'Absent') absentMembers.push(member);
-                    }
-                });
-
-                allMembers.forEach(member => {
-                    if (!recordedSet.has(member.member_id)) {
-                        absentMembers.push({ name: member.name, voice_part: member.voice_part });
-                    }
-                });
-
-                const presentCount = presentMembers.length;
-                const lateCount = lateMembers.length;
-                const absentCount = absentMembers.length;
-                const attended = presentCount + lateCount;
-                const attendancePercent = totalMembers ? ((attended / totalMembers) * 100).toFixed(1) : 0;
-
-                reportHtml += `
-                    <div class="session-report">
-                        <h3>${sessionNames[session]}</h3>
-                        <div class="stats-summary">
-                            <div class="stat-card present"><div class="stat-number">${presentCount}</div><div class="stat-label">✅ Present</div></div>
-                            <div class="stat-card late"><div class="stat-number">${lateCount}</div><div class="stat-label">⏰ Late</div></div>
-                            <div class="stat-card absent"><div class="stat-number">${absentCount}</div><div class="stat-label">❌ Absent</div></div>
-                            <div class="stat-card percentage"><div class="stat-number">${attendancePercent}%</div><div class="stat-label">📈 Attendance</div></div>
+            let html = `
+                <div id="pdfContent">
+                    <div class="report-header-card">
+                        <h2><i class="ti ti-music" style="font-size:18px;vertical-align:-2px;margin-right:6px"></i>University of Embu Students' Choir</h2>
+                        <h3>98th Music Festival 2026 — Daily Attendance Report</h3>
+                        <div class="report-meta">
+                            <span><i class="ti ti-calendar"></i> ${date}</span>
+                            <span><i class="ti ti-users"></i> ${total} members</span>
+                            <span><i class="ti ti-clock"></i> Generated ${new Date().toLocaleTimeString()}</span>
                         </div>
-                `;
-                if (absentMembers.length) {
-                    reportHtml += `<div class="absentee-list"><h4>❌ ABSENTEES (${absentMembers.length})</h4><ul>${absentMembers.map(m => `<li>${escapeHtml(m.name)} (${escapeHtml(m.voice_part)})</li>`).join('')}</ul></div>`;
+                    </div>`;
+
+            for (const session of sessionDefs) {
+                const { data: att } = await sb.from('attendance').select('member_id, status').eq('date', date).eq('session', session.key);
+                const recordedSet = new Set();
+                const presentList = [], lateList = [], absentList = [];
+
+                (att || []).forEach(r => {
+                    recordedSet.add(r.member_id);
+                    const m = memberMap[r.member_id];
+                    if (!m) return;
+                    if (r.status === 'Present') presentList.push(m);
+                    else if (r.status === 'Late')    lateList.push(m);
+                    else if (r.status === 'Absent') absentList.push(m);
+                });
+
+                members.forEach(m => {
+                    if (!recordedSet.has(m.member_id)) absentList.push(m);
+                });
+
+                const attended = presentList.length + lateList.length;
+                const pct = total > 0 ? ((attended / total) * 100).toFixed(1) : '0.0';
+
+                html += `
+                    <div class="session-panel">
+                        <div class="session-panel-header">
+                            <h3><i class="ti ${session.icon}" style="color:${session.color}"></i> ${session.label} <span style="font-size:12px;color:var(--text-secondary);font-weight:400;">${session.sub}</span></h3>
+                            <span class="session-pct-badge">${pct}% attendance</span>
+                        </div>
+                        <div class="session-panel-body">
+                            <div class="kpi-row">
+                                <div class="kpi-mini present">
+                                    <div class="kpi-mini-value">${presentList.length}</div>
+                                    <div class="kpi-mini-label"><i class="ti ti-circle-check" style="color:var(--green)"></i> Present</div>
+                                </div>
+                                <div class="kpi-mini late">
+                                    <div class="kpi-mini-value">${lateList.length}</div>
+                                    <div class="kpi-mini-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Late</div>
+                                </div>
+                                <div class="kpi-mini absent">
+                                    <div class="kpi-mini-value">${absentList.length}</div>
+                                    <div class="kpi-mini-label"><i class="ti ti-x" style="color:var(--red)"></i> Absent</div>
+                                </div>
+                                <div class="kpi-mini pct">
+                                    <div class="kpi-mini-value">${pct}%</div>
+                                    <div class="kpi-mini-label"><i class="ti ti-trending-up" style="color:var(--indigo)"></i> Rate</div>
+                                </div>
+                            </div>`;
+
+                if (absentList.length > 0 || lateList.length > 0) {
+                    html += `<div class="member-lists">`;
+                    if (absentList.length > 0) {
+                        html += `
+                            <div class="member-list-box">
+                                <h4 class="absent-title"><i class="ti ti-x"></i> Absentees (${absentList.length})</h4>
+                                <ul>${absentList.map(m => `<li><span>${esc(m.name)}</span><span class="voice-badge">${esc(m.voice_part)}</span></li>`).join('')}</ul>
+                            </div>`;
+                    }
+                    if (lateList.length > 0) {
+                        html += `
+                            <div class="member-list-box">
+                                <h4 class="late-title"><i class="ti ti-clock"></i> Late arrivals (${lateList.length})</h4>
+                                <ul>${lateList.map(m => `<li><span>${esc(m.name)}</span><span class="voice-badge">${esc(m.voice_part)}</span></li>`).join('')}</ul>
+                            </div>`;
+                    }
+                    html += `</div>`;
                 }
-                if (lateMembers.length) {
-                    reportHtml += `<div class="late-list"><h4>⏰ LATE ARRIVALS (${lateMembers.length})</h4><ul>${lateMembers.map(m => `<li>${escapeHtml(m.name)} (${escapeHtml(m.voice_part)})</li>`).join('')}</ul></div>`;
-                }
-                reportHtml += `</div>`;
+
+                html += `</div></div>`;
             }
 
-            reportHtml += `<div class="footer-note"><p>📌 Report generated: ${new Date().toLocaleString()}</p></div></div>`;
-            currentReportHtml = reportHtml;
-            reportDiv.innerHTML = reportHtml;
+            html += `<div class="report-footer">Report generated: ${new Date().toLocaleString()} · University of Embu Students' Choir</div></div>`;
+            currentReportHtml = html;
+            div.innerHTML = html;
         } catch (err) {
             console.error(err);
-            reportDiv.innerHTML = `<div class="loading" style="color:#dc2626;">❌ Error: ${err.message}</div>`;
+            div.innerHTML = `<div class="loading-state" style="color:var(--red);"><i class="ti ti-alert-circle"></i> Error: ${esc(err.message)}</div>`;
         }
     }
 
-    // ---------- WEEKLY SUMMARY ----------
-    document.getElementById('generateWeeklyBtn')?.addEventListener('click', generateWeeklySummary);
-    document.getElementById('exportWeeklyPDFBtn')?.addEventListener('click', exportWeeklyPDF);
-
+    // ── WEEKLY REPORT ──
     async function generateWeeklySummary() {
-        const weekValue = document.getElementById('weekSelect').value;
-        if (!weekValue) { alert('Please select a week'); return; }
-        const weeklyDiv = document.getElementById('weeklyContent');
-        weeklyDiv.innerHTML = '<div class="loading">📈 Building weekly summary...</div>';
+        const weekVal = document.getElementById('weekSelect').value;
+        if (!weekVal) { alert('Please select a week.'); return; }
+        currentWeekVal = weekVal;
+        const div = document.getElementById('weeklyContent');
+        div.innerHTML = `<div class="loading-state"><i class="ti ti-loader ti-spin"></i> Building weekly summary…</div>`;
 
         try {
-            const weekDates = getWeekDates(weekValue);
-            const [year, week] = weekValue.split('-W');
-            const { data: allMembers, error: membersError } = await supabaseClient.from('members').select('member_id, name, voice_part');
-            if (membersError) throw membersError;
-            const totalMembers = allMembers.length;
-            const memberMap = Object.fromEntries(allMembers.map(m => [m.member_id, { name: m.name, voice_part: m.voice_part }]));
+            const [year, week] = weekVal.split('-W');
+            const weekDates = getWeekDates(weekVal);
 
-            const { data: weekAttendance, error: attError } = await supabaseClient
-                .from('attendance')
-                .select('*')
-                .in('date', weekDates);
-            if (attError) throw attError;
+            const { data: members, error: mErr } = await sb.from('members').select('member_id, name, voice_part');
+            if (mErr) throw mErr;
+            const total = members.length;
+            const memberMap = Object.fromEntries(members.map(m => [m.member_id, m]));
 
-            let totalPresent = 0, totalLate = 0, totalAbsent = 0, totalPossible = 0;
-            const dailyStats = [];
+            const { data: weekAtt } = await sb.from('attendance').select('*').in('date', weekDates);
+
             const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            let totalPresent = 0, totalLate = 0, totalAbsent = 0;
+            const dailyStats = [];
 
-            for (let i = 0; i < weekDates.length; i++) {
+            for (let i = 0; i < 7; i++) {
                 const date = weekDates[i];
-                const dayAttendance = weekAttendance?.filter(a => a.date === date) || [];
-                let dayPresent = 0, dayLate = 0;
-                const recordedSet = new Set();
-                dayAttendance.forEach(rec => {
-                    recordedSet.add(rec.member_id);
-                    if (rec.status === 'Present') dayPresent++;
-                    else if (rec.status === 'Late') dayLate++;
+                const dayAtt = (weekAtt || []).filter(a => a.date === date);
+                const seenIds = new Set();
+                let p = 0, l = 0;
+                dayAtt.forEach(r => {
+                    seenIds.add(r.member_id);
+                    if (r.status === 'Present') p++;
+                    else if (r.status === 'Late') l++;
                 });
-                const dayAbsent = totalMembers - recordedSet.size;
-                dailyStats.push({
-                    date, dayName: dayNames[i], present: dayPresent, late: dayLate, absent: dayAbsent,
-                    percentage: totalMembers ? (((dayPresent + dayLate) / totalMembers) * 100).toFixed(1) : 0
-                });
-                totalPresent += dayPresent;
-                totalLate += dayLate;
-                totalAbsent += dayAbsent;
-                totalPossible += totalMembers;
+                const absent = total - seenIds.size;
+                const pct = total > 0 ? (((p + l) / total) * 100).toFixed(1) : '0.0';
+                dailyStats.push({ date, dayName: dayNames[i], present: p, late: l, absent: Math.max(0, absent), pct });
+                totalPresent += p;
+                totalLate += l;
+                totalAbsent += Math.max(0, absent);
             }
-            const overallPercent = totalPossible ? (((totalPresent + totalLate) / totalPossible) * 100).toFixed(1) : 0;
-            const bestDay = [...dailyStats].sort((a,b) => b.percentage - a.percentage)[0];
-            const worstDay = [...dailyStats].sort((a,b) => a.percentage - b.percentage)[0];
-            const avgDailyPercent = totalMembers ? ((totalPresent + totalLate) / 7 / totalMembers * 100).toFixed(1) : 0;
+
+            const totalPossible = total * 7;
+            const overallPct = totalPossible > 0 ? (((totalPresent + totalLate) / totalPossible) * 100).toFixed(1) : '0.0';
+            const avgDaily = total > 0 ? ((totalPresent + totalLate) / 7 / total * 100).toFixed(1) : '0.0';
+            const sorted = [...dailyStats].filter(d => parseFloat(d.pct) > 0).sort((a, b) => parseFloat(b.pct) - parseFloat(a.pct));
+            const bestDay  = sorted[0]  || null;
+            const worstDay = sorted[sorted.length - 1] || null;
 
             // Top performers
-            const memberAttendance = {};
-            allMembers.forEach(m => { memberAttendance[m.member_id] = { name: m.name, voice_part: m.voice_part, attended: 0, totalDays: 0 }; });
-            weekAttendance?.forEach(rec => {
-                if (memberAttendance[rec.member_id]) {
-                    if (rec.status === 'Present' || rec.status === 'Late') memberAttendance[rec.member_id].attended++;
-                    memberAttendance[rec.member_id].totalDays++;
-                }
+            const memberAtt = {};
+            members.forEach(m => { memberAtt[m.member_id] = { ...m, attended: 0 }; });
+            (weekAtt || []).forEach(r => {
+                if (memberAtt[r.member_id] && (r.status === 'Present' || r.status === 'Late'))
+                    memberAtt[r.member_id].attended++;
             });
-            const topPerformers = Object.values(memberAttendance)
-                .filter(p => p.totalDays > 0)
-                .sort((a,b) => b.attended - a.attended)
-                .slice(0,5);
+            const topPerformers = Object.values(memberAtt)
+                .filter(m => m.attended > 0)
+                .sort((a, b) => b.attended - a.attended)
+                .slice(0, 5);
 
-            let weeklyHtml = `
-                <div id="weeklyPdfContent" class="report-for-pdf">
-                    <div class="report-header">
-                        <h2>🎵 UNIVERSITY OF EMBU STUDENTS' CHOIR</h2>
-                        <h3>98th Music Festival 2026</h3>
-                        <h4>WEEKLY ATTENDANCE SUMMARY</h4>
-                        <p>🗓️ Week ${week}, ${year}</p>
-                        <p>📆 ${weekDates[0]} to ${weekDates[6]}</p>
-                    </div>
-                    <div class="weekly-summary">
-                        <div class="week-header"><h3>📊 Overall Stats</h3></div>
-                        <div class="stats-summary">
-                            <div class="stat-card total"><div class="stat-number">${totalMembers}</div><div class="stat-label">Total Members</div></div>
-                            <div class="stat-card present"><div class="stat-number">${totalPresent}</div><div class="stat-label">Total Present</div></div>
-                            <div class="stat-card late"><div class="stat-number">${totalLate}</div><div class="stat-label">Total Late</div></div>
-                            <div class="stat-card absent"><div class="stat-number">${totalAbsent}</div><div class="stat-label">Total Absent</div></div>
-                            <div class="stat-card percentage"><div class="stat-number">${overallPercent}%</div><div class="stat-label">Weekly Attendance</div></div>
+            let html = `
+                <div id="weeklyPdfContent">
+                    <div class="report-header-card">
+                        <h2><i class="ti ti-music" style="font-size:18px;vertical-align:-2px;margin-right:6px"></i>University of Embu Students' Choir</h2>
+                        <h3>98th Music Festival 2026 — Weekly Attendance Summary</h3>
+                        <div class="report-meta">
+                            <span><i class="ti ti-calendar-week"></i> Week ${week}, ${year}</span>
+                            <span><i class="ti ti-arrows-horizontal"></i> ${weekDates[0]} to ${weekDates[6]}</span>
+                            <span><i class="ti ti-users"></i> ${total} members</span>
                         </div>
                     </div>
-                    <div class="weekly-summary">
-                        <div class="week-header"><h3>⭐ Key Insights</h3></div>
-                        <div class="stats-summary">
-                            <div class="stat-card"><div class="stat-number">${bestDay?.dayName || 'N/A'}</div><div class="stat-label">Best Day</div><div class="stat-label">${bestDay?.percentage || 0}%</div></div>
-                            <div class="stat-card"><div class="stat-number">${worstDay?.dayName || 'N/A'}</div><div class="stat-label">Worst Day</div><div class="stat-label">${worstDay?.percentage || 0}%</div></div>
-                            <div class="stat-card"><div class="stat-number">${avgDailyPercent}%</div><div class="stat-label">Daily Average</div></div>
+
+                    <div class="weekly-kpi-grid">
+                        <div class="weekly-kpi"><div class="weekly-kpi-value">${total}</div><div class="weekly-kpi-label">Total members</div></div>
+                        <div class="weekly-kpi"><div class="weekly-kpi-value" style="color:var(--green)">${totalPresent}</div><div class="weekly-kpi-label">Total present</div></div>
+                        <div class="weekly-kpi"><div class="weekly-kpi-value" style="color:var(--amber)">${totalLate}</div><div class="weekly-kpi-label">Total late</div></div>
+                        <div class="weekly-kpi"><div class="weekly-kpi-value" style="color:var(--red)">${totalAbsent}</div><div class="weekly-kpi-label">Total absent</div></div>
+                        <div class="weekly-kpi"><div class="weekly-kpi-value" style="color:var(--indigo)">${overallPct}%</div><div class="weekly-kpi-label">Weekly rate</div></div>
+                    </div>
+
+                    <div class="insights-row">
+                        <div class="insight-card">
+                            <div class="insight-icon" style="background:var(--green-light)"><i class="ti ti-trophy" style="color:var(--green);font-size:18px"></i></div>
+                            <div>
+                                <div class="insight-label">Best day</div>
+                                <div class="insight-value">${bestDay?.dayName || 'N/A'}</div>
+                                <div class="insight-sub">${bestDay?.pct || 0}% attendance</div>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-icon" style="background:var(--red-light)"><i class="ti ti-trending-down" style="color:var(--red);font-size:18px"></i></div>
+                            <div>
+                                <div class="insight-label">Worst day</div>
+                                <div class="insight-value">${worstDay?.dayName || 'N/A'}</div>
+                                <div class="insight-sub">${worstDay?.pct || 0}% attendance</div>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-icon" style="background:var(--indigo-light)"><i class="ti ti-chart-line" style="color:var(--indigo);font-size:18px"></i></div>
+                            <div>
+                                <div class="insight-label">Daily average</div>
+                                <div class="insight-value">${avgDaily}%</div>
+                                <div class="insight-sub">Per session average</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="weekly-summary">
-                        <div class="week-header"><h3>📅 Daily Breakdown</h3></div>
-                        <div class="daily-breakdown">
-                            ${dailyStats.map(day => `
-                                <div class="daily-card">
-                                    <div class="daily-header"><span>${day.dayName} (${day.date})</span><span>📈 ${day.percentage}%</span></div>
-                                    <div class="daily-stats">
-                                        <div class="daily-stat"><div class="daily-stat-value" style="color:#10b981;">${day.present}</div><div class="stat-label">Present</div></div>
-                                        <div class="daily-stat"><div class="daily-stat-value" style="color:#f59e0b;">${day.late}</div><div class="stat-label">Late</div></div>
-                                        <div class="daily-stat"><div class="daily-stat-value" style="color:#ef4444;">${day.absent}</div><div class="stat-label">Absent</div></div>
-                                    </div>
+
+                    <div style="margin-bottom:8px"><span style="font-size:14px;font-weight:600;color:var(--text-primary)">Daily breakdown</span></div>
+                    <div class="daily-cards-grid">
+                        ${dailyStats.map(d => `
+                            <div class="daily-row">
+                                <div class="daily-day">
+                                    <div class="daily-day-name">${d.dayName}</div>
+                                    <div class="daily-day-date">${d.date}</div>
                                 </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="weekly-summary">
-                        <div class="week-header"><h3>🏆 Top 5 Performers</h3></div>
-                        <div class="absentee-list"><ul>${topPerformers.map(p => `<li>${escapeHtml(p.name)} (${escapeHtml(p.voice_part)}) - ${((p.attended / 7) * 100).toFixed(0)}% attendance</li>`).join('')}</ul></div>
-                    </div>
-                    <div class="footer-note"><p>📅 Report: ${new Date().toLocaleString()}</p></div>
-                </div>
-            `;
-            currentWeeklyHtml = weeklyHtml;
-            weeklyDiv.innerHTML = weeklyHtml;
+                                <div class="daily-bar-wrap">
+                                    <div class="daily-bar-bg"><div class="daily-bar-fill" style="width:${d.pct}%"></div></div>
+                                </div>
+                                <div class="daily-pct">${d.pct}%</div>
+                                <div class="daily-pills">
+                                    <span class="pill pill-green"><i class="ti ti-check"></i>${d.present}</span>
+                                    <span class="pill pill-amber"><i class="ti ti-clock"></i>${d.late}</span>
+                                    <span class="pill pill-red"><i class="ti ti-x"></i>${d.absent}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+
+            if (topPerformers.length > 0) {
+                html += `
+                    <div class="performers-panel">
+                        <h3><i class="ti ti-star"></i> Top performers this week</h3>
+                        ${topPerformers.map((p, i) => `
+                            <div class="performer-row">
+                                <div class="performer-rank">${i + 1}</div>
+                                <div style="flex:1">
+                                    <div class="performer-name">${esc(p.name)}</div>
+                                    <div class="performer-voice">${esc(p.voice_part)}</div>
+                                </div>
+                                <span class="pill pill-indigo">${p.attended}/7 days</span>
+                                <span class="pill pill-green" style="margin-left:6px">${Math.round((p.attended / 7) * 100)}%</span>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            }
+
+            html += `<div class="report-footer">Report generated: ${new Date().toLocaleString()} · University of Embu Students' Choir</div></div>`;
+            currentWeeklyHtml = html;
+            div.innerHTML = html;
         } catch (err) {
             console.error(err);
-            weeklyDiv.innerHTML = `<div class="loading" style="color:#dc2626;">❌ Error: ${err.message}</div>`;
+            div.innerHTML = `<div class="loading-state" style="color:var(--red);"><i class="ti ti-alert-circle"></i> Error: ${esc(err.message)}</div>`;
         }
     }
 
-    // PDF & Text exports
+    // ── EXPORTS ──
     async function exportToPDF() {
-        if (!currentReportHtml) { alert('Generate a daily report first'); return; }
+        if (!currentReportHtml) { alert('Generate a daily report first.'); return; }
         const btn = document.getElementById('exportPDFBtn');
-        const orig = btn.innerText;
-        btn.innerText = '⏳ Generating...'; btn.disabled = true;
-        const container = document.createElement('div'); container.innerHTML = currentReportHtml;
-        await html2pdf().set({ margin: 0.5, filename: `attendance_${currentDate}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(container).save();
-        btn.innerText = orig; btn.disabled = false;
+        btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Generating…';
+        const el = document.createElement('div'); el.innerHTML = currentReportHtml;
+        await html2pdf().set({
+            margin: 0.5,
+            filename: `choir_attendance_${currentDate}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        }).from(el).save();
+        btn.disabled = false; btn.innerHTML = '<i class="ti ti-file-type-pdf"></i> Export PDF';
     }
 
     async function exportWeeklyPDF() {
-        if (!currentWeeklyHtml) { alert('Generate weekly summary first'); return; }
+        if (!currentWeeklyHtml) { alert('Generate a weekly summary first.'); return; }
         const btn = document.getElementById('exportWeeklyPDFBtn');
-        const orig = btn.innerText;
-        btn.innerText = '⏳ PDF...'; btn.disabled = true;
-        const container = document.createElement('div'); container.innerHTML = currentWeeklyHtml;
-        const weekVal = document.getElementById('weekSelect').value;
-        await html2pdf().set({ margin: 0.5, filename: `weekly_${weekVal}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(container).save();
-        btn.innerText = orig; btn.disabled = false;
+        btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Generating…';
+        const el = document.createElement('div'); el.innerHTML = currentWeeklyHtml;
+        await html2pdf().set({
+            margin: 0.5,
+            filename: `choir_weekly_${currentWeekVal}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        }).from(el).save();
+        btn.disabled = false; btn.innerHTML = '<i class="ti ti-file-type-pdf"></i> Export PDF';
     }
 
     function exportToText() {
-        if (!currentReportHtml) { alert('Generate a daily report first'); return; }
-        const temp = document.createElement('div'); temp.innerHTML = currentReportHtml;
-        let text = temp.innerText || temp.textContent;
-        const blob = new Blob([text], { type: 'text/plain' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `attendance_report_${currentDate}.txt`;
-        link.click();
-        URL.revokeObjectURL(link.href);
+        if (!currentReportHtml) { alert('Generate a daily report first.'); return; }
+        const tmp = document.createElement('div'); tmp.innerHTML = currentReportHtml;
+        const blob = new Blob([tmp.innerText || tmp.textContent], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `choir_attendance_${currentDate}.txt`;
+        a.click();
+        URL.revokeObjectURL(a.href);
     }
 
-    function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    // ── EVENTS ──
+    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+    document.getElementById('exportPDFBtn').addEventListener('click', exportToPDF);
+    document.getElementById('exportTextBtn').addEventListener('click', exportToText);
+    document.getElementById('generateWeeklyBtn').addEventListener('click', generateWeeklySummary);
+    document.getElementById('exportWeeklyPDFBtn').addEventListener('click', exportWeeklyPDF);
 
-    // Auto-load daily report on start
-    window.addEventListener('load', () => { generateReport(); });
+    // ── INIT ──
+    async function init() {
+        await checkAuth();
+        await loadUserInfo();
+        generateReport();
+    }
+
+    init();
+
+    window.logout = logout;
 </script>
 </body>
 </html>

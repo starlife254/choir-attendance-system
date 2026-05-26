@@ -2,877 +2,1134 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="google-site-verification" content="9B0aEWHLVVsKurOwYXzYI-2kswRtSRcJPDlWQ4sm6Cg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Mark Attendance | Choir Manager</title>
+    <title>Mark Attendance | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
+        *, *::before, *::after {
+            margin: 0; padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
 
+        :root {
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --indigo-mid: #818cf8;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --blue-light: #dbeafe;
+            --blue-text: #1e40af;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
             min-height: 100vh;
-            padding: 12px;
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 28px;
-            padding: 20px 16px 28px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
-            transition: all 0.2s ease;
-        }
-
-        header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 3px solid #667eea;
-            flex-wrap: wrap;
-            gap: 12px;
+            color: var(--text-primary);
         }
 
-        header h1 {
-            color: #1e293b;
-            font-size: 1.65rem;
-            letter-spacing: -0.3px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            font-weight: 700;
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 0.5px solid var(--border);
+            display: flex; flex-direction: column;
+            position: fixed; left: 0; top: 0; bottom: 0;
+            z-index: 50;
+            transition: transform .25s ease;
         }
 
-        .back-btn {
-            background: #f1f5f9;
-            color: #334155;
-            padding: 10px 18px;
-            text-decoration: none;
-            border-radius: 60px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #e2e8f0;
+        .sidebar-logo {
+            padding: 20px 16px 16px;
+            border-bottom: 0.5px solid var(--border);
         }
 
-        .back-btn:hover {
-            background: #e2e8f0;
-            transform: translateY(-1px);
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: var(--indigo);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px;
         }
 
-        .attendance-controls {
-            display: flex;
-            gap: 14px;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            background: #f8fafc;
-            padding: 16px 14px;
-            border-radius: 24px;
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+
+        .nav-section-label {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase; letter-spacing: .8px;
+            padding: 10px 10px 4px;
         }
 
-        .form-group {
-            flex: 1;
-            min-width: 170px;
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 10px;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 13px; cursor: pointer;
+            transition: background .12s, color .12s;
+            margin-bottom: 2px; position: relative;
         }
+
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+
+        .nav-item.active {
+            background: var(--indigo-light);
+            color: var(--indigo); font-weight: 600;
+        }
+
+        .nav-item.active i { color: var(--indigo); }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--indigo); color: #fff;
+            font-size: 10px; font-weight: 600;
+            padding: 2px 8px; border-radius: 40px;
+        }
+
+        .nav-badge.amber { background: var(--amber); }
+
+        .sidebar-bottom {
+            padding: 12px 8px;
+            border-top: 0.5px solid var(--border);
+        }
+
+        .user-card {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            background: var(--bg);
+        }
+
+        .user-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--indigo);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0;
+        }
+
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; text-transform: capitalize; }
+
+        .logout-link {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 12px; border-radius: 10px;
+            color: var(--red); font-size: 13px; cursor: pointer;
+            margin-top: 4px; transition: background .12s;
+        }
+
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+
+        /* ── MAIN ── */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 0.5px solid var(--border);
+            padding: 0 28px; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 10;
+        }
+
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .topbar-chip {
+            background: var(--bg); border: 0.5px solid var(--border);
+            border-radius: 40px; padding: 5px 12px;
+            font-size: 12px; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .topbar-chip i { font-size: 14px; }
+
+        .hamburger {
+            display: none; background: none; border: none;
+            font-size: 22px; color: var(--text-primary);
+            cursor: pointer; padding: 4px;
+        }
+
+        /* ── CONTENT ── */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* ── CONTROLS PANEL ── */
+        .controls-panel {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            display: flex; align-items: flex-end;
+            gap: 12px; flex-wrap: wrap;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
 
         .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 0.85rem;
-            letter-spacing: 0.3px;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary);
+            display: flex; align-items: center; gap: 5px;
         }
 
-        .date-input, .session-select {
-            width: 100%;
-            padding: 12px 12px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 18px;
-            font-size: 0.95rem;
-            background: white;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
+        .form-group label i { font-size: 14px; }
 
-        .date-input:focus, .session-select:focus {
+        .form-input, .form-select {
+            padding: 9px 14px;
+            border: 0.5px solid var(--border);
+            border-radius: 10px; font-size: 13px;
+            background: var(--bg); font-family: inherit;
+            color: var(--text-primary);
+            transition: border-color .15s;
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
+            width: 100%;
         }
 
-        .primary-btn {
-            padding: 12px 24px;
-            background: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
+        .form-input:focus, .form-select:focus { border-color: var(--indigo); }
+
+        .action-btn {
+            padding: 9px 18px;
+            border: none; border-radius: 10px;
+            font-size: 13px; font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            display: inline-flex; align-items: center; gap: 7px;
+            transition: opacity .15s, transform .1s;
+            white-space: nowrap;
         }
 
-        .primary-btn:active {
-            transform: scale(0.97);
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green   { background: var(--green);  color: #fff; }
+        .btn-amber   { background: var(--amber);  color: #fff; }
+        .btn-red     { background: var(--red);    color: #fff; }
+        .btn-outline {
+            background: transparent;
+            border: 0.5px solid var(--border);
+            color: var(--text-primary);
         }
 
-        .action-buttons {
-            display: flex;
+        /* ── STATS BAR ── */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            margin: 24px 0 20px;
-            flex-wrap: wrap;
-            justify-content: center;
+            margin-bottom: 20px;
         }
 
-        .save-btn, .quick-btn {
-            padding: 12px 20px;
-            border-radius: 60px;
-            font-weight: 600;
-            border: none;
-            font-size: 0.85rem;
+        .stat-mini {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .stat-mini-icon {
+            width: 34px; height: 34px;
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-mini-icon i { font-size: 17px; }
+        .stat-mini-val { font-size: 20px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+        .stat-mini-lbl { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+        /* ── TABLE PANEL ── */
+        .table-panel {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .table-panel-header {
+            padding: 14px 20px;
+            border-bottom: 0.5px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px;
+        }
+
+        .table-panel-title {
+            font-size: 14px; font-weight: 600; color: var(--text-primary);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .table-panel-title i { font-size: 16px; color: var(--indigo); }
+
+        .table-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .table-action-btn {
+            padding: 7px 14px;
+            border: 0.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.2s;
-            flex: 1 0 auto;
-            background: #f1f5f9;
-            color: #1e293b;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: background .12s, color .12s;
         }
 
-        .save-btn {
-            background: #10b981;
-            color: white;
-            box-shadow: 0 4px 8px rgba(16,185,129,0.2);
-        }
+        .table-action-btn:hover { background: var(--indigo-light); color: var(--indigo); border-color: transparent; }
+        .table-action-btn:active { transform: scale(0.97); }
+        .table-action-btn i { font-size: 14px; }
 
-        .quick-btn:first-of-type {
-            background: #3b82f6;
-            color: white;
-        }
+        .table-action-btn.green:hover { background: var(--green-light); color: #065f46; }
+        .table-action-btn.amber:hover { background: var(--amber-light); color: #854d0e; }
+        .table-action-btn.red:hover   { background: var(--red-light);   color: #991b1b; }
 
-        .quick-btn:nth-of-type(2) {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .clear-btn {
-            background: #ef4444;
-            color: white;
-        }
-
-        .attendance-table-container {
-            margin: 0 -8px;
-            padding: 0 8px;
-            width: calc(100% + 16px);
+        .table-scroll {
             overflow-x: auto;
             overflow-y: auto;
-            max-height: 58vh;
-            border-radius: 20px;
+            max-height: 55vh;
             scrollbar-width: thin;
             -webkit-overflow-scrolling: touch;
         }
 
-        .attendance-table {
-            min-width: 750px;
+        .table-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
+        .table-scroll::-webkit-scrollbar-track { background: var(--bg); }
+        .table-scroll::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 4px; }
+
+        .att-table {
+            min-width: 680px;
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-collapse: collapse;
         }
 
-        .attendance-table th {
-            background: #1e293b;
-            color: white;
-            padding: 14px 10px;
-            font-weight: 600;
-            font-size: 0.8rem;
+        .att-table th {
+            background: var(--bg);
+            padding: 11px 16px;
+            font-size: 11px; font-weight: 600;
+            color: var(--text-secondary);
             text-align: left;
-            position: sticky;
-            top: 0;
-            z-index: 20;
+            text-transform: uppercase; letter-spacing: .5px;
+            position: sticky; top: 0; z-index: 10;
+            border-bottom: 0.5px solid var(--border);
             white-space: nowrap;
         }
 
-        .attendance-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #eef2ff;
-            font-size: 0.85rem;
+        .att-table th:first-child {
+            position: sticky; left: 0;
+            background: var(--bg); z-index: 15;
+        }
+
+        .att-table td {
+            padding: 11px 16px;
+            border-bottom: 0.5px solid var(--border);
+            font-size: 13px;
+            background: var(--surface);
             vertical-align: middle;
-            background-color: white;
         }
 
-        .attendance-table th:first-child,
-        .attendance-table td:first-child {
-            position: sticky;
-            left: 0;
-            background-color: white;
-            z-index: 10;
+        .att-table td:first-child {
+            position: sticky; left: 0;
+            background: var(--surface); z-index: 5;
             font-weight: 500;
-            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.05);
+            box-shadow: 1px 0 0 var(--border);
         }
 
-        .attendance-table th:first-child {
-            background-color: #1e293b;
-            z-index: 15;
-            left: 0;
+        .att-table tr:last-child td { border-bottom: none; }
+
+        .att-table tr:hover td { background: #fafbff; }
+        .att-table tr:hover td:first-child { background: #fafbff; }
+
+        /* Voice part group header */
+        .voice-group td {
+            background: var(--bg) !important;
+            font-size: 11px; font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: .8px;
+            padding: 8px 16px;
         }
 
-        .voice-part-header td {
-            background: #f1f5f9 !important;
-            font-weight: 700;
-            font-size: 0.85rem;
-            letter-spacing: 0.3px;
-            color: #0f172a;
-            position: sticky;
-            left: 0;
-            background-color: #f1f5f9;
-            z-index: 8;
+        .voice-group td:first-child {
+            background: var(--bg) !important;
+            z-index: 5;
         }
 
-        .voice-part-header td:first-child {
-            background-color: #f1f5f9;
-            box-shadow: none;
-        }
-
-        .status-select, .apology-select {
-            padding: 10px 8px;
-            border-radius: 40px;
-            border: 1px solid #cbd5e1;
-            background: white;
-            font-size: 0.8rem;
-            font-weight: 500;
-            width: 100%;
-            min-width: 100px;
-            cursor: pointer;
-            transition: 0.1s;
+        /* ── STATUS SELECT ── */
+        .status-select {
+            padding: 7px 10px;
+            border: 0.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 12px; font-weight: 600;
             font-family: inherit;
-        }
-
-        .apology-select {
-            min-width: 110px;
-            background: #fef9e3;
-        }
-
-        .status-select:focus, .apology-select:focus {
+            background: var(--bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: border-color .15s;
             outline: none;
-            border-color: #4f46e5;
-            ring: 2px solid #a5b4fc;
+            min-width: 120px;
         }
 
-        .penalty-indicator {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 4px;
-        }
+        .status-select:focus { border-color: var(--indigo); }
 
-        .penalty-yes {
-            background: #fee2e2;
-            color: #dc2626;
-        }
+        .status-select.is-present { background: var(--green-light);  color: #065f46; border-color: #6ee7b7; }
+        .status-select.is-late    { background: var(--amber-light);  color: #854d0e; border-color: #fcd34d; }
+        .status-select.is-absent  { background: var(--red-light);    color: #991b1b; border-color: #fca5a5; }
 
-        .penalty-no {
-            background: #d1fae5;
-            color: #059669;
-        }
-
-        .message {
-            padding: 14px 18px;
-            border-radius: 60px;
-            margin-top: 20px;
-            text-align: center;
-            font-weight: 500;
-            display: none;
-            backdrop-filter: blur(4px);
-        }
-
-        .message.success {
-            display: block;
-            background: #d1fae5;
-            color: #065f46;
-            border-left: 5px solid #10b981;
-        }
-
-        .message.error {
-            display: block;
-            background: #fee2e2;
-            color: #991b1b;
-            border-left: 5px solid #ef4444;
-        }
-
-        .message.info {
-            display: block;
-            background: #e0f2fe;
-            color: #0369a1;
-            border-left: 5px solid #0ea5e9;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px 16px;
-            font-size: 1rem;
-            color: #4f46e5;
-            font-weight: 500;
-        }
-
-        .fine-badge {
-            background: #fef3c7;
-            color: #d97706;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 12px;
-            margin-left: 6px;
+        /* ── PILLS ── */
+        .pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 40px;
+            font-size: 11px; font-weight: 600;
             white-space: nowrap;
         }
 
-        @media (max-width: 580px) {
-            .container {
-                padding: 16px 12px 24px;
-            }
+        .pill i { font-size: 12px; }
+        .pill-green  { background: var(--green-light);  color: #065f46; }
+        .pill-amber  { background: var(--amber-light);  color: #854d0e; }
+        .pill-red    { background: var(--red-light);    color: #991b1b; }
+        .pill-blue   { background: var(--blue-light);   color: var(--blue-text); }
+        .pill-purple { background: var(--purple-light); color: #5b21b6; }
+        .pill-gray   { background: var(--bg); color: var(--text-secondary); border: 0.5px solid var(--border); }
 
-            .attendance-controls {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 12px;
-            }
-
-            .primary-btn {
-                justify-content: center;
-                width: 100%;
-            }
-
-            .action-buttons {
-                gap: 8px;
-            }
-
-            .save-btn, .quick-btn {
-                font-size: 0.75rem;
-                padding: 10px 12px;
-            }
-
-            .status-select, .apology-select {
-                font-size: 0.7rem;
-                padding: 8px 4px;
-                min-width: 85px;
-            }
-
-            .attendance-table th, .attendance-table td {
-                padding: 10px 6px;
-                font-size: 0.75rem;
-            }
-
-            header h1 {
-                font-size: 1.4rem;
-            }
+        /* ── SAVE BAR ── */
+        .save-bar {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 14px; flex-wrap: wrap;
         }
 
-        @media (max-width: 768px) and (orientation: landscape) {
-            .attendance-table-container {
-                max-height: 65vh;
-            }
+        .save-bar-info { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+        .save-bar-info strong { color: var(--text-primary); }
+
+        .save-bar-btns { display: flex; gap: 10px; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
+            background: var(--text-primary);
+            color: #fff;
+            padding: 11px 20px;
+            border-radius: 40px;
+            font-size: 13px; font-weight: 500;
+            z-index: 300;
+            opacity: 0;
+            transition: opacity .22s, transform .22s;
+            pointer-events: none;
+            display: flex; align-items: center; gap: 8px;
+            max-width: 90vw;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
         }
 
-        .attendance-table-container::-webkit-scrollbar {
-            height: 5px;
-            width: 5px;
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error   { background: #991b1b; }
+        .toast.info    { background: var(--indigo); }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
         }
 
-        .attendance-table-container::-webkit-scrollbar-track {
-            background: #e2e8f0;
-            border-radius: 10px;
+        .empty-state i {
+            font-size: 40px;
+            color: var(--indigo-mid);
+            display: block; margin-bottom: 12px;
         }
 
-        .attendance-table-container::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 10px;
+        .empty-state p { font-size: 14px; color: var(--text-secondary); }
+        .empty-state .hint { font-size: 12px; color: var(--text-tertiary); margin-top: 6px; }
+
+        /* ── FOOTER ── */
+        .footer {
+            padding: 16px 28px;
+            border-top: 0.5px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 12px; color: var(--text-tertiary);
         }
 
-        @media (hover: hover) {
-            .attendance-table tr:hover td {
-                background: #fef9e3;
-            }
-            .primary-btn:hover, .save-btn:hover, .quick-btn:hover {
-                transform: translateY(-2px);
-                filter: brightness(1.03);
-            }
+        /* ── MOBILE BOTTOM NAV ── */
+        .bottom-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
+            justify-content: space-around;
+            padding: 8px 16px env(safe-area-inset-bottom, 12px);
+            box-shadow: 0 -1px 0 var(--border); z-index: 50;
+        }
+
+        .bottom-nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px;
+        }
+
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* ── SIDEBAR OVERLAY (mobile) ── */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35); z-index: 40;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1024px) {
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .footer { display: none; }
+            .bottom-nav { display: flex; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .controls-panel { flex-direction: column; align-items: stretch; }
+            .action-btn { width: 100%; justify-content: center; }
+            .save-bar { flex-direction: column; align-items: stretch; }
+            .save-bar-btns { flex-direction: column; }
+            .table-actions { justify-content: flex-start; }
+        }
+
+        @media (max-width: 400px) {
+            .stats-bar { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>🎵 Mark Attendance</h1>
-        <a href="index.html" class="back-btn">← Dashboard</a>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item active">
+            <i class="ti ti-circle-check"></i> Mark attendance
+            <span class="nav-badge">Today</span>
+        </a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item">
+            <i class="ti ti-file-text"></i> Apologies
+            <span class="nav-badge amber" id="apologiesBadge" style="display:none">0</span>
+        </a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div>
+                <div class="user-name" id="userName">Loading…</div>
+                <div class="user-role" id="userRole">Admin</div>
+            </div>
+        </div>
+        <div class="logout-link" onclick="logout()">
+            <i class="ti ti-logout"></i> Log out
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <i class="ti ti-menu-2"></i>
+            </button>
+            <div class="topbar-left">
+                <h2>Mark Attendance</h2>
+                <p id="topDateLabel">Record today's sessions</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-chip">
+                <i class="ti ti-calendar"></i> <span id="topDate">--</span>
+            </div>
+            <div class="topbar-chip" id="topTime">--:--</div>
+        </div>
     </header>
 
-    <div class="attendance-controls">
-        <div class="form-group">
-            <label>📅 Date</label>
-            <input type="date" id="attendanceDate" class="date-input">
+    <main class="content">
+
+        <!-- Controls -->
+        <div class="controls-panel">
+            <div class="form-group">
+                <label><i class="ti ti-calendar"></i> Date</label>
+                <input type="date" id="attendanceDate" class="form-input">
+            </div>
+            <div class="form-group">
+                <label><i class="ti ti-clock"></i> Session</label>
+                <select id="sessionSelect" class="form-select">
+                    <option value="Morning">Morning  ·  9:00 AM – 1:00 PM</option>
+                    <option value="Afternoon">Afternoon  ·  2:00 PM – 4:00 PM</option>
+                    <option value="Evening">Evening  ·  7:00 PM – 10:30 PM</option>
+                </select>
+            </div>
+            <button id="loadMembersBtn" class="action-btn btn-primary">
+                <i class="ti ti-refresh"></i> Load members
+            </button>
         </div>
-        <div class="form-group">
-            <label>⏰ Session</label>
-            <select id="sessionSelect" class="session-select">
-                <option value="Morning">🌅 Morning (9:00 AM – 1:00 PM)</option>
-                <option value="Afternoon">☀️ Afternoon (2:00 PM – 4:00 PM)</option>
-                <option value="Evening">🌙 Evening (7:00 PM – 10:30 PM)</option>
-            </select>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar" id="statsBar" style="display:none">
+            <div class="stat-mini">
+                <div class="stat-mini-icon" style="background:var(--indigo-light)">
+                    <i class="ti ti-users" style="color:var(--indigo)"></i>
+                </div>
+                <div>
+                    <div class="stat-mini-val" id="statTotal">0</div>
+                    <div class="stat-mini-lbl">Total members</div>
+                </div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-icon" style="background:var(--green-light)">
+                    <i class="ti ti-circle-check" style="color:var(--green)"></i>
+                </div>
+                <div>
+                    <div class="stat-mini-val" id="statPresent">0</div>
+                    <div class="stat-mini-lbl">Present</div>
+                </div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-icon" style="background:var(--amber-light)">
+                    <i class="ti ti-clock" style="color:var(--amber)"></i>
+                </div>
+                <div>
+                    <div class="stat-mini-val" id="statLate">0</div>
+                    <div class="stat-mini-lbl">Late</div>
+                </div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-icon" style="background:var(--red-light)">
+                    <i class="ti ti-x" style="color:var(--red)"></i>
+                </div>
+                <div>
+                    <div class="stat-mini-val" id="statAbsent">0</div>
+                    <div class="stat-mini-lbl">Unmarked</div>
+                </div>
+            </div>
         </div>
-        <button id="loadMembersBtn" class="primary-btn">📋 Load Members</button>
-    </div>
 
-    <div id="attendanceTable" class="attendance-table-container"></div>
+        <!-- Attendance Table -->
+        <div class="table-panel" id="tablePanel">
+            <div class="table-panel-header">
+                <div class="table-panel-title">
+                    <i class="ti ti-list-check"></i>
+                    Member attendance list
+                </div>
+                <div class="table-actions" id="tableActions" style="display:none">
+                    <button class="table-action-btn green" onclick="markAll('Present')">
+                        <i class="ti ti-circle-check"></i> All present
+                    </button>
+                    <button class="table-action-btn amber" onclick="markAll('Late')">
+                        <i class="ti ti-clock"></i> All late
+                    </button>
+                    <button class="table-action-btn red" onclick="clearAllSelections()">
+                        <i class="ti ti-eraser"></i> Clear all
+                    </button>
+                </div>
+            </div>
+            <div class="table-scroll" id="tableScroll">
+                <div class="empty-state">
+                    <i class="ti ti-music"></i>
+                    <p>No members loaded yet</p>
+                    <p class="hint">Select a date and session, then click Load members</p>
+                </div>
+            </div>
+        </div>
 
-    <div class="action-buttons">
-        <button id="saveAttendanceBtn" class="save-btn">💾 Save Records</button>
-        <button id="markAllPresentBtn" class="quick-btn">✓ All Present</button>
-        <button id="markAllLateBtn" class="quick-btn">⏰ All Late</button>
-        <button id="clearAllBtn" class="quick-btn clear-btn">🗑️ Clear All</button>
-    </div>
+        <!-- Save Bar -->
+        <div class="save-bar" id="saveBar" style="display:none">
+            <div class="save-bar-info">
+                <i class="ti ti-info-circle" style="font-size:16px;color:var(--indigo)"></i>
+                Marking <strong id="saveCount">0</strong> records for <strong id="saveSession">—</strong>
+                <span class="pill pill-green" id="savePct">0%</span>
+            </div>
+            <div class="save-bar-btns">
+                <button id="saveAttendanceBtn" class="action-btn btn-green">
+                    <i class="ti ti-device-floppy"></i> Save records
+                </button>
+            </div>
+        </div>
 
-    <div id="message" class="message"></div>
+    </main>
+
+    <footer class="footer">
+        <span>🎶 University of Embu Students' Choir · 98th Music Festival 2026</span>
+        <span id="footerStatus">Ready</span>
+    </footer>
 </div>
 
+<!-- Mobile Bottom Nav -->
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item active"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
-    // ------------------------------
-    // SUPABASE CONFIGURATION
     const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // State
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let currentMembers = [];
     let currentAttendance = {};
-    let currentApology = {};
-    
-    // DOM elements
-    const dateInput = document.getElementById('attendanceDate');
-    const sessionSelect = document.getElementById('sessionSelect');
-    const loadBtn = document.getElementById('loadMembersBtn');
-    const saveBtn = document.getElementById('saveAttendanceBtn');
-    const markAllPresent = document.getElementById('markAllPresentBtn');
-    const markAllLate = document.getElementById('markAllLateBtn');
-    const clearAllBtn = document.getElementById('clearAllBtn');
-    const tableContainer = document.getElementById('attendanceTable');
-    const messageDiv = document.getElementById('message');
-    
-    // Store scroll position
+    let approvedApologies = {};
     let savedScrollTop = 0;
-    
-    // set default date to today
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    dateInput.value = `${yyyy}-${mm}-${dd}`;
-    
-    function showMessage(msg, type = 'info') {
-        messageDiv.textContent = msg;
-        messageDiv.className = `message ${type}`;
-        messageDiv.style.display = 'block';
-        // Auto scroll to message on mobile
-        setTimeout(() => {
-            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-        setTimeout(() => {
-            messageDiv.style.display = 'none';
-            messageDiv.className = 'message';
-        }, 3000);
+
+    // ── HELPERS ──
+    function esc(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
-    
-    // Save current scroll position
-    function saveScrollPosition() {
-        const container = document.querySelector('.attendance-table-container');
-        if (container) {
-            savedScrollTop = container.scrollTop;
-        }
+
+    function todayStr() {
+        const d = new Date();
+        return d.toISOString().split('T')[0];
     }
-    
-    // Restore scroll position
-    function restoreScrollPosition() {
-        const container = document.querySelector('.attendance-table-container');
-        if (container && savedScrollTop > 0) {
-            setTimeout(() => {
-                container.scrollTop = savedScrollTop;
-            }, 10);
-        }
+
+    function tick() {
+        const n = new Date();
+        document.getElementById('topDate').textContent = n.toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric'
+        });
+        document.getElementById('topTime').textContent = n.toLocaleTimeString('en-US', {
+            hour: '2-digit', minute: '2-digit'
+        });
     }
-    
-    function getPenaltyAmount(status, apology) {
+
+    // ── TOAST ──
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        const icons = { success: 'ti-circle-check', error: 'ti-circle-x', info: 'ti-info-circle' };
+        t.innerHTML = `<i class="ti ${icons[type] || icons.info}" style="font-size:16px"></i> ${msg}`;
+        t.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+    }
+
+    // ── PENALTY HELPERS ──
+    function getPenaltyAmount(status, hasApproved) {
         if (status === 'Present') return 0;
-        if (status === 'Late' && apology === 'without_apology') return 20;
-        if (status === 'Absent' && apology === 'without_apology') return 50;
+        if (status === 'Late' && !hasApproved) return 20;
+        if (status === 'Absent' && !hasApproved) return 50;
         return 0;
     }
-    
-    function getPenaltyText(status, apology) {
-        const amount = getPenaltyAmount(status, apology);
-        if (amount === 0) return '✅ No fine';
-        return `💰 KSh ${amount}`;
+
+    function penaltyPill(status, hasApproved) {
+        if (status === 'Present') return `<span class="pill pill-green"><i class="ti ti-check"></i> None</span>`;
+        if (!status) return `<span class="pill pill-gray">—</span>`;
+        const amt = getPenaltyAmount(status, hasApproved);
+        if (amt === 0) return `<span class="pill pill-green"><i class="ti ti-check"></i> Excused</span>`;
+        return `<span class="pill pill-red"><i class="ti ti-cash"></i> KSh ${amt}</span>`;
     }
-    
-    // Update only the changed row instead of full re-render
-    function updateSingleRow(memberId) {
-        const member = currentMembers.find(m => m.member_id === memberId);
-        if (!member) return;
-        
-        const currentStatus = currentAttendance[memberId] || '';
-        const currentApologyStatus = currentApology[memberId] || '';
-        const apologyDisabled = (currentStatus === '' || currentStatus === 'Present');
-        const penaltyAmount = getPenaltyAmount(currentStatus, currentApologyStatus);
-        const penaltyText = getPenaltyText(currentStatus, currentApologyStatus);
-        
-        // Find the row and update it
-        const row = document.querySelector(`tr[data-member-id="${memberId}"]`);
-        if (row) {
-            const statusSelect = row.querySelector('.status-select');
-            const apologySelect = row.querySelector('.apology-select');
-            const penaltySpan = row.querySelector('.penalty-indicator');
-            
-            if (statusSelect) statusSelect.value = currentStatus;
-            if (apologySelect) {
-                apologySelect.value = currentApologyStatus;
-                apologySelect.disabled = apologyDisabled;
-                apologySelect.style.opacity = apologyDisabled ? '0.5' : '1';
-            }
-            if (penaltySpan) {
-                penaltySpan.textContent = penaltyText;
-                penaltySpan.className = `penalty-indicator ${penaltyAmount > 0 ? 'penalty-yes' : 'penalty-no'}`;
-            }
-        }
+
+    // ── AUTH ──
+    async function checkAuth() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return null; }
+        return session;
     }
-    
-    function renderAttendanceTable() {
-        if (!currentMembers.length) {
-            tableContainer.innerHTML = '<div class="loading">✨ No members loaded. Click "Load Members" ✨</div>';
-            return;
-        }
-        
-        const voicePartsOrder = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
-        let html = `<div class="attendance-table-container"><table class="attendance-table">
-                        <thead>
-                            <tr>
-                                <th>Full Name</th>
-                                <th>Voice</th>
-                                <th>Attendance Status</th>
-                                <th>Apology Status</th>
-                                <th>Fine</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-        
-        for (let part of voicePartsOrder) {
-            const partMembers = currentMembers.filter(m => (m.voice_part || 'Other') === part);
-            if (partMembers.length === 0) continue;
-            
-            html += `<tr class="voice-part-header"><td colspan="5"><span style="display:flex; align-items:center; gap:8px;">🎵 ${part} &nbsp;•&nbsp; ${partMembers.length} member${partMembers.length !== 1 ? 's' : ''}</span></td></tr>`;
-            
-            partMembers.forEach(member => {
-                const memberId = member.member_id;
-                const currentStatus = currentAttendance[memberId] || '';
-                const currentApologyStatus = currentApology[memberId] || '';
-                const apologyDisabled = (currentStatus === '' || currentStatus === 'Present');
-                const penaltyAmount = getPenaltyAmount(currentStatus, currentApologyStatus);
-                const penaltyText = getPenaltyText(currentStatus, currentApologyStatus);
-                
-                html += `<tr data-member-id="${memberId}">
-                            <td>${escapeHtml(member.name || 'Unnamed')}</td>
-                            <td>${escapeHtml(member.voice_part || '—')}</td>
-                            <td>
-                                <select class="status-select" data-member-id="${memberId}">
-                                    <option value="" ${currentStatus === '' ? 'selected' : ''}>📌 Select</option>
-                                    <option value="Present" ${currentStatus === 'Present' ? 'selected' : ''}>✅ Present</option>
-                                    <option value="Late" ${currentStatus === 'Late' ? 'selected' : ''}>⏰ Late</option>
-                                    <option value="Absent" ${currentStatus === 'Absent' ? 'selected' : ''}>❌ Absent</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select class="apology-select" data-apology-member-id="${memberId}" ${apologyDisabled ? 'disabled' : ''} style="${apologyDisabled ? 'opacity:0.5;' : ''}">
-                                    <option value="">-- Select --</option>
-                                    <option value="with_apology" ${currentApologyStatus === 'with_apology' ? 'selected' : ''}>🙏 With Apology</option>
-                                    <option value="without_apology" ${currentApologyStatus === 'without_apology' ? 'selected' : ''}>⚠️ Without Apology</option>
-                                </select>
-                            </td>
-                            <td>
-                                <span class="penalty-indicator ${penaltyAmount > 0 ? 'penalty-yes' : 'penalty-no'}">
-                                    ${penaltyText}
-                                </span>
-                            </td>
-                        </tr>`;
-            });
-        }
-        
-        html += `</tbody></table></div>`;
-        tableContainer.innerHTML = html;
-        
-        // Attach status change events - NO RE-RENDER, just update data
-        document.querySelectorAll('.status-select').forEach(select => {
-            select.addEventListener('change', (e) => {
-                e.stopPropagation();
-                const memberId = select.dataset.memberId;
-                const newStatus = select.value;
-                if (memberId) {
-                    saveScrollPosition();
-                    if (newStatus === '') {
-                        delete currentAttendance[memberId];
-                        delete currentApology[memberId];
-                    } else {
-                        currentAttendance[memberId] = newStatus;
-                        if (newStatus === 'Present') {
-                            delete currentApology[memberId];
-                        }
-                    }
-                    // Update only this row instead of full re-render
-                    updateSingleRow(memberId);
-                    restoreScrollPosition();
-                }
-            });
-        });
-        
-        // Attach apology change events
-        document.querySelectorAll('.apology-select').forEach(select => {
-            select.addEventListener('change', (e) => {
-                e.stopPropagation();
-                const memberId = select.dataset.apologyMemberId;
-                const newApology = select.value;
-                if (memberId && currentAttendance[memberId]) {
-                    saveScrollPosition();
-                    if (newApology === '') {
-                        delete currentApology[memberId];
-                    } else {
-                        currentApology[memberId] = newApology;
-                    }
-                    updateSingleRow(memberId);
-                    restoreScrollPosition();
-                }
-            });
-        });
-    }
-    
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    async function loadMembers() {
-        const date = dateInput.value;
-        const session = sessionSelect.value;
-        if (!date) {
-            showMessage('Please select a valid date', 'error');
-            return;
-        }
-        
-        showMessage('🔄 Fetching members...', 'info');
-        tableContainer.innerHTML = '<div class="loading">🎤 Loading choir members...</div>';
-        
+
+    async function logout() {
         try {
-            const { data: members, error: membersError } = await supabaseClient
+            await sb.auth.signOut();
+            window.location.href = 'login.html';
+        } catch { window.location.href = 'login.html'; }
+    }
+
+    // ── USER INFO ──
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const emailName = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = emailName;
+            document.getElementById('userAvatar').textContent = (emailName.charAt(0) || 'A').toUpperCase();
+            const { data: profile } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (profile) {
+                if (profile.full_name) {
+                    const first = profile.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = first;
+                    document.getElementById('userAvatar').textContent = first.charAt(0).toUpperCase();
+                }
+                if (profile.role) document.getElementById('userRole').textContent = profile.role;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ── STATS UPDATE ──
+    function updateStats() {
+        const total = currentMembers.length;
+        let present = 0, late = 0, marked = 0;
+        for (const s of Object.values(currentAttendance)) {
+            if (s === 'Present') present++;
+            else if (s === 'Late') late++;
+            if (s) marked++;
+        }
+        const unmarked = total - marked;
+
+        document.getElementById('statTotal').textContent   = total;
+        document.getElementById('statPresent').textContent = present;
+        document.getElementById('statLate').textContent    = late;
+        document.getElementById('statAbsent').textContent  = unmarked;
+
+        const pct = total > 0 ? Math.round(((present + late) / total) * 100) : 0;
+        document.getElementById('saveCount').textContent  = marked;
+        document.getElementById('saveSession').textContent = document.getElementById('sessionSelect').value;
+        document.getElementById('savePct').textContent   = pct + '%';
+        document.getElementById('footerStatus').textContent = `${marked}/${total} marked`;
+    }
+
+    // ── SINGLE ROW UPDATE ──
+    function updateSingleRow(memberId) {
+        const status = currentAttendance[memberId] || '';
+        const hasApproved = approvedApologies[memberId] || false;
+
+        const row = document.querySelector(`tr[data-member-id="${memberId}"]`);
+        if (!row) return;
+
+        const sel = row.querySelector('.status-select');
+        if (sel) {
+            sel.value = status;
+            sel.className = 'status-select' +
+                (status === 'Present' ? ' is-present' :
+                 status === 'Late'    ? ' is-late' :
+                 status === 'Absent'  ? ' is-absent' : '');
+        }
+
+        const penCell = row.querySelector('.penalty-cell');
+        if (penCell) penCell.innerHTML = penaltyPill(status, hasApproved);
+
+        updateStats();
+    }
+
+    // ── RENDER TABLE ──
+    function renderTable() {
+        const scroll = document.getElementById('tableScroll');
+        if (!currentMembers.length) {
+            scroll.innerHTML = `<div class="empty-state">
+                <i class="ti ti-music"></i>
+                <p>No members found</p>
+                <p class="hint">Add members first in Manage Members</p>
+            </div>`;
+            return;
+        }
+
+        const voiceOrder = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
+        const voiceIcons = {
+            Director: 'ti-star', Soprano: 'ti-music', Alto: 'ti-music',
+            Tenor: 'ti-music', Bass: 'ti-music', Brass: 'ti-device-speaker-off'
+        };
+        const voiceColors = {
+            Director: 'var(--purple)', Soprano: 'var(--indigo)', Alto: '#06b6d4',
+            Tenor: 'var(--green)', Bass: 'var(--amber)', Brass: 'var(--red)'
+        };
+
+        let html = `<table class="att-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Voice part</th>
+                    <th>Status</th>
+                    <th>Apology</th>
+                    <th>Fine</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        for (const vp of voiceOrder) {
+            const group = currentMembers.filter(m => (m.voice_part || 'Other') === vp);
+            if (!group.length) continue;
+
+            const icon = voiceIcons[vp] || 'ti-music';
+            const color = voiceColors[vp] || 'var(--indigo)';
+
+            html += `<tr class="voice-group">
+                <td colspan="5">
+                    <span style="display:flex;align-items:center;gap:8px;">
+                        <i class="ti ${icon}" style="color:${color};font-size:14px"></i>
+                        ${vp} &nbsp;·&nbsp; ${group.length} member${group.length !== 1 ? 's' : ''}
+                    </span>
+                </td>
+            </tr>`;
+
+            for (const m of group) {
+                const mid = m.member_id;
+                const status = currentAttendance[mid] || '';
+                const hasApproved = approvedApologies[mid] || false;
+
+                const selClass = 'status-select' +
+                    (status === 'Present' ? ' is-present' :
+                     status === 'Late'    ? ' is-late' :
+                     status === 'Absent'  ? ' is-absent' : '');
+
+                const apologyPill = hasApproved
+                    ? `<span class="pill pill-green"><i class="ti ti-check"></i> Approved</span>`
+                    : `<span class="pill pill-gray">None</span>`;
+
+                html += `<tr data-member-id="${mid}">
+                    <td>${esc(m.name || 'Unnamed')}</td>
+                    <td>
+                        <span class="pill" style="background:${color}18;color:${color}">${esc(m.voice_part || '—')}</span>
+                    </td>
+                    <td>
+                        <select class="status-select ${selClass.replace('status-select', '').trim()}" data-member-id="${mid}">
+                            <option value="" ${!status ? 'selected' : ''}>Select status</option>
+                            <option value="Present" ${status === 'Present' ? 'selected' : ''}>Present</option>
+                            <option value="Late"    ${status === 'Late'    ? 'selected' : ''}>Late</option>
+                            <option value="Absent"  ${status === 'Absent'  ? 'selected' : ''}>Absent</option>
+                        </select>
+                    </td>
+                    <td>${apologyPill}</td>
+                    <td class="penalty-cell">${penaltyPill(status, hasApproved)}</td>
+                </tr>`;
+            }
+        }
+
+        html += `</tbody></table>`;
+        scroll.innerHTML = html;
+
+        document.querySelectorAll('.status-select').forEach(sel => {
+            sel.addEventListener('change', e => {
+                e.stopPropagation();
+                const mid = sel.dataset.memberId;
+                const val = sel.value;
+                const container = document.getElementById('tableScroll');
+                savedScrollTop = container.scrollTop;
+                if (val) currentAttendance[mid] = val;
+                else delete currentAttendance[mid];
+                updateSingleRow(mid);
+                setTimeout(() => { container.scrollTop = savedScrollTop; }, 10);
+            });
+        });
+
+        document.getElementById('tableActions').style.display = 'flex';
+        document.getElementById('statsBar').style.display = 'grid';
+        document.getElementById('saveBar').style.display = 'flex';
+        updateStats();
+    }
+
+    // ── LOAD MEMBERS ──
+    async function loadMembers() {
+        const date = document.getElementById('attendanceDate').value;
+        const session = document.getElementById('sessionSelect').value;
+        if (!date) { showToast('Please select a date', 'error'); return; }
+
+        const btn = document.getElementById('loadMembersBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ti ti-loader"></i> Loading…';
+        showToast('Fetching members…', 'info');
+
+        try {
+            const { data: members, error: mErr } = await sb
                 .from('members')
                 .select('*')
+                .eq('status', 'active')
                 .order('voice_part', { ascending: true });
-            
-            if (membersError) throw new Error(`Members fetch error: ${membersError.message}`);
-            if (!members || members.length === 0) {
-                showMessage('📭 No members in database.', 'error');
-                currentMembers = [];
-                currentAttendance = {};
-                currentApology = {};
-                renderAttendanceTable();
-                return;
-            }
-            
+
+            if (mErr) throw mErr;
+            if (!members?.length) throw new Error('No active members found.');
+
             currentMembers = members;
-            
-            const { data: existingAtt, error: attError } = await supabaseClient
-                .from('attendance')
-                .select('*')
+
+            // Load apologies
+            const { data: apologies } = await sb
+                .from('apology_requests')
+                .select('member_id')
                 .eq('date', date)
-                .eq('session', session);
-            
-            if (attError) console.warn('Attendance fetch warning:', attError.message);
-            
-            const { data: existingPenalties, error: penError } = await supabaseClient
-                .from('penalties')
+                .eq('session', session)
+                .eq('status', 'approved');
+
+            approvedApologies = {};
+            (apologies || []).forEach(a => { approvedApologies[a.member_id] = true; });
+
+            // Load existing attendance
+            const { data: existing } = await sb
+                .from('attendance')
                 .select('member_id, status')
                 .eq('date', date)
                 .eq('session', session);
-            
-            if (penError) console.warn('Penalties fetch warning:', penError.message);
-            
+
             currentAttendance = {};
-            currentApology = {};
-            
-            if (existingAtt && existingAtt.length) {
-                existingAtt.forEach(rec => {
-                    if (rec.member_id && rec.status) {
-                        currentAttendance[rec.member_id] = rec.status;
-                    }
-                });
-            }
-            
-            if (existingPenalties && existingPenalties.length) {
-                existingPenalties.forEach(pen => {
-                    if (pen.status === 'pending') {
-                        currentApology[pen.member_id] = 'without_apology';
-                    } else if (pen.status === 'paid') {
-                        currentApology[pen.member_id] = 'with_apology';
-                    }
-                });
-            }
-            
-            renderAttendanceTable();
-            showMessage(`✅ ${currentMembers.length} members loaded.`, 'success');
+            (existing || []).forEach(r => {
+                if (r.member_id && r.status) currentAttendance[r.member_id] = r.status;
+            });
+
+            renderTable();
+            const apCount = Object.keys(approvedApologies).length;
+            showToast(`${members.length} members loaded${apCount ? ` · ${apCount} apologies` : ''}`, 'success');
+            document.getElementById('topDateLabel').textContent = `${session} session · ${date}`;
         } catch (err) {
             console.error(err);
-            showMessage(`⚠️ Error: ${err.message}`, 'error');
-            currentMembers = [];
+            showToast(`Error: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ti ti-refresh"></i> Load members';
         }
     }
-    
+
+    // ── MARK ALL ──
+    function markAll(status) {
+        if (!currentMembers.length) { showToast('Load members first', 'error'); return; }
+        const container = document.getElementById('tableScroll');
+        savedScrollTop = container.scrollTop;
+        currentMembers.forEach(m => { currentAttendance[m.member_id] = status; });
+        renderTable();
+        setTimeout(() => { container.scrollTop = savedScrollTop; }, 10);
+        showToast(`All ${currentMembers.length} members marked as ${status}`, 'success');
+    }
+
+    function clearAllSelections() {
+        if (!currentMembers.length) { showToast('No members loaded', 'error'); return; }
+        const container = document.getElementById('tableScroll');
+        savedScrollTop = container.scrollTop;
+        currentAttendance = {};
+        renderTable();
+        setTimeout(() => { container.scrollTop = savedScrollTop; }, 10);
+        showToast('All selections cleared', 'info');
+    }
+
+    // ── SAVE ──
     async function saveAttendance() {
-        const date = dateInput.value;
-        const session = sessionSelect.value;
-        if (!date) {
-            showMessage('Please select a date before saving', 'error');
-            return;
-        }
-        
+        const date = document.getElementById('attendanceDate').value;
+        const session = document.getElementById('sessionSelect').value;
+        if (!date) { showToast('Select a date first', 'error'); return; }
+
         const records = [];
         const penaltyRecords = [];
-        
-        for (const [memberId, status] of Object.entries(currentAttendance)) {
-            if (status && status.trim() !== '') {
-                records.push({
-                    date: date,
-                    session: session,
-                    member_id: memberId,
-                    status: status
+
+        for (const [mid, status] of Object.entries(currentAttendance)) {
+            if (!status) continue;
+            const hasApproved = approvedApologies[mid] || false;
+            const penaltyAmt = getPenaltyAmount(status, hasApproved);
+            records.push({ date, session, member_id: mid, status });
+            if (penaltyAmt > 0) {
+                penaltyRecords.push({
+                    member_id: mid, date, session,
+                    penalty_type: status === 'Late' ? 'late' : 'absent',
+                    amount: penaltyAmt,
+                    status: 'pending',
+                    reason: `${status} without apology`
                 });
-                
-                const apology = currentApology[memberId] || '';
-                const penaltyAmount = getPenaltyAmount(status, apology);
-                
-                if (penaltyAmount > 0) {
-                    penaltyRecords.push({
-                        member_id: memberId,
-                        date: date,
-                        session: session,
-                        penalty_type: status === 'Late' ? 'late' : 'absent',
-                        amount: penaltyAmount,
-                        status: 'pending',
-                        reason: `${status} without apology`
-                    });
-                } else if (status !== 'Present' && apology === 'with_apology') {
-                    penaltyRecords.push({
-                        member_id: memberId,
-                        date: date,
-                        session: session,
-                        penalty_type: status === 'Late' ? 'late' : 'absent',
-                        amount: 0,
-                        status: 'paid',
-                        reason: `${status} with apology - no fine`
-                    });
+            }
+        }
+
+        if (!records.length) { showToast('No attendance marked yet', 'error'); return; }
+
+        const btn = document.getElementById('saveAttendanceBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
+
+        const { error } = await sb
+            .from('attendance')
+            .upsert(records, { onConflict: 'date,session,member_id' });
+
+        if (error) {
+            showToast(`Save failed: ${error.message}`, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save records';
+            return;
+        }
+
+        for (const pen of penaltyRecords) {
+            const { error: pErr } = await sb
+                .from('penalties')
+                .upsert(pen, { onConflict: 'member_id,date,session' });
+            if (pErr) console.warn('Penalty save warning:', pErr);
+        }
+
+        for (const [mid, hasApology] of Object.entries(approvedApologies)) {
+            if (hasApology && currentAttendance[mid]) {
+                const s = currentAttendance[mid];
+                if (s === 'Late' || s === 'Absent') {
+                    await sb.from('penalties')
+                        .update({ status: 'waived', admin_notes: 'Apology approved - fine waived' })
+                        .eq('member_id', mid).eq('date', date).eq('session', session);
                 }
             }
         }
-        
-        if (records.length === 0) {
-            showMessage('⚠️ No attendance marked.', 'error');
-            return;
-        }
-        
-        // Disable save button to prevent double-click
-        saveBtn.disabled = true;
-        saveBtn.textContent = '💾 Saving...';
-        showMessage(`💾 Saving ${records.length} record(s)...`, 'info');
-        
-        const { error: attError } = await supabaseClient
-            .from('attendance')
-            .upsert(records, { onConflict: 'date,session,member_id' });
-        
-        if (attError) {
-            console.error('Upsert error:', attError);
-            showMessage(`❌ Save failed: ${attError.message}`, 'error');
-            saveBtn.disabled = false;
-            saveBtn.textContent = '💾 Save Records';
-            return;
-        }
-        
-        for (const penalty of penaltyRecords) {
-            const { error: penError } = await supabaseClient
-                .from('penalties')
-                .upsert(penalty, { onConflict: 'member_id,date,session' });
-            if (penError) console.warn('Penalty save warning:', penError);
-        }
-        
-        showMessage(`✅ Saved ${records.length} records for ${session}!`, 'success');
-        saveBtn.disabled = false;
-        saveBtn.textContent = '💾 Save Records';
+
+        showToast(`${records.length} records saved for ${session}!`, 'success');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save records';
+        document.getElementById('footerStatus').textContent = `Saved at ${new Date().toLocaleTimeString()}`;
     }
-    
-    function markAll(status) {
-        if (!currentMembers.length) {
-            showMessage('Please load members first', 'error');
-            return;
-        }
-        saveScrollPosition();
-        currentMembers.forEach(member => {
-            currentAttendance[member.member_id] = status;
-            if (status === 'Present') {
-                delete currentApology[member.member_id];
-            } else {
-                currentApology[member.member_id] = 'without_apology';
-            }
-        });
-        renderAttendanceTable();
-        restoreScrollPosition();
-        showMessage(`✓ All ${currentMembers.length} members marked as ${status}`, 'success');
+
+    // ── SIDEBAR ──
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
     }
-    
-    function clearAllSelections() {
-        if (!currentMembers.length) {
-            showMessage('No members loaded', 'error');
-            return;
-        }
-        saveScrollPosition();
-        currentAttendance = {};
-        currentApology = {};
-        renderAttendanceTable();
-        restoreScrollPosition();
-        showMessage('🧹 Cleared all selections', 'success');
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
     }
-    
-    loadBtn.addEventListener('click', loadMembers);
-    saveBtn.addEventListener('click', saveAttendance);
-    markAllPresent.addEventListener('click', () => markAll('Present'));
-    markAllLate.addEventListener('click', () => markAll('Late'));
-    clearAllBtn.addEventListener('click', clearAllSelections);
+
+    // ── INIT ──
+    document.getElementById('attendanceDate').value = todayStr();
+
+    async function init() {
+        await checkAuth();
+        tick();
+        setInterval(tick, 1000);
+        await loadUserInfo();
+    }
+
+    document.getElementById('loadMembersBtn').addEventListener('click', loadMembers);
+    document.getElementById('saveAttendanceBtn').addEventListener('click', saveAttendance);
+
+    init();
+
+    window.markAll = markAll;
+    window.clearAllSelections = clearAllSelections;
+    window.logout = logout;
 </script>
 </body>
 </html>

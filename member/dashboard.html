@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>My Attendance | Member Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>My Dashboard | Member Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 12px;
@@ -41,87 +42,115 @@
             cursor: pointer;
             font-weight: 500;
         }
-        .search-section {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .search-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #1e293b;
-        }
-        .search-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 50px;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .member-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .member-list-item {
-            background: white;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid #e2e8f0;
+        
+        .tabs {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
             gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
         }
-        .member-list-item:hover {
-            background: #eef2ff;
-            transform: translateX(5px);
-            border-color: #667eea;
+        .tab-btn {
+            padding: 10px 24px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
         }
-        .member-list-item.selected {
+        .tab-btn.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-color: #667eea;
         }
-        .member-list-name {
-            font-weight: bold;
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
         }
-        .member-list-voice {
-            font-size: 12px;
-            opacity: 0.7;
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .select-hint {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .welcome-card {
+        
+        .profile-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 25px;
             border-radius: 24px;
             margin-bottom: 24px;
-            display: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
         }
-        .welcome-card.active {
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            overflow: hidden;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-info h2 { font-size: 24px; margin-bottom: 8px; }
+        .profile-info p { opacity: 0.9; font-size: 14px; }
+        
+        .form-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .form-card h3 { margin-bottom: 15px; color: #1e293b; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
             display: block;
-            animation: fadeIn 0.3s ease;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #334155;
+            font-size: 14px;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
         }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .export-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -140,6 +169,7 @@
         .stat-card.late .stat-number { color: #f59e0b; }
         .stat-card.absent .stat-number { color: #ef4444; }
         .stat-card.percentage .stat-number { color: #667eea; }
+        
         .chart-container {
             background: white;
             padding: 20px;
@@ -147,11 +177,6 @@
             margin-bottom: 24px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid #e2e8f0;
-            display: none;
-        }
-        .chart-container.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
         }
         .section-title {
             font-size: 18px;
@@ -162,26 +187,53 @@
             align-items: center;
             gap: 8px;
         }
-        .penalty-item {
-            background: #f8fafc;
+        
+        .apology-item {
+            background: white;
             padding: 15px;
             border-radius: 16px;
             margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            border: 1px solid #e2e8f0;
         }
-        .penalty-amount { font-size: 18px; font-weight: bold; color: #dc2626; }
-        .penalty-status {
+        .status-badge {
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
         }
         .status-pending { background: #fef3c7; color: #d97706; }
-        .status-paid { background: #d1fae5; color: #059669; }
+        .status-approved { background: #d1fae5; color: #059669; }
+        .status-rejected { background: #fee2e2; color: #dc2626; }
+        
+        .leader-info {
+            background: #eef2ff;
+            padding: 15px;
+            border-radius: 16px;
+            margin-top: 15px;
+        }
         .empty-state { text-align: center; padding: 40px; color: #666; }
+        
+        .message {
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .message.success { background: #d1fae5; color: #065f46; display: block; }
+        .message.error { background: #fee2e2; color: #991b1b; display: block; }
+        .message.info { background: #e0f2fe; color: #0369a1; display: block; }
+        
+        .file-input-label {
+            background: #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 13px;
+        }
+        input[type="file"] { display: none; }
+        
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -210,275 +262,453 @@
         }
         .bottom-nav-item span:first-child { font-size: 22px; }
         .bottom-nav-item.active { color: #667eea; background: #f0f0ff; }
+        
         @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
+        @media (max-width: 640px) {
+            .profile-card { flex-direction: column; text-align: center; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { justify-content: center; }
+            .tab-btn { padding: 8px 16px; font-size: 14px; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+        #floatingReminderBtn { transition: transform 0.2s; }
+        #floatingReminderBtn:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Member Attendance Portal</h1>
+            <h1>🎵 My Dashboard</h1>
             <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
         </div>
-        <div>
-            <H3>PENALTIES PAYMENT</H3>
-            <P>POCHI:0117085859 </P>
-            <P>"Peter Manundu"</P>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('stats')">📊 My Stats</button>
+            <button class="tab-btn" onclick="switchTab('profile')">👤 My Profile</button>
+            <button class="tab-btn" onclick="switchTab('apology')">📝 Request Apology</button>
+            <button class="tab-btn" onclick="switchTab('history')">📜 My History</button>
         </div>
 
-        <!-- Search Section -->
-        <div class="search-section">
-            <div class="search-title">🔍 Find Your Name</div>
-            <input type="text" id="searchInput" class="search-input" placeholder="Type your name to search...">
-            <div id="memberList" class="member-list">
-                <div class="empty-state">Loading members...</div>
+        <!-- Stats Tab -->
+        <div id="statsTab" class="tab-content active">
+            <div id="welcomeCard" class="profile-card">
+                <div class="profile-avatar" id="avatarPreview">👤</div>
+                <div class="profile-info">
+                    <h2 id="memberName">Loading...</h2>
+                    <p id="memberVoice">🎭 Loading...</p>
+                    <p id="memberId">🆔 Loading...</p>
+                </div>
             </div>
-            <div class="select-hint">✨ Click on your name to view your attendance stats</div>
+            
+            <!-- Payment Reminder Banner -->
+            <div id="paymentReminder" style="display: none; margin-bottom: 24px;">
+                <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 20px; padding: 16px; border-left: 6px solid #f59e0b; animation: pulse 2s infinite;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="font-size: 32px;">⚠️</div>
+                            <div>
+                                <div style="font-weight: bold; color: #92400e; font-size: 16px;">You have pending fines!</div>
+                                <div id="reminderText" style="color: #78350f; font-size: 13px;"></div>
+                            </div>
+                        </div>
+                        <button onclick="scrollToPenalties()" style="background: #f59e0b; color: white; border: none; padding: 8px 20px; border-radius: 40px; cursor: pointer; font-weight: 500;">Pay Now →</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="statsGrid" class="stats-grid"></div>
+            
+            <div class="chart-container">
+                <div class="section-title">📈 Attendance Trend (Last 30 Days)</div>
+                <canvas id="trendChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <div class="section-title">💰 Penalties & Fines</div>
+                <div id="penaltiesList"></div>
+                <div id="penaltySummary" style="margin-top: 15px; text-align: center;"></div>
+            </div>
         </div>
-         <div>
-            <H3>PENALTIES PAYMENT</H3>
-            <P>POCHI:0117085859 </P>
-            <P>"Peter Manundu"</P>
-            </div>
 
-        <!-- Member Details Section (Hidden until member selected) -->
-        <div id="welcomeCard" class="welcome-card"></div>
-        <div id="statsGrid" class="stats-grid"></div>
-        <div id="chartContainer" class="chart-container">
-            <div class="section-title">📈 Attendance Trend (Last 30 Days)</div>
-            <canvas id="trendChart"></canvas>
+        <!-- Profile Tab -->
+        <div id="profileTab" class="tab-content">
+            <div id="profileMessage" class="message"></div>
+            <div class="form-card">
+                <h3>📱 Contact Information</h3>
+                <div class="form-group"><label>Phone Number</label><input type="tel" id="phoneInput" placeholder="e.g., 0712345678"></div>
+                <div class="form-group"><label>Emergency Contact Name</label><input type="text" id="emergencyNameInput" placeholder="Full name"></div>
+                <div class="form-group"><label>Emergency Contact Phone</label><input type="tel" id="emergencyPhoneInput" placeholder="Phone number"></div>
+            </div>
+            <div class="form-card">
+                <h3>🖼️ Profile Photo</h3>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div id="photoPreview" style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; overflow: hidden;">👤</div>
+                    <label class="file-input-label">📷 Choose Photo<input type="file" id="photoInput" accept="image/*"></label>
+                    <button onclick="uploadPhoto()" class="submit-btn" style="padding: 8px 16px;">Upload</button>
+                </div>
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">Recommended: Square image, max 2MB</p>
+            </div>
+            <div class="form-card"><h3>👥 Section Leader Contact</h3><div id="leaderInfo" class="leader-info">Loading leader information...</div></div>
+            <button onclick="saveProfile()" class="submit-btn">💾 Save Profile Changes</button>
         </div>
-        <div id="penaltiesContainer" class="chart-container">
-            <div class="section-title">💰 Penalties & Fines</div>
-            <div id="penaltiesList"></div>
-            <div id="penaltySummary" style="margin-top: 15px; text-align: center;"></div>
+
+        <!-- Apology Request Tab -->
+        <div id="apologyTab" class="tab-content">
+            <div id="apologyMessage" class="message"></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 24px;">
+                <button id="showLateBtn" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 20px; padding: 30px 20px; cursor: pointer; color: white;">
+                    <div style="font-size: 48px;">⏰</div>
+                    <div style="font-size: 20px; font-weight: bold;">Late Arrival</div>
+                    <div style="font-size: 12px;">Submit late apology</div>
+                </button>
+                <button id="showAbsentBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; border-radius: 20px; padding: 30px 20px; cursor: pointer; color: white;">
+                    <div style="font-size: 48px;">❌</div>
+                    <div style="font-size: 20px; font-weight: bold;">Absent</div>
+                    <div style="font-size: 12px;">Submit absence apology</div>
+                </button>
+            </div>
+            <div id="lateFormContainer" style="display: none;"><div class="form-card"><div style="display: flex; justify-content: space-between;"><h3>⏰ Late Arrival Apology</h3><button onclick="closeLateForm()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button></div><div id="lateTimeWarning" style="background:#fef3c7;padding:12px;border-radius:12px;margin-bottom:20px;display:none;"></div><div class="form-group"><label>Practice Session</label><select id="lateSessionSelect"></select></div><div class="form-group"><label>Expected Arrival Time</label><input type="time" id="lateTimeInput"></div><div class="form-group"><label>Reason for Lateness</label><textarea id="lateReasonInput" rows="3"></textarea></div><button onclick="submitLateApology()" class="submit-btn" style="width:100%;">Submit Late Apology</button></div></div>
+            <div id="absentFormContainer" style="display: none;"><div class="form-card"><div style="display: flex; justify-content: space-between;"><h3>❌ Absence Apology</h3><button onclick="closeAbsentForm()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button></div><div id="absentTimeWarning" style="background:#fef3c7;padding:12px;border-radius:12px;margin-bottom:20px;display:none;"></div><div class="form-group"><label>Practice Session</label><select id="absentSessionSelect"></select></div><div class="form-group"><label>Date of Absence</label><input type="date" id="absentDateInput"></div><div class="form-group"><label>Reason for Absence</label><textarea id="absentReasonInput" rows="3"></textarea></div><button onclick="submitAbsentApology()" class="submit-btn" style="width:100%;">Submit Absence Apology</button></div></div>
+            <div class="form-card"><h3>📋 My Apology Requests</h3><div id="myApologiesList"></div></div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="historyTab" class="tab-content">
+            <div class="form-card">
+                <h3>📄 Export Attendance History</h3>
+                <button onclick="exportToPDF()" class="export-btn">📄 Export as PDF</button>
+                <button onclick="exportToCSV()" class="export-btn">📊 Export as CSV</button>
+                <button onclick="window.print()" class="export-btn">🖨️ Print Friendly</button>
+            </div>
+            <div class="chart-container" id="historyContainer">
+                <div class="section-title">📋 Full Attendance History</div>
+                <div id="attendanceHistoryList" style="max-height: 500px; overflow-y: auto;"></div>
+            </div>
+        </div>
+
+        <!-- Payment Modal - Only shown when "Pay Fine" is clicked -->
+        <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+            <div style="background: white; border-radius: 28px; padding: 25px; max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #1e293b;">💰 Pay Fine</h3>
+                    <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 28px; cursor: pointer;">&times;</button>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">💳</div>
+                    <p style="margin-bottom: 15px;">Pay <strong style="font-size: 24px; color: #dc2626;" id="modalAmount"></strong> for:</p>
+                    <p id="modalDescription" style="font-size: 14px; color: #666; margin-bottom: 20px; padding: 10px; background: #f1f5f9; border-radius: 12px;"></p>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 20px; margin: 20px 0;">
+                        <p style="margin-bottom: 10px;">📱 <strong>POCHI LA BIASHARA</strong></p>
+                        <p style="font-size: 32px; font-weight: bold; letter-spacing: 2px;">0117085859</p>
+                        <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
+                        <p style="margin-bottom: 10px;"><strong> Peter Manundu</strong></p>
+                       <p id="modalAccountNumber" style="font-size: 24px; font-weight: bold; letter-spacing: 1px;"></p>
+                        <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
+                        <p style="margin-bottom: 10px;">💰 <strong>Amount to Pay</strong></p>
+                        <p id="modalAmount2" style="font-size: 28px; font-weight: bold;"></p>
+                        <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
+                        <p style="margin-bottom: 5px; font-size: 12px; opacity: 0.9;">💡 Total Pending Fines: <span id="pendingTotalDisplay">KSh 0</span></p>
+                    </div>
+                    <div style="background: #fef3c7; padding: 12px; border-radius: 12px; margin: 15px 0;">
+                        <p style="font-size: 13px; color: #92400e;">📌 <strong>Instructions:</strong></p>
+                        <p style="font-size: 12px; color: #92400e;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
+                        <p style="font-size: 12px; color: #92400e;">2. Enter Phone Number: <strong>0117085859</strong></p>
+                         <strong id="instructionAccountNumber"></strong></p>
+                        <p style="font-size: 12px; color: #92400e;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
+                        <p style="font-size: 12px; color: #92400e;">4. Enter your M-Pesa PIN and complete payment</p>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">📱 Your Mpesa Name</label>
+                        <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="recordPayment()" class="submit-btn" style="flex: 1; background: #10b981;">✅ I Have Paid</button>
+                        <button onclick="closePaymentModal()" style="flex: 1; background: #ef4444; color: white; border: none; border-radius: 40px; cursor: pointer;">Cancel</button>
+                    </div>
+                    <p style="font-size: 11px; color: #666; margin-top: 20px;">After payment, admin will confirm within 24 hours.</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="bottom-nav-item active" onclick="scrollToTop()"><span>📊</span><span>My Stats</span></div>
+        <div class="bottom-nav-item active" onclick="switchTab('stats')"><span>📊</span><span>Stats</span></div>
+        <div class="bottom-nav-item" onclick="switchTab('profile')"><span>👤</span><span>Profile</span></div>
+        <div class="bottom-nav-item" onclick="switchTab('apology')"><span>📝</span><span>Apology</span></div>
+        <div class="bottom-nav-item" onclick="switchTab('history')"><span>📜</span><span>History</span></div>
         <div class="bottom-nav-item" id="bottomLogoutBtn"><span>🚪</span><span>Logout</span></div>
     </div>
 
     <script>
-        // Supabase configuration - using unique variable name
         const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let trendChart;
-        let allMembers = [];
-        let selectedMember = null;
+        let currentMember = null;
+        let currentUserId = null;
+        let attendanceHistory = [];
+        let currentPenaltyId = null;
+        let currentPenaltyAmount = 0;
+        let currentPenaltyDescription = '';
 
-        // Logout function
+        const SESSION_CONFIG = {
+            Morning: { startTime: "9:00 AM", endTime: "1:00 PM", lateCutoff: "8:30 AM", absentCutoff: "8:00 AM", lateCutoffMinutes: 8*60+30, absentCutoffMinutes: 8*60 },
+            Afternoon: { startTime: "2:00 PM", endTime: "4:00 PM", lateCutoff: "1:30 PM", absentCutoff: "1:00 PM", lateCutoffMinutes: 13*60+30, absentCutoffMinutes: 13*60 },
+            Evening: { startTime: "7:00 PM", endTime: "10:30 PM", lateCutoff: "6:30 PM", absentCutoff: "6:00 PM", lateCutoffMinutes: 18*60+30, absentCutoffMinutes: 18*60 }
+        };
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            const tabs = ['stats', 'profile', 'apology', 'history'];
+            const index = tabs.indexOf(tab);
+            if (index !== -1) {
+                document.querySelectorAll('.tab-btn')[index].classList.add('active');
+                document.getElementById(`${tab}Tab`).classList.add('active');
+            }
+            document.querySelectorAll('.bottom-nav-item').forEach((item, idx) => {
+                if (idx === index) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+            if (tab === 'profile') loadProfileData();
+            if (tab === 'apology') { loadMyApologies(); initApologyTab(); }
+            if (tab === 'history') loadAttendanceHistory();
+        }
+
         async function logout() {
             await supabaseClient.auth.signOut();
             window.location.href = '../login.html';
         }
 
-        // Scroll to top function
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Load all members for the list
-        async function loadMembersList() {
-            const { data: members, error } = await supabaseClient
-                .from('members')
-                .select('member_id, name, voice_part')
-                .order('name', { ascending: true });
-            
-            if (error) {
-                console.error('Error loading members:', error);
-                document.getElementById('memberList').innerHTML = '<div class="empty-state">❌ Error loading members</div>';
-                return;
+        async function getCurrentMember() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = '../login.html'; return null; }
+            currentUserId = user.id;
+            const { data: userMember } = await supabaseClient.from('user_members').select('member_id').eq('user_id', user.id).single();
+            if (userMember) {
+                const { data: member } = await supabaseClient.from('members').select('*').eq('member_id', userMember.member_id).single();
+                currentMember = member;
             }
-            
-            allMembers = members;
-            displayMembers(allMembers);
-        }
-
-        // Display members in the list
-        function displayMembers(members) {
-            const container = document.getElementById('memberList');
-            if (!members || members.length === 0) {
-                container.innerHTML = '<div class="empty-state">🔍 No members found</div>';
-                return;
+            if (!currentMember) {
+                document.getElementById('memberName').textContent = 'Account not linked to a member';
+                document.getElementById('memberName').style.color = '#ef4444';
+                return null;
             }
-            
-            container.innerHTML = members.map(m => `
-                <div class="member-list-item" onclick="selectMember('${m.member_id}')">
-                    <div>
-                        <div class="member-list-name">${escapeHtml(m.name)}</div>
-                        <div class="member-list-voice">${m.voice_part}</div>
-                    </div>
-                    <div>👉</div>
-                </div>
-            `).join('');
+            return currentMember;
         }
 
-        // Search/filter members
-        function searchMembers() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allMembers.filter(m => 
-                m.name.toLowerCase().includes(searchTerm) || 
-                m.voice_part.toLowerCase().includes(searchTerm)
-            );
-            displayMembers(filtered);
-        }
-
-        // Escape HTML to prevent XSS
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str).replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-
-        // Select a member and load their data
-        async function selectMember(memberId) {
-            selectedMember = allMembers.find(m => m.member_id === memberId);
-            if (!selectedMember) return;
-            
-            // Highlight selected member
-            document.querySelectorAll('.member-list-item').forEach(el => {
-                el.classList.remove('selected');
-            });
-            event?.target?.closest('.member-list-item')?.classList.add('selected');
-            
-            // Show welcome card and charts
-            document.getElementById('welcomeCard').classList.add('active');
-            document.getElementById('chartContainer').classList.add('active');
-            document.getElementById('penaltiesContainer').classList.add('active');
-            
-            // Load member data
-            await loadMemberData(selectedMember);
-        }
-
-        // Load attendance data for selected member
-        async function loadMemberData(member) {
+        async function loadMemberData() {
+            const member = await getCurrentMember();
             if (!member) return;
-
-            document.getElementById('welcomeCard').innerHTML = `
-                <div class="member-name">Welcome, ${member.name}!</div>
-                <div style="display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap;">
-                    <span style="background:rgba(255,255,255,0.2); padding:6px 14px; border-radius:40px;">🎭 ${member.voice_part}</span>
-                    <span style="background:rgba(255,255,255,0.2); padding:6px 14px; border-radius:40px;">🆔 ${member.member_id}</span>
-                </div>
-            `;
-
-            // Get attendance history
-            const { data: attendance } = await supabaseClient
-                .from('attendance')
-                .select('*')
-                .eq('member_id', member.member_id)
-                .order('date', { ascending: true });
-
+            document.getElementById('memberName').textContent = member.name;
+            document.getElementById('memberVoice').innerHTML = `🎭 ${member.voice_part}`;
+            document.getElementById('memberId').innerHTML = `🆔 ${member.member_id}`;
+            await loadAttendanceStats();
+            await loadPenalties();
+            await loadProfileData();
+        }
+       
+        async function loadAttendanceStats() {
+            if (!currentMember) return;
+            const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember.member_id);
             const present = attendance?.filter(a => a.status === 'Present').length || 0;
             const late = attendance?.filter(a => a.status === 'Late').length || 0;
             const absent = attendance?.filter(a => a.status === 'Absent').length || 0;
             const total = present + late + absent;
             const percentage = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
-
-            document.getElementById('statsGrid').innerHTML = `
-                <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label">✅ Present</div></div>
+            document.getElementById('statsGrid').innerHTML = `<div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label">✅ Present</div></div>
                 <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label">⏰ Late</div></div>
                 <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label">❌ Absent</div></div>
-                <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label">Attendance Rate</div></div>
-            `;
-
-            // Create trend chart (last 30 days)
-            const last30Days = [];
-            const presentData = [];
-            const lateData = [];
+                <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label">Attendance Rate</div></div>`;
             
+            const last30Days = [], presentData = [], lateData = [];
             for (let i = 29; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
+                const date = new Date(); date.setDate(date.getDate() - i);
                 const dateStr = date.toISOString().split('T')[0];
                 last30Days.push(dateStr.substring(5));
-                
                 const dayAttendance = attendance?.filter(a => a.date === dateStr) || [];
                 presentData.push(dayAttendance.filter(a => a.status === 'Present').length);
                 lateData.push(dayAttendance.filter(a => a.status === 'Late').length);
             }
-
             if (trendChart) trendChart.destroy();
             const ctx = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: last30Days,
-                    datasets: [
-                        { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true },
-                        { label: 'Late', data: lateData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.3, fill: true }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: true }
-            });
-
-            // Load penalties
-            await loadPenalties(member.member_id);
+            trendChart = new Chart(ctx, { type: 'line', data: { labels: last30Days, datasets: [{ label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true }, { label: 'Late', data: lateData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.3, fill: true }] }, options: { responsive: true, maintainAspectRatio: true } });
         }
-
-        // Load penalties for selected member
-        async function loadPenalties(memberId) {
-            const { data: penalties } = await supabaseClient
-                .from('penalties')
-                .select('*')
-                .eq('member_id', memberId)
-                .order('date', { ascending: false });
-
+        
+        async function loadPenalties() {
+            if (!currentMember) return;
+            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember.member_id).order('date', { ascending: false });
             const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
             const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
-
-            document.getElementById('penaltySummary').innerHTML = `
-                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-                    <div><strong>💰 Total Fines:</strong> KSh ${pendingTotal + paidTotal}</div>
-                    <div><strong>⏳ Pending:</strong> KSh ${pendingTotal}</div>
-                    <div><strong>✅ Paid:</strong> KSh ${paidTotal}</div>
-                </div>
-            `;
-
-            if (!penalties?.length) {
-                document.getElementById('penaltiesList').innerHTML = '<div class="empty-state">🎉 No penalties recorded! Keep up the good attendance!</div>';
-                return;
-            }
-
-            document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
-                <div class="penalty-item">
-                    <div>
-                        <div><strong>${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</strong></div>
-                        <div style="font-size: 13px; color: #666;">${p.date} • ${p.session || ''}</div>
-                        ${p.reason ? `<div style="font-size: 11px; color: #666;">📝 ${p.reason}</div>` : ''}
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="penalty-amount">KSh ${p.amount}</div>
-                        <div class="penalty-status ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status.toUpperCase()}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Check authentication and load
-        async function init() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = '../login.html';
-                return;
-            }
+            document.getElementById('penaltySummary').innerHTML = `<div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;"><div><strong>💰 Total Fines:</strong> KSh ${pendingTotal + paidTotal}</div><div><strong>⏳ Pending:</strong> KSh ${pendingTotal}</div><div><strong>✅ Paid:</strong> KSh ${paidTotal}</div></div><div style="margin-top: 10px; font-size: 12px; color: #666;">📞 Payment: POCHI 0117085859 | Peter Manundu</div>`;
             
-            await loadMembersList();
+            if (!penalties?.length) {
+                document.getElementById('penaltiesList').innerHTML = '<div class="empty-state">🎉 No penalties recorded!</div>';
+            } else {
+                document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
+                    <div class="apology-item">
+                        <div><div><strong>${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</strong></div><div style="font-size: 13px; color: #666;">${p.date} • ${p.session || ''}</div></div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 18px; font-weight: bold; color: #dc2626;">KSh ${p.amount}</div>
+                            <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
+                            ${p.status === 'pending' ? `<div style="margin-top: 10px;"><button onclick="showPaymentModal('${p.id}', ${p.amount}, '${p.penalty_type === 'late' ? 'Late Fine' : 'Absent Fine'} - ${p.date}')" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 13px; width: 100%;">💳 Pay Fine</button></div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            await checkPendingPenalties();
+            await updateFloatingReminder();
         }
 
-        // Event listeners
+        async function showPaymentModal(penaltyId, amount, description) {
+            const { data: penalty } = await supabaseClient.from('penalties').select('status').eq('id', penaltyId).single();
+            if (!penalty || penalty.status !== 'pending') { alert('This fine has already been paid or does not exist.'); return; }
+            currentPenaltyId = penaltyId; currentPenaltyAmount = amount; currentPenaltyDescription = description;
+            const { data: penalties } = await supabaseClient.from('penalties').select('amount').eq('member_id', currentMember.member_id).eq('status', 'pending');
+            const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
+            document.getElementById('modalAmount').innerHTML = `KSh ${amount}`;
+            document.getElementById('modalDescription').innerHTML = description;
+            document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
+            document.getElementById('modalAmount2').innerHTML = `KSh ${amount}`;
+            document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal}`;
+            document.getElementById('instructionAccountNumber').innerHTML = currentMember.member_id;
+            document.getElementById('instructionAmount').innerHTML = `KSh ${amount}`;
+            document.getElementById('transactionCode').value = '';
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+        
+        function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; currentPenaltyId = null; }
+        
+       async function recordPayment() {
+    if (!currentPenaltyId) { alert('No payment selected'); return; }
+    const transactionCode = document.getElementById('transactionCode').value.trim();
+    
+    const { error } = await supabaseClient.from('payments').insert({ 
+        member_id: currentMember.member_id, 
+        penalty_id: currentPenaltyId, 
+        amount: currentPenaltyAmount, 
+        payment_method: 'mpesa', 
+        status: 'pending', 
+        payment_date: new Date().toISOString().split('T')[0], 
+        reference: transactionCode || null
+        // removed 'notes' field
+    });
+    
+    if (error) alert('❌ Error recording payment: ' + error.message);
+    else { alert('✅ Payment recorded! Admin will confirm within 24 hours.'); closePaymentModal(); loadPenalties(); }
+}
+
+        async function loadProfileData() {
+            if (!currentMember) return;
+            const { data: profile } = await supabaseClient.from('user_profiles').select('*').eq('user_id', currentUserId).maybeSingle();
+            if (profile) {
+                document.getElementById('phoneInput').value = profile.phone || '';
+                document.getElementById('emergencyNameInput').value = profile.emergency_contact || '';
+                document.getElementById('emergencyPhoneInput').value = profile.emergency_phone || '';
+                if (profile.profile_photo_url) { document.getElementById('photoPreview').innerHTML = `<img src="${profile.profile_photo_url}" style="width:100%; height:100%; object-fit:cover;">`; document.getElementById('avatarPreview').innerHTML = `<img src="${profile.profile_photo_url}" style="width:100%; height:100%; object-fit:cover;">`; }
+            }
+            const { data: leader } = await supabaseClient.from('members').select('name, phone, email').eq('voice_part', currentMember.voice_part).eq('is_leader', true).maybeSingle();
+            if (leader) document.getElementById('leaderInfo').innerHTML = `<p><strong>🎵 Section Leader:</strong> ${leader.name}</p><p><strong>📞 Contact:</strong> ${leader.phone || 'Not available'}</p><p><strong>📧 Email:</strong> ${leader.email || 'Not available'}</p>`;
+            else document.getElementById('leaderInfo').innerHTML = `<p>📢 Section leader contact information will be updated soon.</p><p>For any urgent matters, contact the choir director.</p>`;
+        }
+
+        async function saveProfile() {
+            const phone = document.getElementById('phoneInput').value;
+            const emergencyContact = document.getElementById('emergencyNameInput').value;
+            const emergencyPhone = document.getElementById('emergencyPhoneInput').value;
+            const { error } = await supabaseClient.from('user_profiles').upsert({ user_id: currentUserId, member_id: currentMember.member_id, phone, emergency_contact: emergencyContact, emergency_phone: emergencyPhone, updated_at: new Date() });
+            const msgDiv = document.getElementById('profileMessage');
+            if (error) { msgDiv.className = 'message error'; msgDiv.textContent = '❌ Error saving profile: ' + error.message; setTimeout(() => msgDiv.className = 'message', 3000); }
+            else { msgDiv.className = 'message success'; msgDiv.textContent = '✅ Profile saved successfully!'; setTimeout(() => msgDiv.className = 'message', 3000); }
+        }
+
+        async function uploadPhoto() {
+            const fileInput = document.getElementById('photoInput'); const file = fileInput.files[0];
+            if (!file) return;
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${currentUserId}_${Date.now()}.${fileExt}`;
+            const filePath = `profile_photos/${fileName}`;
+            const { error: uploadError } = await supabaseClient.storage.from('profiles').upload(filePath, file);
+            if (uploadError) { alert('Upload error: ' + uploadError.message); return; }
+            const { data: { publicUrl } } = supabaseClient.storage.from('profiles').getPublicUrl(filePath);
+            const { error: updateError } = await supabaseClient.from('user_profiles').upsert({ user_id: currentUserId, member_id: currentMember.member_id, profile_photo_url: publicUrl });
+            if (updateError) alert('Error updating profile: ' + updateError.message);
+            else { document.getElementById('photoPreview').innerHTML = `<img src="${publicUrl}" style="width:100%; height:100%; object-fit:cover;">`; document.getElementById('avatarPreview').innerHTML = `<img src="${publicUrl}" style="width:100%; height:100%; object-fit:cover;">`; alert('✅ Photo uploaded successfully!'); }
+        }
+
+        async function checkPendingPenalties() {
+            if (!currentMember) return;
+            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember.member_id).eq('status', 'pending');
+            const pendingCount = penalties?.length || 0;
+            const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
+            const reminderDiv = document.getElementById('paymentReminder');
+            const reminderText = document.getElementById('reminderText');
+            if (pendingCount > 0) {
+                reminderDiv.style.display = 'block';
+                reminderText.innerHTML = pendingCount === 1 ? `You have 1 pending fine of KSh ${pendingTotal}. Please clear it to avoid extra charges.` : `You have ${pendingCount} pending fines totaling KSh ${pendingTotal}. Please clear them to avoid extra charges.`;
+            } else { reminderDiv.style.display = 'none'; }
+        }
+        
+        function scrollToPenalties() { const section = document.getElementById('penaltiesList'); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        
+        function addFloatingReminderButton() {
+            if (document.getElementById('floatingReminderBtn')) return;
+            const floatingBtn = document.createElement('div');
+            floatingBtn.id = 'floatingReminderBtn';
+            floatingBtn.innerHTML = `<div style="position: fixed; bottom: 80px; right: 20px; background: #ef4444; color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99;"><span style="font-size: 24px;">💰</span><span id="floatingCount" style="position: absolute; top: -5px; right: -5px; background: #f59e0b; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold;">0</span></div>`;
+            floatingBtn.style.display = 'none';
+            document.body.appendChild(floatingBtn);
+            floatingBtn.onclick = () => scrollToPenalties();
+        }
+        
+        async function updateFloatingReminder() {
+            if (!currentMember) return;
+            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember.member_id).eq('status', 'pending');
+            const pendingCount = penalties?.length || 0;
+            const floatingBtn = document.getElementById('floatingReminderBtn');
+            if (floatingBtn) {
+                if (pendingCount > 0) { floatingBtn.style.display = 'block'; const countSpan = floatingBtn.querySelector('#floatingCount'); if (countSpan) countSpan.textContent = pendingCount; }
+                else { floatingBtn.style.display = 'none'; }
+            }
+        }
+        
+        function startReminderInterval() { checkPendingPenalties(); updateFloatingReminder(); setInterval(() => { checkPendingPenalties(); updateFloatingReminder(); }, 5 * 60 * 1000); }
+        
+        function getCurrentMinutes() { const now = new Date(); return now.getHours() * 60 + now.getMinutes(); }
+        function isLateSessionAvailable(session) { return getCurrentMinutes() <= SESSION_CONFIG[session].lateCutoffMinutes; }
+        function isAbsentSessionAvailable(session, date) { const selectedDate = new Date(date); const today = new Date(); today.setHours(0,0,0,0); if (selectedDate > today) return true; if (selectedDate.getTime() === today.getTime()) return getCurrentMinutes() <= SESSION_CONFIG[session].absentCutoffMinutes; return false; }
+        function getAvailableLateSessions() { const available = []; for (const [session] of Object.entries(SESSION_CONFIG)) if (isLateSessionAvailable(session)) available.push(session); return available; }
+        function populateLateSessions() { const select = document.getElementById('lateSessionSelect'); const available = getAvailableLateSessions(); const warningDiv = document.getElementById('lateTimeWarning'); if (available.length === 0) { select.innerHTML = '<option disabled>No sessions available</option>'; warningDiv.style.display = 'block'; } else { warningDiv.style.display = 'none'; select.innerHTML = available.map(s => `<option value="${s}">${s} (${SESSION_CONFIG[s].startTime} - ${SESSION_CONFIG[s].endTime})</option>`).join(''); } }
+        function populateAbsentSessions() { const date = document.getElementById('absentDateInput').value; const select = document.getElementById('absentSessionSelect'); const warningDiv = document.getElementById('absentTimeWarning'); if (!date) return; const available = []; for (const [session] of Object.entries(SESSION_CONFIG)) if (isAbsentSessionAvailable(session, date)) available.push(session); if (available.length === 0) { select.innerHTML = '<option disabled>No sessions available</option>'; warningDiv.style.display = 'block'; } else { warningDiv.style.display = 'none'; select.innerHTML = available.map(s => `<option value="${s}">${s} (${SESSION_CONFIG[s].startTime} - ${SESSION_CONFIG[s].endTime})</option>`).join(''); } }
+        function showLateForm() { document.getElementById('lateFormContainer').style.display = 'block'; document.getElementById('absentFormContainer').style.display = 'none'; populateLateSessions(); }
+        function showAbsentForm() { document.getElementById('absentFormContainer').style.display = 'block'; document.getElementById('lateFormContainer').style.display = 'none'; const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); document.getElementById('absentDateInput').value = tomorrow.toISOString().split('T')[0]; populateAbsentSessions(); }
+        function closeLateForm() { document.getElementById('lateFormContainer').style.display = 'none'; }
+        function closeAbsentForm() { document.getElementById('absentFormContainer').style.display = 'none'; }
+        async function submitLateApology() { const session = document.getElementById('lateSessionSelect').value; const reason = document.getElementById('lateReasonInput').value; if (!session || !reason) { showApologyMessage('Please fill all fields', 'error'); return; } const date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('apology_requests').insert({ member_id: currentMember.member_id, apology_type: 'late', date, session, reason, status: 'pending' }); if (error) showApologyMessage('Error: ' + error.message, 'error'); else { showApologyMessage('✅ Late apology submitted!', 'success'); closeLateForm(); loadMyApologies(); } }
+        async function submitAbsentApology() { const session = document.getElementById('absentSessionSelect').value; const date = document.getElementById('absentDateInput').value; const reason = document.getElementById('absentReasonInput').value; if (!session || !date || !reason) { showApologyMessage('Please fill all fields', 'error'); return; } const { error } = await supabaseClient.from('apology_requests').insert({ member_id: currentMember.member_id, apology_type: 'absent', date, session, reason, status: 'pending' }); if (error) showApologyMessage('Error: ' + error.message, 'error'); else { showApologyMessage('✅ Absence apology submitted!', 'success'); closeAbsentForm(); loadMyApologies(); } }
+        function showApologyMessage(msg, type) { const msgDiv = document.getElementById('apologyMessage'); msgDiv.className = `message ${type}`; msgDiv.innerHTML = msg; setTimeout(() => msgDiv.className = 'message', 3000); }
+        async function loadMyApologies() { if (!currentMember) return; const { data: apologies } = await supabaseClient.from('apology_requests').select('*').eq('member_id', currentMember.member_id).order('date', { ascending: false }); const container = document.getElementById('myApologiesList'); if (!apologies?.length) { container.innerHTML = '<div class="empty-state">📭 No apology requests submitted yet.</div>'; return; } container.innerHTML = apologies.map(a => `<div class="apology-item"><div><div><strong>${a.apology_type === 'late' ? '⏰ Late' : '❌ Absent'}</strong> 📅 ${a.date} - ${a.session}</div><div style="font-size:13px;margin-top:5px;">${escapeHtml(a.reason)}</div>${a.admin_notes ? `<div style="font-size:12px;color:#666;">📝 Admin: ${escapeHtml(a.admin_notes)}</div>` : ''}</div><div><span class="status-badge status-${a.status}">${a.status.toUpperCase()}</span></div></div>`).join(''); }
+        function initApologyTab() { document.getElementById('showLateBtn').onclick = showLateForm; document.getElementById('showAbsentBtn').onclick = showAbsentForm; const absentDate = document.getElementById('absentDateInput'); if (absentDate) absentDate.onchange = populateAbsentSessions; const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); if (absentDate) absentDate.value = tomorrow.toISOString().split('T')[0]; }
+        async function loadAttendanceHistory() { if (!currentMember) return; const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember.member_id).order('date', { ascending: false }); attendanceHistory = attendance || []; const container = document.getElementById('attendanceHistoryList'); if (!attendanceHistory.length) { container.innerHTML = '<div class="empty-state">📭 No attendance records found.</div>'; return; } container.innerHTML = `<table style="width:100%; border-collapse: collapse;"><thead><tr style="background:#f1f5f9;"><th style="padding:10px;">Date</th><th style="padding:10px;">Session</th><th style="padding:10px;">Status</th></tr></thead><tbody>${attendanceHistory.map(a => `<tr><td style="padding:10px;">${a.date}</td><td style="padding:10px;">${a.session}</td><td style="padding:10px;"><span class="status-badge ${a.status === 'Present' ? 'status-approved' : a.status === 'Late' ? 'status-pending' : 'status-rejected'}">${a.status === 'Present' ? '✅ Present' : a.status === 'Late' ? '⏰ Late' : '❌ Absent'}</span></td></tr>`).join('')}</tbody></table>`; }
+        async function exportToPDF() { const element = document.getElementById('historyContainer'); await html2pdf().set({ margin: [0.5,0.5,0.5,0.5], filename: `attendance_${currentMember?.name}_${new Date().toISOString().split('T')[0]}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(element).save(); }
+        function exportToCSV() { if (!attendanceHistory.length) { alert('No attendance data to export'); return; } const headers = ['Date', 'Session', 'Status']; const rows = attendanceHistory.map(a => [a.date, a.session, a.status]); const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n'); const blob = new Blob([csvContent], { type: 'text/csv' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `attendance_${currentMember?.name}_${new Date().toISOString().split('T')[0]}.csv`; link.click(); URL.revokeObjectURL(link.href); }
+        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : m === '>' ? '&gt;' : m); }
+
         document.getElementById('logoutBtn').addEventListener('click', logout);
         document.getElementById('bottomLogoutBtn').addEventListener('click', logout);
-        document.getElementById('searchInput').addEventListener('input', searchMembers);
         
-        // Start the app
+        async function init() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = '../login.html'; return; }
+            await loadMemberData();
+            addFloatingReminderButton();
+            startReminderInterval();
+        }
         init();
     </script>
 </body>

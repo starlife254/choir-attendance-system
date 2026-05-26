@@ -3,491 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>My Attendance | Member Portal</title>
+    <title>Members View | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 12px;
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5; --indigo-light: #eef2ff;
+            --green: #10b981; --green-light: #d1fae5;
+            --amber: #f59e0b; --amber-light: #fef9c3;
+            --red: #ef4444; --red-light: #fee2e2;
+            --bg: #f8fafc; --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
         }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 28px;
-            padding: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
-            margin-bottom: 70px;
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        /* MAIN */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        /* CONTENT */
+        .content { padding: 24px 28px 40px; flex: 1; }
+        .two-col { display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start; }
+
+        /* SEARCH PANEL */
+        .search-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 18px; position: sticky; top: 72px; }
+        .search-panel-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+        .search-panel-title i { font-size: 16px; color: var(--indigo); }
+        .search-box { position: relative; margin-bottom: 14px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text-tertiary); }
+        .search-input { width: 100%; padding: 10px 14px 10px 38px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; background: var(--bg); font-family: inherit; outline: none; transition: border-color .15s; color: var(--text-primary); }
+        .search-input:focus { border-color: var(--indigo); }
+        .member-list { max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .member-list-item { background: var(--bg); padding: 11px 14px; border-radius: 10px; cursor: pointer; transition: all .15s; border: 0.5px solid transparent; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .member-list-item:hover { background: var(--indigo-light); border-color: var(--indigo-light); transform: translateX(3px); }
+        .member-list-item.selected { background: var(--indigo); color: #fff; border-color: var(--indigo); }
+        .member-list-item.selected .member-list-voice { opacity: .7; color: #fff; }
+        .member-list-name { font-size: 13px; font-weight: 600; }
+        .member-list-voice { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .select-hint { font-size: 11px; color: var(--text-tertiary); text-align: center; margin-top: 10px; }
+
+        /* DETAIL PANEL */
+        .detail-panel { display: flex; flex-direction: column; gap: 16px; }
+        .welcome-card { background: var(--indigo); border-radius: 16px; padding: 20px 22px; color: #fff; display: none; }
+        .welcome-card.active { display: block; animation: fadeIn .25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .welcome-name { font-size: 18px; font-weight: 700; }
+        .welcome-meta { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+        .welcome-badge { background: rgba(255,255,255,0.2); padding: 5px 14px; border-radius: 40px; font-size: 12px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+        .stat-number { font-size: 26px; font-weight: 700; }
+        .stat-label { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+        .stat-card.present .stat-number { color: var(--green); }
+        .stat-card.late    .stat-number { color: var(--amber); }
+        .stat-card.absent  .stat-number { color: var(--red); }
+        .stat-card.rate    .stat-number { color: var(--indigo); }
+
+        .chart-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 18px; display: none; }
+        .chart-panel.active { display: block; animation: fadeIn .25s ease; }
+        .panel-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+        .panel-title i { font-size: 16px; }
+
+        .penalties-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 18px; display: none; }
+        .penalties-panel.active { display: block; animation: fadeIn .25s ease; }
+        .penalty-summary { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 14px; background: var(--bg); border-radius: 10px; font-size: 13px; }
+        .penalty-summary span { display: flex; gap: 5px; }
+
+        .penalty-item { background: var(--bg); padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .penalty-amount { font-size: 16px; font-weight: 700; color: var(--red); }
+        .penalty-status-badge { padding: 3px 10px; border-radius: 40px; font-size: 11px; font-weight: 600; }
+        .status-pending { background: var(--amber-light); color: #d97706; }
+        .status-paid    { background: var(--green-light);  color: #059669; }
+
+        .empty-state { text-align: center; padding: 40px; color: var(--text-tertiary); font-size: 13px; }
+        .empty-state i { font-size: 28px; display: block; margin-bottom: 8px; }
+        .placeholder-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
+        .placeholder-state i { font-size: 40px; display: block; margin-bottom: 12px; }
+
+        /* BOTTOM NAV */
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        @media (max-width: 1024px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 900px)  { .two-col { grid-template-columns: 1fr; } .search-panel { position: static; } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .header h1 { color: #1e293b; font-size: 1.5rem; }
-        .logout-btn {
-            background: #f5f5f500;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        .search-section {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .search-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #1e293b;
-        }
-        .search-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 50px;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .member-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .member-list-item {
-            background: white;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .back-btn {
-            background: #f1f5f9;
-            color: #335545;
-            padding: 10px 18px;
-            text-decoration: none;
-            border-radius: 60px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .member-list-item:hover {
-            background: #eef2ff;
-            transform: translateX(5px);
-            border-color: #667eea;
-        }
-        .member-list-item.selected {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: #667eea;
-        }
-        .member-list-name {
-            font-weight: bold;
-        }
-        .member-list-voice {
-            font-size: 12px;
-            opacity: 0.7;
-        }
-        .select-hint {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .welcome-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 24px;
-            margin-bottom: 24px;
-            display: none;
-        }
-        .welcome-card.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-        }
-        .stat-number { font-size: 32px; font-weight: bold; }
-        .stat-label { color: #666; font-size: 13px; margin-top: 5px; }
-        .stat-card.present .stat-number { color: #10b981; }
-        .stat-card.late .stat-number { color: #f59e0b; }
-        .stat-card.absent .stat-number { color: #ef4444; }
-        .stat-card.percentage .stat-number { color: #667eea; }
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-            display: none;
-        }
-        .chart-container.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .penalty-item {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .penalty-amount { font-size: 18px; font-weight: bold; color: #dc2626; }
-        .penalty-status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-        .status-pending { background: #fef3c7; color: #d97706; }
-        .status-paid { background: #d1fae5; color: #059669; }
-        .empty-state { text-align: center; padding: 40px; color: #666; }
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-        .bottom-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #666;
-            font-size: 11px;
-            gap: 4px;
-            padding: 5px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-        .bottom-nav-item span:first-child { font-size: 22px; }
-        .bottom-nav-item.active { color: #667eea; background: #f0f0ff; }
-        @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
+        button { cursor: pointer; touch-action: manipulation; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📊 Member Attendance Portal</h1>
-        
-            <button class="logout-btn" id="logoutBtn"></button>
-          <a href="index.html" class="back-btn">← Dashboard</a>
-        </div>
 
-        <!-- Search Section -->
-        <div class="search-section">
-            <div class="search-title">🔍 Find Your Name</div>
-            <input type="text" id="searchInput" class="search-input" placeholder="Type your name to search...">
-            <div id="memberList" class="member-list">
-                <div class="empty-state">Loading members...</div>
-            </div>
-            <div class="select-hint">✨ Click on your name to view your attendance stats</div>
-        </div>
-            <div>
-            <H3>PENALTIES PAYMENT</H3>
-            <P>POCHI:0117085859 </P>
-            <P>"Peter Manundu"</P>
-            </div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-        <!-- Member Details Section (Hidden until member selected) -->
-        <div id="welcomeCard" class="welcome-card"></div>
-        <div id="statsGrid" class="stats-grid"></div>
-        <div id="chartContainer" class="chart-container">
-            <div class="section-title">📈 Attendance Trend (Last 30 Days)</div>
-            <canvas id="trendChart"></canvas>
-        </div>
-        <div id="penaltiesContainer" class="chart-container">
-            <div class="section-title">💰 Penalties & Fines</div>
-            <div id="penaltiesList"></div>
-            <div id="penaltySummary" style="margin-top: 15px; text-align: center;"></div>
-        </div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
     </div>
-
-    <div class="bottom-nav">
-        <div class="bottom-nav-item active" onclick="scrollToTop()"><span>📊</span><span>My Stats</span></div>
-        <div class="bottom-nav-item" id="bottomLogoutBtn"><span>🚪</span><span>Logout</span></div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item active"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="doLogout()"><i class="ti ti-logout"></i> Log out</div>
     </div>
+</aside>
 
-    <script>
-        // Supabase configuration - using unique variable name
-        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        let trendChart;
-        let allMembers = [];
-        let selectedMember = null;
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="ti ti-menu-2"></i></button>
+            <div class="topbar-left">
+                <h2>Members View</h2>
+                <p>Search and view individual member attendance</p>
+            </div>
+        </div>
+        <div class="topbar-right"><div class="topbar-chip" id="topTime">--:--</div></div>
+    </header>
 
-        // Logout function
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            window.location.href = '../login.html';
-        }
-
-        // Scroll to top function
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Load all members for the list
-        async function loadMembersList() {
-            const { data: members, error } = await supabaseClient
-                .from('members')
-                .select('member_id, name, voice_part')
-                .order('name', { ascending: true });
-            
-            if (error) {
-                console.error('Error loading members:', error);
-                document.getElementById('memberList').innerHTML = '<div class="empty-state">❌ Error loading members</div>';
-                return;
-            }
-            
-            allMembers = members;
-            displayMembers(allMembers);
-        }
-
-        // Display members in the list
-        function displayMembers(members) {
-            const container = document.getElementById('memberList');
-            if (!members || members.length === 0) {
-                container.innerHTML = '<div class="empty-state">🔍 No members found</div>';
-                return;
-            }
-            
-            container.innerHTML = members.map(m => `
-                <div class="member-list-item" onclick="selectMember('${m.member_id}')">
-                    <div>
-                        <div class="member-list-name">${escapeHtml(m.name)}</div>
-                        <div class="member-list-voice">${m.voice_part}</div>
-                    </div>
-                    <div>👉</div>
+    <main class="content">
+        <div class="two-col">
+            <!-- Search panel -->
+            <div class="search-panel">
+                <div class="search-panel-title"><i class="ti ti-search"></i> Find a member</div>
+                <div class="search-box">
+                    <i class="ti ti-search"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search by name or voice part…">
                 </div>
-            `).join('');
-        }
-
-        // Search/filter members
-        function searchMembers() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allMembers.filter(m => 
-                m.name.toLowerCase().includes(searchTerm) || 
-                m.voice_part.toLowerCase().includes(searchTerm)
-            );
-            displayMembers(filtered);
-        }
-
-        // Escape HTML to prevent XSS
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str).replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-
-        // Select a member and load their data
-        async function selectMember(memberId) {
-            selectedMember = allMembers.find(m => m.member_id === memberId);
-            if (!selectedMember) return;
-            
-            // Highlight selected member
-            document.querySelectorAll('.member-list-item').forEach(el => {
-                el.classList.remove('selected');
-            });
-            event?.target?.closest('.member-list-item')?.classList.add('selected');
-            
-            // Show welcome card and charts
-            document.getElementById('welcomeCard').classList.add('active');
-            document.getElementById('chartContainer').classList.add('active');
-            document.getElementById('penaltiesContainer').classList.add('active');
-            
-            // Load member data
-            await loadMemberData(selectedMember);
-        }
-
-        // Load attendance data for selected member
-        async function loadMemberData(member) {
-            if (!member) return;
-
-            document.getElementById('welcomeCard').innerHTML = `
-                <div class="member-name">Welcome, ${member.name}!</div>
-                <div style="display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap;">
-                    <span style="background:rgba(255,255,255,0.2); padding:6px 14px; border-radius:40px;">🎭 ${member.voice_part}</span>
-                    <span style="background:rgba(255,255,255,0.2); padding:6px 14px; border-radius:40px;">🆔 ${member.member_id}</span>
+                <div id="memberList" class="member-list">
+                    <div class="empty-state"><i class="ti ti-loader"></i> Loading members…</div>
                 </div>
-            `;
+                <p class="select-hint">Click a member to view their attendance &amp; penalties</p>
+            </div>
 
-            // Get attendance history
-            const { data: attendance } = await supabaseClient
-                .from('attendance')
-                .select('*')
-                .eq('member_id', member.member_id)
-                .order('date', { ascending: true });
-
-            const present = attendance?.filter(a => a.status === 'Present').length || 0;
-            const late = attendance?.filter(a => a.status === 'Late').length || 0;
-            const absent = attendance?.filter(a => a.status === 'Absent').length || 0;
-            const total = present + late + absent;
-            const percentage = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
-
-            document.getElementById('statsGrid').innerHTML = `
-                <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label">✅ Present</div></div>
-                <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label">⏰ Late</div></div>
-                <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label">❌ Absent</div></div>
-                <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label">Attendance Rate</div></div>
-            `;
-
-            // Create trend chart (last 30 days)
-            const last30Days = [];
-            const presentData = [];
-            const lateData = [];
-            
-            for (let i = 29; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                last30Days.push(dateStr.substring(5));
-                
-                const dayAttendance = attendance?.filter(a => a.date === dateStr) || [];
-                presentData.push(dayAttendance.filter(a => a.status === 'Present').length);
-                lateData.push(dayAttendance.filter(a => a.status === 'Late').length);
-            }
-
-            if (trendChart) trendChart.destroy();
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: last30Days,
-                    datasets: [
-                        { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true },
-                        { label: 'Late', data: lateData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.3, fill: true }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: true }
-            });
-
-            // Load penalties
-            await loadPenalties(member.member_id);
-        }
-
-        // Load penalties for selected member
-        async function loadPenalties(memberId) {
-            const { data: penalties } = await supabaseClient
-                .from('penalties')
-                .select('*')
-                .eq('member_id', memberId)
-                .order('date', { ascending: false });
-
-            const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
-            const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
-
-            document.getElementById('penaltySummary').innerHTML = `
-                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-                    <div><strong>💰 Total Fines:</strong> KSh ${pendingTotal + paidTotal}</div>
-                    <div><strong>⏳ Pending:</strong> KSh ${pendingTotal}</div>
-                    <div><strong>✅ Paid:</strong> KSh ${paidTotal}</div>
+            <!-- Detail panel -->
+            <div class="detail-panel">
+                <div id="welcomeCard" class="welcome-card">
+                    <div class="welcome-name" id="welcomeName">Member</div>
+                    <div class="welcome-meta" id="welcomeMeta"></div>
                 </div>
-            `;
 
-            if (!penalties?.length) {
-                document.getElementById('penaltiesList').innerHTML = '<div class="empty-state">🎉 No penalties recorded! Keep up the good attendance!</div>';
-                return;
-            }
-
-            document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
-                <div class="penalty-item">
-                    <div>
-                        <div><strong>${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</strong></div>
-                        <div style="font-size: 13px; color: #666;">${p.date} • ${p.session || ''}</div>
-                        ${p.reason ? `<div style="font-size: 11px; color: #666;">📝 ${p.reason}</div>` : ''}
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="penalty-amount">KSh ${p.amount}</div>
-                        <div class="penalty-status ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status.toUpperCase()}</div>
+                <div id="statsGridWrap">
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- populated on member select -->
                     </div>
                 </div>
-            `).join('');
-        }
 
-        // Check authentication and load
-        async function init() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = '../login.html';
-                return;
+                <div id="chartContainer" class="chart-panel">
+                    <div class="panel-title"><i class="ti ti-chart-line" style="color:var(--indigo)"></i> Attendance trend (last 30 days)</div>
+                    <canvas id="trendChart" height="90"></canvas>
+                </div>
+
+                <div id="penaltiesContainer" class="penalties-panel">
+                    <div class="panel-title"><i class="ti ti-cash" style="color:var(--red)"></i> Penalties &amp; fines</div>
+                    <div id="penaltySummary" class="penalty-summary"></div>
+                    <div id="penaltiesList"></div>
+                </div>
+
+                <div id="placeholderState" class="placeholder-state">
+                    <i class="ti ti-user-search" style="color:var(--text-tertiary)"></i>
+                    Select a member on the left to view their full attendance record and penalties.
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let allMembers = [], selectedMember = null, trendChart;
+
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+    setInterval(tick,1000); tick();
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+    function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+    async function doLogout() { try { await supabaseClient.auth.signOut(); } catch {} window.location.href = 'login.html'; }
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            const { data: p } = await supabaseClient.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (p) { if (p.full_name) { const f=p.full_name.split(' ')[0]; document.getElementById('userName').textContent=f; document.getElementById('userAvatar').textContent=f.charAt(0).toUpperCase(); } if (p.role) document.getElementById('userRole').textContent=p.role; }
+        } catch(e) { console.warn(e); }
+    }
+
+    async function loadMembersList() {
+        const { data: members, error } = await supabaseClient.from('members').select('member_id, name, voice_part').order('name', { ascending: true });
+        if (error) { document.getElementById('memberList').innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading members</div>'; return; }
+        allMembers = members;
+        displayMembers(allMembers);
+    }
+
+    function displayMembers(members) {
+        const container = document.getElementById('memberList');
+        if (!members || members.length === 0) { container.innerHTML = '<div class="empty-state"><i class="ti ti-mood-empty"></i> No members found</div>'; return; }
+        container.innerHTML = members.map(m => `
+            <div class="member-list-item" onclick="selectMember('${m.member_id}')">
+                <div>
+                    <div class="member-list-name">${escapeHtml(m.name)}</div>
+                    <div class="member-list-voice">${escapeHtml(m.voice_part)}</div>
+                </div>
+                <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-tertiary)"></i>
+            </div>
+        `).join('');
+    }
+
+    function searchMembers() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        displayMembers(allMembers.filter(m => m.name.toLowerCase().includes(q) || m.voice_part.toLowerCase().includes(q)));
+    }
+
+    async function selectMember(memberId) {
+        selectedMember = allMembers.find(m => m.member_id === memberId);
+        if (!selectedMember) return;
+        document.querySelectorAll('.member-list-item').forEach(el => el.classList.remove('selected'));
+        event?.target?.closest('.member-list-item')?.classList.add('selected');
+        document.getElementById('placeholderState').style.display = 'none';
+        document.getElementById('welcomeCard').classList.add('active');
+        document.getElementById('chartContainer').classList.add('active');
+        document.getElementById('penaltiesContainer').classList.add('active');
+        await loadMemberData(selectedMember);
+    }
+
+    async function loadMemberData(member) {
+        if (!member) return;
+        document.getElementById('welcomeCard').innerHTML = `
+            <div class="welcome-name">👤 ${escapeHtml(member.name)}</div>
+            <div class="welcome-meta">
+                <span class="welcome-badge"><i class="ti ti-microphone" style="font-size:13px;vertical-align:-2px"></i> ${escapeHtml(member.voice_part)}</span>
+                <span class="welcome-badge"><i class="ti ti-id" style="font-size:13px;vertical-align:-2px"></i> ${escapeHtml(member.member_id)}</span>
+            </div>
+        `;
+        const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', member.member_id).order('date', { ascending: true });
+        const present = attendance?.filter(a => a.status === 'Present').length || 0;
+        const late    = attendance?.filter(a => a.status === 'Late').length    || 0;
+        const absent  = attendance?.filter(a => a.status === 'Absent').length  || 0;
+        const total   = present + late + absent;
+        const pct     = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label">✅ Present</div></div>
+            <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label">⏰ Late</div></div>
+            <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label">❌ Absent</div></div>
+            <div class="stat-card rate"><div class="stat-number">${pct}%</div><div class="stat-label">Attendance Rate</div></div>
+        `;
+        const last30Days = [], presentData = [], lateData = [];
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date(); date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+            last30Days.push(dateStr.substring(5));
+            const dayAtt = attendance?.filter(a => a.date === dateStr) || [];
+            presentData.push(dayAtt.filter(a => a.status === 'Present').length);
+            lateData.push(dayAtt.filter(a => a.status === 'Late').length);
+        }
+        if (trendChart) trendChart.destroy();
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        trendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: last30Days,
+                datasets: [
+                    { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', tension: 0.35, fill: true, pointRadius: 2 },
+                    { label: 'Late',    data: lateData,    borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.35, fill: true, pointRadius: 2 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: true,
+                plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } },
+                scales: { x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } }, y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, stepSize: 1 }, beginAtZero: true } }
             }
-            
-            await loadMembersList();
-        }
+        });
+        await loadPenalties(member.member_id);
+    }
 
-        // Event listeners
-        document.getElementById('logoutBtn').addEventListener('click', logout);
-        document.getElementById('bottomLogoutBtn').addEventListener('click', logout);
-        document.getElementById('searchInput').addEventListener('input', searchMembers);
-        
-        // Start the app
-        init();
-    </script>
+    async function loadPenalties(memberId) {
+        const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', memberId).order('date', { ascending: false });
+        const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
+        const paidTotal    = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0)    || 0;
+        document.getElementById('penaltySummary').innerHTML = `
+            <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
+            <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
+            <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
+        `;
+        if (!penalties?.length) { document.getElementById('penaltiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i> No penalties recorded! Keep up the good attendance!</div>'; return; }
+        document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
+            <div class="penalty-item">
+                <div>
+                    <div style="font-size:13px;font-weight:600;">${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">${p.date} · ${p.session || ''}</div>
+                    ${p.reason ? `<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">📝 ${escapeHtml(p.reason)}</div>` : ''}
+                </div>
+                <div style="text-align:right;">
+                    <div class="penalty-amount">KSh ${p.amount}</div>
+                    <span class="penalty-status-badge ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status.toUpperCase()}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', searchMembers);
+
+    async function init() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await loadUserInfo();
+        await loadMembersList();
+    }
+    init();
+    window.doLogout = doLogout;
+</script>
 </body>
 </html>

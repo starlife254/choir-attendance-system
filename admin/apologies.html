@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Manage Apologies | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5; --indigo-light: #eef2ff;
+            --green: #10b981; --green-light: #d1fae5;
+            --amber: #f59e0b; --amber-light: #fef9c3;
+            --red: #ef4444; --red-light: #fee2e2;
+            --bg: #f8fafc; --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        /* MAIN */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        /* CONTENT */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* KPI */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+        .kpi-card.amber::before { background: var(--amber); }
+        .kpi-card.green::before { background: var(--green); }
+        .kpi-card.red::before   { background: var(--red); }
+        .kpi-card.indigo::before{ background: var(--indigo); }
+        .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .kpi-label i { font-size: 14px; }
+        .kpi-value { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+        .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+
+        /* FILTERS */
+        .filters-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .filter-select { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 13px; color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer; }
+        .filter-select:focus { border-color: var(--indigo); }
+        .refresh-btn { padding: 8px 16px; border: none; border-radius: 10px; background: var(--indigo); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .refresh-btn:hover { opacity: .88; }
+
+        /* APOLOGY CARDS */
+        .apologies-list { display: flex; flex-direction: column; gap: 12px; }
+        .apology-card { background: var(--surface); border: 0.5px solid var(--border); border-left: 4px solid var(--amber); border-radius: 14px; padding: 18px 20px; transition: box-shadow .15s; }
+        .apology-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .apology-card.approved { border-left-color: var(--green); }
+        .apology-card.rejected { border-left-color: var(--red); }
+
+        .apology-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+        .apology-member-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+        .apology-member-meta { font-size: 12px; color: var(--text-secondary); margin-top: 3px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .apology-member-meta span { display: flex; align-items: center; gap: 4px; }
+        .apology-member-meta i { font-size: 13px; }
+
+        .status-badge { padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; }
+        .status-pending  { background: var(--amber-light); color: #d97706; }
+        .status-approved { background: var(--green-light);  color: #059669; }
+        .status-rejected { background: var(--red-light);    color: #dc2626; }
+
+        .apology-details { background: var(--bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+        .apology-details p { margin: 5px 0; font-size: 13px; color: var(--text-primary); display: flex; gap: 6px; }
+        .apology-details p strong { color: var(--text-secondary); min-width: 90px; }
+
+        .admin-note { width: 100%; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: 10px; margin-top: 10px; font-family: inherit; font-size: 13px; resize: vertical; outline: none; background: var(--bg); }
+        .admin-note:focus { border-color: var(--indigo); }
+
+        .action-btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .approve-btn { padding: 8px 20px; background: var(--green); color: #fff; border: none; border-radius: 40px; cursor: pointer; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: opacity .15s; }
+        .reject-btn  { padding: 8px 20px; background: var(--red);   color: #fff; border: none; border-radius: 40px; cursor: pointer; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: opacity .15s; }
+        .approve-btn:hover, .reject-btn:hover { opacity: .88; }
+
+        .empty-state { text-align: center; padding: 48px 20px; font-size: 13px; color: var(--text-tertiary); }
+        .empty-state i { font-size: 32px; display: block; margin-bottom: 10px; }
+
+        /* BOTTOM NAV */
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .filters-panel { flex-direction: column; align-items: stretch; }
+            .refresh-btn { justify-content: center; }
+        }
+        button { cursor: pointer; touch-action: manipulation; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item active"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="doLogout()"><i class="ti ti-logout"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="ti ti-menu-2"></i></button>
+            <div class="topbar-left">
+                <h2>Manage Apologies</h2>
+                <p>Review and approve absence requests</p>
+            </div>
+        </div>
+        <div class="topbar-right"><div class="topbar-chip" id="topTime">--:--</div></div>
+    </header>
+
+    <main class="content">
+        <div class="kpi-grid" id="summaryStats">
+            <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i>Pending</div><div class="kpi-value">—</div></div>
+            <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i>Approved</div><div class="kpi-value">—</div></div>
+            <div class="kpi-card red"><div class="kpi-label"><i class="ti ti-x" style="color:var(--red)"></i>Rejected</div><div class="kpi-value">—</div></div>
+            <div class="kpi-card indigo"><div class="kpi-label"><i class="ti ti-file-text" style="color:var(--indigo)"></i>Total</div><div class="kpi-value">—</div></div>
+        </div>
+
+        <div class="filters-panel">
+            <select id="statusFilter" class="filter-select">
+                <option value="all">All requests</option>
+                <option value="pending">Pending only</option>
+                <option value="approved">Approved only</option>
+                <option value="rejected">Rejected only</option>
+            </select>
+            <button class="refresh-btn" onclick="loadApologies()">
+                <i class="ti ti-refresh"></i> Refresh
+            </button>
+        </div>
+
+        <div id="apologiesList" class="apologies-list">
+            <div class="empty-state"><i class="ti ti-loader"></i> Loading apologies…</div>
+        </div>
+    </main>
+</div>
+
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+    setInterval(tick,1000); tick();
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+    function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+    async function doLogout() { try { await supabaseClient.auth.signOut(); } catch {} window.location.href = 'login.html'; }
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            const { data: p } = await supabaseClient.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (p) { if (p.full_name) { const f=p.full_name.split(' ')[0]; document.getElementById('userName').textContent=f; document.getElementById('userAvatar').textContent=f.charAt(0).toUpperCase(); } if (p.role) document.getElementById('userRole').textContent=p.role; }
+        } catch(e) { console.warn(e); }
+    }
+
+    async function loadApologies() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        let query = supabaseClient.from('apology_requests').select('*, members(member_id, name, voice_part)').order('created_at', { ascending: false });
+        if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+        const { data: apologies, error } = await query;
+        if (error) { document.getElementById('apologiesList').innerHTML = `<div class="empty-state"><i class="ti ti-alert-circle"></i> Error: ${escapeHtml(error.message)}</div>`; return; }
+
+        const pending  = apologies?.filter(a => a.status === 'pending').length  || 0;
+        const approved = apologies?.filter(a => a.status === 'approved').length || 0;
+        const rejected = apologies?.filter(a => a.status === 'rejected').length || 0;
+
+        document.getElementById('summaryStats').innerHTML = `
+            <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i>Pending</div><div class="kpi-value">${pending}</div><div class="kpi-meta">Awaiting review</div></div>
+            <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i>Approved</div><div class="kpi-value">${approved}</div><div class="kpi-meta">Excused absences</div></div>
+            <div class="kpi-card red"><div class="kpi-label"><i class="ti ti-x" style="color:var(--red)"></i>Rejected</div><div class="kpi-value">${rejected}</div><div class="kpi-meta">Not approved</div></div>
+            <div class="kpi-card indigo"><div class="kpi-label"><i class="ti ti-file-text" style="color:var(--indigo)"></i>Total</div><div class="kpi-value">${apologies?.length||0}</div><div class="kpi-meta">All requests</div></div>
+        `;
+
+        if (!apologies?.length) { document.getElementById('apologiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i>No apology requests found.</div>'; return; }
+
+        document.getElementById('apologiesList').innerHTML = apologies.map(a => `
+            <div class="apology-card ${a.status}" id="apology-${a.id}">
+                <div class="apology-header">
+                    <div>
+                        <div class="apology-member-name">${escapeHtml(a.members?.name || 'Unknown')}</div>
+                        <div class="apology-member-meta">
+                            <span><i class="ti ti-microphone"></i>${escapeHtml(a.members?.voice_part || '—')}</span>
+                            <span><i class="ti ti-id"></i>${escapeHtml(a.member_id)}</span>
+                        </div>
+                    </div>
+                    <span class="status-badge status-${a.status}">${a.status.toUpperCase()}</span>
+                </div>
+                <div class="apology-details">
+                    <p><strong><i class="ti ti-calendar"></i> Date:</strong> ${a.date} · ${a.session}</p>
+                    <p><strong><i class="ti ti-file-description"></i> Reason:</strong> ${escapeHtml(a.reason)}</p>
+                    <p><strong><i class="ti ti-clock"></i> Submitted:</strong> ${new Date(a.created_at).toLocaleString()}</p>
+                    ${a.admin_notes ? `<p><strong><i class="ti ti-note"></i> Admin note:</strong> ${escapeHtml(a.admin_notes)}</p>` : ''}
+                </div>
+                ${a.status === 'pending' ? `
+                    <textarea id="note-${a.id}" class="admin-note" placeholder="Add optional admin note (visible to member)…"></textarea>
+                    <div class="action-btns">
+                        <button class="approve-btn" onclick="updateApology('${a.id}', 'approved')"><i class="ti ti-check"></i> Approve</button>
+                        <button class="reject-btn"  onclick="updateApology('${a.id}', 'rejected')"><i class="ti ti-x"></i> Reject</button>
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+    }
+
+    async function updateApology(id, status) {
+        const note = document.getElementById(`note-${id}`)?.value || '';
+        const { data: apology, error: fetchError } = await supabaseClient.from('apology_requests').select('*').eq('id', id).single();
+        if (fetchError) { alert('❌ Error fetching apology: ' + fetchError.message); return; }
+        const { error: updateError } = await supabaseClient.from('apology_requests').update({ status, admin_notes: note, updated_at: new Date() }).eq('id', id);
+        if (updateError) { alert('❌ Error: ' + updateError.message); return; }
+        if (status === 'approved') {
+            const attendanceStatus = apology.apology_type === 'late' ? 'Late' : 'Present';
+            const { data: existingAttendance } = await supabaseClient.from('attendance').select('*').eq('member_id', apology.member_id).eq('date', apology.date).eq('session', apology.session).maybeSingle();
+            if (existingAttendance) {
+                await supabaseClient.from('attendance').update({ status: attendanceStatus, has_apology: true, apology_approved: true }).eq('id', existingAttendance.id);
+            } else {
+                await supabaseClient.from('attendance').insert({ member_id: apology.member_id, date: apology.date, session: apology.session, status: attendanceStatus, has_apology: true, apology_approved: true, marked_at: new Date() });
+            }
+            alert(`✅ Apology ${status}! Attendance has been updated.`);
+        } else {
+            alert(`✅ Apology ${status}!`);
+        }
+        loadApologies();
+    }
+
+    document.getElementById('statusFilter').addEventListener('change', loadApologies);
+
+    async function init() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await loadUserInfo();
+        loadApologies();
+    }
+
+    init();
+    window.loadApologies = loadApologies;
+    window.updateApology = updateApology;
+    window.doLogout = doLogout;
+</script>
+</body>
+</html>

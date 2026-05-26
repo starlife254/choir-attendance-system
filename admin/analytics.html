@@ -3,499 +3,740 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Member Analytics | Choir Manager</title>
+    <title>Analytics | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 12px;
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --cyan: #06b6d4;
+            --cyan-light: #cffafe;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 28px;
-            padding: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
-            margin-bottom: 70px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .header h1 { color: #1e293b; font-size: 1.5rem; }
-        .back-btn {
-            background: #f1f5f9;
-            color: #334155;
-            padding: 10px 18px;
-            text-decoration: none;
-            border-radius: 60px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            padding: 10px 24px;
-            background: #f1f5f9;
-            border: none;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        /* ── SIDEBAR ── */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+
+        /* ── SIDEBAR OVERLAY ── */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        /* ── MAIN ── */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── TOPBAR ── */
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .topbar-chip i { font-size: 14px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        /* ── CONTENT ── */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* ── TABS ── */
+        .tabs-bar { display: flex; gap: 4px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 5px; margin-bottom: 24px; width: fit-content; }
+        .tab-btn { padding: 8px 20px; background: transparent; border: none; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 9px; color: var(--text-secondary); display: flex; align-items: center; gap: 7px; transition: background .12s, color .12s; white-space: nowrap; }
+        .tab-btn i { font-size: 15px; }
+        .tab-btn.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .tab-btn:active { transform: scale(0.97); }
+        .tab-content { display: none; animation: fadeIn .22s ease; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .member-list { max-height: 500px; overflow-y: auto; }
-        .member-item {
-            background: #f8fafc;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 4px solid #667eea;
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── CONTROLS ── */
+        .controls-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-select { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer; transition: border-color .15s; }
+        .filter-select:focus { border-color: var(--indigo); }
+        .action-btn { padding: 8px 16px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; white-space: nowrap; }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-amber { background: var(--amber); color: #fff; }
+        .btn-outline { background: transparent; border: 0.5px solid var(--border); color: var(--text-primary); }
+
+        /* ── KPI GRID ── */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+        .kpi-card.indigo::before { background: var(--indigo); }
+        .kpi-card.green::before  { background: var(--green); }
+        .kpi-card.amber::before  { background: var(--amber); }
+        .kpi-card.red::before    { background: var(--red); }
+        .kpi-card.cyan::before   { background: var(--cyan); }
+        .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .kpi-label i { font-size: 14px; }
+        .kpi-value { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+        .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+
+        /* ── PANEL ── */
+        .panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+        .panel-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .panel-title i { font-size: 16px; }
+
+        /* ── CHART ── */
+        .chart-wrap { position: relative; }
+
+        /* ── SEARCH ── */
+        .search-box { position: relative; margin-bottom: 18px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text-tertiary); }
+        .search-input { width: 100%; padding: 10px 14px 10px 38px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; background: var(--bg); font-family: inherit; outline: none; transition: border-color .15s; color: var(--text-primary); }
+        .search-input:focus { border-color: var(--indigo); }
+
+        /* ── MEMBER LIST ── */
+        .member-list { display: flex; flex-direction: column; gap: 8px; max-height: 520px; overflow-y: auto; }
+        .member-row { background: var(--bg); border-radius: 12px; padding: 13px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-left: 3px solid var(--indigo); transition: background .12s, transform .1s; }
+        .member-row:hover { background: var(--indigo-light); transform: translateX(3px); }
+        .member-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+        .member-info { flex: 1; min-width: 0; }
+        .member-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .member-voice { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .member-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        /* ── PILLS ── */
+        .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 40px; font-size: 11px; font-weight: 600; }
+        .pill i { font-size: 11px; }
+        .pill-green  { background: var(--green-light);  color: #065f46; }
+        .pill-amber  { background: var(--amber-light);  color: #854d0e; }
+        .pill-red    { background: var(--red-light);    color: #991b1b; }
+        .pill-indigo { background: var(--indigo-light); color: var(--indigo); }
+        .pill-cyan   { background: var(--cyan-light);   color: #155e75; }
+        .pill-gray   { background: #f1f5f9; color: var(--text-secondary); }
+
+        /* ── PENALTY LIST ── */
+        .penalty-row { background: var(--bg); border-radius: 12px; padding: 13px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; cursor: pointer; transition: background .12s; }
+        .penalty-row:hover { background: var(--indigo-light); }
+        .penalty-meta { flex: 1; min-width: 0; }
+        .penalty-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .penalty-details { font-size: 11px; color: var(--text-secondary); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .penalty-amount { font-size: 16px; font-weight: 700; color: var(--red); min-width: 80px; text-align: right; }
+        .pay-btn { padding: 5px 14px; border: none; border-radius: 40px; background: var(--green); color: #fff; font-size: 11px; font-weight: 600; cursor: pointer; margin-top: 4px; display: block; transition: opacity .15s; }
+        .pay-btn:hover { opacity: .85; }
+
+        /* ── PERFORMERS ── */
+        .performer-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+        .performer-row:last-child { border-bottom: none; }
+        .performer-rank { width: 26px; height: 26px; border-radius: 50%; background: var(--indigo-light); color: var(--indigo); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .performer-rank.gold   { background: #fef9c3; color: #854d0e; }
+        .performer-rank.silver { background: #f1f5f9; color: #475569; }
+        .performer-rank.bronze { background: #fef3c7; color: #92400e; }
+        .performer-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .performer-voice { font-size: 11px; color: var(--text-secondary); }
+
+        /* ── EMPTY / LOADING ── */
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-tertiary); font-size: 13px; }
+        .empty-state i { font-size: 32px; display: block; margin-bottom: 10px; color: var(--text-tertiary); }
+        .loading-state { text-align: center; padding: 40px 20px; font-size: 13px; color: var(--text-secondary); }
+        .loading-state i { font-size: 28px; display: block; margin-bottom: 8px; color: var(--indigo-mid, var(--indigo)); }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .tabs-bar { width: 100%; flex-wrap: wrap; }
         }
-        .member-item:hover { background: #eef2ff; transform: translateX(5px); }
-        .member-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
-        .member-stats { display: flex; gap: 15px; font-size: 12px; flex-wrap: wrap; }
-        .stat-badge { padding: 2px 8px; border-radius: 12px; }
-        .stat-badge.present { background: #d1fae5; color: #065f46; }
-        .stat-badge.late { background: #fef3c7; color: #92400e; }
-        .stat-badge.absent { background: #fee2e2; color: #991b1b; }
-        .stat-badge.pending { background: #fef3c7; color: #d97706; }
-        .stat-badge.paid { background: #d1fae5; color: #059669; }
-        
-        .search-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 60px;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 24px;
-        }
-        .summary-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-        }
-        .summary-number { font-size: 28px; font-weight: bold; }
-        .summary-label { font-size: 12px; opacity: 0.9; margin-top: 5px; }
-        
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-        }
-        .filter-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .filter-select {
-            padding: 10px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 40px;
-            background: white;
-            cursor: pointer;
-        }
-        .penalty-item {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .penalty-item:hover { background: #eef2ff; transform: translateX(5px); }
-        .penalty-amount { font-size: 18px; font-weight: bold; color: #dc2626; }
-        
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-        .bottom-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #666;
-            font-size: 11px;
-            gap: 4px;
-            padding: 5px 15px;
-            border-radius: 10px;
-        }
-        .bottom-nav-item span:first-child { font-size: 22px; }
-        .bottom-nav-item.active { color: #667eea; background: #f0f0ff; }
-        .empty-state { text-align: center; padding: 40px; color: #666; }
-        .success-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: 500; }
-        .warning-btn { background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: 500; }
-        
-        @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
-        @media (max-width: 480px) { .summary-stats { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+        button { cursor: pointer; touch-action: manipulation; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📈 Member Analytics</h1>
-            <a href="index.html" class="back-btn">← Dashboard</a>
-        </div>
-        
 
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('group')">👥 Group Trends</button>
-            <button class="tab-btn" onclick="switchTab('members')">👤 Members List</button>
-            <button class="tab-btn" onclick="switchTab('penalties')">💰 Penalties & Fines</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item active"><i class="ti ti-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div>
+                <div class="user-name" id="userName">Loading…</div>
+                <div class="user-role" id="userRole">Admin</div>
+            </div>
+        </div>
+        <div class="logout-link" onclick="logout()">
+            <i class="ti ti-logout"></i> Log out
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <i class="ti ti-menu-2"></i>
+            </button>
+            <div class="topbar-left">
+                <h2>Analytics</h2>
+                <p>Member trends, performance &amp; penalties</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-chip" id="topTime">--:--</div>
+        </div>
+    </header>
+
+    <main class="content">
+
+        <!-- TABS -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" data-tab="group">
+                <i class="ti ti-chart-line"></i> Group trends
+            </button>
+            <button class="tab-btn" data-tab="members">
+                <i class="ti ti-users"></i> Members list
+            </button>
+            <button class="tab-btn" data-tab="penalties">
+                <i class="ti ti-cash"></i> Penalties &amp; fines
+            </button>
         </div>
 
-        <!-- Group Trends Tab -->
+        <!-- ── GROUP TRENDS TAB ── -->
         <div id="groupTab" class="tab-content active">
-            <div class="filter-group">
-                <select id="groupWeekSelect" class="filter-select" onchange="loadGroupTrends()">
+            <div class="controls-row">
+                <select id="groupWeekSelect" class="filter-select">
                     <option value="7">Last 7 days</option>
                     <option value="14" selected>Last 14 days</option>
                     <option value="30">Last 30 days</option>
                 </select>
-               </div>
-            <div class="summary-stats" id="groupSummary"></div>
-            <div class="chart-container">
-                <canvas id="trendChart"></canvas>
+                <button class="action-btn btn-primary" onclick="loadGroupTrends()">
+                    <i class="ti ti-refresh"></i> Refresh
+                </button>
             </div>
-            <div id="topPerformers"></div>
+
+            <div class="kpi-grid" id="groupKpis">
+                <div class="kpi-card indigo"><div class="kpi-label"><i class="ti ti-users" style="color:var(--indigo)"></i>Total members</div><div class="kpi-value">—</div></div>
+                <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-cash" style="color:var(--green)"></i>Total fines</div><div class="kpi-value">—</div></div>
+                <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i>Pending</div><div class="kpi-value">—</div></div>
+                <div class="kpi-card cyan"><div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--cyan)"></i>Collected</div><div class="kpi-value">—</div></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title"><i class="ti ti-chart-line" style="color:var(--indigo)"></i> Attendance trend</div>
+                <div class="chart-wrap"><canvas id="trendChart" height="90"></canvas></div>
+            </div>
+
+            <div class="panel" id="topPerformersPanel">
+                <div class="panel-title"><i class="ti ti-trophy" style="color:var(--amber)"></i> Top performers</div>
+                <div class="loading-state"><i class="ti ti-loader"></i> Loading…</div>
+            </div>
         </div>
 
-        <!-- Members List Tab -->
+        <!-- ── MEMBERS TAB ── -->
         <div id="membersTab" class="tab-content">
-            <input type="text" id="memberSearch" class="search-input" placeholder="🔍 Search member by name..." onkeyup="filterMembers()">
-            <div id="memberList" class="member-list">Loading members...</div>
+            <div class="search-box">
+                <i class="ti ti-search"></i>
+                <input type="text" id="memberSearch" class="search-input" placeholder="Search member by name…" oninput="filterMembers()">
+            </div>
+            <div id="memberList" class="member-list">
+                <div class="loading-state"><i class="ti ti-loader"></i> Loading members…</div>
+            </div>
         </div>
 
-        <!-- Penalties Tab -->
+        <!-- ── PENALTIES TAB ── -->
         <div id="penaltiesTab" class="tab-content">
-            <div class="filter-group">
-                <select id="penaltyStatusFilter" class="filter-select" onchange="loadPenalties()">
-                    <option value="all">All Penalties</option>
-                    <option value="pending">Pending Only</option>
-                    <option value="paid">Paid Only</option>
+            <div class="controls-row">
+                <select id="penaltyStatusFilter" class="filter-select">
+                    <option value="all">All penalties</option>
+                    <option value="pending">Pending only</option>
+                    <option value="paid">Paid only</option>
                 </select>
-               </div>
-            <div class="summary-stats" id="penaltySummary"></div>
-            <div id="penaltiesList"></div>
+                <button class="action-btn btn-primary" onclick="loadPenalties()">
+                    <i class="ti ti-refresh"></i> Refresh
+                </button>
+                <button class="action-btn btn-green" onclick="syncPenaltiesFromAttendance()">
+                    <i class="ti ti-refresh-dot"></i> Sync from attendance
+                </button>
+                <button class="action-btn btn-red" onclick="clearAllPenalties()">
+                    <i class="ti ti-trash"></i> Clear all
+                </button>
+            </div>
+
+            <div class="kpi-grid" id="penaltyKpis">
+                <div class="kpi-card red"><div class="kpi-label"><i class="ti ti-receipt" style="color:var(--red)"></i>Total fines</div><div class="kpi-value">—</div></div>
+                <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i>Pending</div><div class="kpi-value">—</div></div>
+                <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i>Collected</div><div class="kpi-value">—</div></div>
+            </div>
+
+            <div id="penaltiesList">
+                <div class="loading-state"><i class="ti ti-loader"></i> Loading penalties…</div>
+            </div>
         </div>
-    </div>
 
-    <div class="bottom-nav">
-        <a href="index.html" class="bottom-nav-item"><span>🏠</span><span>Home</span></a>
-        <a href="mark-attendance.html" class="bottom-nav-item"><span>✅</span><span>Mark</span></a>
-        <a href="reports.html" class="bottom-nav-item"><span>📊</span><span>Reports</span></a>
-        <a href="analytics.html" class="bottom-nav-item active"><span>📈</span><span>Analytics</span></a>
-    </div>
+    </main>
+</div>
 
-    <script>
-        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        let trendChart;
-        let allMembers = [];
+<!-- Bottom Nav (mobile) -->
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item active"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
+</nav>
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            if (tab === 'group') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('groupTab').classList.add('active');
-                loadGroupTrends();
-            } else if (tab === 'members') {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('membersTab').classList.add('active');
-                loadMembersList();
-            } else {
-                document.querySelectorAll('.tab-btn')[2].classList.add('active');
-                document.getElementById('penaltiesTab').classList.add('active');
-                loadPenalties();
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let trendChart;
+    let allMembers = [];
+    let memberAttendanceCache = {};
+
+    // ── HELPERS ──
+    function esc(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function fmt(n) { return 'KSh ' + (n || 0).toLocaleString(); }
+
+    function tick() {
+        document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ── AUTH ──
+    async function checkAuth() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return null; }
+        return session;
+    }
+
+    async function logout() {
+        try { await sb.auth.signOut(); } catch {}
+        window.location.href = 'login.html';
+    }
+
+    // ── USER INFO ──
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const emailName = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = emailName;
+            document.getElementById('userAvatar').textContent = (emailName.charAt(0) || 'A').toUpperCase();
+            const { data: profile } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (profile) {
+                if (profile.full_name) {
+                    const first = profile.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = first;
+                    document.getElementById('userAvatar').textContent = first.charAt(0).toUpperCase();
+                }
+                if (profile.role) document.getElementById('userRole').textContent = profile.role;
             }
-        }
+        } catch (e) { console.warn(e); }
+    }
 
-        async function loadGroupTrends() {
-            const days = parseInt(document.getElementById('groupWeekSelect').value);
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - days);
-            
-            const { data: attendance } = await supabaseClient
-                .from('attendance')
-                .select('date, status')
-                .gte('date', startDate.toISOString().split('T')[0]);
-            
+    // ── SIDEBAR ──
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    // ── TABS ──
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`${tab}Tab`).classList.add('active');
+            if (tab === 'group')     loadGroupTrends();
+            if (tab === 'members')   loadMembersList();
+            if (tab === 'penalties') loadPenalties();
+        });
+    });
+
+    document.getElementById('groupWeekSelect').addEventListener('change', loadGroupTrends);
+    document.getElementById('penaltyStatusFilter').addEventListener('change', loadPenalties);
+
+    // ── GROUP TRENDS ──
+    async function loadGroupTrends() {
+        const days = parseInt(document.getElementById('groupWeekSelect').value);
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+        const startStr = startDate.toISOString().split('T')[0];
+
+        try {
+            const { data: att } = await sb.from('attendance').select('date, status').gte('date', startStr);
             const dailyStats = {};
-            attendance?.forEach(record => {
-                if (!dailyStats[record.date]) dailyStats[record.date] = { present: 0, late: 0 };
-                if (record.status === 'Present') dailyStats[record.date].present++;
-                else if (record.status === 'Late') dailyStats[record.date].late++;
+            (att || []).forEach(r => {
+                if (!dailyStats[r.date]) dailyStats[r.date] = { present: 0, late: 0 };
+                if (r.status === 'Present') dailyStats[r.date].present++;
+                else if (r.status === 'Late') dailyStats[r.date].late++;
             });
-            
+
             const dates = Object.keys(dailyStats).sort();
             const presentData = dates.map(d => dailyStats[d].present);
-            const lateData = dates.map(d => dailyStats[d].late);
-            
+            const lateData    = dates.map(d => dailyStats[d].late);
+
             if (trendChart) trendChart.destroy();
             const ctx = document.getElementById('trendChart').getContext('2d');
             trendChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: dates, datasets: [
-                    { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true },
-                    { label: 'Late', data: lateData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.3, fill: true }
-                ]},
-                options: { responsive: true, maintainAspectRatio: true }
-            });
-            
-            await loadGroupSummary();
-            await loadTopPerformers(startDate);
-        }
-
-        async function loadGroupSummary() {
-            const { count: totalMembers } = await supabaseClient.from('members').select('*', { count: 'exact', head: true });
-            const { data: penalties } = await supabaseClient.from('penalties').select('status, amount');
-            
-            const totalPending = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0) || 0;
-            const totalPaid = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + (p.amount || 0), 0) || 0;
-            
-            document.getElementById('groupSummary').innerHTML = `
-                <div class="summary-card">👥 ${totalMembers || 0}<div class="summary-label">Total Members</div></div>
-                <div class="summary-card">💰 KSh ${totalPending + totalPaid}<div class="summary-label">Total Fines</div></div>
-                <div class="summary-card" style="background:#f59e0b;color:#333;">⏳ KSh ${totalPending}<div class="summary-label">Pending</div></div>
-                <div class="summary-card" style="background:#10b981;">✅ KSh ${totalPaid}<div class="summary-label">Collected</div></div>
-            `;
-        }
-
-        async function loadTopPerformers(startDate) {
-            const { data: attendance } = await supabaseClient
-                .from('attendance')
-                .select('member_id, status, members(name, voice_part)')
-                .gte('date', startDate.toISOString().split('T')[0]);
-            
-            if (!attendance?.length) {
-                document.getElementById('topPerformers').innerHTML = '<div class="chart-container"><h3>🏆 Top Performers</h3><div class="empty-state">No attendance data yet.</div></div>';
-                return;
-            }
-            
-            const memberStats = {};
-            attendance.forEach(record => {
-                if (!memberStats[record.member_id]) {
-                    memberStats[record.member_id] = { name: record.members?.name, voice: record.members?.voice_part, present: 0, late: 0, total: 0 };
+                data: {
+                    labels: dates,
+                    datasets: [
+                        { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 5 },
+                        { label: 'Late',    data: lateData,    borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 5 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 12 } } } },
+                    scales: {
+                        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 } } },
+                        y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 }, stepSize: 1 }, beginAtZero: true }
+                    }
                 }
-                if (record.status === 'Present') memberStats[record.member_id].present++;
-                else if (record.status === 'Late') memberStats[record.member_id].late++;
-                memberStats[record.member_id].total++;
             });
-            
-            const performers = Object.values(memberStats).sort((a, b) => ((b.present + b.late) / b.total) - ((a.present + a.late) / a.total)).slice(0, 5);
-            
-            document.getElementById('topPerformers').innerHTML = `
-                <div class="chart-container">
-                    <h3>🏆 Top 5 Performers</h3>
-                    ${performers.map((p, i) => `
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #e2e8f0;">
-                            <div><strong>${i+1}. ${p.name}</strong> <span style="color:#666; font-size:12px;">(${p.voice})</span></div>
-                            <div><span style="color:#10b981;">✅ ${p.present}</span> / <span style="color:#f59e0b;">⏰ ${p.late}</span> / 📊 ${((p.present + p.late) / p.total * 100).toFixed(0)}%</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+
+            await loadGroupKpis();
+            await loadTopPerformers(startStr);
+        } catch (e) { console.warn(e); }
+    }
+
+    async function loadGroupKpis() {
+        const { count: totalMembers } = await sb.from('members').select('*', { count: 'exact', head: true });
+        const { data: penalties } = await sb.from('penalties').select('status, amount');
+        const totalPending = (penalties || []).filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
+        const totalPaid    = (penalties || []).filter(p => p.status === 'paid').reduce((s, p) => s + (p.amount || 0), 0);
+
+        document.getElementById('groupKpis').innerHTML = `
+            <div class="kpi-card indigo">
+                <div class="kpi-label"><i class="ti ti-users" style="color:var(--indigo)"></i> Total members</div>
+                <div class="kpi-value">${totalMembers || 0}</div>
+                <div class="kpi-meta">Registered this festival</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-label"><i class="ti ti-cash" style="color:var(--green)"></i> Total fines</div>
+                <div class="kpi-value" style="font-size:18px">${fmt(totalPending + totalPaid)}</div>
+                <div class="kpi-meta">All time</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Pending</div>
+                <div class="kpi-value" style="font-size:18px">${fmt(totalPending)}</div>
+                <div class="kpi-meta">Awaiting payment</div>
+            </div>
+            <div class="kpi-card cyan">
+                <div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--cyan)"></i> Collected</div>
+                <div class="kpi-value" style="font-size:18px">${fmt(totalPaid)}</div>
+                <div class="kpi-meta">Paid penalties</div>
+            </div>
+        `;
+    }
+
+    async function loadTopPerformers(startStr) {
+        const panel = document.getElementById('topPerformersPanel');
+        const { data: att } = await sb.from('attendance')
+            .select('member_id, status, members(name, voice_part)')
+            .gte('date', startStr);
+
+        if (!att || att.length === 0) {
+            panel.innerHTML = `<div class="panel-title"><i class="ti ti-trophy" style="color:var(--amber)"></i> Top performers</div><div class="empty-state"><i class="ti ti-mood-empty"></i>No attendance data in this period.</div>`;
+            return;
         }
 
-        async function loadMembersList() {
-            const { data: members } = await supabaseClient.from('members').select('*').order('voice_part');
-            if (!members) return;
-            allMembers = members;
-            
-            const { data: attendance } = await supabaseClient.from('attendance').select('member_id, status');
-            const memberAttendance = {};
-            attendance?.forEach(a => {
-                if (!memberAttendance[a.member_id]) memberAttendance[a.member_id] = { present: 0, late: 0, absent: 0 };
-                if (a.status === 'Present') memberAttendance[a.member_id].present++;
-                else if (a.status === 'Late') memberAttendance[a.member_id].late++;
-                else if (a.status === 'Absent') memberAttendance[a.member_id].absent++;
-            });
-            
-            displayMembers(allMembers, memberAttendance);
-        }
+        const stats = {};
+        att.forEach(r => {
+            if (!stats[r.member_id]) stats[r.member_id] = { name: r.members?.name, voice: r.members?.voice_part, present: 0, late: 0, total: 0 };
+            if (r.status === 'Present') stats[r.member_id].present++;
+            else if (r.status === 'Late') stats[r.member_id].late++;
+            stats[r.member_id].total++;
+        });
 
-        function displayMembers(members, attendanceStats = {}) {
-            const container = document.getElementById('memberList');
-            container.innerHTML = members.map(m => {
-                const stats = attendanceStats[m.member_id] || { present: 0, late: 0, absent: 0 };
-                return `
-                    <div class="member-item" onclick="viewMember('${m.member_id}')">
-                        <div class="member-name">${escapeHtml(m.name)}</div>
-                        <div class="member-stats">
-                            <span>🎭 ${m.voice_part}</span>
-                            <span class="stat-badge present">✅ ${stats.present}</span>
-                            <span class="stat-badge late">⏰ ${stats.late}</span>
-                            <span class="stat-badge absent">❌ ${stats.absent}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+        const top = Object.values(stats)
+            .filter(s => s.total > 0)
+            .sort((a, b) => ((b.present + b.late) / b.total) - ((a.present + a.late) / a.total))
+            .slice(0, 5);
 
-        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
-        function filterMembers() { displayMembers(allMembers.filter(m => m.name.toLowerCase().includes(document.getElementById('memberSearch').value.toLowerCase()))); }
-        function viewMember(memberId) { window.location.href = `member-detail.html?id=${memberId}`; }
+        const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
 
-        async function loadPenalties() {
-            const statusFilter = document.getElementById('penaltyStatusFilter').value;
-            let query = supabaseClient.from('penalties').select('*, members(name, voice_part)').order('date', { ascending: false });
-            if (statusFilter !== 'all') query = query.eq('status', statusFilter);
-            
-            const { data: penalties } = await query;
-            
-            const totalPending = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0) || 0;
-            const totalPaid = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + (p.amount || 0), 0) || 0;
-            
-            document.getElementById('penaltySummary').innerHTML = `
-                <div class="summary-card" style="background:#dc2626;">💰 KSh ${totalPending + totalPaid}<div class="summary-label">Total Fines</div></div>
-                <div class="summary-card" style="background:#f59e0b;color:#333;">⏳ KSh ${totalPending}<div class="summary-label">Pending</div></div>
-                <div class="summary-card" style="background:#10b981;">✅ KSh ${totalPaid}<div class="summary-label">Collected</div></div>
-            `;
-            
-            if (!penalties?.length) {
-                document.getElementById('penaltiesList').innerHTML = `
-                    <div class="empty-state">
-                        🎉 No penalties recorded!<br><br>
-                        <button onclick="syncPenaltiesFromAttendance()" class="success-btn">🔄 Sync Penalties from Attendance</button>
+        panel.innerHTML = `
+            <div class="panel-title"><i class="ti ti-trophy" style="color:var(--amber)"></i> Top performers</div>
+            ${top.map((p, i) => `
+                <div class="performer-row">
+                    <div class="performer-rank ${rankClass(i)}">${i + 1}</div>
+                    <div style="flex:1">
+                        <div class="performer-name">${esc(p.name)}</div>
+                        <div class="performer-voice">${esc(p.voice)}</div>
                     </div>
-                `;
-                return;
-            }
-            
-            document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
-                <div class="penalty-item" onclick="viewMember('${p.member_id}')">
-                    <div>
-                        <div class="member-name">${p.members?.name || 'Unknown Member'}</div>
-                        <div class="member-stats">
-                            <span>🎭 ${p.members?.voice_part || '—'}</span>
-                            <span>${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</span>
-                            <span>📅 ${p.date}</span>
-                            <span>${p.session || ''}</span>
-                            ${p.has_apology ? '<span class="stat-badge paid">🙏 With Apology</span>' : '<span class="stat-badge pending">⚠️ No Apology</span>'}
-                        </div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div class="stat-badge ${p.status === 'pending' ? 'pending' : 'paid'}">${p.status.toUpperCase()}</div>
-                        <div class="penalty-amount">KSh ${p.amount}</div>
-                        ${p.status === 'pending' ? `<button class="pay-btn" onclick="event.stopPropagation(); markPenaltyPaid('${p.id}')" style="background:#10b981; color:white; border:none; padding:5px 12px; border-radius:20px; margin-top:5px;">Mark Paid</button>` : ''}
+                    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                        <span class="pill pill-green"><i class="ti ti-check"></i>${p.present}</span>
+                        <span class="pill pill-amber"><i class="ti ti-clock"></i>${p.late}</span>
+                        <span class="pill pill-indigo">${((p.present + p.late) / p.total * 100).toFixed(0)}%</span>
                     </div>
                 </div>
-            `).join('');
+            `).join('')}
+        `;
+    }
+
+    // ── MEMBERS LIST ──
+    async function loadMembersList() {
+        document.getElementById('memberList').innerHTML = '<div class="loading-state"><i class="ti ti-loader"></i> Loading members…</div>';
+        const { data: members } = await sb.from('members').select('*').order('voice_part');
+        if (!members) return;
+        allMembers = members;
+
+        const { data: att } = await sb.from('attendance').select('member_id, status');
+        memberAttendanceCache = {};
+        (att || []).forEach(a => {
+            if (!memberAttendanceCache[a.member_id]) memberAttendanceCache[a.member_id] = { present: 0, late: 0, absent: 0 };
+            if (a.status === 'Present') memberAttendanceCache[a.member_id].present++;
+            else if (a.status === 'Late')    memberAttendanceCache[a.member_id].late++;
+            else if (a.status === 'Absent')  memberAttendanceCache[a.member_id].absent++;
+        });
+
+        displayMembers(allMembers);
+    }
+
+    function displayMembers(list) {
+        const container = document.getElementById('memberList');
+        if (!list.length) {
+            container.innerHTML = '<div class="empty-state"><i class="ti ti-mood-empty"></i>No members found.</div>';
+            return;
+        }
+        container.innerHTML = list.map(m => {
+            const s = memberAttendanceCache[m.member_id] || { present: 0, late: 0, absent: 0 };
+            const initial = (m.name || 'M').charAt(0).toUpperCase();
+            return `
+                <div class="member-row" onclick="window.location.href='member-detail.html?id=${m.member_id}'">
+                    <div class="member-avatar">${initial}</div>
+                    <div class="member-info">
+                        <div class="member-name">${esc(m.name)}</div>
+                        <div class="member-voice">${esc(m.voice_part)}</div>
+                    </div>
+                    <div class="member-pills">
+                        <span class="pill pill-green"><i class="ti ti-check"></i>${s.present}</span>
+                        <span class="pill pill-amber"><i class="ti ti-clock"></i>${s.late}</span>
+                        <span class="pill pill-red"><i class="ti ti-x"></i>${s.absent}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function filterMembers() {
+        const q = document.getElementById('memberSearch').value.toLowerCase();
+        displayMembers(allMembers.filter(m => m.name?.toLowerCase().includes(q)));
+    }
+
+    // ── PENALTIES ──
+    async function loadPenalties() {
+        const statusFilter = document.getElementById('penaltyStatusFilter').value;
+        document.getElementById('penaltiesList').innerHTML = '<div class="loading-state"><i class="ti ti-loader"></i> Loading penalties…</div>';
+
+        let query = sb.from('penalties').select('*, members(name, voice_part)').order('date', { ascending: false });
+        if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+        const { data: penalties } = await query;
+
+        const totalPending = (penalties || []).filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
+        const totalPaid    = (penalties || []).filter(p => p.status === 'paid').reduce((s, p) => s + (p.amount || 0), 0);
+
+        document.getElementById('penaltyKpis').innerHTML = `
+            <div class="kpi-card red">
+                <div class="kpi-label"><i class="ti ti-receipt" style="color:var(--red)"></i> Total fines</div>
+                <div class="kpi-value" style="font-size:18px">${fmt(totalPending + totalPaid)}</div>
+                <div class="kpi-meta">${(penalties || []).length} records</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Pending</div>
+                <div class="kpi-value" style="font-size:18px">${fmt(totalPending)}</div>
+                <div class="kpi-meta">${(penalties || []).filter(p => p.status === 'pending').length} records</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i> Collected</div>
+                <div class="kpi-value" style="font-size:18px">${fmt(totalPaid)}</div>
+                <div class="kpi-meta">${(penalties || []).filter(p => p.status === 'paid').length} records</div>
+            </div>
+        `;
+
+        const div = document.getElementById('penaltiesList');
+
+        if (!penalties || penalties.length === 0) {
+            div.innerHTML = `
+                <div class="empty-state">
+                    <i class="ti ti-mood-happy"></i>
+                    No penalties found for this filter.<br><br>
+                    <button class="action-btn btn-green" onclick="syncPenaltiesFromAttendance()">
+                        <i class="ti ti-refresh-dot"></i> Sync from attendance
+                    </button>
+                </div>
+            `;
+            return;
         }
 
-        async function syncPenaltiesFromAttendance() {
-            const { data: attendance } = await supabaseClient.from('attendance').select('member_id, date, session, status');
-            if (!attendance?.length) { alert('No attendance records found.'); return; }
-            
-            // First, clear existing penalties to avoid duplicates
-            await supabaseClient.from('penalties').delete().neq('id', 0);
-            
-            let added = 0, lateCount = 0, absentCount = 0;
-            
-            for (const record of attendance) {
-                if (record.status === 'Late') {
-                    const { error } = await supabaseClient.from('penalties').insert({
-                        member_id: record.member_id,
-                        date: record.date,
-                        session: record.session,
-                        penalty_type: 'late',
-                        amount: 20,
-                        status: 'pending',
-                        has_apology: false,
-                        reason: 'Late without apology'
-                    });
-                    if (!error) { added++; lateCount++; }
-                } else if (record.status === 'Absent') {
-                    const { error } = await supabaseClient.from('penalties').insert({
-                        member_id: record.member_id,
-                        date: record.date,
-                        session: record.session,
-                        penalty_type: 'absent',
-                        amount: 50,
-                        status: 'pending',
-                        has_apology: false,
-                        reason: 'Absent without apology'
-                    });
-                    if (!error) { added++; absentCount++; }
-                }
-            }
-            
-            alert(`✅ Penalty Sync Complete!\n\n📊 Summary:\n• Late records: ${lateCount} (KSh 20 each = KSh ${lateCount * 20})\n• Absent records: ${absentCount} (KSh 50 each = KSh ${absentCount * 50})\n• Total penalties added: ${added}\n\n💰 Total fines: KSh ${(lateCount * 20) + (absentCount * 50)}`);
-            
-            await loadPenalties();
-            await loadGroupTrends();
+        div.innerHTML = penalties.map(p => {
+            const isPending = p.status === 'pending';
+            const typeIcon  = p.penalty_type === 'late' ? 'ti-clock' : 'ti-x';
+            const typeLabel = p.penalty_type === 'late' ? 'Late' : 'Absent';
+            return `
+                <div class="penalty-row" onclick="window.location.href='member-detail.html?id=${p.member_id}'">
+                    <div class="penalty-meta">
+                        <div class="penalty-name">${esc(p.members?.name || 'Unknown')}</div>
+                        <div class="penalty-details">
+                            <span><i class="ti ti-microphone" style="font-size:12px"></i> ${esc(p.members?.voice_part || '—')}</span>
+                            <span><i class="ti ${typeIcon}" style="font-size:12px"></i> ${typeLabel}</span>
+                            <span><i class="ti ti-calendar" style="font-size:12px"></i> ${esc(p.date)}</span>
+                            ${p.session ? `<span>${esc(p.session)}</span>` : ''}
+                        </div>
+                        <div style="margin-top:6px;">
+                            ${p.has_apology
+                                ? '<span class="pill pill-green"><i class="ti ti-check"></i>With apology</span>'
+                                : '<span class="pill pill-amber"><i class="ti ti-alert-triangle"></i>No apology</span>'}
+                            <span class="pill ${isPending ? 'pill-red' : 'pill-green'}" style="margin-left:6px;">
+                                ${isPending ? 'Pending' : 'Paid'}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;">
+                        <div class="penalty-amount">${fmt(p.amount)}</div>
+                        ${isPending ? `<button class="pay-btn" onclick="event.stopPropagation();markPenaltyPaid('${p.id}')"><i class="ti ti-circle-check" style="font-size:12px"></i> Mark paid</button>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function markPenaltyPaid(id) {
+        const { error } = await sb.from('penalties').update({ status: 'paid' }).eq('id', id);
+        if (error) { alert('Error: ' + error.message); return; }
+        await loadPenalties();
+        await loadGroupKpis();
+    }
+
+    async function syncPenaltiesFromAttendance() {
+        if (!confirm('This will clear existing penalties and re-sync from attendance records. Continue?')) return;
+        const { data: att } = await sb.from('attendance').select('member_id, date, session, status');
+        if (!att?.length) { alert('No attendance records found.'); return; }
+
+        await sb.from('penalties').delete().neq('id', 0);
+
+        let lateCount = 0, absentCount = 0, errors = 0;
+        for (const r of att) {
+            if (r.status !== 'Late' && r.status !== 'Absent') continue;
+            const isLate = r.status === 'Late';
+            const { error } = await sb.from('penalties').insert({
+                member_id: r.member_id,
+                date: r.date,
+                session: r.session,
+                penalty_type: isLate ? 'late' : 'absent',
+                amount: isLate ? 20 : 50,
+                status: 'pending',
+                has_apology: false,
+                reason: isLate ? 'Late without apology' : 'Absent without apology'
+            });
+            if (error) errors++;
+            else isLate ? lateCount++ : absentCount++;
         }
 
-        async function markPenaltyPaid(penaltyId) {
-            const { error } = await supabaseClient.from('penalties').update({ status: 'paid' }).eq('id', penaltyId);
-            if (error) { alert('Error: ' + error.message); } 
-            else { alert('✅ Penalty marked as paid!'); loadPenalties(); loadGroupTrends(); }
-        }
+        alert(`Sync complete!\n\nLate: ${lateCount} (KSh ${lateCount * 20})\nAbsent: ${absentCount} (KSh ${absentCount * 50})\nTotal: KSh ${(lateCount * 20) + (absentCount * 50)}${errors ? `\n\n${errors} error(s) occurred.` : ''}`);
+        await loadPenalties();
+        await loadGroupKpis();
+    }
 
-        async function clearAllPenalties() {
-            if (confirm('⚠️ WARNING: This will delete ALL penalty records. This action cannot be undone. Are you sure?')) {
-                await supabaseClient.from('penalties').delete().neq('id', 0);
-                alert('✅ All penalties have been cleared.');
-                loadPenalties();
-                loadGroupTrends();
-            }
-        }
+    async function clearAllPenalties() {
+        if (!confirm('⚠️ This will permanently delete ALL penalty records. This cannot be undone. Are you sure?')) return;
+        await sb.from('penalties').delete().neq('id', 0);
+        alert('All penalties cleared.');
+        await loadPenalties();
+        await loadGroupKpis();
+    }
 
-        loadGroupTrends();
-    </script>
+    // ── INIT ──
+    async function init() {
+        await checkAuth();
+        tick(); setInterval(tick, 1000);
+        await loadUserInfo();
+        await loadGroupTrends();
+    }
+
+    init();
+    window.logout = logout;
+    window.loadGroupTrends = loadGroupTrends;
+    window.loadPenalties = loadPenalties;
+    window.filterMembers = filterMembers;
+    window.syncPenaltiesFromAttendance = syncPenaltiesFromAttendance;
+    window.clearAllPenalties = clearAllPenalties;
+    window.markPenaltyPaid = markPenaltyPaid;
+</script>
 </body>
 </html>

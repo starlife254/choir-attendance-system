@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google-site-verification" content="9B0aEWHLVVsKurOwYXzYI-2kswRtSRcJPDlWQ4sm6Cg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Confirm Penalties | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --indigo-mid: #818cf8;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --blue-light: #dbeafe;
+            --blue-text: #1e40af;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            color: var(--text-primary);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 0.5px solid var(--border);
+            display: flex; flex-direction: column;
+            position: fixed; left: 0; top: 0; bottom: 0;
+            z-index: 50;
+            transition: transform .25s ease;
+        }
+
+        .sidebar-logo {
+            padding: 20px 16px 16px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: var(--indigo); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+
+        .nav-section-label {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase; letter-spacing: .8px;
+            padding: 10px 10px 4px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 10px;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 13px; cursor: pointer;
+            transition: background .12s, color .12s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+
+        .nav-item.active {
+            background: var(--indigo-light);
+            color: var(--indigo); font-weight: 600;
+        }
+
+        .nav-item.active i { color: var(--indigo); }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--indigo); color: #fff;
+            font-size: 10px; font-weight: 600;
+            padding: 2px 8px; border-radius: 40px;
+        }
+
+        .nav-badge.amber { background: var(--amber); }
+
+        .sidebar-bottom {
+            padding: 12px 8px;
+            border-top: 0.5px solid var(--border);
+        }
+
+        .user-card {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            background: var(--bg);
+        }
+
+        .user-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--indigo);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0;
+        }
+
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; text-transform: capitalize; }
+
+        .logout-link {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 12px; border-radius: 10px;
+            color: var(--red); font-size: 13px; cursor: pointer;
+            margin-top: 4px; transition: background .12s;
+        }
+
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+
+        /* ── MAIN ── */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 0.5px solid var(--border);
+            padding: 0 28px; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 10;
+        }
+
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .topbar-chip {
+            background: var(--bg); border: 0.5px solid var(--border);
+            border-radius: 40px; padding: 5px 12px;
+            font-size: 12px; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .topbar-chip i { font-size: 14px; }
+
+        .hamburger {
+            display: none; background: none; border: none;
+            font-size: 22px; color: var(--text-primary);
+            cursor: pointer; padding: 4px;
+        }
+
+        /* ── CONTENT ── */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* ── KPI GRID ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 18px;
+            position: relative; overflow: hidden;
+            transition: box-shadow .15s;
+        }
+
+        .kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; border-radius: 3px 0 0 3px;
+        }
+
+        .kpi-card.indigo::before { background: var(--indigo); }
+        .kpi-card.amber::before  { background: var(--amber);  }
+        .kpi-card.green::before  { background: var(--green);  }
+        .kpi-card.red::before    { background: var(--red);    }
+
+        .kpi-label {
+            font-size: 12px; color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .kpi-label i { font-size: 14px; }
+        .kpi-value { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+        .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+
+        /* ── CONTROLS PANEL ── */
+        .controls-panel {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+
+        .form-group label {
+            font-size: 12px; font-weight: 600; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .form-group label i { font-size: 14px; }
+
+        .form-select {
+            padding: 9px 14px;
+            border: 0.5px solid var(--border);
+            border-radius: 10px; font-size: 13px;
+            background: var(--bg); font-family: inherit;
+            color: var(--text-primary);
+            transition: border-color .15s; outline: none; width: 100%;
+        }
+
+        .form-select:focus { border-color: var(--indigo); }
+
+        .action-btn {
+            padding: 9px 18px; border: none; border-radius: 10px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 7px;
+            transition: opacity .15s, transform .1s; white-space: nowrap;
+        }
+
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--indigo); color: #fff; }
+
+        /* ── TABLE PANEL ── */
+        .table-panel {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+        }
+
+        .table-panel-header {
+            padding: 14px 20px;
+            border-bottom: 0.5px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 10px;
+        }
+
+        .table-panel-title {
+            font-size: 14px; font-weight: 600; color: var(--text-primary);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .table-panel-title i { font-size: 16px; color: var(--indigo); }
+
+        .table-scroll {
+            overflow-x: auto; overflow-y: auto;
+            max-height: 58vh;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
+        .table-scroll::-webkit-scrollbar-track { background: var(--bg); }
+        .table-scroll::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 4px; }
+
+        .pay-table {
+            min-width: 820px; width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pay-table th {
+            background: var(--bg);
+            padding: 11px 16px;
+            font-size: 11px; font-weight: 600;
+            color: var(--text-secondary);
+            text-align: left;
+            text-transform: uppercase; letter-spacing: .5px;
+            position: sticky; top: 0; z-index: 10;
+            border-bottom: 0.5px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .pay-table td {
+            padding: 12px 16px;
+            border-bottom: 0.5px solid var(--border);
+            font-size: 13px; background: var(--surface);
+            vertical-align: middle;
+        }
+
+        .pay-table tr:last-child td { border-bottom: none; }
+        .pay-table tr:hover td { background: #fafbff; }
+
+        /* ── PILLS ── */
+        .pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 40px;
+            font-size: 11px; font-weight: 600; white-space: nowrap;
+        }
+
+        .pill i { font-size: 12px; }
+        .pill-green  { background: var(--green-light);  color: #065f46; }
+        .pill-amber  { background: var(--amber-light);  color: #854d0e; }
+        .pill-red    { background: var(--red-light);    color: #991b1b; }
+        .pill-indigo { background: var(--indigo-light); color: var(--indigo); }
+        .pill-gray   { background: var(--bg); color: var(--text-secondary); border: 0.5px solid var(--border); }
+
+        /* ── INLINE BUTTONS ── */
+        .row-btn {
+            padding: 6px 12px; border: none; border-radius: 8px;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 5px;
+            transition: opacity .15s, transform .1s;
+        }
+
+        .row-btn:hover { opacity: .85; }
+        .row-btn:active { transform: scale(0.96); }
+        .row-btn.confirm { background: var(--green-light); color: #065f46; }
+        .row-btn.reject  { background: var(--red-light);   color: #991b1b; }
+        .row-btn i { font-size: 13px; }
+
+        /* ── REF CODE ── */
+        .ref-code {
+            font-family: 'SF Mono', 'Fira Mono', monospace;
+            font-size: 11px; color: var(--text-secondary);
+            background: var(--bg); padding: 3px 8px; border-radius: 6px;
+            border: 0.5px solid var(--border);
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 40px; color: var(--indigo-mid);
+            display: block; margin-bottom: 12px;
+        }
+
+        .empty-state p { font-size: 14px; color: var(--text-secondary); }
+        .empty-state .hint { font-size: 12px; color: var(--text-tertiary); margin-top: 6px; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
+            background: var(--text-primary); color: #fff;
+            padding: 11px 20px; border-radius: 40px;
+            font-size: 13px; font-weight: 500;
+            z-index: 300; opacity: 0;
+            transition: opacity .22s, transform .22s;
+            pointer-events: none;
+            display: flex; align-items: center; gap: 8px;
+            max-width: 90vw;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error   { background: #991b1b; }
+        .toast.info    { background: var(--indigo); }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45); z-index: 200;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: var(--surface); border-radius: 20px;
+            padding: 28px 24px; max-width: 340px; width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .modal-box .modal-icon {
+            width: 52px; height: 52px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 14px;
+            font-size: 24px;
+        }
+
+        .modal-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+        .modal-box p  { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+        .modal-buttons { display: flex; gap: 12px; margin-top: 22px; }
+
+        .modal-buttons button {
+            flex: 1; padding: 12px; border: none; border-radius: 40px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: opacity .15s;
+        }
+
+        .modal-buttons button:hover { opacity: .85; }
+        .btn-confirm-modal { background: var(--green); color: #fff; }
+        .btn-reject-modal  { background: var(--red);   color: #fff; }
+        .btn-cancel-modal  { background: var(--bg); color: var(--text-secondary); }
+
+        /* ── FOOTER ── */
+        .footer {
+            padding: 16px 28px;
+            border-top: 0.5px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 12px; color: var(--text-tertiary);
+        }
+
+        /* ── MOBILE BOTTOM NAV ── */
+        .bottom-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
+            justify-content: space-around;
+            padding: 8px 16px env(safe-area-inset-bottom, 12px);
+            box-shadow: 0 -1px 0 var(--border); z-index: 50;
+        }
+
+        .bottom-nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px;
+        }
+
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* ── SIDEBAR OVERLAY ── */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35); z-index: 40;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .footer { display: none; }
+            .bottom-nav { display: flex; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .controls-panel { flex-direction: column; align-items: stretch; }
+            .action-btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item">
+            <i class="ti ti-circle-check"></i> Mark attendance
+            <span class="nav-badge">Today</span>
+        </a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item active">
+            <i class="ti ti-cash"></i> Confirm penalties
+        </a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div>
+                <div class="user-name" id="userName">Loading…</div>
+                <div class="user-role" id="userRole">Admin</div>
+            </div>
+        </div>
+        <div class="logout-link" onclick="logout()">
+            <i class="ti ti-logout"></i> Log out
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <i class="ti ti-menu-2"></i>
+            </button>
+            <div class="topbar-left">
+                <h2>Confirm Penalties</h2>
+                <p>Review and approve member payment submissions</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-chip" id="topTime">--:--</div>
+            <button class="action-btn btn-primary" onclick="loadPayments()" style="padding:6px 14px;font-size:12px;">
+                <i class="ti ti-refresh"></i> Refresh
+            </button>
+        </div>
+    </header>
+
+    <main class="content">
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card amber">
+                <div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Pending payments</div>
+                <div class="kpi-value" id="kpiPendingCount">—</div>
+                <div class="kpi-meta">Awaiting review</div>
+            </div>
+            <div class="kpi-card indigo">
+                <div class="kpi-label"><i class="ti ti-cash" style="color:var(--indigo)"></i> Pending amount</div>
+                <div class="kpi-value" id="kpiPendingAmt">—</div>
+                <div class="kpi-meta">KSh outstanding</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i> Total collected</div>
+                <div class="kpi-value" id="kpiConfirmed">—</div>
+                <div class="kpi-meta">KSh confirmed</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="kpi-label"><i class="ti ti-circle-x" style="color:var(--red)"></i> Rejected</div>
+                <div class="kpi-value" id="kpiRejected">—</div>
+                <div class="kpi-meta">KSh rejected</div>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="controls-panel">
+            <div class="form-group">
+                <label><i class="ti ti-filter"></i> Filter by status</label>
+                <select id="statusFilter" class="form-select">
+                    <option value="pending">Pending payments</option>
+                    <option value="confirmed">Confirmed payments</option>
+                    <option value="rejected">Rejected payments</option>
+                    <option value="all">All payments</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-panel">
+            <div class="table-panel-header">
+                <div class="table-panel-title">
+                    <i class="ti ti-receipt"></i>
+                    Payment submissions
+                </div>
+                <span class="pill pill-gray" id="rowCount">— records</span>
+            </div>
+            <div class="table-scroll">
+                <div class="empty-state" id="emptyState">
+                    <i class="ti ti-receipt"></i>
+                    <p>Loading payments…</p>
+                </div>
+                <table class="pay-table" id="payTable" style="display:none">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Voice part</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Payment date</th>
+                            <th>Reference</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsList"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <span>🎶 University of Embu Students' Choir · 98th Music Festival 2026</span>
+        <span id="lastRefreshed">—</span>
+    </footer>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="modal-icon" style="background:var(--green-light)">
+            <i class="ti ti-circle-check" style="color:var(--green)"></i>
+        </div>
+        <h3>Confirm payment?</h3>
+        <p>This will mark the fine as <strong>paid</strong> and close the penalty record.</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel-modal" onclick="closeModals()">Cancel</button>
+            <button class="btn-confirm-modal" id="confirmYesBtn">Yes, confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal-overlay" id="rejectModal">
+    <div class="modal-box">
+        <div class="modal-icon" style="background:var(--red-light)">
+            <i class="ti ti-circle-x" style="color:var(--red)"></i>
+        </div>
+        <h3>Reject payment?</h3>
+        <p>The member's fine will remain <strong>unpaid</strong> and they'll need to resubmit.</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel-modal" onclick="closeModals()">Cancel</button>
+            <button class="btn-reject-modal" id="rejectYesBtn">Yes, reject</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let pendingAction = null;
+
+    // ── HELPERS ──
+    function esc(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function fmt(n) {
+        return Number(n || 0).toLocaleString();
+    }
+
+    function tick() {
+        document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    // ── TOAST ──
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        const icons = { success: 'ti-circle-check', error: 'ti-circle-x', info: 'ti-info-circle' };
+        t.innerHTML = `<i class="ti ${icons[type] || icons.info}" style="font-size:16px"></i> ${msg}`;
+        t.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    // ── MODALS ──
+    function closeModals() {
+        document.getElementById('confirmModal').classList.remove('open');
+        document.getElementById('rejectModal').classList.remove('open');
+        pendingAction = null;
+    }
+
+    function openConfirmModal(paymentId, penaltyId) {
+        pendingAction = { type: 'confirm', paymentId, penaltyId };
+        document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function openRejectModal(paymentId) {
+        pendingAction = { type: 'reject', paymentId };
+        document.getElementById('rejectModal').classList.add('open');
+    }
+
+    document.getElementById('confirmYesBtn').addEventListener('click', async () => {
+        if (!pendingAction || pendingAction.type !== 'confirm') return;
+        closeModals();
+        await doConfirm(pendingAction.paymentId, pendingAction.penaltyId);
+    });
+
+    document.getElementById('rejectYesBtn').addEventListener('click', async () => {
+        if (!pendingAction || pendingAction.type !== 'reject') return;
+        closeModals();
+        await doReject(pendingAction.paymentId);
+    });
+
+    // ── AUTH ──
+    async function checkAuth() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return null; }
+        return session;
+    }
+
+    async function logout() {
+        try { await sb.auth.signOut(); } catch {}
+        window.location.href = 'login.html';
+    }
+
+    // ── USER INFO ──
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const emailName = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = emailName;
+            document.getElementById('userAvatar').textContent = (emailName.charAt(0) || 'A').toUpperCase();
+            const { data: profile } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (profile) {
+                if (profile.full_name) {
+                    const first = profile.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = first;
+                    document.getElementById('userAvatar').textContent = first.charAt(0).toUpperCase();
+                }
+                if (profile.role) document.getElementById('userRole').textContent = profile.role;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ── LOAD PAYMENTS ──
+    async function loadPayments() {
+        const statusFilter = document.getElementById('statusFilter').value;
+
+        document.getElementById('emptyState').innerHTML = `
+            <i class="ti ti-loader" style="font-size:32px;color:var(--indigo-mid);display:block;margin-bottom:12px;animation:spin 1s linear infinite"></i>
+            <p>Loading payments…</p>`;
+        document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('payTable').style.display = 'none';
+
+        let query = sb
+            .from('payments')
+            .select(`id, member_id, penalty_id, amount, payment_method, status, payment_date, reference, created_at, confirmed_at, confirmed_by,
+                members!payments_member_id_fkey(name, voice_part)`)
+            .order('created_at', { ascending: false });
+
+        if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+
+        const { data: payments, error } = await query;
+
+        if (error) {
+            document.getElementById('emptyState').innerHTML = `
+                <i class="ti ti-alert-circle" style="font-size:32px;color:var(--red);display:block;margin-bottom:12px"></i>
+                <p style="color:var(--red)">Error loading payments</p>
+                <p class="hint">${esc(error.message)}</p>`;
+            return;
+        }
+
+        // Update KPIs from ALL payments (refetch totals)
+        const { data: allPayments } = await sb.from('payments').select('status, amount');
+        if (allPayments) {
+            const pCount = allPayments.filter(p => p.status === 'pending').length;
+            const pAmt   = allPayments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
+            const cAmt   = allPayments.filter(p => p.status === 'confirmed').reduce((s, p) => s + (p.amount || 0), 0);
+            const rAmt   = allPayments.filter(p => p.status === 'rejected').reduce((s, p) => s + (p.amount || 0), 0);
+            document.getElementById('kpiPendingCount').textContent = pCount;
+            document.getElementById('kpiPendingAmt').textContent   = `${fmt(pAmt)}`;
+            document.getElementById('kpiConfirmed').textContent    = `${fmt(cAmt)}`;
+            document.getElementById('kpiRejected').textContent     = `${fmt(rAmt)}`;
+        }
+
+        document.getElementById('lastRefreshed').textContent =
+            `Last refreshed: ${new Date().toLocaleTimeString()}`;
+
+        if (!payments?.length) {
+            document.getElementById('emptyState').innerHTML = `
+                <i class="ti ti-receipt" style="font-size:36px;color:var(--indigo-mid);display:block;margin-bottom:12px"></i>
+                <p>No ${statusFilter === 'all' ? '' : statusFilter + ' '}payments found</p>
+                <p class="hint">Change the filter to see other records</p>`;
+            document.getElementById('rowCount').textContent = '0 records';
+            return;
+        }
+
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('payTable').style.display = 'table';
+        document.getElementById('rowCount').textContent = `${payments.length} record${payments.length !== 1 ? 's' : ''}`;
+
+        const methodIcon = m => {
+            if (!m || m === 'mpesa') return 'ti-device-mobile';
+            if (m === 'cash') return 'ti-cash';
+            return 'ti-credit-card';
+        };
+
+        document.getElementById('paymentsList').innerHTML = payments.map(p => {
+            const name  = p.members ? (Array.isArray(p.members) ? p.members[0]?.name : p.members.name) : 'Unknown';
+            const voice = p.members ? (Array.isArray(p.members) ? p.members[0]?.voice_part : p.members.voice_part) : '—';
+
+            const statusPill = p.status === 'confirmed'
+                ? `<span class="pill pill-green"><i class="ti ti-check"></i> Confirmed</span>`
+                : p.status === 'rejected'
+                ? `<span class="pill pill-red"><i class="ti ti-x"></i> Rejected</span>`
+                : `<span class="pill pill-amber"><i class="ti ti-clock"></i> Pending</span>`;
+
+            const actions = p.status === 'pending'
+                ? `<div style="display:flex;gap:6px;">
+                    <button class="row-btn confirm" onclick="openConfirmModal('${p.id}','${p.penalty_id}')">
+                        <i class="ti ti-check"></i> Confirm
+                    </button>
+                    <button class="row-btn reject" onclick="openRejectModal('${p.id}')">
+                        <i class="ti ti-x"></i> Reject
+                    </button>
+                  </div>`
+                : `<span style="font-size:11px;color:var(--text-tertiary)">${p.confirmed_at ? new Date(p.confirmed_at).toLocaleDateString() : '—'}</span>`;
+
+            const payDate = p.payment_date
+                ? new Date(p.payment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                : '—';
+
+            return `<tr>
+                <td style="font-weight:600">${esc(name)}</td>
+                <td><span class="pill pill-indigo">${esc(voice)}</span></td>
+                <td style="font-weight:700;color:var(--red)">KSh ${fmt(p.amount)}</td>
+                <td>
+                    <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);">
+                        <i class="ti ${methodIcon(p.payment_method)}" style="font-size:14px"></i>
+                        ${esc((p.payment_method || 'M-Pesa').toUpperCase())}
+                    </span>
+                </td>
+                <td style="font-size:12px;color:var(--text-secondary)">${payDate}</td>
+                <td>${p.reference ? `<span class="ref-code">${esc(p.reference)}</span>` : '<span style="color:var(--text-tertiary);font-size:12px">—</span>'}</td>
+                <td>${statusPill}</td>
+                <td>${actions}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── CONFIRM ──
+    async function doConfirm(paymentId, penaltyId) {
+        showToast('Processing confirmation…', 'info');
+
+        const { data: { user } } = await sb.auth.getUser();
+
+        const { error: pErr } = await sb.from('payments')
+            .update({ status: 'confirmed', confirmed_at: new Date().toISOString(), confirmed_by: user?.email })
+            .eq('id', paymentId);
+
+        if (pErr) { showToast('Error: ' + pErr.message, 'error'); return; }
+
+        if (penaltyId) {
+            const { error: fErr } = await sb.from('penalties').update({ status: 'paid' }).eq('id', penaltyId);
+            if (fErr) console.warn('Penalty update warning:', fErr);
+        }
+
+        showToast('Payment confirmed and fine marked paid!', 'success');
+        loadPayments();
+    }
+
+    // ── REJECT ──
+    async function doReject(paymentId) {
+        showToast('Processing rejection…', 'info');
+
+        const { error } = await sb.from('payments')
+            .update({ status: 'rejected', notes: 'Payment rejected by admin' })
+            .eq('id', paymentId);
+
+        if (error) { showToast('Error: ' + error.message, 'error'); return; }
+
+        showToast('Payment rejected', 'error');
+        loadPayments();
+    }
+
+    // ── SIDEBAR ──
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    // ── INIT ──
+    document.getElementById('statusFilter').addEventListener('change', loadPayments);
+
+    // Spinner keyframe
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+
+    async function init() {
+        await checkAuth();
+        tick();
+        setInterval(tick, 1000);
+        await loadUserInfo();
+        await loadPayments();
+    }
+
+    init();
+
+    window.loadPayments = loadPayments;
+    window.openConfirmModal = openConfirmModal;
+    window.openRejectModal = openRejectModal;
+    window.closeModals = closeModals;
+    window.logout = logout;
+</script>
+</body>
+</html>

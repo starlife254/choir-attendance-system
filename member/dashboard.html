@@ -776,18 +776,52 @@
         }
 
         async function uploadPhoto() {
-            const fileInput = document.getElementById('photoInput'); const file = fileInput.files[0];
-            if (!file) return;
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${currentUserId}_${Date.now()}.${fileExt}`;
-            const filePath = `profile_photos/${fileName}`;
-            const { error: uploadError } = await supabaseClient.storage.from('profiles').upload(filePath, file);
-            if (uploadError) { alert('Upload error: ' + uploadError.message); return; }
-            const { data: { publicUrl } } = supabaseClient.storage.from('profiles').getPublicUrl(filePath);
-            const { error: updateError } = await supabaseClient.from('user_profiles').upsert({ user_id: currentUserId, member_id: currentMember.member_id, profile_photo_url: publicUrl });
-            if (updateError) alert('Error updating profile: ' + updateError.message);
-            else { document.getElementById('photoPreview').innerHTML = `<img src="${publicUrl}" style="width:100%; height:100%; object-fit:cover;">`; document.getElementById('avatarPreview').innerHTML = `<img src="${publicUrl}" style="width:100%; height:100%; object-fit:cover;">`; alert('✅ Photo uploaded successfully!'); }
+    const fileInput = document.getElementById('photoInput');
+    const file = fileInput.files[0];
+    if (!file) return;
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${currentUserId}_${Date.now()}.${fileExt}`;
+    const filePath = `profile_photos/${fileName}`;
+    
+    const { error: uploadError } = await supabaseClient.storage
+        .from('profiles')
+        .upload(filePath, file);
+    
+    if (uploadError) {
+        alert('Upload error: ' + uploadError.message);
+        return;
+    }
+    
+    const { data: { publicUrl } } = supabaseClient.storage
+        .from('profiles')
+        .getPublicUrl(filePath);
+    
+    // CRITICAL: Clean the URL before saving
+    const cleanUrl = publicUrl.split(',')[0].trim();
+    
+    const { error: updateError } = await supabaseClient
+        .from('user_profiles')
+        .upsert({
+            user_id: currentUserId,
+            member_id: currentMember.member_id,
+            profile_photo_url: cleanUrl,
+            updated_at: new Date()
+        });
+    
+    if (updateError) {
+        alert('Error updating profile: ' + updateError.message);
+    } else {
+        document.getElementById('photoPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`;
+        document.getElementById('avatarPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`;
+        alert('✅ Photo uploaded successfully!');
+        
+        // Clear cache
+        if (typeof profilePhotosCache !== 'undefined') {
+            profilePhotosCache[currentMember.member_id] = null;
         }
+    }
+}
 
         async function checkPendingPenalties() {
             if (!currentMember) return;

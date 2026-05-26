@@ -710,48 +710,56 @@
         document.getElementById('rejectModal').classList.add('open');
     }
 
-    document.getElementById('confirmYesBtn').addEventListener('click', async () => {
-        if (!pendingAction || pendingAction.type !== 'confirm') return;
-        closeModals();
-        await doConfirm(pendingAction.paymentId, pendingAction.penaltyId);
-    });
+    // ── CONFIRM ACTION ──
+    async function doConfirm(paymentId, penaltyId) {
+        showToast('Processing confirmation…', 'info');
+        
+        const confirmBtn = document.getElementById('confirmYesBtn');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Processing...';
 
-    document.getElementById('rejectYesBtn').addEventListener('click', async () => {
-        if (!pendingAction || pendingAction.type !== 'reject') return;
-        closeModals();
-        await doReject(pendingAction.paymentId);
-    });
+        const { data: { user } } = await sb.auth.getUser();
 
-    // ── AUTH ──
-    async function checkAuth() {
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return null; }
-        return session;
+        const { error: pErr } = await sb.from('payments')
+            .update({ status: 'confirmed', confirmed_at: new Date().toISOString(), confirmed_by: user?.email })
+            .eq('id', paymentId);
+
+        if (pErr) { 
+            showToast('Error: ' + pErr.message, 'error'); 
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Yes, confirm';
+            return; 
+        }
+
+        if (penaltyId) {
+            await sb.from('penalties').update({ status: 'paid' }).eq('id', penaltyId);
+        }
+
+        showToast('Payment confirmed and fine marked paid!', 'success');
+        await loadPayments();
     }
 
-    async function logout() {
-        try { await sb.auth.signOut(); } catch {}
-        window.location.href = 'login.html';
-    }
+    // ── REJECT ACTION ──
+    async function doReject(paymentId) {
+        showToast('Processing rejection…', 'info');
+        
+        const rejectBtn = document.getElementById('rejectYesBtn');
+        rejectBtn.disabled = true;
+        rejectBtn.textContent = 'Processing...';
 
-    // ── USER INFO ──
-    async function loadUserInfo() {
-        try {
-            const { data: { user } } = await sb.auth.getUser();
-            if (!user) return;
-            const emailName = user.email?.split('@')[0] || 'Admin';
-            document.getElementById('userName').textContent = emailName;
-            document.getElementById('userAvatar').textContent = (emailName.charAt(0) || 'A').toUpperCase();
-            const { data: profile } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
-            if (profile) {
-                if (profile.full_name) {
-                    const first = profile.full_name.split(' ')[0];
-                    document.getElementById('userName').textContent = first;
-                    document.getElementById('userAvatar').textContent = first.charAt(0).toUpperCase();
-                }
-                if (profile.role) document.getElementById('userRole').textContent = profile.role;
-            }
-        } catch (e) { console.warn(e); }
+        const { error } = await sb.from('payments')
+            .update({ status: 'rejected', notes: 'Payment rejected by admin' })
+            .eq('id', paymentId);
+
+        if (error) { 
+            showToast('Error: ' + error.message, 'error'); 
+            rejectBtn.disabled = false;
+            rejectBtn.textContent = 'Yes, reject';
+            return; 
+        }
+
+        showToast('Payment rejected', 'error');
+        await loadPayments();
     }
 
     // ── LOAD PAYMENTS ──
@@ -782,7 +790,7 @@
             return;
         }
 
-        // Update KPIs from ALL payments (refetch totals)
+        // Update KPIs from ALL payments
         const { data: allPayments } = await sb.from('payments').select('status, amount');
         if (allPayments) {
             const pCount = allPayments.filter(p => p.status === 'pending').length;
@@ -821,22 +829,26 @@
             const name  = p.members ? (Array.isArray(p.members) ? p.members[0]?.name : p.members.name) : 'Unknown';
             const voice = p.members ? (Array.isArray(p.members) ? p.members[0]?.voice_part : p.members.voice_part) : '—';
 
-            const statusPill = p.status === 'confirmed'
-                ? `<span class="pill pill-green"><i class="ti ti-check"></i> Confirmed</span>`
-                : p.status === 'rejected'
-                ? `<span class="pill pill-red"><i class="ti ti-x"></i> Rejected</span>`
-                : `<span class="pill pill-amber"><i class="ti ti-clock"></i> Pending</span>`;
-
-            const actions = p.status === 'pending'
-                ? `<div style="display:flex;gap:6px;">
+            let statusPill = '';
+            let actions = '';
+            
+            if (p.status === 'confirmed') {
+                statusPill = `<span class="pill pill-green"><i class="ti ti-check"></i> Confirmed</span>`;
+                actions = `<span style="font-size:11px;color:var(--text-tertiary)">${p.confirmed_at ? new Date(p.confirmed_at).toLocaleDateString() : '—'}</span>`;
+            } else if (p.status === 'rejected') {
+                statusPill = `<span class="pill pill-red"><i class="ti ti-x"></i> Rejected</span>`;
+                actions = `<span style="font-size:11px;color:var(--text-tertiary)">—</span>`;
+            } else {
+                statusPill = `<span class="pill pill-amber"><i class="ti ti-clock"></i> Pending</span>`;
+                actions = `<div style="display:flex;gap:6px;">
                     <button class="row-btn confirm" onclick="openConfirmModal('${p.id}','${p.penalty_id}')">
                         <i class="ti ti-check"></i> Confirm
                     </button>
                     <button class="row-btn reject" onclick="openRejectModal('${p.id}')">
                         <i class="ti ti-x"></i> Reject
                     </button>
-                  </div>`
-                : `<span style="font-size:11px;color:var(--text-tertiary)">${p.confirmed_at ? new Date(p.confirmed_at).toLocaleDateString() : '—'}</span>`;
+                </div>`;
+            }
 
             const payDate = p.payment_date
                 ? new Date(p.payment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -860,39 +872,36 @@
         }).join('');
     }
 
-    // ── CONFIRM ──
-    async function doConfirm(paymentId, penaltyId) {
-        showToast('Processing confirmation…', 'info');
-
-        const { data: { user } } = await sb.auth.getUser();
-
-        const { error: pErr } = await sb.from('payments')
-            .update({ status: 'confirmed', confirmed_at: new Date().toISOString(), confirmed_by: user?.email })
-            .eq('id', paymentId);
-
-        if (pErr) { showToast('Error: ' + pErr.message, 'error'); return; }
-
-        if (penaltyId) {
-            const { error: fErr } = await sb.from('penalties').update({ status: 'paid' }).eq('id', penaltyId);
-            if (fErr) console.warn('Penalty update warning:', fErr);
-        }
-
-        showToast('Payment confirmed and fine marked paid!', 'success');
-        loadPayments();
+    // ── AUTH ──
+    async function checkAuth() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return null; }
+        return session;
     }
 
-    // ── REJECT ──
-    async function doReject(paymentId) {
-        showToast('Processing rejection…', 'info');
+    async function logout() {
+        try { await sb.auth.signOut(); } catch(e) { console.warn(e); }
+        window.location.href = 'login.html';
+    }
 
-        const { error } = await sb.from('payments')
-            .update({ status: 'rejected', notes: 'Payment rejected by admin' })
-            .eq('id', paymentId);
-
-        if (error) { showToast('Error: ' + error.message, 'error'); return; }
-
-        showToast('Payment rejected', 'error');
-        loadPayments();
+    // ── USER INFO ──
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const emailName = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = emailName;
+            document.getElementById('userAvatar').textContent = (emailName.charAt(0) || 'A').toUpperCase();
+            const { data: profile } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (profile) {
+                if (profile.full_name) {
+                    const first = profile.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = first;
+                    document.getElementById('userAvatar').textContent = first.charAt(0).toUpperCase();
+                }
+                if (profile.role) document.getElementById('userRole').textContent = profile.role;
+            }
+        } catch (e) { console.warn(e); }
     }
 
     // ── SIDEBAR ──
@@ -906,13 +915,27 @@
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
 
-    // ── INIT ──
-    document.getElementById('statusFilter').addEventListener('change', loadPayments);
+    // ── MODAL BUTTON EVENT LISTENERS ──
+    document.getElementById('confirmYesBtn').onclick = async function() {
+        if (!pendingAction || pendingAction.type !== 'confirm') return;
+        const action = pendingAction;
+        closeModals();
+        await doConfirm(action.paymentId, action.penaltyId);
+    };
 
-    // Spinner keyframe
-    const style = document.createElement('style');
-    style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-    document.head.appendChild(style);
+    document.getElementById('rejectYesBtn').onclick = async function() {
+        if (!pendingAction || pendingAction.type !== 'reject') return;
+        const action = pendingAction;
+        closeModals();
+        await doReject(action.paymentId);
+    };
+
+    // ── INIT ──
+    document.getElementById('statusFilter').addEventListener('change', () => loadPayments());
+
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    document.head.appendChild(styleSheet);
 
     async function init() {
         await checkAuth();
@@ -924,11 +947,16 @@
 
     init();
 
+    // Expose functions globally
     window.loadPayments = loadPayments;
     window.openConfirmModal = openConfirmModal;
     window.openRejectModal = openRejectModal;
     window.closeModals = closeModals;
     window.logout = logout;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.doConfirm = doConfirm;
+    window.doReject = doReject;
 </script>
 </body>
 </html>

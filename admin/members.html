@@ -258,12 +258,19 @@
         } catch(e) { console.warn(e); }
     }
 
-    async function loadMembersList() {
-        const { data: members, error } = await supabaseClient.from('members').select('member_id, name, voice_part').order('name', { ascending: true });
-        if (error) { document.getElementById('memberList').innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading members</div>'; return; }
-        allMembers = members;
-        displayMembers(allMembers);
+   async function loadMembersList() {
+    const { data: members, error } = await supabaseClient
+        .from('members')
+        .select('member_id, name, voice_part')
+        .eq('status', 'active')  // ← ONLY show active members
+        .order('name', { ascending: true });
+    if (error) { 
+        document.getElementById('memberList').innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading members</div>'; 
+        return; 
     }
+    allMembers = members;
+    displayMembers(allMembers);
+}
 
     function displayMembers(members) {
         const container = document.getElementById('memberList');

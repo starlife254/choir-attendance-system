@@ -891,10 +891,10 @@
     // ── KPIs ──
     async function loadKPIs() {
         try {
-            const { count: total } = await sb
-                .from('members')
-                .select('*', { count: 'exact', head: true });
-
+           const { count: total } = await sb
+    .from('members')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'active');  // Only count active members
             document.getElementById('kpiTotal').textContent = total ?? '—';
             if (!total) return;
 

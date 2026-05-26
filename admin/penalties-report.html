@@ -3,90 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Penalties Report | Choir Manager</title>
+    <title>Penalties Report | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --indigo-mid: #818cf8;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --blue-light: #dbeafe;
+            --blue-text: #1e40af;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg);
             min-height: 100vh;
-            padding: 12px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 28px;
-            padding: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
-            margin-bottom: 70px;
-        }
-        .header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 12px;
+            color: var(--text-primary);
         }
-        .header h1 { color: #1e293b; font-size: 1.5rem; }
-        .back-btn {
-            background: #f1f5f9;
-            color: #334155;
-            padding: 10px 18px;
-            text-decoration: none;
-            border-radius: 60px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 0.5px solid var(--border);
+            display: flex; flex-direction: column;
+            position: fixed; left: 0; top: 0; bottom: 0;
+            z-index: 50;
+            transition: transform .25s ease;
         }
+
+        .sidebar-logo {
+            padding: 20px 16px 16px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: var(--indigo); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+
+        .nav-section-label {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase; letter-spacing: .8px;
+            padding: 10px 10px 4px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 10px;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 13px; cursor: pointer;
+            transition: background .12s, color .12s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+
+        .nav-item.active {
+            background: var(--indigo-light);
+            color: var(--indigo); font-weight: 600;
+        }
+
+        .nav-item.active i { color: var(--indigo); }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .sidebar-bottom {
+            padding: 12px 8px;
+            border-top: 0.5px solid var(--border);
+        }
+
+        .user-card {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            background: var(--bg);
+        }
+
+        .user-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--indigo);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0;
+        }
+
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; text-transform: capitalize; }
+
+        .logout-link {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 12px; border-radius: 10px;
+            color: var(--red); font-size: 13px; cursor: pointer;
+            margin-top: 4px; transition: background .12s;
+        }
+
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35); z-index: 40;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 0.5px solid var(--border);
+            padding: 0 28px;
+            height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 10;
+        }
+
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .topbar-chip {
+            background: var(--bg); border: 0.5px solid var(--border);
+            border-radius: 40px; padding: 5px 12px;
+            font-size: 12px; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .topbar-chip i { font-size: 14px; }
+
+        .hamburger {
+            display: none; background: none; border: none;
+            font-size: 22px; color: var(--text-primary);
+            cursor: pointer; padding: 4px;
+        }
+
+        /* ── CONTENT ── */
+        .content {
+            padding: 24px 28px 40px;
+            flex: 1;
+        }
+
+        /* ── FILTER GROUP ── */
         .filter-group {
             display: flex;
             gap: 12px;
             margin-bottom: 24px;
             flex-wrap: wrap;
             align-items: center;
-            background: #f8fafc;
-            padding: 16px;
-            border-radius: 20px;
+            background: var(--surface);
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 0.5px solid var(--border);
         }
+
         .filter-select, .filter-input {
             padding: 10px 16px;
-            border: 1px solid #e2e8f0;
+            border: 0.5px solid var(--border);
             border-radius: 40px;
-            background: white;
+            background: var(--bg);
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color .15s;
         }
+
+        .filter-select:focus, .filter-input:focus {
+            border-color: var(--indigo);
+        }
+
         .filter-input {
             flex: 1;
-            min-width: 180px;
+            min-width: 200px;
         }
+
         .action-btn {
             padding: 10px 20px;
             border: none;
             border-radius: 40px;
             cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
+            font-weight: 600;
+            font-size: 13px;
+            transition: opacity .15s, transform .1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
         }
-        .pdf-btn {
-            background: #dc2626;
-            color: white;
-        }
-        .refresh-btn {
-            background: #667eea;
-            color: white;
-        }
+
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .pdf-btn { background: var(--red); color: #fff; }
+        .refresh-btn { background: var(--indigo); color: #fff; }
+
+        /* ── SUMMARY STATS ── */
         .summary-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             margin-bottom: 24px;
         }
+
         .summary-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -94,311 +250,483 @@
             border-radius: 20px;
             text-align: center;
         }
+
+        .summary-card.amber { background: var(--amber); color: #333; }
+        .summary-card.green { background: var(--green); }
+        .summary-card.indigo { background: linear-gradient(135deg, #667eea, #764ba2); }
+
         .summary-number { font-size: 32px; font-weight: bold; }
         .summary-label { font-size: 13px; opacity: 0.9; margin-top: 5px; }
+
+        /* ── TABLE ── */
         .penalties-table-container {
             overflow-x: auto;
-            border-radius: 20px;
-            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            border: 0.5px solid var(--border);
+            background: var(--surface);
         }
+
         .penalties-table {
             width: 100%;
             border-collapse: collapse;
             min-width: 800px;
         }
+
         .penalties-table th {
-            background: #1e293b;
-            color: white;
-            padding: 14px 12px;
+            background: var(--bg);
+            color: var(--text-secondary);
+            padding: 12px 16px;
             text-align: left;
             font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .penalties-table td {
+            padding: 12px 16px;
+            border-bottom: 0.5px solid var(--border);
             font-size: 13px;
         }
-        .penalties-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eef2ff;
-            font-size: 14px;
-        }
-        .penalties-table tr:hover {
-            background: #f8fafc;
-        }
+
+        .penalties-table tr:last-child td { border-bottom: none; }
+        .penalties-table tr:hover td { background: var(--bg); }
+
         .status-badge {
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
             display: inline-block;
         }
-        .status-pending { background: #fef3c7; color: #d97706; }
-        .status-paid { background: #d1fae5; color: #059669; }
-        .penalty-amount {
-            font-weight: bold;
-            color: #dc2626;
-        }
+
+        .status-pending { background: var(--amber-light); color: #d97706; }
+        .status-paid { background: var(--green-light); color: #059669; }
+
+        .penalty-amount { font-weight: 700; color: var(--red); }
         .member-link {
-            color: #667eea;
+            color: var(--indigo);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
         }
-        .member-link:hover {
-            text-decoration: underline;
-        }
+        .member-link:hover { text-decoration: underline; }
+
         .no-data {
             text-align: center;
-            padding: 40px;
-            color: #666;
+            padding: 60px 20px;
+            color: var(--text-tertiary);
+            font-size: 14px;
         }
+
+        .no-data i { font-size: 40px; display: block; margin-bottom: 12px; }
+
+        /* ── BOTTOM NAV ── */
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
             justify-content: space-around;
-            padding: 10px 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
+            padding: 8px 16px env(safe-area-inset-bottom, 12px);
+            box-shadow: 0 -1px 0 var(--border);
+            z-index: 50;
         }
+
         .bottom-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #666;
-            font-size: 11px;
-            gap: 4px;
-            padding: 5px 15px;
-            border-radius: 10px;
+            display: flex; flex-direction: column; align-items: center;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px;
         }
-        .bottom-nav-item span:first-child { font-size: 22px; }
-        .bottom-nav-item.active { color: #667eea; background: #f0f0ff; }
-        @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
-        @media (max-width: 640px) {
+
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1024px) {
             .summary-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
             .filter-group { flex-direction: column; align-items: stretch; }
+            .summary-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>💰 Penalties Report</h1>
-            <a href="analytics.html" class="back-btn">← Back to Analytics</a>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div>
+                <div class="user-name" id="userName">Loading…</div>
+                <div class="user-role" id="userRole">Admin</div>
+            </div>
         </div>
+        <div class="logout-link" onclick="logout()">
+            <i class="ti ti-logout"></i> Log out
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <i class="ti ti-menu-2"></i>
+            </button>
+            <div class="topbar-left">
+                <h2>Penalties Report</h2>
+                <p>View and export penalty records</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-chip" id="topTime">--:--</div>
+        </div>
+    </header>
+
+    <main class="content">
 
         <div class="filter-group">
-            <select id="statusFilter" class="filter-select" onchange="loadPenaltiesReport()">
+            <select id="statusFilter" class="filter-select">
                 <option value="all">All Penalties</option>
                 <option value="pending">Pending Only</option>
                 <option value="paid">Paid Only</option>
             </select>
-            <select id="typeFilter" class="filter-select" onchange="loadPenaltiesReport()">
+            <select id="typeFilter" class="filter-select">
                 <option value="all">All Types</option>
                 <option value="late">Late Only</option>
                 <option value="absent">Absent Only</option>
             </select>
-            <input type="text" id="searchFilter" class="filter-input" placeholder="🔍 Search by member name..." onkeyup="loadPenaltiesReport()">
-            
-            <button onclick="exportToPDF()" class="action-btn pdf-btn">📄 Export PDF</button>
+            <input type="text" id="searchFilter" class="filter-input" placeholder="🔍 Search by member name...">
+            <button onclick="exportToPDF()" class="action-btn pdf-btn">
+                <i class="ti ti-file-pdf"></i> Export PDF
+            </button>
+            <button onclick="loadPenaltiesReport()" class="action-btn refresh-btn">
+                <i class="ti ti-refresh"></i> Refresh
+            </button>
         </div>
 
         <div class="summary-stats" id="summaryStats">
-            <div class="summary-card">💰 Loading...</div>
+            <div class="summary-card indigo">💰 Loading...</div>
         </div>
 
         <div class="penalties-table-container" id="penaltiesTableContainer">
-            <div class="no-data">Loading penalties...</div>
+            <div class="no-data"><i class="ti ti-loader"></i> Loading penalties...</div>
         </div>
-    </div>
 
-    <div class="bottom-nav">
-        <a href="index.html" class="bottom-nav-item"><span>🏠</span><span>Home</span></a>
-        <a href="mark-attendance.html" class="bottom-nav-item"><span>✅</span><span>Mark</span></a>
-        <a href="reports.html" class="bottom-nav-item"><span>📊</span><span>Reports</span></a>
-        <a href="analytics.html" class="bottom-nav-item active"><span>📈</span><span>Analytics</span></a>
-    </div>
+    </main>
+</div>
 
-    <script>
-        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<!-- Bottom Nav (mobile) -->
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let allPenalties = [];
+
+    // ── HELPERS ──
+    function esc(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function fmt(n) { return 'KSh ' + (n || 0).toLocaleString(); }
+
+    function tick() {
+        document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ── AUTH ──
+    async function checkAuth() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return null; }
+        return session;
+    }
+
+    async function logout() {
+        try { await sb.auth.signOut(); } catch(e) { console.warn(e); }
+        window.location.href = 'login.html';
+    }
+
+    // ── USER INFO ──
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const emailName = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = emailName;
+            document.getElementById('userAvatar').textContent = (emailName.charAt(0) || 'A').toUpperCase();
+            const { data: profile } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (profile) {
+                if (profile.full_name) {
+                    const first = profile.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = first;
+                    document.getElementById('userAvatar').textContent = first.charAt(0).toUpperCase();
+                }
+                if (profile.role) document.getElementById('userRole').textContent = profile.role;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ── SIDEBAR ──
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    // ── LOAD PENALTIES REPORT ──
+    async function loadPenaltiesReport() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const typeFilter = document.getElementById('typeFilter').value;
+        const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
         
-        let allPenalties = [];
-
-        async function loadPenaltiesReport() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const typeFilter = document.getElementById('typeFilter').value;
-            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
-            
-            let query = supabaseClient
-                .from('penalties')
-                .select('*, members(name, voice_part, member_id)')
-                .order('date', { ascending: false });
-            
-            const { data: penalties, error } = await query;
-            
-            if (error) {
-                console.error('Error loading penalties:', error);
-                document.getElementById('penaltiesTableContainer').innerHTML = '<div class="no-data">❌ Error loading penalties</div>';
-                return;
+        document.getElementById('penaltiesTableContainer').innerHTML = '<div class="no-data"><i class="ti ti-loader"></i> Loading penalties...</div>';
+        
+        let query = sb
+            .from('penalties')
+            .select('*, members(name, voice_part, member_id)')
+            .order('date', { ascending: false });
+        
+        const { data: penalties, error } = await query;
+        
+        if (error) {
+            console.error('Error loading penalties:', error);
+            document.getElementById('penaltiesTableContainer').innerHTML = '<div class="no-data"><i class="ti ti-alert-circle"></i> Error loading penalties</div>';
+            return;
+        }
+        
+        allPenalties = penalties || [];
+        
+        // Apply filters
+        let filtered = [...allPenalties];
+        if (statusFilter !== 'all') {
+            filtered = filtered.filter(p => p.status === statusFilter);
+        }
+        if (typeFilter !== 'all') {
+            filtered = filtered.filter(p => p.penalty_type === typeFilter);
+        }
+        if (searchFilter) {
+            filtered = filtered.filter(p => p.members?.name?.toLowerCase().includes(searchFilter));
+        }
+        
+        // Calculate summary
+        const totalPenalties = filtered.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const totalPending = filtered.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount || 0), 0);
+        const totalPaid = filtered.filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0);
+        const uniqueMembers = new Set(filtered.map(p => p.member_id)).size;
+        
+        document.getElementById('summaryStats').innerHTML = `
+            <div class="summary-card indigo">
+                <div class="summary-number">${fmt(totalPenalties)}</div>
+                <div class="summary-label">Total Fines</div>
+            </div>
+            <div class="summary-card amber">
+                <div class="summary-number">${fmt(totalPending)}</div>
+                <div class="summary-label">Pending</div>
+            </div>
+            <div class="summary-card green">
+                <div class="summary-number">${fmt(totalPaid)}</div>
+                <div class="summary-label">Paid</div>
+            </div>
+            <div class="summary-card indigo">
+                <div class="summary-number">${uniqueMembers}</div>
+                <div class="summary-label">Members with Penalties</div>
+            </div>
+        `;
+        
+        if (!filtered.length) {
+            document.getElementById('penaltiesTableContainer').innerHTML = `
+                <div class="no-data">
+                    <i class="ti ti-mood-happy"></i>
+                    No penalties found matching your filters!
+                </div>`;
+            return;
+        }
+        
+        // Group by member for better display
+        const groupedByMember = {};
+        filtered.forEach(penalty => {
+            const memberId = penalty.member_id;
+            if (!groupedByMember[memberId]) {
+                groupedByMember[memberId] = {
+                    member: penalty.members,
+                    penalties: [],
+                    totalAmount: 0,
+                    pendingAmount: 0,
+                    paidAmount: 0
+                };
             }
-            
-            allPenalties = penalties || [];
-            
-            // Apply filters
-            let filtered = [...allPenalties];
-            if (statusFilter !== 'all') {
-                filtered = filtered.filter(p => p.status === statusFilter);
+            groupedByMember[memberId].penalties.push(penalty);
+            groupedByMember[memberId].totalAmount += penalty.amount;
+            if (penalty.status === 'pending') {
+                groupedByMember[memberId].pendingAmount += penalty.amount;
+            } else {
+                groupedByMember[memberId].paidAmount += penalty.amount;
             }
-            if (typeFilter !== 'all') {
-                filtered = filtered.filter(p => p.penalty_type === typeFilter);
-            }
-            if (searchFilter) {
-                filtered = filtered.filter(p => p.members?.name?.toLowerCase().includes(searchFilter));
-            }
-            
-            // Calculate summary
-            const totalPenalties = filtered.reduce((sum, p) => sum + (p.amount || 0), 0);
-            const totalPending = filtered.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount || 0), 0);
-            const totalPaid = filtered.filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0);
-            const uniqueMembers = new Set(filtered.map(p => p.member_id)).size;
-            
-            document.getElementById('summaryStats').innerHTML = `
-                <div class="summary-card">💰 KSh ${totalPenalties}<div class="summary-label">Total Fines</div></div>
-                <div class="summary-card" style="background:#f59e0b;color:#333;">⏳ KSh ${totalPending}<div class="summary-label">Pending</div></div>
-                <div class="summary-card" style="background:#10b981;">✅ KSh ${totalPaid}<div class="summary-label">Paid</div></div>
-                <div class="summary-card">👥 ${uniqueMembers}<div class="summary-label">Members with Penalties</div></div>
-            `;
-            
-            if (!filtered.length) {
-                document.getElementById('penaltiesTableContainer').innerHTML = '<div class="no-data">🎉 No penalties found matching your filters!</div>';
-                return;
-            }
-            
-            // Group by member for better display
-            const groupedByMember = {};
-            filtered.forEach(penalty => {
-                const memberId = penalty.member_id;
-                if (!groupedByMember[memberId]) {
-                    groupedByMember[memberId] = {
-                        member: penalty.members,
-                        penalties: [],
-                        totalAmount: 0,
-                        pendingAmount: 0,
-                        paidAmount: 0
-                    };
-                }
-                groupedByMember[memberId].penalties.push(penalty);
-                groupedByMember[memberId].totalAmount += penalty.amount;
-                if (penalty.status === 'pending') {
-                    groupedByMember[memberId].pendingAmount += penalty.amount;
-                } else {
-                    groupedByMember[memberId].paidAmount += penalty.amount;
-                }
-            });
-            
-            let html = `
-                <table class="penalties-table" id="pdfTable">
-                    <thead>
-                        <tr>
-                            <th>Member Name</th>
-                            <th>Voice Part</th>
-                            <th>Member ID</th>
-                            <th>Total Fines</th>
-                            <th>Pending</th>
-                            <th>Paid</th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            for (const [memberId, data] of Object.entries(groupedByMember)) {
-                const member = data.member;
-                const detailsHtml = data.penalties.map(p => `
-                    <div style="font-size:12px; padding:4px 0; border-bottom:1px solid #e2e8f0;">
-                        ${p.date} - ${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'} 
-                        (${p.session || ''}) - KSh ${p.amount}
-                        <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status}</span>
-                    </div>
-                `).join('');
-                
-                html += `
+        });
+        
+        let html = `
+            <table class="penalties-table" id="pdfTable">
+                <thead>
                     <tr>
-                        <td><a href="member-detail.html?id=${memberId}" class="member-link">${member?.name || 'Unknown'}</a></td>
-                        <td>${member?.voice_part || '—'}</td>
-                        <td>${memberId}</td>
-                        <td class="penalty-amount">KSh ${data.totalAmount}</td>
-                        <td class="penalty-amount">KSh ${data.pendingAmount}</td>
-                        <td style="color:#10b981;">KSh ${data.paidAmount}</td>
-                        <td style="min-width:200px;">${detailsHtml}</td>
+                        <th>Member Name</th>
+                        <th>Voice Part</th>
+                        <th>Member ID</th>
+                        <th>Total Fines</th>
+                        <th>Pending</th>
+                        <th>Paid</th>
+                        <th>Details</th>
                     </tr>
-                `;
-            }
-            
-            html += `</tbody></table>`;
-            document.getElementById('penaltiesTableContainer').innerHTML = html;
-        }
+                </thead>
+                <tbody>
+        `;
         
-        async function exportToPDF() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const typeFilter = document.getElementById('typeFilter').value;
-            const searchFilter = document.getElementById('searchFilter').value;
+        for (const [memberId, data] of Object.entries(groupedByMember)) {
+            const member = data.member;
+            const detailsHtml = data.penalties.map(p => `
+                <div style="font-size:11px; padding:4px 0; border-bottom:1px solid #e2e8f0;">
+                    ${p.date} - ${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'} 
+                    (${p.session || ''}) - ${fmt(p.amount)}
+                    <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status}</span>
+                </div>
+            `).join('');
             
-            // Create PDF content
-            const pdfContent = document.createElement('div');
-            pdfContent.style.padding = '20px';
-            pdfContent.style.fontFamily = 'Arial, sans-serif';
-            pdfContent.style.backgroundColor = 'white';
-            
-            const currentDate = new Date().toLocaleDateString();
-            const filterText = [];
-            if (statusFilter !== 'all') filterText.push(`Status: ${statusFilter}`);
-            if (typeFilter !== 'all') filterText.push(`Type: ${typeFilter}`);
-            if (searchFilter) filterText.push(`Search: ${searchFilter}`);
-            
-            pdfContent.innerHTML = `
-                <div style="text-align:center; margin-bottom:30px;">
-                    <h1 style="color:#667eea;">🎵 University of Embu Students' Choir</h1>
-                    <h2>Penalties Report</h2>
-                    <p>98th Music Festival 2026</p>
-                    <p>Generated on: ${currentDate}</p>
-                    ${filterText.length ? `<p>Filters: ${filterText.join(' | ')}</p>` : ''}
-                </div>
-                <div style="margin-bottom:20px;">
-                    ${document.getElementById('summaryStats').innerHTML}
-                </div>
-                <div>
-                    ${document.getElementById('penaltiesTableContainer').innerHTML}
-                </div>
-                <div style="text-align:center; margin-top:30px; font-size:12px; color:#999;">
-                    <p>University of Embu | Choir Attendance System</p>
-                </div>
+            html += `
+                <tr>
+                    <td><a href="member-detail.html?id=${memberId}" class="member-link">${esc(member?.name || 'Unknown')}</a></td>
+                    <td>${esc(member?.voice_part || '—')}</td>
+                    <td style="font-family:monospace; font-size:11px;">${memberId}</td>
+                    <td class="penalty-amount">${fmt(data.totalAmount)}</td>
+                    <td class="penalty-amount">${fmt(data.pendingAmount)}</td>
+                    <td style="color:var(--green); font-weight:600;">${fmt(data.paidAmount)}</td>
+                    <td style="min-width:220px;">${detailsHtml}</td>
+                </tr>
             `;
-            
-            // PDF Options
-            const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: `penalties_report_${currentDate.replace(/\//g, '-')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-            };
-            
-            const exportBtn = document.querySelector('.pdf-btn');
-            const originalText = exportBtn.textContent;
-            exportBtn.textContent = '⏳ Generating PDF...';
-            exportBtn.disabled = true;
-            
-            await html2pdf().set(opt).from(pdfContent).save();
-            
-            exportBtn.textContent = originalText;
-            exportBtn.disabled = false;
         }
         
-        // Load penalties on page load
-        loadPenaltiesReport();
-    </script>
+        html += `</tbody></table>`;
+        document.getElementById('penaltiesTableContainer').innerHTML = html;
+    }
+    
+    // ── EXPORT PDF ──
+    async function exportToPDF() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const typeFilter = document.getElementById('typeFilter').value;
+        const searchFilter = document.getElementById('searchFilter').value;
+        
+        const pdfContent = document.createElement('div');
+        pdfContent.style.padding = '20px';
+        pdfContent.style.fontFamily = 'Arial, sans-serif';
+        pdfContent.style.backgroundColor = 'white';
+        
+        const currentDate = new Date().toLocaleDateString();
+        const filterText = [];
+        if (statusFilter !== 'all') filterText.push(`Status: ${statusFilter}`);
+        if (typeFilter !== 'all') filterText.push(`Type: ${typeFilter}`);
+        if (searchFilter) filterText.push(`Search: ${searchFilter}`);
+        
+        pdfContent.innerHTML = `
+            <div style="text-align:center; margin-bottom:30px;">
+                <h1 style="color:#667eea;">🎵 University of Embu Students' Choir</h1>
+                <h2>Penalties Report</h2>
+                <p>98th Music Festival 2026</p>
+                <p>Generated on: ${currentDate}</p>
+                ${filterText.length ? `<p>Filters: ${filterText.join(' | ')}</p>` : ''}
+            </div>
+            <div style="margin-bottom:20px;">
+                ${document.getElementById('summaryStats').innerHTML}
+            </div>
+            <div>
+                ${document.getElementById('penaltiesTableContainer').innerHTML}
+            </div>
+            <div style="text-align:center; margin-top:30px; font-size:12px; color:#999;">
+                <p>University of Embu | Choir Attendance System</p>
+            </div>
+        `;
+        
+        const opt = {
+            margin: [0.5, 0.5, 0.5, 0.5],
+            filename: `penalties_report_${currentDate.replace(/\//g, '-')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+        };
+        
+        const exportBtn = document.querySelector('.pdf-btn');
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<i class="ti ti-loader"></i> Generating...';
+        exportBtn.disabled = true;
+        
+        await html2pdf().set(opt).from(pdfContent).save();
+        
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+    }
+    
+    // ── INIT ──
+    document.getElementById('statusFilter').addEventListener('change', loadPenaltiesReport);
+    document.getElementById('typeFilter').addEventListener('change', loadPenaltiesReport);
+    document.getElementById('searchFilter').addEventListener('input', loadPenaltiesReport);
+    
+    async function init() {
+        await checkAuth();
+        tick();
+        setInterval(tick, 1000);
+        await loadUserInfo();
+        await loadPenaltiesReport();
+    }
+    
+    init();
+    
+    // Expose global functions
+    window.logout = logout;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.loadPenaltiesReport = loadPenaltiesReport;
+    window.exportToPDF = exportToPDF;
+</script>
 </body>
 </html>

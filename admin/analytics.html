@@ -475,35 +475,39 @@
     }
 
     async function loadGroupKpis() {
-        const { count: totalMembers } = await sb.from('members').select('*', { count: 'exact', head: true });
-        const { data: penalties } = await sb.from('penalties').select('status, amount');
-        const totalPending = (penalties || []).filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
-        const totalPaid    = (penalties || []).filter(p => p.status === 'paid').reduce((s, p) => s + (p.amount || 0), 0);
+    // FIX: Only count ACTIVE members (not alumni or removed)
+    const { count: totalMembers } = await sb
+        .from('members')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+    
+    const { data: penalties } = await sb.from('penalties').select('status, amount');
+    const totalPending = (penalties || []).filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
+    const totalPaid    = (penalties || []).filter(p => p.status === 'paid').reduce((s, p) => s + (p.amount || 0), 0);
 
-        document.getElementById('groupKpis').innerHTML = `
-            <div class="kpi-card indigo">
-                <div class="kpi-label"><i class="ti ti-users" style="color:var(--indigo)"></i> Total members</div>
-                <div class="kpi-value">${totalMembers || 0}</div>
-                <div class="kpi-meta">Registered this festival</div>
-            </div>
-            <div class="kpi-card green">
-                <div class="kpi-label"><i class="ti ti-cash" style="color:var(--green)"></i> Total fines</div>
-                <div class="kpi-value" style="font-size:18px">${fmt(totalPending + totalPaid)}</div>
-                <div class="kpi-meta">All time</div>
-            </div>
-            <div class="kpi-card amber">
-                <div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Pending</div>
-                <div class="kpi-value" style="font-size:18px">${fmt(totalPending)}</div>
-                <div class="kpi-meta">Awaiting payment</div>
-            </div>
-            <div class="kpi-card cyan">
-                <div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--cyan)"></i> Collected</div>
-                <div class="kpi-value" style="font-size:18px">${fmt(totalPaid)}</div>
-                <div class="kpi-meta">Paid penalties</div>
-            </div>
-        `;
-    }
-
+    document.getElementById('groupKpis').innerHTML = `
+        <div class="kpi-card indigo">
+            <div class="kpi-label"><i class="ti ti-users" style="color:var(--indigo)"></i> Total members</div>
+            <div class="kpi-value">${totalMembers || 0}</div>
+            <div class="kpi-meta">Active members only</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-label"><i class="ti ti-cash" style="color:var(--green)"></i> Total fines</div>
+            <div class="kpi-value" style="font-size:18px">${fmt(totalPending + totalPaid)}</div>
+            <div class="kpi-meta">All time</div>
+        </div>
+        <div class="kpi-card amber">
+            <div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Pending</div>
+            <div class="kpi-value" style="font-size:18px">${fmt(totalPending)}</div>
+            <div class="kpi-meta">Awaiting payment</div>
+        </div>
+        <div class="kpi-card cyan">
+            <div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--cyan)"></i> Collected</div>
+            <div class="kpi-value" style="font-size:18px">${fmt(totalPaid)}</div>
+            <div class="kpi-meta">Paid penalties</div>
+        </div>
+    `;
+}
     async function loadTopPerformers(startStr) {
         const panel = document.getElementById('topPerformersPanel');
         const { data: att } = await sb.from('attendance')

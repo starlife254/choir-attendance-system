@@ -34,7 +34,6 @@
         .message.error { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
         .message.success { display: block; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
         
-        /* Register Link */
         .register-link {
             text-align: center;
             margin-top: 20px;
@@ -50,7 +49,6 @@
             text-decoration: underline;
         }
         
-        /* Developer Footer */
         .developer-footer {
             text-align: center;
             margin-top: 20px;
@@ -127,7 +125,6 @@
             </div>
         </div>
         
-        <!-- Developer Credit Footer -->
         <div class="developer-footer">
             <p>
                 Developed by
@@ -144,26 +141,20 @@
     </div>
 
     <script>
-        // Supabase configuration - using a different variable name to avoid conflict
         const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
-        
-        // Create client with unique name (not 'supabase')
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function getUserRole(email) {
-            // Check user_roles table
             const { data, error } = await supabaseClient
                 .from('user_roles')
                 .select('role')
                 .eq('email', email)
                 .single();
-            
             if (data && !error) {
                 return data.role;
             }
-            
-            return 'member'; // Default role
+            return 'member';
         }
 
         async function checkSession() {
@@ -198,7 +189,6 @@
                 
                 if (data.session) {
                     const role = await getUserRole(email);
-                    
                     messageDiv.textContent = '✅ Login successful! Redirecting...';
                     messageDiv.className = 'message success';
                     messageDiv.style.display = 'block';

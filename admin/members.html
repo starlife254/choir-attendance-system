@@ -254,6 +254,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let allMembers = [], selectedMember = null, trendChart;
+    let profilePhotoMap = {};
 
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
     function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
@@ -274,39 +275,32 @@
         } catch(e) { console.warn(e); }
     }
 
-    // DIRECT APPROACH: Get all profile photos in one query
-    let profilePhotoMap = {};
-
+    // SIMPLIFIED: Load profile photos directly by member_id
     async function loadProfilePhotos() {
         try {
-            // Get all user_members links
-            const { data: userLinks } = await supabaseClient
-                .from('user_members')
-                .select('member_id, user_id');
-            
-            if (!userLinks || userLinks.length === 0) return;
-            
-            // Get all user_profiles with photos
-            const { data: profiles } = await supabaseClient
+            // Get all user_profiles that have profile photos
+            const { data: profiles, error } = await supabaseClient
                 .from('user_profiles')
-                .select('user_id, profile_photo_url')
+                .select('member_id, profile_photo_url')
                 .not('profile_photo_url', 'is', null);
             
-            if (!profiles || profiles.length === 0) return;
+            if (error) {
+                console.warn('Error loading profiles:', error);
+                return;
+            }
             
-            // Create a map of user_id -> photo_url
-            const userPhotoMap = {};
-            profiles.forEach(p => {
-                if (p.profile_photo_url) {
-                    let cleanUrl = p.profile_photo_url.split(',')[0].trim();
-                    userPhotoMap[p.user_id] = cleanUrl;
-                }
-            });
+            if (!profiles || profiles.length === 0) {
+                console.log('No profile photos found');
+                return;
+            }
             
-            // Create map of member_id -> photo_url
-            userLinks.forEach(link => {
-                if (userPhotoMap[link.user_id]) {
-                    profilePhotoMap[link.member_id] = userPhotoMap[link.user_id];
+            // Create map of member_id -> clean photo URL
+            profiles.forEach(profile => {
+                if (profile.member_id && profile.profile_photo_url) {
+                    let cleanUrl = profile.profile_photo_url.split(',')[0].trim();
+                    // Add cache buster
+                    cleanUrl = cleanUrl + (cleanUrl.includes('?') ? '&t=' : '?t=') + Date.now();
+                    profilePhotoMap[profile.member_id] = cleanUrl;
                 }
             });
             
@@ -335,7 +329,7 @@
         container.innerHTML = members.map(m => {
             const photoUrl = profilePhotoMap[m.member_id];
             const avatarHtml = photoUrl 
-                ? `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`
+                ? `<img src="${photoUrl}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`
                 : `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
             
             return `
@@ -361,7 +355,7 @@
         container.innerHTML = filtered.map(m => {
             const photoUrl = profilePhotoMap[m.member_id];
             const avatarHtml = photoUrl 
-                ? `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`
+                ? `<img src="${photoUrl}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`
                 : `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
             
             return `
@@ -398,7 +392,7 @@
         
         const photoUrl = profilePhotoMap[member.member_id];
         const avatarHtml = photoUrl 
-            ? `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(member.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>';">`
+            ? `<img src="${photoUrl}" alt="${escapeHtml(member.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>';">`
             : `<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>`;
         
         document.getElementById('profileCard').innerHTML = `

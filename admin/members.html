@@ -254,7 +254,6 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let allMembers = [], selectedMember = null, trendChart;
-    let profilePhotosCache = {};
 
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
     function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
@@ -275,59 +274,45 @@
         } catch(e) { console.warn(e); }
     }
 
-    // Function to clean URL (remove any trailing commas or extra text)
-    function cleanImageUrl(url) {
-        if (!url) return null;
-        // Split by comma and take first part
-        let cleanUrl = url.split(',')[0].trim();
-        // Add cache buster to force refresh
-        cleanUrl = cleanUrl + (cleanUrl.includes('?') ? '&t=' : '?t=') + Date.now();
-        return cleanUrl;
-    }
+    // DIRECT APPROACH: Get all profile photos in one query
+    let profilePhotoMap = {};
 
-    async function getProfilePhotoUrl(memberId) {
-        if (profilePhotosCache[memberId]) return profilePhotosCache[memberId];
-        
+    async function loadProfilePhotos() {
         try {
-            // First, try to get from user_profiles via user_members
-            const { data: userLink } = await supabaseClient
+            // Get all user_members links
+            const { data: userLinks } = await supabaseClient
                 .from('user_members')
-                .select('user_id')
-                .eq('member_id', memberId)
-                .maybeSingle();
+                .select('member_id, user_id');
             
-            if (userLink) {
-                const { data: profile } = await supabaseClient
-                    .from('user_profiles')
-                    .select('profile_photo_url')
-                    .eq('user_id', userLink.user_id)
-                    .maybeSingle();
-                
-                if (profile?.profile_photo_url) {
-                    const cleanUrl = cleanImageUrl(profile.profile_photo_url);
-                    profilePhotosCache[memberId] = cleanUrl;
-                    return cleanUrl;
-                }
-            }
+            if (!userLinks || userLinks.length === 0) return;
             
-            // Fallback: try direct query by member_id
-            const { data: directProfile } = await supabaseClient
+            // Get all user_profiles with photos
+            const { data: profiles } = await supabaseClient
                 .from('user_profiles')
-                .select('profile_photo_url')
-                .eq('member_id', memberId)
-                .maybeSingle();
+                .select('user_id, profile_photo_url')
+                .not('profile_photo_url', 'is', null);
             
-            if (directProfile?.profile_photo_url) {
-                const cleanUrl = cleanImageUrl(directProfile.profile_photo_url);
-                profilePhotosCache[memberId] = cleanUrl;
-                return cleanUrl;
-            }
+            if (!profiles || profiles.length === 0) return;
             
-            profilePhotosCache[memberId] = null;
-            return null;
+            // Create a map of user_id -> photo_url
+            const userPhotoMap = {};
+            profiles.forEach(p => {
+                if (p.profile_photo_url) {
+                    let cleanUrl = p.profile_photo_url.split(',')[0].trim();
+                    userPhotoMap[p.user_id] = cleanUrl;
+                }
+            });
+            
+            // Create map of member_id -> photo_url
+            userLinks.forEach(link => {
+                if (userPhotoMap[link.user_id]) {
+                    profilePhotoMap[link.member_id] = userPhotoMap[link.user_id];
+                }
+            });
+            
+            console.log('Loaded profile photos for members:', Object.keys(profilePhotoMap).length);
         } catch(e) {
-            console.warn('Error loading profile photo for member', memberId, e);
-            return null;
+            console.warn('Error loading profile photos:', e);
         }
     }
 
@@ -343,31 +328,29 @@
         }
         allMembers = members;
         
-        const container = document.getElementById('memberList');
-        container.innerHTML = members.map(m => `
-            <div class="member-list-item" onclick="selectMember('${m.member_id}')" id="member-item-${m.member_id}">
-                <div class="member-list-avatar" id="member-avatar-${m.member_id}">
-                    <span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>
-                </div>
-                <div class="member-list-info">
-                    <div class="member-list-name">${escapeHtml(m.name)}</div>
-                    <div class="member-list-voice">${escapeHtml(m.voice_part)}</div>
-                </div>
-                <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-tertiary)"></i>
-            </div>
-        `).join('');
+        // Load all profile photos first
+        await loadProfilePhotos();
         
-        // Load profile photos asynchronously
-        for (const m of members) {
-            getProfilePhotoUrl(m.member_id).then(photoUrl => {
-                if (photoUrl) {
-                    const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
-                    if (avatarDiv) {
-                        avatarDiv.innerHTML = `<img src="${photoUrl}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
-                    }
-                }
-            });
-        }
+        const container = document.getElementById('memberList');
+        container.innerHTML = members.map(m => {
+            const photoUrl = profilePhotoMap[m.member_id];
+            const avatarHtml = photoUrl 
+                ? `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`
+                : `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
+            
+            return `
+                <div class="member-list-item" onclick="selectMember('${m.member_id}')" id="member-item-${m.member_id}">
+                    <div class="member-list-avatar" id="member-avatar-${m.member_id}">
+                        ${avatarHtml}
+                    </div>
+                    <div class="member-list-info">
+                        <div class="member-list-name">${escapeHtml(m.name)}</div>
+                        <div class="member-list-voice">${escapeHtml(m.voice_part)}</div>
+                    </div>
+                    <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-tertiary)"></i>
+                </div>
+            `;
+        }).join('');
     }
 
     function searchMembers() {
@@ -375,36 +358,25 @@
         const filtered = allMembers.filter(m => m.name.toLowerCase().includes(q) || m.voice_part.toLowerCase().includes(q));
         
         const container = document.getElementById('memberList');
-        container.innerHTML = filtered.map(m => `
-            <div class="member-list-item" onclick="selectMember('${m.member_id}')" id="member-item-${m.member_id}">
-                <div class="member-list-avatar" id="member-avatar-${m.member_id}">
-                    <span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>
+        container.innerHTML = filtered.map(m => {
+            const photoUrl = profilePhotoMap[m.member_id];
+            const avatarHtml = photoUrl 
+                ? `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`
+                : `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
+            
+            return `
+                <div class="member-list-item" onclick="selectMember('${m.member_id}')" id="member-item-${m.member_id}">
+                    <div class="member-list-avatar" id="member-avatar-${m.member_id}">
+                        ${avatarHtml}
+                    </div>
+                    <div class="member-list-info">
+                        <div class="member-list-name">${escapeHtml(m.name)}</div>
+                        <div class="member-list-voice">${escapeHtml(m.voice_part)}</div>
+                    </div>
+                    <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-tertiary)"></i>
                 </div>
-                <div class="member-list-info">
-                    <div class="member-list-name">${escapeHtml(m.name)}</div>
-                    <div class="member-list-voice">${escapeHtml(m.voice_part)}</div>
-                </div>
-                <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-tertiary)"></i>
-            </div>
-        `).join('');
-        
-        for (const m of filtered) {
-            if (profilePhotosCache[m.member_id]) {
-                const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
-                if (avatarDiv) {
-                    avatarDiv.innerHTML = `<img src="${profilePhotosCache[m.member_id]}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
-                }
-            } else {
-                getProfilePhotoUrl(m.member_id).then(photoUrl => {
-                    if (photoUrl) {
-                        const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
-                        if (avatarDiv) {
-                            avatarDiv.innerHTML = `<img src="${photoUrl}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
-                        }
-                    }
-                });
-            }
-        }
+            `;
+        }).join('');
     }
 
     async function selectMember(memberId) {
@@ -424,10 +396,9 @@
     async function loadMemberData(member) {
         if (!member) return;
         
-        // Get profile photo with fresh cache
-        const photoUrl = await getProfilePhotoUrl(member.member_id);
+        const photoUrl = profilePhotoMap[member.member_id];
         const avatarHtml = photoUrl 
-            ? `<img src="${photoUrl}" alt="${escapeHtml(member.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>';">`
+            ? `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(member.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>';">`
             : `<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>`;
         
         document.getElementById('profileCard').innerHTML = `

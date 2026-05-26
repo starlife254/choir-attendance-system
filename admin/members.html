@@ -66,26 +66,77 @@
         .search-input { width: 100%; padding: 10px 14px 10px 38px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; background: var(--bg); font-family: inherit; outline: none; transition: border-color .15s; color: var(--text-primary); }
         .search-input:focus { border-color: var(--indigo); }
         .member-list { max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-        .member-list-item { background: var(--bg); padding: 11px 14px; border-radius: 10px; cursor: pointer; transition: all .15s; border: 0.5px solid transparent; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .member-list-item { background: var(--bg); padding: 11px 14px; border-radius: 10px; cursor: pointer; transition: all .15s; border: 0.5px solid transparent; display: flex; align-items: center; gap: 12px; }
         .member-list-item:hover { background: var(--indigo-light); border-color: var(--indigo-light); transform: translateX(3px); }
         .member-list-item.selected { background: var(--indigo); color: #fff; border-color: var(--indigo); }
         .member-list-item.selected .member-list-voice { opacity: .7; color: #fff; }
-        .member-list-name { font-size: 13px; font-weight: 600; }
+        .member-list-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--indigo-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        .member-list-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .member-list-avatar span { font-size: 16px; font-weight: 600; color: var(--indigo); }
+        .member-list-info { flex: 1; }
+        .member-list-name { font-size: 14px; font-weight: 600; }
         .member-list-voice { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
         .select-hint { font-size: 11px; color: var(--text-tertiary); text-align: center; margin-top: 10px; }
 
         /* DETAIL PANEL */
         .detail-panel { display: flex; flex-direction: column; gap: 16px; }
-        .welcome-card { background: var(--indigo); border-radius: 16px; padding: 20px 22px; color: #fff; display: none; }
-        .welcome-card.active { display: block; animation: fadeIn .25s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .welcome-name { font-size: 18px; font-weight: 700; }
-        .welcome-meta { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
-        .welcome-badge { background: rgba(255,255,255,0.2); padding: 5px 14px; border-radius: 40px; font-size: 12px; }
+        
+        /* PROFILE CARD - Like the image reference */
+        .profile-card { 
+            background: linear-gradient(135deg, var(--indigo) 0%, #7c3aed 100%); 
+            border-radius: 20px; 
+            padding: 24px; 
+            color: #fff; 
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-card.active { display: block; animation: fadeIn .25s ease; }
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+        .profile-card::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .profile-content { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .profile-avatar { 
+            width: 100px; 
+            height: 100px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.2); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-avatar span { font-size: 48px; }
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .profile-role { font-size: 14px; opacity: 0.85; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .profile-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .profile-badge { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 40px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
-        .stat-number { font-size: 26px; font-weight: 700; }
+        .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; transition: transform .15s, box-shadow .15s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .stat-number { font-size: 28px; font-weight: 700; }
         .stat-label { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
         .stat-card.present .stat-number { color: var(--green); }
         .stat-card.late    .stat-number { color: var(--amber); }
@@ -102,7 +153,8 @@
         .penalty-summary { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 14px; background: var(--bg); border-radius: 10px; font-size: 13px; }
         .penalty-summary span { display: flex; gap: 5px; }
 
-        .penalty-item { background: var(--bg); padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .penalty-item { background: var(--bg); padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; cursor: pointer; transition: background .15s; }
+        .penalty-item:hover { background: var(--indigo-light); }
         .penalty-amount { font-size: 16px; font-weight: 700; color: var(--red); }
         .penalty-status-badge { padding: 3px 10px; border-radius: 40px; font-size: 11px; font-weight: 600; }
         .status-pending { background: var(--amber-light); color: #d97706; }
@@ -113,13 +165,15 @@
         .placeholder-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
         .placeholder-state i { font-size: 40px; display: block; margin-bottom: 12px; }
 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
         /* BOTTOM NAV */
         .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
         .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
         .bottom-nav-item i { font-size: 22px; }
         .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
 
-        @media (max-width: 1024px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 900px)  { .two-col { grid-template-columns: 1fr; } .search-panel { position: static; } }
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -131,6 +185,8 @@
             .topbar { padding: 0 16px; }
             .bottom-nav { display: flex; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
+            .profile-content { flex-direction: column; text-align: center; }
+            .profile-badges { justify-content: center; }
         }
         button { cursor: pointer; touch-action: manipulation; }
     </style>
@@ -195,15 +251,13 @@
 
             <!-- Detail panel -->
             <div class="detail-panel">
-                <div id="welcomeCard" class="welcome-card">
-                    <div class="welcome-name" id="welcomeName">Member</div>
-                    <div class="welcome-meta" id="welcomeMeta"></div>
+                <!-- Profile Card - Like the image reference -->
+                <div id="profileCard" class="profile-card">
+                    <!-- Dynamic content loaded by JavaScript -->
                 </div>
 
-                <div id="statsGridWrap">
-                    <div class="stats-grid" id="statsGrid">
-                        <!-- populated on member select -->
-                    </div>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- populated on member select -->
                 </div>
 
                 <div id="chartContainer" class="chart-panel">
@@ -239,6 +293,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let allMembers = [], selectedMember = null, trendChart;
+    let profilePhotos = {};
 
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
     function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
@@ -258,37 +313,107 @@
         } catch(e) { console.warn(e); }
     }
 
-   async function loadMembersList() {
-    const { data: members, error } = await supabaseClient
-        .from('members')
-        .select('member_id, name, voice_part')
-        .eq('status', 'active')  // ← ONLY show active members
-        .order('name', { ascending: true });
-    if (error) { 
-        document.getElementById('memberList').innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading members</div>'; 
-        return; 
+    async function loadProfilePhoto(memberId) {
+        if (profilePhotos[memberId]) return profilePhotos[memberId];
+        
+        try {
+            const { data: userLink } = await supabaseClient
+                .from('user_members')
+                .select('user_id')
+                .eq('member_id', memberId)
+                .maybeSingle();
+            
+            if (userLink) {
+                const { data: profile } = await supabaseClient
+                    .from('user_profiles')
+                    .select('profile_photo_url')
+                    .eq('user_id', userLink.user_id)
+                    .maybeSingle();
+                
+                if (profile?.profile_photo_url) {
+                    profilePhotos[memberId] = profile.profile_photo_url;
+                    return profile.profile_photo_url;
+                }
+            }
+            return null;
+        } catch(e) {
+            return null;
+        }
     }
-    allMembers = members;
-    displayMembers(allMembers);
-}
 
-    function displayMembers(members) {
+    async function loadMembersList() {
+        const { data: members, error } = await supabaseClient
+            .from('members')
+            .select('member_id, name, voice_part')
+            .eq('status', 'active')
+            .order('name', { ascending: true });
+        if (error) { 
+            document.getElementById('memberList').innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading members</div>'; 
+            return; 
+        }
+        allMembers = members;
+        
         const container = document.getElementById('memberList');
-        if (!members || members.length === 0) { container.innerHTML = '<div class="empty-state"><i class="ti ti-mood-empty"></i> No members found</div>'; return; }
         container.innerHTML = members.map(m => `
-            <div class="member-list-item" onclick="selectMember('${m.member_id}')">
-                <div>
+            <div class="member-list-item" onclick="selectMember('${m.member_id}')" id="member-item-${m.member_id}">
+                <div class="member-list-avatar" id="member-avatar-${m.member_id}">
+                    <span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>
+                </div>
+                <div class="member-list-info">
                     <div class="member-list-name">${escapeHtml(m.name)}</div>
                     <div class="member-list-voice">${escapeHtml(m.voice_part)}</div>
                 </div>
                 <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-tertiary)"></i>
             </div>
         `).join('');
+        
+        for (const m of members) {
+            loadProfilePhoto(m.member_id).then(photoUrl => {
+                if (photoUrl) {
+                    const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
+                    if (avatarDiv) {
+                        avatarDiv.innerHTML = `<img src="${photoUrl}" alt="${escapeHtml(m.name)}">`;
+                    }
+                }
+            });
+        }
     }
 
     function searchMembers() {
         const q = document.getElementById('searchInput').value.toLowerCase();
-        displayMembers(allMembers.filter(m => m.name.toLowerCase().includes(q) || m.voice_part.toLowerCase().includes(q)));
+        const filtered = allMembers.filter(m => m.name.toLowerCase().includes(q) || m.voice_part.toLowerCase().includes(q));
+        
+        const container = document.getElementById('memberList');
+        container.innerHTML = filtered.map(m => `
+            <div class="member-list-item" onclick="selectMember('${m.member_id}')" id="member-item-${m.member_id}">
+                <div class="member-list-avatar" id="member-avatar-${m.member_id}">
+                    <span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>
+                </div>
+                <div class="member-list-info">
+                    <div class="member-list-name">${escapeHtml(m.name)}</div>
+                    <div class="member-list-voice">${escapeHtml(m.voice_part)}</div>
+                </div>
+                <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-tertiary)"></i>
+            </div>
+        `).join('');
+        
+        for (const m of filtered) {
+            if (profilePhotos[m.member_id]) {
+                const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
+                if (avatarDiv && profilePhotos[m.member_id]) {
+                    avatarDiv.innerHTML = `<img src="${profilePhotos[m.member_id]}" alt="${escapeHtml(m.name)}">`;
+                }
+            } else {
+                loadProfilePhoto(m.member_id).then(photoUrl => {
+                    if (photoUrl) {
+                        const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
+                        if (avatarDiv) {
+                            avatarDiv.innerHTML = `<img src="${photoUrl}" alt="${escapeHtml(m.name)}">`;
+                        }
+                    }
+                });
+            }
+        }
     }
 
     async function selectMember(memberId) {
@@ -297,7 +422,7 @@
         document.querySelectorAll('.member-list-item').forEach(el => el.classList.remove('selected'));
         event?.target?.closest('.member-list-item')?.classList.add('selected');
         document.getElementById('placeholderState').style.display = 'none';
-        document.getElementById('welcomeCard').classList.add('active');
+        document.getElementById('profileCard').classList.add('active');
         document.getElementById('chartContainer').classList.add('active');
         document.getElementById('penaltiesContainer').classList.add('active');
         await loadMemberData(selectedMember);
@@ -305,25 +430,55 @@
 
     async function loadMemberData(member) {
         if (!member) return;
-        document.getElementById('welcomeCard').innerHTML = `
-            <div class="welcome-name">👤 ${escapeHtml(member.name)}</div>
-            <div class="welcome-meta">
-                <span class="welcome-badge"><i class="ti ti-microphone" style="font-size:13px;vertical-align:-2px"></i> ${escapeHtml(member.voice_part)}</span>
-                <span class="welcome-badge"><i class="ti ti-id" style="font-size:13px;vertical-align:-2px"></i> ${escapeHtml(member.member_id)}</span>
+        
+        const photoUrl = await loadProfilePhoto(member.member_id);
+        const avatarHtml = photoUrl 
+            ? `<img src="${photoUrl}" alt="${escapeHtml(member.name)}">`
+            : `<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>`;
+        
+        document.getElementById('profileCard').innerHTML = `
+            <div class="profile-content">
+                <div class="profile-avatar">
+                    ${avatarHtml}
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">${escapeHtml(member.name)}</div>
+                    <div class="profile-role">
+                        <i class="ti ti-microphone" style="font-size:14px"></i> ${escapeHtml(member.voice_part)}
+                    </div>
+                    <div class="profile-badges">
+                        <span class="profile-badge"><i class="ti ti-id" style="font-size:12px"></i> ${escapeHtml(member.member_id)}</span>
+                    </div>
+                </div>
             </div>
         `;
+        
         const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', member.member_id).order('date', { ascending: true });
         const present = attendance?.filter(a => a.status === 'Present').length || 0;
         const late    = attendance?.filter(a => a.status === 'Late').length    || 0;
         const absent  = attendance?.filter(a => a.status === 'Absent').length  || 0;
         const total   = present + late + absent;
         const pct     = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
+        
         document.getElementById('statsGrid').innerHTML = `
-            <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label">✅ Present</div></div>
-            <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label">⏰ Late</div></div>
-            <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label">❌ Absent</div></div>
-            <div class="stat-card rate"><div class="stat-number">${pct}%</div><div class="stat-label">Attendance Rate</div></div>
+            <div class="stat-card present">
+                <div class="stat-number">${present}</div>
+                <div class="stat-label">✅ Present</div>
+            </div>
+            <div class="stat-card late">
+                <div class="stat-number">${late}</div>
+                <div class="stat-label">⏰ Late</div>
+            </div>
+            <div class="stat-card absent">
+                <div class="stat-number">${absent}</div>
+                <div class="stat-label">❌ Absent</div>
+            </div>
+            <div class="stat-card rate">
+                <div class="stat-number">${pct}%</div>
+                <div class="stat-label">Attendance Rate</div>
+            </div>
         `;
+        
         const last30Days = [], presentData = [], lateData = [];
         for (let i = 29; i >= 0; i--) {
             const date = new Date(); date.setDate(date.getDate() - i);
@@ -333,6 +488,7 @@
             presentData.push(dayAtt.filter(a => a.status === 'Present').length);
             lateData.push(dayAtt.filter(a => a.status === 'Late').length);
         }
+        
         if (trendChart) trendChart.destroy();
         const ctx = document.getElementById('trendChart').getContext('2d');
         trendChart = new Chart(ctx, {
@@ -350,6 +506,7 @@
                 scales: { x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } }, y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, stepSize: 1 }, beginAtZero: true } }
             }
         });
+        
         await loadPenalties(member.member_id);
     }
 
@@ -357,14 +514,20 @@
         const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', memberId).order('date', { ascending: false });
         const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
         const paidTotal    = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0)    || 0;
+        
         document.getElementById('penaltySummary').innerHTML = `
             <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
             <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
             <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
         `;
-        if (!penalties?.length) { document.getElementById('penaltiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i> No penalties recorded! Keep up the good attendance!</div>'; return; }
+        
+        if (!penalties?.length) { 
+            document.getElementById('penaltiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i> No penalties recorded! Keep up the good attendance!</div>'; 
+            return; 
+        }
+        
         document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
-            <div class="penalty-item">
+            <div class="penalty-item" onclick="window.location.href='member-detail.html?id=${p.member_id}'">
                 <div>
                     <div style="font-size:13px;font-weight:600;">${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</div>
                     <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">${p.date} · ${p.session || ''}</div>

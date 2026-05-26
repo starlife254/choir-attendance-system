@@ -81,7 +81,7 @@
         /* DETAIL PANEL */
         .detail-panel { display: flex; flex-direction: column; gap: 16px; }
         
-        /* PROFILE CARD - Like the image reference */
+        /* PROFILE CARD */
         .profile-card { 
             background: linear-gradient(135deg, var(--indigo) 0%, #7c3aed 100%); 
             border-radius: 20px; 
@@ -251,13 +251,11 @@
 
             <!-- Detail panel -->
             <div class="detail-panel">
-                <!-- Profile Card - Like the image reference -->
+                <!-- Profile Card -->
                 <div id="profileCard" class="profile-card">
-                    <!-- Dynamic content loaded by JavaScript -->
                 </div>
 
                 <div class="stats-grid" id="statsGrid">
-                    <!-- populated on member select -->
                 </div>
 
                 <div id="chartContainer" class="chart-panel">
@@ -301,6 +299,7 @@
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
     function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
     async function doLogout() { try { await supabaseClient.auth.signOut(); } catch {} window.location.href = '../login.html';}
+    
     async function loadUserInfo() {
         try {
             const { data: { user } } = await supabaseClient.auth.getUser();
@@ -313,10 +312,25 @@
         } catch(e) { console.warn(e); }
     }
 
-    async function loadProfilePhoto(memberId) {
-        if (profilePhotos[memberId]) return profilePhotos[memberId];
+    // Function to get a valid image URL with cache-busting
+    function getValidImageUrl(url, memberId) {
+        if (!url) return null;
+        // Add timestamp to force reload and avoid caching issues
+        const timestamp = new Date().getTime();
+        // Clean up the URL if it has any issues
+        let cleanUrl = url.split(',')[0]; // Remove any trailing commas
+        // Add cache-buster
+        return `${cleanUrl}?t=${timestamp}`;
+    }
+
+    async function loadProfilePhoto(memberId, forceRefresh = false) {
+        // Check cache first (unless force refresh)
+        if (!forceRefresh && profilePhotos[memberId]) {
+            return profilePhotos[memberId];
+        }
         
         try {
+            // Find user linked to this member
             const { data: userLink } = await supabaseClient
                 .from('user_members')
                 .select('user_id')
@@ -331,12 +345,15 @@
                     .maybeSingle();
                 
                 if (profile?.profile_photo_url) {
-                    profilePhotos[memberId] = profile.profile_photo_url;
-                    return profile.profile_photo_url;
+                    const validUrl = getValidImageUrl(profile.profile_photo_url, memberId);
+                    profilePhotos[memberId] = validUrl;
+                    return validUrl;
                 }
             }
+            profilePhotos[memberId] = null;
             return null;
         } catch(e) {
+            console.warn('Error loading profile photo:', e);
             return null;
         }
     }
@@ -367,12 +384,13 @@
             </div>
         `).join('');
         
+        // Load profile photos asynchronously
         for (const m of members) {
             loadProfilePhoto(m.member_id).then(photoUrl => {
                 if (photoUrl) {
                     const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
                     if (avatarDiv) {
-                        avatarDiv.innerHTML = `<img src="${photoUrl}" alt="${escapeHtml(m.name)}">`;
+                        avatarDiv.innerHTML = `<img src="${photoUrl}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
                     }
                 }
             });
@@ -401,14 +419,14 @@
             if (profilePhotos[m.member_id]) {
                 const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
                 if (avatarDiv && profilePhotos[m.member_id]) {
-                    avatarDiv.innerHTML = `<img src="${profilePhotos[m.member_id]}" alt="${escapeHtml(m.name)}">`;
+                    avatarDiv.innerHTML = `<img src="${profilePhotos[m.member_id]}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
                 }
             } else {
                 loadProfilePhoto(m.member_id).then(photoUrl => {
                     if (photoUrl) {
                         const avatarDiv = document.getElementById(`member-avatar-${m.member_id}`);
                         if (avatarDiv) {
-                            avatarDiv.innerHTML = `<img src="${photoUrl}" alt="${escapeHtml(m.name)}">`;
+                            avatarDiv.innerHTML = `<img src="${photoUrl}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
                         }
                     }
                 });
@@ -420,7 +438,9 @@
         selectedMember = allMembers.find(m => m.member_id === memberId);
         if (!selectedMember) return;
         document.querySelectorAll('.member-list-item').forEach(el => el.classList.remove('selected'));
-        event?.target?.closest('.member-list-item')?.classList.add('selected');
+        if (event?.target?.closest) {
+            event.target.closest('.member-list-item')?.classList.add('selected');
+        }
         document.getElementById('placeholderState').style.display = 'none';
         document.getElementById('profileCard').classList.add('active');
         document.getElementById('chartContainer').classList.add('active');
@@ -431,9 +451,10 @@
     async function loadMemberData(member) {
         if (!member) return;
         
-        const photoUrl = await loadProfilePhoto(member.member_id);
+        // Force refresh profile photo for selected member
+        const photoUrl = await loadProfilePhoto(member.member_id, true);
         const avatarHtml = photoUrl 
-            ? `<img src="${photoUrl}" alt="${escapeHtml(member.name)}">`
+            ? `<img src="${photoUrl}" alt="${escapeHtml(member.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>';">`
             : `<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>`;
         
         document.getElementById('profileCard').innerHTML = `
@@ -551,6 +572,7 @@
     }
     init();
     window.doLogout = doLogout;
+    window.selectMember = selectMember;
 </script>
 </body>
 </html>

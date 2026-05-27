@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <!-- Main Login Page -->
+  <url>
+    <loc>https://choir-attendance-system.vercel.app/</loc>
+    <lastmod>2026-05-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Admin Section (Login & Portal) -->
+  <url>
+    <loc>https://choir-attendance-system.vercel.app/admin/</loc>
+    <lastmod>2026-05-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Member Section (Dashboard & Portal) -->
+  <url>
+    <loc>https://choir-attendance-system.vercel.app/member/</loc>
+    <lastmod>2026-05-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Member Registration Page -->
+  <url>
+    <loc>https://choir-attendance-system.vercel.app/member/register.html</loc>
+    <lastmod>2026-05-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Member Dashboard (requires login) -->
+  <url>
+    <loc>https://choir-attendance-system.vercel.app/member/dashboard.html</loc>
+    <lastmod>2026-05-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>

@@ -287,7 +287,6 @@
             document.getElementById('userName').textContent = name;
             document.getElementById('userAvatar').innerHTML = `<span>${name.charAt(0).toUpperCase()}</span>`;
             
-            // Try to get admin profile photo
             const { data: profile } = await supabaseClient
                 .from('user_profiles')
                 .select('profile_photo_url, full_name')
@@ -307,26 +306,32 @@
         } catch(e) { console.warn(e); }
     }
 
-    // Load profile photos - using user_members join to link users to members
+    // SIMPLIFIED: Direct approach - get all user_profiles and map to member_id via user_members
     async function loadProfilePhotos() {
         try {
-            // First get all user_members relationships
+            console.log('Loading profile photos...');
+            
+            // Step 1: Get all user_members (links users to members)
             const { data: userMembers, error: umError } = await supabaseClient
                 .from('user_members')
                 .select('member_id, user_id');
             
             if (umError) {
-                console.warn('Error loading user_members:', umError);
+                console.error('Error loading user_members:', umError.message);
                 return;
             }
             
             if (!userMembers || userMembers.length === 0) {
-                console.log('No user_members found');
+                console.log('No user_members records found');
                 return;
             }
             
-            // Get all user profiles with photos
-            const userIds = userMembers.map(um => um.user_id);
+            console.log(`Found ${userMembers.length} user_members records`);
+            
+            // Step 2: Get user_ids from userMembers
+            const userIds = [...new Set(userMembers.map(um => um.user_id))];
+            
+            // Step 3: Get profiles for those user_ids (same as member dashboard)
             const { data: profiles, error: pError } = await supabaseClient
                 .from('user_profiles')
                 .select('user_id, profile_photo_url')
@@ -334,16 +339,18 @@
                 .not('profile_photo_url', 'is', null);
             
             if (pError) {
-                console.warn('Error loading user_profiles:', pError);
+                console.error('Error loading user_profiles:', pError.message);
                 return;
             }
             
             if (!profiles || profiles.length === 0) {
-                console.log('No profile photos found in user_profiles');
+                console.log('No profiles with photos found for these users');
                 return;
             }
             
-            // Create map of user_id -> photo_url
+            console.log(`Found ${profiles.length} profiles with photos`);
+            
+            // Step 4: Create map of user_id -> photo_url
             const userPhotoMap = {};
             profiles.forEach(profile => {
                 if (profile.user_id && profile.profile_photo_url) {
@@ -352,16 +359,17 @@
                 }
             });
             
-            // Map to member_id
+            // Step 5: Map to member_id
             userMembers.forEach(um => {
                 if (userPhotoMap[um.user_id]) {
                     profilePhotoMap[um.member_id] = userPhotoMap[um.user_id];
                 }
             });
             
-            console.log('Loaded profile photos for members:', Object.keys(profilePhotoMap).length);
+            console.log(`Successfully mapped ${Object.keys(profilePhotoMap).length} members to profile photos`);
+            
         } catch(e) {
-            console.warn('Error loading profile photos:', e);
+            console.error('Error in loadProfilePhotos:', e);
         }
     }
 
@@ -378,6 +386,8 @@
         
         // Filter active members only
         allMembers = members.filter(m => m.status === 'active');
+        
+        console.log(`Loaded ${allMembers.length} active members`);
         
         // Load profile photos
         await loadProfilePhotos();
@@ -396,7 +406,7 @@
             const photoUrl = profilePhotoMap[m.member_id];
             let avatarHtml = '';
             if (photoUrl) {
-                avatarHtml = `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
+                avatarHtml = `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="console.log('Image failed to load for ${m.name}'); this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
             } else {
                 avatarHtml = `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
             }
@@ -430,7 +440,7 @@
         selectedMember = allMembers.find(m => m.member_id === memberId);
         if (!selectedMember) return;
         
-        // Update UI - remove selected class from all, add to current
+        // Update UI
         document.querySelectorAll('.member-list-item').forEach(el => {
             el.classList.remove('selected');
         });
@@ -457,7 +467,7 @@
             avatarHtml = `<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>`;
         }
         
-        // Profile card HTML
+        // Profile card
         document.getElementById('profileCard').innerHTML = `
             <div class="profile-content">
                 <div class="profile-avatar">
@@ -508,7 +518,7 @@
             </div>
         `;
         
-        // Chart data - last 30 days
+        // Chart data
         const last30Days = [], presentData = [], lateData = [];
         for (let i = 29; i >= 0; i--) {
             const date = new Date(); 

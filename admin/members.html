@@ -35,7 +35,8 @@
         .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
         .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
         .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
-        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; overflow: hidden; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
         .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
         .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
@@ -100,7 +101,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-avatar span { font-size: 48px; }
+        .profile-avatar span { font-size: 48px; font-weight: 600; }
         .profile-info { flex: 1; }
         .profile-name { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
         .profile-role { font-size: 14px; opacity: 0.85; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
@@ -108,7 +109,8 @@
         .profile-badge { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 40px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+        .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; transition: transform 0.15s, box-shadow 0.15s; cursor: default; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
         .stat-number { font-size: 28px; font-weight: 700; }
         .stat-label { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
         .stat-card.present .stat-number { color: var(--green); }
@@ -135,7 +137,7 @@
 
         .empty-state { text-align: center; padding: 40px; color: var(--text-tertiary); font-size: 13px; }
         .empty-state i { font-size: 28px; display: block; margin-bottom: 8px; }
-        .placeholder-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
+        .placeholder-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); background: var(--surface); border-radius: 16px; border: 1px dashed var(--border); }
         .placeholder-state i { font-size: 40px; display: block; margin-bottom: 12px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -187,7 +189,7 @@
     </nav>
     <div class="sidebar-bottom">
         <div class="user-card">
-            <div class="user-avatar" id="userAvatar">A</div>
+            <div class="user-avatar" id="userAvatar"><span>A</span></div>
             <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
         </div>
         <div class="logout-link" onclick="doLogout()"><i class="ti ti-logout"></i> Log out</div>
@@ -254,14 +256,28 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let allMembers = [], selectedMember = null, trendChart;
-    let profilePhotoMap = {};
+    let profilePhotoMap = {}; // member_id -> photo_url
 
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
-    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+    
+    function tick() { 
+        document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    }
     setInterval(tick,1000); tick();
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
-    function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
-    async function doLogout() { try { await supabaseClient.auth.signOut(); } catch {} window.location.href = '../login.html';}
+    
+    function toggleSidebar() { 
+        document.getElementById('sidebar').classList.toggle('open'); 
+        document.getElementById('sidebarOverlay').classList.toggle('open'); 
+    }
+    function closeSidebar()  { 
+        document.getElementById('sidebar').classList.remove('open'); 
+        document.getElementById('sidebarOverlay').classList.remove('open'); 
+    }
+    
+    async function doLogout() { 
+        try { await supabaseClient.auth.signOut(); } catch {} 
+        window.location.href = '../login.html';
+    }
     
     async function loadUserInfo() {
         try {
@@ -269,38 +285,77 @@
             if (!user) return;
             const name = user.email?.split('@')[0] || 'Admin';
             document.getElementById('userName').textContent = name;
-            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-            const { data: p } = await supabaseClient.from('user_profiles').select('*').eq('user_id', user.id).single();
-            if (p) { if (p.full_name) { const f=p.full_name.split(' ')[0]; document.getElementById('userName').textContent=f; document.getElementById('userAvatar').textContent=f.charAt(0).toUpperCase(); } if (p.role) document.getElementById('userRole').textContent=p.role; }
+            document.getElementById('userAvatar').innerHTML = `<span>${name.charAt(0).toUpperCase()}</span>`;
+            
+            // Try to get admin profile photo
+            const { data: profile } = await supabaseClient
+                .from('user_profiles')
+                .select('profile_photo_url, full_name')
+                .eq('user_id', user.id)
+                .maybeSingle();
+                
+            if (profile) {
+                if (profile.full_name) {
+                    const fn = profile.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = fn;
+                }
+                if (profile.profile_photo_url) {
+                    const cleanUrl = profile.profile_photo_url.split(',')[0].trim();
+                    document.getElementById('userAvatar').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" alt="Admin">`;
+                }
+            }
         } catch(e) { console.warn(e); }
     }
 
-    // SIMPLIFIED: Load profile photos directly by member_id
+    // Load profile photos - using user_members join to link users to members
     async function loadProfilePhotos() {
         try {
-            // Get all user_profiles that have profile photos
-            const { data: profiles, error } = await supabaseClient
+            // First get all user_members relationships
+            const { data: userMembers, error: umError } = await supabaseClient
+                .from('user_members')
+                .select('member_id, user_id');
+            
+            if (umError) {
+                console.warn('Error loading user_members:', umError);
+                return;
+            }
+            
+            if (!userMembers || userMembers.length === 0) {
+                console.log('No user_members found');
+                return;
+            }
+            
+            // Get all user profiles with photos
+            const userIds = userMembers.map(um => um.user_id);
+            const { data: profiles, error: pError } = await supabaseClient
                 .from('user_profiles')
-                .select('member_id, profile_photo_url')
+                .select('user_id, profile_photo_url')
+                .in('user_id', userIds)
                 .not('profile_photo_url', 'is', null);
             
-            if (error) {
-                console.warn('Error loading profiles:', error);
+            if (pError) {
+                console.warn('Error loading user_profiles:', pError);
                 return;
             }
             
             if (!profiles || profiles.length === 0) {
-                console.log('No profile photos found');
+                console.log('No profile photos found in user_profiles');
                 return;
             }
             
-            // Create map of member_id -> clean photo URL
+            // Create map of user_id -> photo_url
+            const userPhotoMap = {};
             profiles.forEach(profile => {
-                if (profile.member_id && profile.profile_photo_url) {
+                if (profile.user_id && profile.profile_photo_url) {
                     let cleanUrl = profile.profile_photo_url.split(',')[0].trim();
-                    // Add cache buster
-                    cleanUrl = cleanUrl + (cleanUrl.includes('?') ? '&t=' : '?t=') + Date.now();
-                    profilePhotoMap[profile.member_id] = cleanUrl;
+                    userPhotoMap[profile.user_id] = cleanUrl;
+                }
+            });
+            
+            // Map to member_id
+            userMembers.forEach(um => {
+                if (userPhotoMap[um.user_id]) {
+                    profilePhotoMap[um.member_id] = userPhotoMap[um.user_id];
                 }
             });
             
@@ -313,28 +368,42 @@
     async function loadMembersList() {
         const { data: members, error } = await supabaseClient
             .from('members')
-            .select('member_id, name, voice_part')
-            .eq('status', 'active')
+            .select('member_id, name, voice_part, status')
             .order('name', { ascending: true });
+            
         if (error) { 
             document.getElementById('memberList').innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading members</div>'; 
             return; 
         }
-        allMembers = members;
         
-        // Load all profile photos first
+        // Filter active members only
+        allMembers = members.filter(m => m.status === 'active');
+        
+        // Load profile photos
         await loadProfilePhotos();
         
+        renderMemberList(allMembers);
+    }
+
+    function renderMemberList(members) {
         const container = document.getElementById('memberList');
+        if (!members.length) {
+            container.innerHTML = '<div class="empty-state"><i class="ti ti-user-off"></i> No members found</div>';
+            return;
+        }
+        
         container.innerHTML = members.map(m => {
             const photoUrl = profilePhotoMap[m.member_id];
-            const avatarHtml = photoUrl 
-                ? `<img src="${photoUrl}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`
-                : `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
+            let avatarHtml = '';
+            if (photoUrl) {
+                avatarHtml = `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
+            } else {
+                avatarHtml = `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
+            }
             
             return `
                 <div class="member-list-item" onclick="selectMember('${m.member_id}')" id="member-item-${m.member_id}">
-                    <div class="member-list-avatar" id="member-avatar-${m.member_id}">
+                    <div class="member-list-avatar">
                         ${avatarHtml}
                     </div>
                     <div class="member-list-info">
@@ -349,41 +418,31 @@
 
     function searchMembers() {
         const q = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = allMembers.filter(m => m.name.toLowerCase().includes(q) || m.voice_part.toLowerCase().includes(q));
-        
-        const container = document.getElementById('memberList');
-        container.innerHTML = filtered.map(m => {
-            const photoUrl = profilePhotoMap[m.member_id];
-            const avatarHtml = photoUrl 
-                ? `<img src="${photoUrl}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`
-                : `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
-            
-            return `
-                <div class="member-list-item" onclick="selectMember('${m.member_id}')" id="member-item-${m.member_id}">
-                    <div class="member-list-avatar" id="member-avatar-${m.member_id}">
-                        ${avatarHtml}
-                    </div>
-                    <div class="member-list-info">
-                        <div class="member-list-name">${escapeHtml(m.name)}</div>
-                        <div class="member-list-voice">${escapeHtml(m.voice_part)}</div>
-                    </div>
-                    <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-tertiary)"></i>
-                </div>
-            `;
-        }).join('');
+        const filtered = allMembers.filter(m => 
+            m.name.toLowerCase().includes(q) || 
+            m.voice_part.toLowerCase().includes(q) ||
+            m.member_id.toLowerCase().includes(q)
+        );
+        renderMemberList(filtered);
     }
 
     async function selectMember(memberId) {
         selectedMember = allMembers.find(m => m.member_id === memberId);
         if (!selectedMember) return;
-        document.querySelectorAll('.member-list-item').forEach(el => el.classList.remove('selected'));
-        if (event?.target?.closest) {
-            event.target.closest('.member-list-item')?.classList.add('selected');
-        }
+        
+        // Update UI - remove selected class from all, add to current
+        document.querySelectorAll('.member-list-item').forEach(el => {
+            el.classList.remove('selected');
+        });
+        const selectedEl = document.getElementById(`member-item-${memberId}`);
+        if (selectedEl) selectedEl.classList.add('selected');
+        
+        // Show detail panels
         document.getElementById('placeholderState').style.display = 'none';
         document.getElementById('profileCard').classList.add('active');
         document.getElementById('chartContainer').classList.add('active');
         document.getElementById('penaltiesContainer').classList.add('active');
+        
         await loadMemberData(selectedMember);
     }
 
@@ -391,10 +450,14 @@
         if (!member) return;
         
         const photoUrl = profilePhotoMap[member.member_id];
-        const avatarHtml = photoUrl 
-            ? `<img src="${photoUrl}" alt="${escapeHtml(member.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>';">`
-            : `<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>`;
+        let avatarHtml = '';
+        if (photoUrl) {
+            avatarHtml = `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(member.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>';">`;
+        } else {
+            avatarHtml = `<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>`;
+        }
         
+        // Profile card HTML
         document.getElementById('profileCard').innerHTML = `
             <div class="profile-content">
                 <div class="profile-avatar">
@@ -407,15 +470,22 @@
                     </div>
                     <div class="profile-badges">
                         <span class="profile-badge"><i class="ti ti-id" style="font-size:12px"></i> ${escapeHtml(member.member_id)}</span>
+                        <span class="profile-badge"><i class="ti ti-status-${member.status === 'active' ? 'online' : 'offline'}" style="font-size:12px"></i> ${member.status || 'active'}</span>
                     </div>
                 </div>
             </div>
         `;
         
-        const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', member.member_id).order('date', { ascending: true });
+        // Load attendance stats
+        const { data: attendance } = await supabaseClient
+            .from('attendance')
+            .select('*')
+            .eq('member_id', member.member_id)
+            .order('date', { ascending: true });
+            
         const present = attendance?.filter(a => a.status === 'Present').length || 0;
-        const late    = attendance?.filter(a => a.status === 'Late').length    || 0;
-        const absent  = attendance?.filter(a => a.status === 'Absent').length  || 0;
+        const late    = attendance?.filter(a => a.status === 'Late').length || 0;
+        const absent  = attendance?.filter(a => a.status === 'Absent').length || 0;
         const total   = present + late + absent;
         const pct     = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
         
@@ -438,9 +508,11 @@
             </div>
         `;
         
+        // Chart data - last 30 days
         const last30Days = [], presentData = [], lateData = [];
         for (let i = 29; i >= 0; i--) {
-            const date = new Date(); date.setDate(date.getDate() - i);
+            const date = new Date(); 
+            date.setDate(date.getDate() - i);
             const dateStr = date.toISOString().split('T')[0];
             last30Days.push(dateStr.substring(5));
             const dayAtt = attendance?.filter(a => a.date === dateStr) || [];
@@ -455,14 +527,20 @@
             data: {
                 labels: last30Days,
                 datasets: [
-                    { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', tension: 0.35, fill: true, pointRadius: 2 },
-                    { label: 'Late',    data: lateData,    borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.35, fill: true, pointRadius: 2 }
+                    { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', tension: 0.35, fill: true, pointRadius: 2, pointBackgroundColor: '#10b981' },
+                    { label: 'Late',    data: lateData,    borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.35, fill: true, pointRadius: 2, pointBackgroundColor: '#f59e0b' }
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: true,
-                plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } },
-                scales: { x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } }, y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, stepSize: 1 }, beginAtZero: true } }
+                responsive: true, 
+                maintainAspectRatio: true,
+                plugins: { 
+                    legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } 
+                },
+                scales: { 
+                    x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, maxRotation: 45, minRotation: 45 } } }, 
+                    y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, stepSize: 1 }, beginAtZero: true } 
+                }
             }
         });
         
@@ -470,7 +548,18 @@
     }
 
     async function loadPenalties(memberId) {
-        const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', memberId).order('date', { ascending: false });
+        const { data: penalties, error } = await supabaseClient
+            .from('penalties')
+            .select('*')
+            .eq('member_id', memberId)
+            .order('date', { ascending: false });
+        
+        if (error) {
+            console.warn('Error loading penalties:', error);
+            document.getElementById('penaltiesList').innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading penalties</div>';
+            return;
+        }
+            
         const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
         const paidTotal    = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0)    || 0;
         
@@ -486,7 +575,7 @@
         }
         
         document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
-            <div class="penalty-item" onclick="window.location.href='member-detail.html?id=${p.member_id}'">
+            <div class="penalty-item">
                 <div>
                     <div style="font-size:13px;font-weight:600;">${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</div>
                     <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">${p.date} · ${p.session || ''}</div>
@@ -504,13 +593,19 @@
 
     async function init() {
         const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) { window.location.href = '../login.html'; return; }
+        if (!session) { 
+            window.location.href = '../login.html'; 
+            return; 
+        }
         await loadUserInfo();
         await loadMembersList();
     }
+    
     init();
     window.doLogout = doLogout;
     window.selectMember = selectMember;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
 </script>
 </body>
 </html>

@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="description" content="Official attendance tracking system for the University of Embu (UoEm) Students Choir. Manage and track choir member attendance seamlessly.">
     <meta name="keywords" content="UoEm, University of Embu, UoEm Students Choir, Choir Attendance System, Embu University Choir">
-    <title>University of Embu (UoEm) Students Choir - Attendance System</title> <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>University of Embu (UoEm) Students Choir - Attendance System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -62,7 +63,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── HEADER ── */
         .header {
             display: flex;
             justify-content: space-between;
@@ -91,7 +91,6 @@
         }
         .logout-btn:hover { background: #fecaca; transform: scale(1.03); }
 
-        /* ── TABS ── */
         .tabs {
             display: flex;
             gap: 6px;
@@ -128,7 +127,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── PROFILE CARD ── */
         .profile-card {
             background: linear-gradient(135deg, var(--purple) 0%, var(--violet) 100%);
             color: white;
@@ -177,7 +175,6 @@
         .profile-info h2 { font-size: 22px; margin-bottom: 7px; font-weight: 700; letter-spacing: -0.3px; }
         .profile-info p { opacity: 0.88; font-size: 13.5px; margin-bottom: 3px; }
 
-        /* ── STAT CARDS ── */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -205,7 +202,6 @@
         .stat-card.absent .stat-number  { color: var(--red); }
         .stat-card.percentage .stat-number { color: var(--purple); }
 
-        /* ── CHART / SECTION CARDS ── */
         .chart-container {
             background: var(--white);
             padding: 22px;
@@ -225,13 +221,13 @@
             letter-spacing: -0.2px;
         }
 
-        /* ── FORM CARDS ── */
         .form-card {
             background: var(--slate-50);
             padding: 22px;
             border-radius: var(--radius);
             margin-bottom: 18px;
             border: 1.5px solid var(--slate-100);
+            transition: all 0.3s ease;
         }
         .form-card h3 {
             margin-bottom: 16px;
@@ -265,8 +261,19 @@
             box-shadow: 0 0 0 3px rgba(91,79,207,0.12);
         }
         .form-group textarea { min-height: 80px; resize: vertical; }
+        
+        /* Two column layout for form groups */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
 
-        /* ── BUTTONS ── */
         .submit-btn {
             background: linear-gradient(135deg, var(--green), #059669);
             color: white;
@@ -279,9 +286,36 @@
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.18s;
             box-shadow: 0 4px 14px rgba(16,185,129,0.3);
+            position: relative;
+            overflow: hidden;
         }
         .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(16,185,129,0.4); }
         .submit-btn:active { transform: translateY(0); }
+        
+        .submit-btn.saving {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            pointer-events: none;
+        }
+        .submit-btn.saved {
+            background: linear-gradient(135deg, var(--green), #059669);
+        }
+        .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        .submit-btn:active::after {
+            width: 200px;
+            height: 200px;
+        }
+
         .export-btn {
             background: var(--purple);
             color: white;
@@ -299,7 +333,6 @@
         }
         .export-btn:hover { background: var(--purple-dark); transform: translateY(-1px); box-shadow: 0 5px 14px rgba(91,79,207,0.35); }
 
-        /* ── APOLOGY ITEMS ── */
         .apology-item {
             background: white;
             padding: 16px 18px;
@@ -314,7 +347,6 @@
         }
         .apology-item:hover { box-shadow: var(--card-shadow); }
 
-        /* ── STATUS BADGES ── */
         .status-badge {
             padding: 4px 13px;
             border-radius: 20px;
@@ -328,7 +360,6 @@
         .status-approved { background: #d1fae5; color: #065f46; }
         .status-rejected { background: #fee2e2; color: #991b1b; }
 
-        /* ── LEADER INFO ── */
         .leader-info {
             background: var(--purple-light);
             padding: 16px;
@@ -338,7 +369,6 @@
         }
         .leader-info p { font-size: 14px; margin-bottom: 6px; color: var(--slate-700); }
 
-        /* ── MESSAGES ── */
         .empty-state { text-align: center; padding: 40px; color: var(--slate-500); font-size: 15px; }
         .message {
             padding: 13px 16px;
@@ -347,12 +377,16 @@
             display: none;
             font-weight: 500;
             font-size: 14px;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .message.success { background: #d1fae5; color: #065f46; display: block; }
         .message.error   { background: #fee2e2; color: #991b1b; display: block; }
         .message.info    { background: #e0f2fe; color: #0369a1; display: block; }
 
-        /* ── FILE INPUT ── */
         .file-input-label {
             background: var(--slate-100);
             padding: 9px 18px;
@@ -367,7 +401,17 @@
         .file-input-label:hover { background: var(--purple-light); color: var(--purple); }
         input[type="file"] { display: none; }
 
-        /* ── BOTTOM NAV ── */
+        .saved-checkmark {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 16px;
+            animation: bounce 0.4s ease;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
         .bottom-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -400,7 +444,6 @@
         .bottom-nav-item.active { color: var(--purple); background: var(--purple-light); }
         .bottom-nav-item:hover:not(.active) { color: var(--purple); background: #f5f3ff; }
 
-        /* ── RESPONSIVE ── */
         @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
         @media (max-width: 640px) {
             .profile-card { flex-direction: column; text-align: center; }
@@ -409,13 +452,21 @@
             .tab-btn { padding: 8px 14px; font-size: 13px; }
         }
 
-        /* ── ANIMATIONS ── */
         @keyframes pulse {
             0%, 100% { opacity: 1; box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
             50% { opacity: 0.93; box-shadow: 0 4px 20px rgba(245,158,11,0.6); }
         }
         #floatingReminderBtn { transition: transform 0.2s; }
         #floatingReminderBtn:hover { transform: scale(1.08); }
+        
+        @keyframes highlightFlash {
+            0% { background-color: var(--slate-50); }
+            50% { background-color: #d1fae5; }
+            100% { background-color: var(--slate-50); }
+        }
+        .form-card.highlight {
+            animation: highlightFlash 0.6s ease;
+        }
     </style>
 </head>
 <body>
@@ -444,7 +495,6 @@
                 </div>
             </div>
             
-            <!-- Payment Reminder Banner -->
             <div id="paymentReminder" style="display: none; margin-bottom: 24px;">
                 <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 20px; padding: 16px; border-left: 6px solid #f59e0b; animation: pulse 2s infinite;">
                     <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -477,13 +527,41 @@
         <!-- Profile Tab -->
         <div id="profileTab" class="tab-content">
             <div id="profileMessage" class="message"></div>
-            <div class="form-card">
+            <div class="form-card" id="contactFormCard">
                 <h3>📱 Contact Information</h3>
-                <div class="form-group"><label>Phone Number</label><input type="tel" id="phoneInput" placeholder="e.g., 0712345678"></div>
-                <div class="form-group"><label>Emergency Contact Name</label><input type="text" id="emergencyNameInput" placeholder="Full name"></div>
-                <div class="form-group"><label>Emergency Contact Phone</label><input type="tel" id="emergencyPhoneInput" placeholder="Phone number"></div>
+                <div class="form-group">
+                    <label>📞 Phone Number</label>
+                    <input type="tel" id="phoneInput" placeholder="e.g., 0712345678">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>👤 Emergency Contact Name</label>
+                        <input type="text" id="emergencyNameInput" placeholder="Full name of emergency contact">
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 Relationship</label>
+                        <select id="emergencyRelationshipInput">
+                            <option value="">Select relationship</option>
+                            <option value="Parent">👨‍👩‍👧 Parent</option>
+                            <option value="Sibling">👫 Sibling</option>
+                            <option value="Spouse">💑 Spouse</option>
+                            <option value="Relative">👪 Relative</option>
+                            <option value="Friend">🤝 Friend</option>
+                            <option value="Roommate">🏠 Roommate</option>
+                            <option value="Guardian">🛡️ Guardian</option>
+                            <option value="Other">📌 Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📱 Emergency Contact Phone</label>
+                    <input type="tel" id="emergencyPhoneInput" placeholder="e.g., 0712345678">
+                </div>
             </div>
-            <div class="form-card">
+            
+            <div class="form-card" id="photoFormCard">
                 <h3>🖼️ Profile Photo</h3>
                 <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                     <div id="photoPreview" style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; overflow: hidden;">👤</div>
@@ -492,8 +570,13 @@
                 </div>
                 <p style="font-size: 12px; color: #666; margin-top: 10px;">Recommended: Square image, max 2MB</p>
             </div>
-            <div class="form-card"><h3>👥 Section Leader Contact</h3><div id="leaderInfo" class="leader-info">Loading leader information...</div></div>
-            <button onclick="saveProfile()" class="submit-btn">💾 Save Profile Changes</button>
+            
+            <div class="form-card">
+                <h3>👥 Section Leader Contact</h3>
+                <div id="leaderInfo" class="leader-info">Loading leader information...</div>
+            </div>
+            
+            <button onclick="saveProfile()" class="submit-btn" id="saveProfileBtn">💾 Save Profile Changes</button>
         </div>
 
         <!-- Apology Request Tab -->
@@ -530,7 +613,7 @@
             </div>
         </div>
 
-        <!-- Payment Modal - Only shown when "Pay Fine" is clicked -->
+        <!-- Payment Modal -->
         <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
             <div style="background: white; border-radius: 28px; padding: 25px; max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -625,34 +708,33 @@
             window.location.href = '../login.html';
         }
 
-       async function getCurrentMember() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) { window.location.href = '../login.html'; return null; }
-    currentUserId = user.id;
-    
-    const { data: userMember } = await supabaseClient.from('user_members').select('member_id').eq('user_id', user.id).single();
-    
-    if (userMember) {
-        const { data: member } = await supabaseClient.from('members').select('*').eq('member_id', userMember.member_id).single();
-        
-        // CHECK IF MEMBER IS ACTIVE - if not, logout and show message
-        if (member && member.status !== 'active') {
-            alert('⚠️ Your account has been deactivated or moved to alumni. Please contact the choir administrator.');
-            await supabaseClient.auth.signOut();
-            window.location.href = '../login.html';
-            return null;
+        async function getCurrentMember() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = '../login.html'; return null; }
+            currentUserId = user.id;
+            
+            const { data: userMember } = await supabaseClient.from('user_members').select('member_id').eq('user_id', user.id).single();
+            
+            if (userMember) {
+                const { data: member } = await supabaseClient.from('members').select('*').eq('member_id', userMember.member_id).single();
+                
+                if (member && member.status !== 'active') {
+                    alert('⚠️ Your account has been deactivated or moved to alumni. Please contact the choir administrator.');
+                    await supabaseClient.auth.signOut();
+                    window.location.href = '../login.html';
+                    return null;
+                }
+                
+                currentMember = member;
+            }
+            
+            if (!currentMember) {
+                document.getElementById('memberName').textContent = 'Account not linked to a member';
+                document.getElementById('memberName').style.color = '#ef4444';
+                return null;
+            }
+            return currentMember;
         }
-        
-        currentMember = member;
-    }
-    
-    if (!currentMember) {
-        document.getElementById('memberName').textContent = 'Account not linked to a member';
-        document.getElementById('memberName').style.color = '#ef4444';
-        return null;
-    }
-    return currentMember;
-}
 
         async function loadMemberData() {
             const member = await getCurrentMember();
@@ -736,24 +818,23 @@
         
         function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; currentPenaltyId = null; }
         
-       async function recordPayment() {
-    if (!currentPenaltyId) { alert('No payment selected'); return; }
-    const transactionCode = document.getElementById('transactionCode').value.trim();
-    
-    const { error } = await supabaseClient.from('payments').insert({ 
-        member_id: currentMember.member_id, 
-        penalty_id: currentPenaltyId, 
-        amount: currentPenaltyAmount, 
-        payment_method: 'mpesa', 
-        status: 'pending', 
-        payment_date: new Date().toISOString().split('T')[0], 
-        reference: transactionCode || null
-        // removed 'notes' field
-    });
-    
-    if (error) alert('❌ Error recording payment: ' + error.message);
-    else { alert('✅ Payment recorded! Admin will confirm within 24 hours.'); closePaymentModal(); loadPenalties(); }
-}
+        async function recordPayment() {
+            if (!currentPenaltyId) { alert('No payment selected'); return; }
+            const transactionCode = document.getElementById('transactionCode').value.trim();
+            
+            const { error } = await supabaseClient.from('payments').insert({ 
+                member_id: currentMember.member_id, 
+                penalty_id: currentPenaltyId, 
+                amount: currentPenaltyAmount, 
+                payment_method: 'mpesa', 
+                status: 'pending', 
+                payment_date: new Date().toISOString().split('T')[0], 
+                reference: transactionCode || null
+            });
+            
+            if (error) alert('❌ Error recording payment: ' + error.message);
+            else { alert('✅ Payment recorded! Admin will confirm within 24 hours.'); closePaymentModal(); loadPenalties(); }
+        }
 
         async function loadProfileData() {
             if (!currentMember) return;
@@ -762,7 +843,12 @@
                 document.getElementById('phoneInput').value = profile.phone || '';
                 document.getElementById('emergencyNameInput').value = profile.emergency_contact || '';
                 document.getElementById('emergencyPhoneInput').value = profile.emergency_phone || '';
-                if (profile.profile_photo_url) { document.getElementById('photoPreview').innerHTML = `<img src="${profile.profile_photo_url}" style="width:100%; height:100%; object-fit:cover;">`; document.getElementById('avatarPreview').innerHTML = `<img src="${profile.profile_photo_url}" style="width:100%; height:100%; object-fit:cover;">`; }
+                document.getElementById('emergencyRelationshipInput').value = profile.emergency_relationship || '';
+                if (profile.profile_photo_url) { 
+                    const cleanUrl = profile.profile_photo_url.split(',')[0].trim();
+                    document.getElementById('photoPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`; 
+                    document.getElementById('avatarPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`; 
+                }
             }
             const { data: leader } = await supabaseClient.from('members').select('name, phone, email').eq('voice_part', currentMember.voice_part).eq('is_leader', true).maybeSingle();
             if (leader) document.getElementById('leaderInfo').innerHTML = `<p><strong>🎵 Section Leader:</strong> ${leader.name}</p><p><strong>📞 Contact:</strong> ${leader.phone || 'Not available'}</p><p><strong>📧 Email:</strong> ${leader.email || 'Not available'}</p>`;
@@ -773,59 +859,111 @@
             const phone = document.getElementById('phoneInput').value;
             const emergencyContact = document.getElementById('emergencyNameInput').value;
             const emergencyPhone = document.getElementById('emergencyPhoneInput').value;
-            const { error } = await supabaseClient.from('user_profiles').upsert({ user_id: currentUserId, member_id: currentMember.member_id, phone, emergency_contact: emergencyContact, emergency_phone: emergencyPhone, updated_at: new Date() });
+            const emergencyRelationship = document.getElementById('emergencyRelationshipInput').value;
+            
+            const saveBtn = document.getElementById('saveProfileBtn');
+            const originalText = saveBtn.innerHTML;
+            
+            saveBtn.innerHTML = '⏳ Saving...';
+            saveBtn.classList.add('saving');
+            
+            const contactCard = document.getElementById('contactFormCard');
+            contactCard.classList.add('highlight');
+            setTimeout(() => contactCard.classList.remove('highlight'), 600);
+            
+            const { error } = await supabaseClient.from('user_profiles').upsert({ 
+                user_id: currentUserId, 
+                member_id: currentMember.member_id, 
+                phone, 
+                emergency_contact: emergencyContact, 
+                emergency_phone: emergencyPhone,
+                emergency_relationship: emergencyRelationship,
+                updated_at: new Date() 
+            });
+            
             const msgDiv = document.getElementById('profileMessage');
-            if (error) { msgDiv.className = 'message error'; msgDiv.textContent = '❌ Error saving profile: ' + error.message; setTimeout(() => msgDiv.className = 'message', 3000); }
-            else { msgDiv.className = 'message success'; msgDiv.textContent = '✅ Profile saved successfully!'; setTimeout(() => msgDiv.className = 'message', 3000); }
+            
+            if (error) { 
+                msgDiv.className = 'message error'; 
+                msgDiv.innerHTML = '❌ Error saving profile: ' + error.message + ' <span class="saved-checkmark">⚠️</span>';
+                saveBtn.innerHTML = originalText;
+                saveBtn.classList.remove('saving');
+                setTimeout(() => msgDiv.className = 'message', 4000);
+            } else { 
+                msgDiv.className = 'message success'; 
+                msgDiv.innerHTML = '✅ Profile saved successfully! <span class="saved-checkmark">✓</span>';
+                saveBtn.innerHTML = '✓ Saved!';
+                saveBtn.classList.add('saved');
+                
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.classList.remove('saving', 'saved');
+                }, 2000);
+                
+                setTimeout(() => msgDiv.className = 'message', 4000);
+            }
         }
 
         async function uploadPhoto() {
-    const fileInput = document.getElementById('photoInput');
-    const file = fileInput.files[0];
-    if (!file) return;
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${currentUserId}_${Date.now()}.${fileExt}`;
-    const filePath = `profile_photos/${fileName}`;
-    
-    const { error: uploadError } = await supabaseClient.storage
-        .from('profiles')
-        .upload(filePath, file);
-    
-    if (uploadError) {
-        alert('Upload error: ' + uploadError.message);
-        return;
-    }
-    
-    const { data: { publicUrl } } = supabaseClient.storage
-        .from('profiles')
-        .getPublicUrl(filePath);
-    
-    // CRITICAL: Clean the URL before saving
-    const cleanUrl = publicUrl.split(',')[0].trim();
-    
-    const { error: updateError } = await supabaseClient
-        .from('user_profiles')
-        .upsert({
-            user_id: currentUserId,
-            member_id: currentMember.member_id,
-            profile_photo_url: cleanUrl,
-            updated_at: new Date()
-        });
-    
-    if (updateError) {
-        alert('Error updating profile: ' + updateError.message);
-    } else {
-        document.getElementById('photoPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`;
-        document.getElementById('avatarPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`;
-        alert('✅ Photo uploaded successfully!');
-        
-        // Clear cache
-        if (typeof profilePhotosCache !== 'undefined') {
-            profilePhotosCache[currentMember.member_id] = null;
+            const fileInput = document.getElementById('photoInput');
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${currentUserId}_${Date.now()}.${fileExt}`;
+            const filePath = `profile_photos/${fileName}`;
+            
+            const uploadBtn = event.target;
+            const originalText = uploadBtn.innerHTML;
+            uploadBtn.innerHTML = '⏳ Uploading...';
+            uploadBtn.disabled = true;
+            
+            const { error: uploadError } = await supabaseClient.storage
+                .from('profiles')
+                .upload(filePath, file);
+            
+            if (uploadError) {
+                alert('Upload error: ' + uploadError.message);
+                uploadBtn.innerHTML = originalText;
+                uploadBtn.disabled = false;
+                return;
+            }
+            
+            const { data: { publicUrl } } = supabaseClient.storage
+                .from('profiles')
+                .getPublicUrl(filePath);
+            
+            const cleanUrl = publicUrl.split(',')[0].trim();
+            
+            const { error: updateError } = await supabaseClient
+                .from('user_profiles')
+                .upsert({
+                    user_id: currentUserId,
+                    member_id: currentMember.member_id,
+                    profile_photo_url: cleanUrl,
+                    updated_at: new Date()
+                });
+            
+            if (updateError) {
+                alert('Error updating profile: ' + updateError.message);
+            } else {
+                document.getElementById('photoPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`;
+                document.getElementById('avatarPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`;
+                
+                const msgDiv = document.getElementById('profileMessage');
+                msgDiv.className = 'message success';
+                msgDiv.innerHTML = '✅ Photo uploaded successfully! <span class="saved-checkmark">📸</span>';
+                setTimeout(() => msgDiv.className = 'message', 3000);
+                
+                const photoCard = document.getElementById('photoFormCard');
+                photoCard.classList.add('highlight');
+                setTimeout(() => photoCard.classList.remove('highlight'), 600);
+            }
+            
+            uploadBtn.innerHTML = originalText;
+            uploadBtn.disabled = false;
+            fileInput.value = '';
         }
-    }
-}
 
         async function checkPendingPenalties() {
             if (!currentMember) return;

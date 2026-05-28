@@ -240,6 +240,19 @@
                     <i class="ti ti-user-search" style="color:var(--text-tertiary)"></i>
                     Select a member on the left to view their full attendance record and penalties.
                 </div>
+                <!-- Add this new section in the detail-panel, after profile-card -->
+<div id="emergencyCard" class="emergency-info" style="display: none; background: var(--surface); border-radius: 16px; padding: 18px; border: 1px solid var(--border); margin-bottom: 16px;">
+    <div class="panel-title"><i class="ti ti-phone-call" style="color:var(--green)"></i> Emergency Contact</div>
+    <div id="emergencyDetails" style="display: flex; flex-direction: column; gap: 8px;">
+        <p><strong>📞 Phone:</strong> <span id="memberPhone">-</span></p>
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <p><strong>👤 Emergency Contact:</strong> <span id="emergencyName">-</span></p></br>
+            <p><strong>🔗 Relationship:</strong> <span id="emergencyRelationship">-</span></p>
+        </div>
+        <p><strong>📱 Emergency Phone:</strong> <span id="emergencyPhone">-</span></p>
+    </div>
+</div>
+</div>
             </div>
         </div>
     </main>
@@ -519,7 +532,25 @@
                 <div class="stat-label">Attendance Rate</div>
             </div>
         `;
-        
+
+
+    // Load emergency contact info from user_profiles
+const { data: userProfile } = await supabaseClient
+    .from('user_profiles')
+    .select('phone, emergency_contact, emergency_phone, emergency_relationship')
+    .eq('member_id', member.member_id)
+    .maybeSingle();
+
+const emergencyCard = document.getElementById('emergencyCard');
+if (userProfile && (userProfile.phone || userProfile.emergency_contact || userProfile.emergency_phone || userProfile.emergency_relationship)) {
+    document.getElementById('memberPhone').textContent = userProfile.phone || 'Not provided';
+    document.getElementById('emergencyName').textContent = userProfile.emergency_contact || 'Not provided';
+    document.getElementById('emergencyRelationship').textContent = userProfile.emergency_relationship || 'Not specified';
+    document.getElementById('emergencyPhone').textContent = userProfile.emergency_phone || 'Not provided';
+    emergencyCard.style.display = 'block';
+} else {
+    emergencyCard.style.display = 'none';
+}
         // Chart data
         const last30Days = [], presentData = [], lateData = [];
         for (let i = 29; i >= 0; i--) {
@@ -557,6 +588,8 @@
         });
         
         await loadPenalties(member.member_id);
+
+
     }
 
     async function loadPenalties(memberId) {

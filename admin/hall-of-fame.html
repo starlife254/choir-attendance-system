@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Hall of Fame | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f5e6b8;
+            --gold-dark: #b8960f;
+            --gold-deep: #8a6d10;
+            --gold-soft: #fbf4dc;
+            --plaque: #fdfaf0;
+            --ink: #1a1f36;
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body { font-family: var(--font-body); background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        /* MAIN */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        /* CONTENT */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* BUTTONS */
+        .action-btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-amber { background: var(--amber); color: #fff; }
+        .btn-gold { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%); color: #fff; box-shadow: 0 2px 10px rgba(212,175,55,0.35); }
+
+        /* ===== HALL OF FAME HERO STRIP ===== */
+        .hof-hero {
+            position: relative;
+            margin-top: 4px;
+            padding: 28px 32px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--ink) 0%, #2b2547 100%);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .hof-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 15% 30%, rgba(212,175,55,0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 70%, rgba(212,175,55,0.12) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .hof-hero-text { position: relative; z-index: 1; }
+        .hof-hero-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .hof-hero-eyebrow::before, .hof-hero-eyebrow::after {
+            content: '';
+            height: 1px;
+            width: 22px;
+            background: var(--gold);
+            opacity: .6;
+        }
+        .hof-hero-title {
+            font-family: var(--font-display);
+            font-size: 30px;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 10px;
+            letter-spacing: .2px;
+        }
+        .hof-hero-sub {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 6px;
+            max-width: 460px;
+            line-height: 1.6;
+        }
+        .hof-hero-stats {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 24px;
+        }
+        .hof-hero-stat { text-align: center; }
+        .hof-hero-stat .num {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--gold);
+            line-height: 1;
+        }
+        .hof-hero-stat .label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.55);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-top: 5px;
+        }
+
+        /* HALL OF FAME GRID */
+        .hof-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 22px;
+            margin-top: 24px;
+        }
+
+        .hof-card {
+            background: var(--plaque);
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform .2s ease, box-shadow .2s ease;
+            position: relative;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(14px);
+            animation: hofCardIn .5s ease forwards;
+        }
+        @keyframes hofCardIn { to { opacity: 1; transform: translateY(0); } }
+        .hof-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.12);
+        }
+        .hof-card.featured {
+            border: 1px solid var(--gold);
+            box-shadow: 0 0 0 1px rgba(212,175,55,0.25), 0 16px 40px rgba(212,175,55,0.18);
+        }
+        .hof-card.featured::before {
+            content: '⭐ Featured';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 5px 13px;
+            border-radius: 40px;
+            letter-spacing: .5px;
+            z-index: 5;
+            box-shadow: 0 3px 10px rgba(212,175,55,0.4);
+        }
+
+        .hof-image {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, #eee7d2, #f3ecd9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .hof-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hof-image .placeholder {
+            font-size: 64px;
+            color: var(--gold-dark);
+            opacity: .35;
+            background: linear-gradient(135deg, #eee7d2, #f3ecd9);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hof-year-badge {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(26,31,54,0.78);
+            backdrop-filter: blur(4px);
+            color: var(--gold-light);
+            padding: 4px 13px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .3px;
+        }
+
+        .hof-body {
+            padding: 18px 20px 20px;
+        }
+        .hof-name {
+            font-family: var(--font-display);
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.3;
+        }
+        .hof-name .medal {
+            font-size: 15px;
+        }
+        .hof-rule {
+            width: 36px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            margin-top: 8px;
+            border-radius: 2px;
+        }
+        .hof-role {
+            font-size: 12px;
+            color: var(--gold-deep);
+            font-weight: 700;
+            margin-top: 10px;
+            display: inline-block;
+            background: var(--gold-soft);
+            padding: 3px 12px;
+            border-radius: 40px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+        .hof-bio {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .hof-achievement {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--gold-deep);
+            background: var(--gold-soft);
+            border-left: 3px solid var(--gold);
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            line-height: 1.5;
+        }
+        .hof-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            border-top: 1px dashed rgba(212,175,55,0.3);
+            padding-top: 14px;
+        }
+        .hof-actions button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .hof-actions button:hover { opacity: .85; }
+        .btn-edit { background: var(--indigo-light); color: var(--indigo); }
+        .btn-feature { background: var(--gold-light); color: var(--gold-dark); }
+        .btn-delete { background: var(--red-light); color: var(--red); }
+
+        /* FORM MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 200;
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal-box h3 {
+            font-family: var(--font-display);
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-box h3 i { font-size: 20px; color: var(--gold); }
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 9px 14px;
+            border: 0.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color .15s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: var(--indigo);
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .modal-buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 40px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+        .modal-buttons button:hover { opacity: .85; }
+        .btn-submit { background: var(--indigo); color: #fff; }
+        .btn-cancel { background: var(--bg); color: var(--text-secondary); }
+
+        /* FILE INPUT */
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+        }
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            font-size: 100px;
+        }
+        .file-input-label {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--bg);
+            border: 0.5px solid var(--border);
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: background .15s;
+            pointer-events: none;
+        }
+        .file-input-label:hover { 
+            background: var(--indigo-light); 
+            color: var(--indigo); 
+        }
+        .file-preview { 
+            margin-top: 10px; 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 50%; 
+            overflow: hidden; 
+            background: var(--bg); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .file-preview img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        .file-preview span { 
+            font-size: 32px; 
+            color: var(--text-tertiary); 
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 70px 20px;
+            color: var(--text-tertiary);
+            grid-column: 1 / -1;
+            background: var(--plaque);
+            border: 1px dashed rgba(212,175,55,0.4);
+            border-radius: 16px;
+        }
+        .empty-state i { font-size: 44px; display: block; margin-bottom: 14px; color: var(--gold); opacity: .6; }
+        .empty-state p { font-family: var(--font-display); font-size: 16px; color: var(--text-secondary); }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
+            background: var(--text-primary); color: #fff;
+            padding: 11px 20px; border-radius: 40px;
+            font-size: 13px; font-weight: 500;
+            z-index: 300; opacity: 0;
+            transition: opacity .22s, transform .22s;
+            pointer-events: none;
+            display: flex; align-items: center; gap: 8px;
+            max-width: 90vw;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error { background: #991b1b; }
+        .toast.info { background: var(--indigo); }
+
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* ===== DETAIL VIEW MODAL ===== */
+        .detail-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(10,12,24,0.7);
+            z-index: 250;
+            align-items: center; justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .detail-overlay.open { display: flex; }
+        .detail-box {
+            background: var(--plaque);
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+            animation: detailFadeIn 0.3s ease;
+            border: 1px solid rgba(212,175,55,0.25);
+        }
+        @keyframes detailFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .detail-header {
+            position: relative;
+            height: 280px;
+            background: linear-gradient(135deg, #eee7d2, #f3ecd9);
+            overflow: hidden;
+            border-radius: 24px 24px 0 0;
+        }
+        .detail-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .detail-header .placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: var(--gold-dark);
+            opacity: .4;
+            background: linear-gradient(135deg, #eee7d2, #f3ecd9);
+        }
+        .detail-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(26,31,54,0.6);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .detail-close:hover { background: rgba(26,31,54,0.85); }
+        .detail-featured-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 40px;
+            letter-spacing: .5px;
+            box-shadow: 0 3px 10px rgba(212,175,55,0.4);
+        }
+        .detail-body {
+            padding: 26px 30px 30px;
+        }
+        .detail-eyebrow {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+        }
+        .detail-name {
+            font-family: var(--font-display);
+            font-size: 27px;
+            font-weight: 700;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .detail-name .medal {
+            font-size: 20px;
+        }
+        .detail-rule {
+            width: 56px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            margin-top: 10px;
+            border-radius: 2px;
+        }
+        .detail-role {
+            font-size: 13px;
+            color: var(--gold-deep);
+            font-weight: 700;
+            margin-top: 14px;
+            display: inline-block;
+            background: var(--gold-soft);
+            padding: 5px 16px;
+            border-radius: 40px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+        .detail-year {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .detail-achievement {
+            margin-top: 18px;
+            background: var(--gold-soft);
+            padding: 14px 18px;
+            border-radius: 12px;
+            border-left: 4px solid var(--gold);
+        }
+        .detail-achievement-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gold-dark);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 4px;
+        }
+        .detail-achievement-text {
+            font-size: 14px;
+            color: var(--ink);
+        }
+        .detail-bio {
+            margin-top: 18px;
+        }
+        .detail-bio-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+        }
+        .detail-bio-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+        .detail-actions {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px dashed rgba(212,175,55,0.35);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .detail-actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .detail-actions button:hover { opacity: .85; }
+
+        @media (max-width: 1024px) { .hof-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
+            .hof-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .hof-hero { padding: 22px 20px; border-radius: 16px; flex-direction: column; align-items: flex-start; }
+            .hof-hero-title { font-size: 23px; }
+            .hof-hero-sub { font-size: 12px; }
+            .hof-hero-stats { gap: 18px; }
+            .hof-hero-stat .num { font-size: 21px; }
+            .detail-header { height: 200px; }
+            .detail-body { padding: 20px; }
+            .detail-name { font-size: 22px; }
+        }
+        @media (max-width: 480px) { 
+            .hof-grid { grid-template-columns: 1fr; }
+            .detail-header { height: 180px; }
+            .hof-hero-stats { width: 100%; justify-content: space-between; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hof-card { animation: none; opacity: 1; transform: none; }
+            .hof-card, .hof-card:hover { transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="fas fa-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="fas fa-check-circle"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="fas fa-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="fas fa-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="fas fa-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="fas fa-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="fas fa-cash"></i> Confirm penalties</a>
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item active"><i class="fas fa-trophy"></i> Hall of Fame</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+            <div class="topbar-left">
+                <h2>🏆 Hall of Fame</h2>
+                <p>Celebrating our outstanding members</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <button class="action-btn btn-gold" onclick="openAddModal()">
+                <i class="fas fa-plus"></i> Add honoree
+            </button>
+            <div class="topbar-chip" id="topTime">--:--</div>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="hof-hero">
+            <div class="hof-hero-text">
+                <div class="hof-hero-eyebrow">Wall of Honor</div>
+                <div class="hof-hero-title">Voices that shaped our legacy</div>
+                <div class="hof-hero-sub">Every honoree here gave something lasting to the University of Embu Choir — a season won, a section led, a sound made possible.</div>
+            </div>
+            <div class="hof-hero-stats">
+                <div class="hof-hero-stat">
+                    <div class="num" id="statTotal">0</div>
+                    <div class="label">Honorees</div>
+                </div>
+                <div class="hof-hero-stat">
+                    <div class="num" id="statFeatured">0</div>
+                    <div class="label">Featured</div>
+                </div>
+                <div class="hof-hero-stat">
+                    <div class="num" id="statYears">—</div>
+                    <div class="label">Years spanned</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="hofGrid" class="hof-grid">
+            <div class="empty-state">
+                <i class="fas fa-trophy"></i>
+                <p>No honorees yet. Add your first Hall of Fame member!</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="hofModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-trophy"></i> <span id="modalTitle">Add to Hall of Fame</span></h3>
+        <form id="hofForm">
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" id="hofName" placeholder="e.g., John Ndumia" required>
+            </div>
+            <div class="form-group">
+                <label>Role Played *</label>
+                <input type="text" id="hofRole" placeholder="e.g., Director, Choir Leader, Soprano Section Leader" required>
+            </div>
+            <div class="form-group">
+                <label>Photo</label>
+                <div class="file-input-wrapper">
+                    <label class="file-input-label"><i class="fas fa-upload"></i> Choose photo</label>
+                    <input type="file" id="hofPhoto" accept="image/*" onchange="previewPhoto(event)">
+                </div>
+                <div class="file-preview" id="photoPreview">
+                    <span>🖼️</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Year Added</label>
+                <input type="number" id="hofYear" value="2026" placeholder="2026">
+            </div>
+            <div class="form-group">
+                <label>Achievement / Key Contribution</label>
+                <textarea id="hofAchievement" rows="2" placeholder="e.g., Led the choir to victory at the 98th Music Festival"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Biography / Brief Story *</label>
+                <textarea id="hofBio" rows="3" placeholder="Tell the story of this member's contribution to the choir..." required></textarea>
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+                <input type="checkbox" id="hofFeatured" style="width:auto;margin:0;">
+                <label for="hofFeatured" style="margin:0;color:var(--gold-dark);font-weight:600;">⭐ Feature this honoree</label>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-submit">💾 Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== DETAIL VIEW MODAL ===== -->
+<div class="detail-overlay" id="detailModal" onclick="closeDetail(event)">
+    <div class="detail-box" onclick="event.stopPropagation()">
+        <div class="detail-header" id="detailHeader">
+            <div id="detailImageContainer">
+                <span class="placeholder"><i class="fas fa-user"></i></span>
+            </div>
+            <button class="detail-close" onclick="closeDetail()"><i class="fas fa-times"></i></button>
+            <div class="detail-featured-badge" id="detailFeaturedBadge" style="display:none;">⭐ Featured</div>
+        </div>
+        <div class="detail-body">
+            <div class="detail-eyebrow">Hall of Fame Honoree</div>
+            <div class="detail-name" id="detailName">
+                <span>Name</span>
+                <span class="medal" id="detailMedal"></span>
+            </div>
+            <div class="detail-rule"></div>
+            <span class="detail-role" id="detailRole">Role</span>
+            <div class="detail-year" id="detailYear">
+                <i class="fas fa-calendar-alt"></i> <span>Year: </span>
+            </div>
+            <div class="detail-achievement" id="detailAchievementContainer" style="display:none;">
+                <div class="detail-achievement-label"><i class="fas fa-star"></i> Achievement</div>
+                <div class="detail-achievement-text" id="detailAchievement">-</div>
+            </div>
+            <div class="detail-bio">
+                <div class="detail-bio-label"><i class="fas fa-book-open"></i> Biography</div>
+                <div class="detail-bio-text" id="detailBio">No biography provided.</div>
+            </div>
+            <div class="detail-actions">
+                <button class="btn-edit" onclick="editFromDetail()"><i class="fas fa-edit"></i> Edit</button>
+                <button class="btn-feature" id="detailFeatureBtn" onclick="featureFromDetail()"><i class="fas fa-star"></i> Feature</button>
+                <button class="btn-delete" onclick="deleteFromDetail()"><i class="fas fa-trash"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="fas fa-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="fas fa-check-circle"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
+    <a href="analytics.html" class="bottom-nav-item"><i class="fas fa-trending-up"></i><span>Analytics</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let honorees = [];
+    let editingId = null;
+    let photoFile = null;
+    let currentDetailId = null;
+
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+    setInterval(tick,1000); tick();
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+    async function doLogout() { try { await supabaseClient.auth.signOut(); } catch {} window.location.href = '../login.html'; }
+
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            const { data: p } = await supabaseClient.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (p) { if (p.full_name) { const f=p.full_name.split(' ')[0]; document.getElementById('userName').textContent=f; document.getElementById('userAvatar').textContent=f.charAt(0).toUpperCase(); } if (p.role) document.getElementById('userRole').textContent=p.role; }
+        } catch(e) { console.warn(e); }
+    }
+
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
+        t.innerHTML = `<i class="fas ${icons[type] || icons.info}" style="font-size:16px"></i> ${msg}`;
+        t.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+    }
+
+    function previewPhoto(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        photoFile = file;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const preview = document.getElementById('photoPreview');
+            preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ===== LOAD HONOREES =====
+    async function loadHonorees() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('hall_of_fame')
+                .select('*')
+                .order('is_featured', { ascending: false })
+                .order('sort_order', { ascending: true })
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error loading honorees:', error);
+                showToast('Error loading honorees: ' + error.message, 'error');
+                return;
+            }
+
+            honorees = data || [];
+            renderHonorees();
+            renderStats();
+        } catch (error) {
+            console.error('Load error:', error);
+            showToast('Failed to load honorees', 'error');
+        }
+    }
+
+    function renderStats() {
+        const total = honorees.length;
+        const featured = honorees.filter(h => h.is_featured).length;
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statFeatured').textContent = featured;
+
+        const years = honorees.map(h => h.year_added).filter(Boolean);
+        if (years.length) {
+            const min = Math.min(...years), max = Math.max(...years);
+            document.getElementById('statYears').textContent = min === max ? `${min}` : `${min}–${max}`;
+        } else {
+            document.getElementById('statYears').textContent = '—';
+        }
+    }
+
+    function renderHonorees() {
+        const grid = document.getElementById('hofGrid');
+
+        if (!honorees.length) {
+            grid.innerHTML = `<div class="empty-state"><i class="fas fa-trophy"></i><p>No honorees yet. Add your first Hall of Fame member!</p></div>`;
+            return;
+        }
+
+        grid.innerHTML = honorees.map((h, idx) => `
+            <div class="hof-card ${h.is_featured ? 'featured' : ''}" style="animation-delay:${Math.min(idx * 0.05, 0.4)}s" onclick="openDetail('${h.id}')">
+                <div class="hof-image">
+                    ${h.photo_url ? `<img src="${h.photo_url}?t=${Date.now()}" alt="${escapeHtml(h.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-user\\' style=\\'font-size:48px\\'></i></div>';">` : 
+                    `<div class="placeholder"><i class="fas fa-user" style="font-size:48px;"></i></div>`}
+                    <span class="hof-year-badge">🏅 ${h.year_added || '—'}</span>
+                </div>
+                <div class="hof-body">
+                    <div class="hof-name">
+                        ${escapeHtml(h.name)}
+                        ${h.is_featured ? '<span class="medal">⭐</span>' : ''}
+                    </div>
+                    <div class="hof-rule"></div>
+                    <span class="hof-role">${escapeHtml(h.role_played)}</span>
+                    <div class="hof-bio">${escapeHtml(h.bio)}</div>
+                    ${h.achievement ? `<div class="hof-achievement"><i class="fas fa-star"></i> ${escapeHtml(h.achievement)}</div>` : ''}
+                    <div class="hof-actions" onclick="event.stopPropagation()">
+                        <button class="btn-edit" onclick="openEditModal('${h.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        ${h.is_featured ? 
+                            `<button class="btn-feature" onclick="toggleFeature('${h.id}', false)"><i class="fas fa-star"></i> Unfeature</button>` :
+                            `<button class="btn-feature" onclick="toggleFeature('${h.id}', true)"><i class="fas fa-star"></i> Feature</button>`
+                        }
+                        <button class="btn-delete" onclick="deleteHonoree('${h.id}')"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ===== DETAIL VIEW =====
+    function openDetail(id) {
+        const honoree = honorees.find(h => h.id === id);
+        if (!honoree) return;
+        
+        currentDetailId = id;
+        
+        document.getElementById('detailName').innerHTML = `
+            ${escapeHtml(honoree.name)}
+            ${honoree.is_featured ? '<span class="medal">⭐</span>' : ''}
+        `;
+        document.getElementById('detailRole').textContent = honoree.role_played;
+        document.getElementById('detailYear').innerHTML = `<i class="fas fa-calendar-alt"></i> Year: ${honoree.year_added || '—'}`;
+        
+        if (honoree.achievement) {
+            document.getElementById('detailAchievementContainer').style.display = 'block';
+            document.getElementById('detailAchievement').textContent = honoree.achievement;
+        } else {
+            document.getElementById('detailAchievementContainer').style.display = 'none';
+        }
+        
+        document.getElementById('detailBio').textContent = honoree.bio || 'No biography provided.';
+        
+        if (honoree.is_featured) {
+            document.getElementById('detailFeaturedBadge').style.display = 'block';
+        } else {
+            document.getElementById('detailFeaturedBadge').style.display = 'none';
+        }
+        
+        const featureBtn = document.getElementById('detailFeatureBtn');
+        if (honoree.is_featured) {
+            featureBtn.innerHTML = '<i class="fas fa-star"></i> Unfeature';
+            featureBtn.className = 'btn-feature';
+            featureBtn.onclick = function() { toggleFeature(id, false); closeDetail(); };
+        } else {
+            featureBtn.innerHTML = '<i class="fas fa-star"></i> Feature';
+            featureBtn.className = 'btn-feature';
+            featureBtn.onclick = function() { toggleFeature(id, true); closeDetail(); };
+        }
+        
+        const imgContainer = document.getElementById('detailImageContainer');
+        if (honoree.photo_url) {
+            imgContainer.innerHTML = `<img src="${honoree.photo_url}?t=${Date.now()}" alt="${escapeHtml(honoree.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'placeholder\\'><i class=\\'fas fa-user\\'></i></span>';">`;
+        } else {
+            imgContainer.innerHTML = `<span class="placeholder"><i class="fas fa-user"></i></span>`;
+        }
+        
+        document.getElementById('detailModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetail(e) {
+        if (e && e.target !== e.currentTarget) return;
+        document.getElementById('detailModal').classList.remove('open');
+        document.body.style.overflow = '';
+        currentDetailId = null;
+    }
+
+    function editFromDetail() {
+        if (currentDetailId) {
+            closeDetail();
+            setTimeout(() => openEditModal(currentDetailId), 300);
+        }
+    }
+
+    function featureFromDetail() {
+        if (currentDetailId) {
+            const honoree = honorees.find(h => h.id === currentDetailId);
+            if (honoree) {
+                toggleFeature(currentDetailId, !honoree.is_featured);
+                closeDetail();
+            }
+        }
+    }
+
+    function deleteFromDetail() {
+        if (currentDetailId) {
+            closeDetail();
+            setTimeout(() => deleteHonoree(currentDetailId), 300);
+        }
+    }
+
+    // ===== MODAL FUNCTIONS =====
+    function openAddModal() {
+        editingId = null;
+        photoFile = null;
+        document.getElementById('modalTitle').textContent = 'Add to Hall of Fame';
+        document.getElementById('editId').value = '';
+        document.getElementById('hofForm').reset();
+        document.getElementById('hofYear').value = new Date().getFullYear();
+        document.getElementById('photoPreview').innerHTML = '<span>🖼️</span>';
+        document.getElementById('hofModal').classList.add('open');
+    }
+
+    async function openEditModal(id) {
+        const honoree = honorees.find(h => h.id === id);
+        if (!honoree) return;
+
+        editingId = id;
+        photoFile = null;
+        document.getElementById('modalTitle').textContent = 'Edit Honoree';
+        document.getElementById('editId').value = id;
+        document.getElementById('hofName').value = honoree.name;
+        document.getElementById('hofRole').value = honoree.role_played;
+        document.getElementById('hofYear').value = honoree.year_added || new Date().getFullYear();
+        document.getElementById('hofAchievement').value = honoree.achievement || '';
+        document.getElementById('hofBio').value = honoree.bio;
+        document.getElementById('hofFeatured').checked = honoree.is_featured || false;
+
+        if (honoree.photo_url) {
+            document.getElementById('photoPreview').innerHTML = `<img src="${honoree.photo_url}?t=${Date.now()}" alt="Preview">`;
+        } else {
+            document.getElementById('photoPreview').innerHTML = '<span>🖼️</span>';
+        }
+
+        document.getElementById('hofModal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('hofModal').classList.remove('open');
+        editingId = null;
+        photoFile = null;
+    }
+
+    // ===== UPLOAD & SAVE =====
+    async function uploadPhoto(file, name) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${name}_${Date.now()}.${fileExt}`;
+        const filePath = `hall-of-fame/${fileName}`;
+
+        const { error: uploadError } = await supabaseClient.storage
+            .from('profiles')
+            .upload(filePath, file);
+
+        if (uploadError) {
+            console.error('Upload error:', uploadError);
+            return null;
+        }
+
+        const { data: { publicUrl } } = supabaseClient.storage
+            .from('profiles')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
+    }
+
+    document.getElementById('hofForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('hofName').value.trim();
+        const role = document.getElementById('hofRole').value.trim();
+        const year = parseInt(document.getElementById('hofYear').value) || new Date().getFullYear();
+        const achievement = document.getElementById('hofAchievement').value.trim();
+        const bio = document.getElementById('hofBio').value.trim();
+        const featured = document.getElementById('hofFeatured').checked;
+        const editId = document.getElementById('editId').value;
+
+        if (!name || !role || !bio) {
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
+
+        const submitBtn = document.querySelector('.btn-submit');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Saving...';
+
+        try {
+            let photoUrl = null;
+
+            if (photoFile) {
+                const fileName = name.replace(/\s+/g, '_').toLowerCase();
+                photoUrl = await uploadPhoto(photoFile, fileName);
+                if (!photoUrl) {
+                    showToast('Failed to upload photo', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '💾 Save';
+                    return;
+                }
+            }
+
+            if (!photoUrl && editId) {
+                const existing = honorees.find(h => h.id === editId);
+                if (existing) photoUrl = existing.photo_url;
+            }
+
+            const data = {
+                name,
+                role_played: role,
+                year_added: year,
+                achievement: achievement || null,
+                bio,
+                is_featured: featured,
+                photo_url: photoUrl,
+                updated_at: new Date()
+            };
+
+            let result;
+            if (editId) {
+                result = await supabaseClient
+                    .from('hall_of_fame')
+                    .update(data)
+                    .eq('id', editId);
+            } else {
+                data.created_at = new Date();
+                result = await supabaseClient
+                    .from('hall_of_fame')
+                    .insert(data);
+            }
+
+            if (result.error) {
+                console.error('Save error:', result.error);
+                showToast('Error saving: ' + result.error.message, 'error');
+            } else {
+                showToast(editId ? '✅ Honoree updated!' : '✅ Honoree added!', 'success');
+                closeModal();
+                loadHonorees();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('An error occurred', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💾 Save';
+        }
+    });
+
+    // ===== FEATURE & DELETE =====
+    async function toggleFeature(id, featured) {
+        const { error } = await supabaseClient
+            .from('hall_of_fame')
+            .update({ is_featured: featured, updated_at: new Date() })
+            .eq('id', id);
+
+        if (error) {
+            showToast('Error: ' + error.message, 'error');
+        } else {
+            showToast(featured ? '⭐ Featured!' : '⭐ Unfeatured', 'success');
+            loadHonorees();
+        }
+    }
+
+    async function deleteHonoree(id) {
+        const honoree = honorees.find(h => h.id === id);
+        if (!honoree) return;
+
+        if (!confirm(`Are you sure you want to remove "${honoree.name}" from the Hall of Fame?\n\nThis action cannot be undone.`)) return;
+
+        if (honoree.photo_url) {
+            try {
+                const path = honoree.photo_url.split('/public/profiles/')[1];
+                if (path) {
+                    await supabaseClient.storage.from('profiles').remove([path]);
+                }
+            } catch (e) { console.warn('Photo delete error:', e); }
+        }
+
+        const { error } = await supabaseClient
+            .from('hall_of_fame')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            showToast('Error: ' + error.message, 'error');
+        } else {
+            showToast('✅ Removed from Hall of Fame', 'success');
+            loadHonorees();
+        }
+    }
+
+    // ===== AUTH & INIT =====
+    async function checkAuth() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        return session;
+    }
+
+    async function init() {
+        await checkAuth();
+        await loadUserInfo();
+        await loadHonorees();
+    }
+
+    document.getElementById('hofModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+            closeDetail();
+        }
+    });
+
+    init();
+
+    // Expose global functions
+    window.openAddModal = openAddModal;
+    window.openEditModal = openEditModal;
+    window.closeModal = closeModal;
+    window.toggleFeature = toggleFeature;
+    window.deleteHonoree = deleteHonoree;
+    window.previewPhoto = previewPhoto;
+    window.doLogout = doLogout;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.openDetail = openDetail;
+    window.closeDetail = closeDetail;
+    window.editFromDetail = editFromDetail;
+    window.featureFromDetail = featureFromDetail;
+    window.deleteFromDetail = deleteFromDetail;
+</script>
+</body>
+</html>

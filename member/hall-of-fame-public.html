@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Hall of Fame | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f5e6a3;
+            --gold-dark: #b8960f;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --gold-gradient: linear-gradient(135deg, #f5e6a3, #d4af37, #b8960f);
+            --text-dark: #0f172a;
+            --text-mid: #475569;
+            --text-muted: #94a3b8;
+            --surface: #f8fafc;
+            --border: #e2e8f0;
+            --card-radius: 20px;
+            --shadow-gold: 0 8px 32px rgba(212, 175, 55, 0.2);
+            --accent: #4f46e5;
+            --accent-bg: #eef2ff;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0618;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(124, 58, 237, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(15, 10, 30, 0.9) 0%, #0a0618 100%);
+            min-height: 100vh;
+            padding: clamp(12px, 3vw, 40px);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: clamp(20px, 4vw, 48px);
+            box-shadow: 0 32px 80px -16px rgba(0,0,0,0.6), 0 0 0 1px rgba(212, 175, 55, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--gold), var(--gold-dark), var(--gold), transparent);
+            background-size: 300% 100%;
+            animation: shimmer 4s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: -300% 0; }
+            50% { background-position: 300% 0; }
+        }
+
+        /* ── HEADER ── */
+        .header {
+            text-align: center;
+            padding-bottom: clamp(24px, 4vw, 40px);
+            margin-bottom: clamp(24px, 4vw, 40px);
+            position: relative;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: clamp(200px, 50%, 500px);
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), var(--gold-dark), var(--gold), transparent);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .trophy-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(90px, 15vw, 120px);
+            height: clamp(90px, 15vw, 120px);
+            background: linear-gradient(135deg, #fffbe6, #fde68a);
+            border-radius: 50%;
+            border: 3px solid var(--gold);
+            position: relative;
+            box-shadow: 0 8px 40px rgba(212, 175, 55, 0.35);
+        }
+        .trophy-wrap .trophy-icon {
+            font-size: clamp(44px, 8vw, 64px);
+            color: var(--gold-dark);
+        }
+        .trophy-wrap .ring {
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 2px solid rgba(212, 175, 55, 0.15);
+            animation: pulse-ring 3s ease-in-out infinite;
+        }
+        .trophy-wrap .ring:nth-child(2) {
+            inset: -14px;
+            animation-delay: 0.5s;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.08); opacity: 0.2; }
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(36px, 7vw, 56px);
+            font-weight: 900;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+        .header h1 .gold-text {
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            position: relative;
+        }
+        .header h1 .gold-text::after {
+            content: '✦';
+            position: absolute;
+            right: -32px;
+            top: 50%;
+            transform: translateY(-50%);
+            -webkit-text-fill-color: var(--gold);
+            font-size: 20px;
+        }
+        .header .subtitle {
+            color: var(--text-mid);
+            font-size: clamp(14px, 2vw, 18px);
+            margin-top: 6px;
+            max-width: 540px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+        .header .subtitle strong {
+            color: var(--gold-dark);
+            font-weight: 600;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: clamp(24px, 6vw, 56px);
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .stats-bar .stat-item {
+            text-align: center;
+            position: relative;
+        }
+        .stats-bar .stat-item:not(:last-child)::after {
+            content: '|';
+            position: absolute;
+            right: -28px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--border);
+            font-weight: 300;
+        }
+        @media (max-width: 480px) {
+            .stats-bar .stat-item:not(:last-child)::after { display: none; }
+        }
+        .stats-bar .number {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(24px, 3.5vw, 34px);
+            font-weight: 800;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stats-bar .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* ── GRID ── */
+        .hof-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(18px, 2.5vw, 28px);
+        }
+
+        /* ── CARD ── */
+        .hof-card {
+            background: var(--surface);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .hof-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--card-radius);
+            padding: 2px;
+            background: linear-gradient(135deg, transparent, transparent, transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            z-index: 1;
+        }
+        .hof-card:hover::before {
+            background: linear-gradient(135deg, var(--gold), rgba(212, 175, 55, 0.3), var(--gold));
+        }
+        .hof-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 24px 56px rgba(0,0,0,0.1), 0 0 0 1px rgba(212, 175, 55, 0.2);
+        }
+        .hof-card.featured {
+            border-color: var(--gold);
+            border-width: 2px;
+            box-shadow: var(--shadow-gold);
+        }
+        .hof-card.featured:hover {
+            box-shadow: 0 24px 64px rgba(212, 175, 55, 0.25);
+            border-color: var(--gold-dark);
+        }
+
+        .hof-image {
+            height: clamp(200px, 28vw, 280px);
+            background: linear-gradient(135deg, #1a1628, #2d2640);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .hof-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hof-card:hover .hof-image img {
+            transform: scale(1.06);
+        }
+        .hof-image .placeholder {
+            font-size: clamp(52px, 8vw, 76px);
+            color: rgba(255,255,255,0.15);
+            font-weight: 300;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        .hof-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.3) 100%);
+            pointer-events: none;
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 14px; right: 14px;
+            background: var(--gold-gradient);
+            color: #3d2b00;
+            padding: 5px 16px;
+            border-radius: 40px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+            z-index: 2;
+            text-transform: uppercase;
+        }
+        .featured-badge i {
+            font-size: 11px;
+        }
+
+        .year-badge {
+            position: absolute;
+            bottom: 14px; left: 14px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #fff;
+            padding: 5px 16px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 2;
+            border: 1px solid rgba(255,255,255,0.08);
+            letter-spacing: 0.3px;
+        }
+        .year-badge i {
+            font-size: 11px;
+            color: var(--gold);
+        }
+
+        .hof-body {
+            padding: clamp(16px, 3vw, 24px);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+        .hof-name {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(18px, 2.5vw, 24px);
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1.2;
+            letter-spacing: -0.3px;
+        }
+        .hof-role {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-bg), #e0e7ff);
+            color: var(--accent);
+            padding: 3px 16px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            width: fit-content;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .hof-bio {
+            color: var(--text-mid);
+            font-size: clamp(12px, 1.6vw, 14px);
+            line-height: 1.7;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+        .hof-achievement {
+            background: linear-gradient(135deg, #fef9c3, #fde68a);
+            border-left: 4px solid var(--gold);
+            padding: 10px 14px;
+            border-radius: 0 10px 10px 0;
+            font-size: 12px;
+            color: #713f12;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .hof-achievement i {
+            flex-shrink: 0;
+            margin-top: 1px;
+            color: var(--gold-dark);
+            font-size: 14px;
+        }
+
+        /* ── EMPTY STATE ── */
+        .hof-state {
+            text-align: center;
+            padding: clamp(60px, 12vw, 140px) 20px;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+            background: var(--surface);
+            border-radius: var(--card-radius);
+            border: 2px dashed var(--border);
+        }
+        .hof-state .state-icon { 
+            font-size: 64px; 
+            display: block; 
+            margin-bottom: 16px; 
+            opacity: 0.5;
+        }
+        .hof-state h3 { 
+            font-size: 22px; 
+            color: var(--text-dark); 
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .hof-state p { font-size: 15px; }
+
+        /* ── DETAIL VIEW OVERLAY ── */
+        .detail-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeInOverlay 0.3s ease;
+        }
+        .detail-overlay.open {
+            display: flex;
+        }
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .detail-modal {
+            background: white;
+            border-radius: 28px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+            animation: slideUpDetail 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        @keyframes slideUpDetail {
+            from { opacity: 0; transform: translateY(40px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .detail-close {
+            position: sticky;
+            top: 16px;
+            right: 16px;
+            float: right;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            margin: 16px 16px 0 0;
+        }
+        .detail-close:hover {
+            background: rgba(0,0,0,0.8);
+            transform: scale(1.08);
+        }
+
+        .detail-header {
+            padding: 0 28px 0 28px;
+            margin-top: -20px;
+        }
+        .detail-image-wrap {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid var(--gold);
+            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
+            flex-shrink: 0;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .detail-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .detail-image-wrap .placeholder {
+            font-size: 64px;
+            color: var(--text-muted);
+        }
+
+        .detail-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+        .detail-name .featured-tag {
+            display: inline-block;
+            background: var(--gold-gradient);
+            color: #3d2b00;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 14px;
+            border-radius: 40px;
+            margin-left: 10px;
+            vertical-align: middle;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .detail-role {
+            font-size: 16px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 4px;
+            display: inline-block;
+            background: var(--accent-bg);
+            padding: 4px 18px;
+            border-radius: 40px;
+        }
+        .detail-year {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .detail-year i {
+            color: var(--gold);
+        }
+
+        .detail-body {
+            padding: 0 28px 28px 28px;
+        }
+
+        .detail-section {
+            margin-top: 20px;
+        }
+        .detail-section .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .detail-section .section-label i {
+            color: var(--gold);
+            font-size: 14px;
+        }
+
+        .detail-achievement-box {
+            background: linear-gradient(135deg, #fef9c3, #fde68a);
+            border-left: 4px solid var(--gold);
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-top: 4px;
+        }
+        .detail-achievement-box .text {
+            font-size: 15px;
+            color: #713f12;
+            line-height: 1.6;
+        }
+
+        .detail-bio-text {
+            font-size: 15px;
+            color: var(--text-mid);
+            line-height: 1.8;
+            margin-top: 4px;
+        }
+
+        .detail-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .detail-meta-item {
+            background: var(--surface);
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .detail-meta-item .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .detail-meta-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-top: 2px;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .detail-actions .back-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+            color: var(--text-mid);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .detail-actions .back-btn:hover {
+            background: var(--accent-bg);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (min-width: 1025px) {
+            .hof-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .hof-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width: 481px) and (max-width: 768px) {
+            .hof-grid { grid-template-columns: repeat(2, 1fr); }
+            .hof-image { height: clamp(170px, 30vw, 220px); }
+            .detail-modal { max-width: 95%; }
+            .detail-header { padding: 0 20px; }
+            .detail-body { padding: 0 20px 20px; }
+            .detail-image-wrap { width: 110px; height: 110px; }
+            .detail-name { font-size: 26px; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 8px; }
+            .container { border-radius: 20px; padding: 16px; }
+            .hof-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .hof-image { height: clamp(150px, 35vw, 190px); }
+            .hof-body { padding: 12px; }
+            .hof-bio { -webkit-line-clamp: 2; }
+            .detail-modal { max-width: 100%; border-radius: 20px; }
+            .detail-header { padding: 0 16px; }
+            .detail-body { padding: 0 16px 16px; }
+            .detail-image-wrap { width: 90px; height: 90px; }
+            .detail-name { font-size: 22px; }
+            .detail-meta-grid { grid-template-columns: 1fr; }
+            .detail-close { top: 10px; right: 10px; width: 38px; height: 38px; font-size: 16px; margin: 10px 10px 0 0; }
+            .footer-actions { flex-direction: column; align-items: stretch; text-align: center; }
+        }
+        @media (max-width: 380px) {
+            .hof-grid { grid-template-columns: 1fr; }
+            .hof-image { height: 200px; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--surface); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+        /* Scrollable detail modal */
+        .detail-modal::-webkit-scrollbar { width: 4px; }
+        .detail-modal::-webkit-scrollbar-track { background: transparent; }
+        .detail-modal::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-top">
+                <div class="trophy-wrap">
+                    <span class="ring"></span>
+                    <span class="ring"></span>
+                    <span class="trophy-icon">🏆</span>
+                </div>
+            </div>
+            <h1>Hall of <span class="gold-text">Fame</span></h1>
+            <p class="subtitle">
+                Honoring the <strong>legends</strong> who have shaped the 
+                <strong>University of Embu Students' Choir</strong> through 
+                excellence, dedication, and service.
+            </p>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item">
+                    <span class="number" id="totalCount">0</span>
+                    <span class="label">Inductees</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number" id="featuredCount">0</span>
+                    <span class="label">Featured</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number" id="yearRange">—</span>
+                    <span class="label">Years Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRID -->
+        <div id="hofGrid" class="hof-grid">
+            <div class="hof-state">
+                <span class="state-icon">🎵</span>
+                <h3>Loading Legends…</h3>
+                <p>Fetching the heroes of our choir.</p>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <!-- DETAIL VIEW MODAL -->
+    <div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+        <div class="detail-modal" onclick="event.stopPropagation()">
+            <button class="detail-close" onclick="closeDetail()"><i class="fas fa-times"></i></button>
+            <div id="detailContent">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let honoreesData = [];
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+
+        function getYearRange(data) {
+            if (!data || data.length === 0) return '—';
+            const years = data.map(h => h.year_added).filter(y => y && !isNaN(y));
+            if (years.length === 0) return '—';
+            const min = Math.min(...years);
+            const max = Math.max(...years);
+            return min === max ? String(min) : `${min} – ${max}`;
+        }
+
+        // ─── OPEN DETAIL ───
+        function openDetail(id) {
+            const honoree = honoreesData.find(h => h.id === id);
+            if (!honoree) return;
+
+            const overlay = document.getElementById('detailOverlay');
+            const content = document.getElementById('detailContent');
+
+            const isFeatured = honoree.is_featured;
+            const hasAchievement = honoree.achievement && honoree.achievement.trim().length > 0;
+
+            content.innerHTML = `
+                <div class="detail-header" style="padding-top: 8px;">
+                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                        <div class="detail-image-wrap">
+                            ${honoree.photo_url 
+                                ? `<img src="${honoree.photo_url}?t=${Date.now()}" alt="${escapeHtml(honoree.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-user\\'></i></div>';">`
+                                : `<div class="placeholder"><i class="fas fa-user"></i></div>`}
+                        </div>
+                        <div>
+                            <div class="detail-name">
+                                ${escapeHtml(honoree.name)}
+                                ${isFeatured ? '<span class="featured-tag"><i class="fas fa-star"></i> Featured</span>' : ''}
+                            </div>
+                            <div class="detail-role">${escapeHtml(honoree.role_played)}</div>
+                            <div class="detail-year">
+                                <i class="fas fa-calendar-alt"></i> 
+                                Inducted: ${honoree.year_added || '—'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-body">
+                    ${hasAchievement ? `
+                        <div class="detail-section">
+                            <div class="section-label"><i class="fas fa-trophy"></i> Achievement</div>
+                            <div class="detail-achievement-box">
+                                <div class="text">${escapeHtml(honoree.achievement)}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="detail-section">
+                        <div class="section-label"><i class="fas fa-book-open"></i> Biography</div>
+                        <div class="detail-bio-text">${escapeHtml(honoree.bio) || 'No biography provided.'}</div>
+                    </div>
+
+                    <div class="detail-meta-grid">
+                        <div class="detail-meta-item">
+                            <div class="label">🏅 Year Inducted</div>
+                            <div class="value">${honoree.year_added || '—'}</div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <div class="label">⭐ Status</div>
+                            <div class="value">${isFeatured ? 'Featured Honoree' : 'Honoree'}</div>
+                        </div>
+                        ${honoree.role_played ? `
+                            <div class="detail-meta-item">
+                                <div class="label">🎭 Role</div>
+                                <div class="value">${escapeHtml(honoree.role_played)}</div>
+                            </div>
+                        ` : ''}
+                        ${honoree.created_at ? `
+                            <div class="detail-meta-item">
+                                <div class="label">📅 Added On</div>
+                                <div class="value">${new Date(honoree.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="detail-actions">
+                        <button class="back-btn" onclick="closeDetail()">
+                            <i class="fas fa-arrow-left"></i> Back to Hall of Fame
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // ─── CLOSE DETAIL ───
+        function closeDetail(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('detailOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeDetail();
+        });
+
+        // ─── LOAD HONOREES ───
+        async function loadHonorees() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('hall_of_fame')
+                    .select('*')
+                    .order('is_featured', { ascending: false })
+                    .order('sort_order', { ascending: true })
+                    .order('created_at', { ascending: false });
+
+                if (error) { 
+                    console.error('Error loading honorees:', error);
+                    document.getElementById('hofGrid').innerHTML = `
+                        <div class="hof-state">
+                            <span class="state-icon">⚠️</span>
+                            <h3>Error Loading</h3>
+                            <p>Could not fetch honorees. Please try again later.</p>
+                        </div>`;
+                    return;
+                }
+
+                honoreesData = data || [];
+                const grid = document.getElementById('hofGrid');
+                
+                document.getElementById('totalCount').textContent = honoreesData.length;
+                document.getElementById('featuredCount').textContent = honoreesData.filter(h => h.is_featured).length;
+                document.getElementById('yearRange').textContent = getYearRange(honoreesData);
+
+                if (!honoreesData.length) {
+                    grid.innerHTML = `
+                        <div class="hof-state">
+                            <span class="state-icon">🏅</span>
+                            <h3>No Honorees Yet</h3>
+                            <p>The first legend is waiting to be inducted!</p>
+                        </div>`;
+                    return;
+                }
+
+                grid.innerHTML = honoreesData.map((h, index) => {
+                    const delay = index * 50;
+                    const isFeatured = h.is_featured;
+                    return `
+                        <div class="hof-card ${isFeatured ? 'featured' : ''}" 
+                             style="animation: fadeIn 0.5s ease ${delay}ms both;"
+                             onclick="openDetail('${h.id}')">
+                            <div class="hof-image">
+                                ${h.photo_url 
+                                    ? `<img src="${h.photo_url}?t=${Date.now()}" alt="${escapeHtml(h.name)}" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'>🎵</div>';">`
+                                    : '<div class="placeholder">🎵</div>'}
+                                ${isFeatured ? '<div class="featured-badge"><i class="fas fa-star"></i> Featured</div>' : ''}
+                                <div class="year-badge">
+                                    <i class="fas fa-calendar-alt"></i> ${h.year_added || '—'}
+                                </div>
+                            </div>
+                            <div class="hof-body">
+                                <div class="hof-name">${escapeHtml(h.name)}</div>
+                                <span class="hof-role">${escapeHtml(h.role_played)}</span>
+                                <div class="hof-bio">${escapeHtml(h.bio)}</div>
+                                ${h.achievement ? `<div class="hof-achievement"><i class="fas fa-award"></i><span>${escapeHtml(h.achievement)}</span></div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(30px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                `;
+                document.head.appendChild(style);
+
+            } catch (error) {
+                console.error('Load error:', error);
+            }
+        }
+
+        loadHonorees();
+    </script>
+</body>
+</html>

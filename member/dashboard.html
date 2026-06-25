@@ -5,13 +5,12 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta name="description" content="Official attendance tracking system for the University of Embu (UoEm) Students Choir. Manage and track choir member attendance seamlessly.">
-    <meta name="keywords" content="UoEm, University of Embu, UoEm Students Choir, Choir Attendance System, Embu University Choir">
     <title>University of Embu (UoEm) Students Choir - Attendance System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --purple: #5b4fcf;
@@ -29,6 +28,9 @@
             --slate-100: #f1f5f9;
             --slate-50: #f8fafc;
             --white: #ffffff;
+            --gold: #d4af37;
+            --gold-light: #f5e6b8;
+            --gold-dark: #b8960f;
             --card-shadow: 0 4px 24px rgba(91,79,207,0.08), 0 1px 4px rgba(0,0,0,0.06);
             --card-shadow-hover: 0 8px 32px rgba(91,79,207,0.16), 0 2px 8px rgba(0,0,0,0.08);
             --radius: 20px;
@@ -77,6 +79,12 @@
             font-weight: 800;
             letter-spacing: -0.5px;
         }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
         .logout-btn {
             background: #fee2e2;
             color: #b91c1c;
@@ -90,6 +98,28 @@
             transition: background 0.18s, transform 0.12s;
         }
         .logout-btn:hover { background: #fecaca; transform: scale(1.03); }
+
+        .hof-nav-btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: inherit;
+            transition: transform 0.18s, box-shadow 0.18s;
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .hof-nav-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+        }
 
         .tabs {
             display: flex;
@@ -262,7 +292,6 @@
         }
         .form-group textarea { min-height: 80px; resize: vertical; }
         
-        /* Two column layout for form groups */
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -444,20 +473,278 @@
         .bottom-nav-item.active { color: var(--purple); background: var(--purple-light); }
         .bottom-nav-item:hover:not(.active) { color: var(--purple); background: #f5f3ff; }
 
+        /* Hall of Fame Grid in modal */
+        .hof-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .hof-modal-overlay.open { display: flex; }
+        .hof-modal-box {
+            background: white;
+            border-radius: 28px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+            animation: detailFadeIn 0.3s ease;
+        }
+        @keyframes detailFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .hof-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .hof-modal-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--slate-900);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hof-modal-close {
+            background: var(--slate-100);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hof-modal-close:hover { background: var(--slate-300); }
+
+        .hof-grid-modal {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .hof-card-modal {
+            background: var(--white);
+            border: 1px solid var(--slate-100);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.15s;
+            cursor: pointer;
+        }
+        .hof-card-modal:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+        }
+        .hof-card-modal.featured {
+            border: 2px solid var(--gold);
+        }
+        .hof-card-modal .hof-image {
+            width: 100%;
+            height: 180px;
+            background: var(--slate-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .hof-card-modal .hof-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hof-card-modal .hof-image .placeholder {
+            font-size: 48px;
+            color: var(--slate-500);
+        }
+        .hof-card-modal .hof-body {
+            padding: 16px;
+        }
+        .hof-card-modal .hof-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--slate-900);
+        }
+        .hof-card-modal .hof-role {
+            font-size: 12px;
+            color: var(--purple);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .hof-card-modal .hof-bio {
+            font-size: 13px;
+            color: var(--slate-500);
+            margin-top: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .hof-card-modal .hof-year {
+            font-size: 11px;
+            color: var(--slate-400);
+            margin-top: 6px;
+        }
+        .featured-badge {
+            background: var(--gold);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-left: 8px;
+            text-transform: uppercase;
+        }
+        .hof-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--slate-500);
+        }
+        .hof-empty i {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+            color: var(--slate-300);
+        }
+
+        /* Detail view inside modal */
+        .hof-detail-view {
+            display: none;
+            padding: 20px 0;
+        }
+        .hof-detail-view.active {
+            display: block;
+        }
+        .hof-detail-header {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .hof-detail-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--slate-100);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hof-detail-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hof-detail-image .placeholder {
+            font-size: 64px;
+            color: var(--slate-400);
+        }
+        .hof-detail-info {
+            flex: 1;
+        }
+        .hof-detail-info .name {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--slate-900);
+        }
+        .hof-detail-info .role {
+            font-size: 16px;
+            color: var(--purple);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .hof-detail-info .year {
+            font-size: 14px;
+            color: var(--slate-500);
+            margin-top: 6px;
+        }
+        .hof-detail-achievement {
+            background: var(--gold-light);
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid var(--gold);
+            margin: 16px 0;
+        }
+        .hof-detail-achievement .label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gold-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .hof-detail-achievement .text {
+            font-size: 15px;
+            color: var(--slate-900);
+            margin-top: 4px;
+        }
+        .hof-detail-bio {
+            margin-top: 12px;
+        }
+        .hof-detail-bio .label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--slate-400);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .hof-detail-bio .text {
+            font-size: 15px;
+            color: var(--slate-700);
+            line-height: 1.8;
+            margin-top: 4px;
+        }
+        .hof-back-btn {
+            background: var(--slate-100);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            font-family: inherit;
+            transition: background 0.18s;
+            margin-bottom: 16px;
+        }
+        .hof-back-btn:hover { background: var(--slate-200); }
+        .hof-grid-view {
+            display: block;
+        }
+        .hof-grid-view.hidden {
+            display: none;
+        }
+
         @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
         @media (max-width: 640px) {
             .profile-card { flex-direction: column; text-align: center; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .tabs { justify-content: center; }
             .tab-btn { padding: 8px 14px; font-size: 13px; }
+            .hof-modal-box { padding: 16px; }
+            .hof-grid-modal { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .hof-detail-header { flex-direction: column; align-items: center; text-align: center; }
+        }
+        @media (max-width: 480px) {
+            .hof-grid-modal { grid-template-columns: 1fr; }
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
             50% { opacity: 0.93; box-shadow: 0 4px 20px rgba(245,158,11,0.6); }
         }
-        #floatingReminderBtn { transition: transform 0.2s; }
-        #floatingReminderBtn:hover { transform: scale(1.08); }
         
         @keyframes highlightFlash {
             0% { background-color: var(--slate-50); }
@@ -474,7 +761,12 @@
     <div class="container">
         <div class="header">
             <h1>🎵 My Dashboard</h1>
-            <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
+            <div class="header-actions">
+               <div class="bottom-nav-item" onclick="window.location.href='hall-of-fame-public.html'">
+    <span>🏆</span><span>Hall of Fame</span>
+</div>
+                <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
+            </div>
         </div>
 
         <div class="tabs">
@@ -612,48 +904,69 @@
                 <div id="attendanceHistoryList" style="max-height: 500px; overflow-y: auto;"></div>
             </div>
         </div>
+    </div>
 
-        <!-- Payment Modal -->
-        <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
-            <div style="background: white; border-radius: 28px; padding: 25px; max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: #1e293b;">💰 Pay Fine</h3>
-                    <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 28px; cursor: pointer;">&times;</button>
+    <!-- Hall of Fame Modal -->
+    <div class="hof-modal-overlay" id="hofModal">
+        <div class="hof-modal-box">
+            <div class="hof-modal-header">
+                <h2><i class="fas fa-trophy" style="color: var(--gold);"></i> Hall of Fame</h2>
+                <button class="hof-modal-close" onclick="closeHallOfFame()">&times;</button>
+            </div>
+            <div id="hofContent">
+                <!-- Grid View -->
+                <div id="hofGridView" class="hof-grid-view">
+                    <div id="hofGridContainer" style="margin-top: 16px;"></div>
                 </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 48px; margin-bottom: 15px;">💳</div>
-                    <p style="margin-bottom: 15px;">Pay <strong style="font-size: 24px; color: #dc2626;" id="modalAmount"></strong> for:</p>
-                    <p id="modalDescription" style="font-size: 14px; color: #666; margin-bottom: 20px; padding: 10px; background: #f1f5f9; border-radius: 12px;"></p>
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 20px; margin: 20px 0;">
-                        <p style="margin-bottom: 10px;">📱 <strong>POCHI LA BIASHARA</strong></p>
-                        <p style="font-size: 32px; font-weight: bold; letter-spacing: 2px;">0117085859</p>
-                        <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
-                        <p style="margin-bottom: 10px;"><strong> Peter Manundu</strong></p>
-                       <p id="modalAccountNumber" style="font-size: 24px; font-weight: bold; letter-spacing: 1px;"></p>
-                        <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
-                        <p style="margin-bottom: 10px;">💰 <strong>Amount to Pay</strong></p>
-                        <p id="modalAmount2" style="font-size: 28px; font-weight: bold;"></p>
-                        <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
-                        <p style="margin-bottom: 5px; font-size: 12px; opacity: 0.9;">💡 Total Pending Fines: <span id="pendingTotalDisplay">KSh 0</span></p>
-                    </div>
-                    <div style="background: #fef3c7; padding: 12px; border-radius: 12px; margin: 15px 0;">
-                        <p style="font-size: 13px; color: #92400e;">📌 <strong>Instructions:</strong></p>
-                        <p style="font-size: 12px; color: #92400e;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
-                        <p style="font-size: 12px; color: #92400e;">2. Enter Phone Number: <strong>0117085859</strong></p>
-                         <strong id="instructionAccountNumber"></strong></p>
-                        <p style="font-size: 12px; color: #92400e;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
-                        <p style="font-size: 12px; color: #92400e;">4. Enter your M-Pesa PIN and complete payment</p>
-                    </div>
-                    <div style="margin: 20px 0;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">📱 Your Mpesa Name</label>
-                        <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px;">
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="recordPayment()" class="submit-btn" style="flex: 1; background: #10b981;">✅ I Have Paid</button>
-                        <button onclick="closePaymentModal()" style="flex: 1; background: #ef4444; color: white; border: none; border-radius: 40px; cursor: pointer;">Cancel</button>
-                    </div>
-                    <p style="font-size: 11px; color: #666; margin-top: 20px;">After payment, admin will confirm within 24 hours.</p>
+                <!-- Detail View -->
+                <div id="hofDetailView" class="hof-detail-view">
+                    <button class="hof-back-btn" onclick="showHofGrid()">← Back to Hall of Fame</button>
+                    <div id="hofDetailContent"></div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 28px; padding: 25px; max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #1e293b;">💰 Pay Fine</h3>
+                <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 28px; cursor: pointer;">&times;</button>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 15px;">💳</div>
+                <p style="margin-bottom: 15px;">Pay <strong style="font-size: 24px; color: #dc2626;" id="modalAmount"></strong> for:</p>
+                <p id="modalDescription" style="font-size: 14px; color: #666; margin-bottom: 20px; padding: 10px; background: #f1f5f9; border-radius: 12px;"></p>
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 20px; margin: 20px 0;">
+                    <p style="margin-bottom: 10px;">📱 <strong>POCHI LA BIASHARA</strong></p>
+                    <p style="font-size: 32px; font-weight: bold; letter-spacing: 2px;">0117085859</p>
+                    <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
+                    <p style="margin-bottom: 10px;"><strong> Peter Manundu</strong></p>
+                    <p id="modalAccountNumber" style="font-size: 24px; font-weight: bold; letter-spacing: 1px;"></p>
+                    <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
+                    <p style="margin-bottom: 10px;">💰 <strong>Amount to Pay</strong></p>
+                    <p id="modalAmount2" style="font-size: 28px; font-weight: bold;"></p>
+                    <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
+                    <p style="margin-bottom: 5px; font-size: 12px; opacity: 0.9;">💡 Total Pending Fines: <span id="pendingTotalDisplay">KSh 0</span></p>
+                </div>
+                <div style="background: #fef3c7; padding: 12px; border-radius: 12px; margin: 15px 0;">
+                    <p style="font-size: 13px; color: #92400e;">📌 <strong>Instructions:</strong></p>
+                    <p style="font-size: 12px; color: #92400e;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
+                    <p style="font-size: 12px; color: #92400e;">2. Enter Phone Number: <strong>0117085859</strong></p>
+                    <strong id="instructionAccountNumber"></strong></p>
+                    <p style="font-size: 12px; color: #92400e;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
+                    <p style="font-size: 12px; color: #92400e;">4. Enter your M-Pesa PIN and complete payment</p>
+                </div>
+                <div style="margin: 20px 0;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">📱 Your Mpesa Name</label>
+                    <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="recordPayment()" class="submit-btn" style="flex: 1; background: #10b981;">✅ I Have Paid</button>
+                    <button onclick="closePaymentModal()" style="flex: 1; background: #ef4444; color: white; border: none; border-radius: 40px; cursor: pointer;">Cancel</button>
+                </div>
+                <p style="font-size: 11px; color: #666; margin-top: 20px;">After payment, admin will confirm within 24 hours.</p>
             </div>
         </div>
     </div>
@@ -663,6 +976,7 @@
         <div class="bottom-nav-item" onclick="switchTab('profile')"><span>👤</span><span>Profile</span></div>
         <div class="bottom-nav-item" onclick="switchTab('apology')"><span>📝</span><span>Apology</span></div>
         <div class="bottom-nav-item" onclick="switchTab('history')"><span>📜</span><span>History</span></div>
+        <div class="bottom-nav-item" onclick="openHallOfFame()"><span>🏆</span><span>Hall of Fame</span></div>
         <div class="bottom-nav-item" id="bottomLogoutBtn"><span>🚪</span><span>Logout</span></div>
     </div>
 
@@ -678,6 +992,7 @@
         let currentPenaltyId = null;
         let currentPenaltyAmount = 0;
         let currentPenaltyDescription = '';
+        let honorees = [];
 
         const SESSION_CONFIG = {
             Morning: { startTime: "9:00 AM", endTime: "1:00 PM", lateCutoff: "8:30 AM", absentCutoff: "8:00 AM", lateCutoffMinutes: 8*60+30, absentCutoffMinutes: 8*60 },
@@ -1023,6 +1338,120 @@
         function exportToCSV() { if (!attendanceHistory.length) { alert('No attendance data to export'); return; } const headers = ['Date', 'Session', 'Status']; const rows = attendanceHistory.map(a => [a.date, a.session, a.status]); const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n'); const blob = new Blob([csvContent], { type: 'text/csv' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `attendance_${currentMember?.name}_${new Date().toISOString().split('T')[0]}.csv`; link.click(); URL.revokeObjectURL(link.href); }
         function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : m === '>' ? '&gt;' : m); }
 
+        // ===== HALL OF FAME FUNCTIONS =====
+        async function loadHallOfFame() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('hall_of_fame')
+                    .select('*')
+                    .order('is_featured', { ascending: false })
+                    .order('sort_order', { ascending: true })
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('Error loading honorees:', error);
+                    return;
+                }
+
+                honorees = data || [];
+                renderHallOfFame();
+            } catch (error) {
+                console.error('Load error:', error);
+            }
+        }
+
+        function renderHallOfFame() {
+            const container = document.getElementById('hofGridContainer');
+            
+            if (!honorees.length) {
+                container.innerHTML = `
+                    <div class="hof-empty">
+                        <i class="fas fa-trophy"></i>
+                        <p>No honorees yet. Check back soon!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = honorees.map(h => `
+                <div class="hof-card-modal ${h.is_featured ? 'featured' : ''}" onclick="showHofDetail('${h.id}')">
+                    <div class="hof-image">
+                        ${h.photo_url ? `<img src="${h.photo_url}?t=${Date.now()}" alt="${escapeHtml(h.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-user\\'></i></div>';">` : 
+                        `<div class="placeholder"><i class="fas fa-user"></i></div>`}
+                    </div>
+                    <div class="hof-body">
+                        <div class="hof-name">
+                            ${escapeHtml(h.name)}
+                            ${h.is_featured ? '<span class="featured-badge">⭐ Featured</span>' : ''}
+                        </div>
+                        <div class="hof-role">${escapeHtml(h.role_played)}</div>
+                        <div class="hof-bio">${escapeHtml(h.bio)}</div>
+                        <div class="hof-year">🏅 ${h.year_added || '—'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showHofDetail(id) {
+            const honoree = honorees.find(h => h.id === id);
+            if (!honoree) return;
+
+            document.getElementById('hofGridView').classList.add('hidden');
+            document.getElementById('hofDetailView').classList.add('active');
+
+            const content = document.getElementById('hofDetailContent');
+            content.innerHTML = `
+                <div class="hof-detail-header">
+                    <div class="hof-detail-image">
+                        ${honoree.photo_url ? `<img src="${honoree.photo_url}?t=${Date.now()}" alt="${escapeHtml(honoree.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-user\\'></i></div>';">` : 
+                        `<div class="placeholder"><i class="fas fa-user"></i></div>`}
+                    </div>
+                    <div class="hof-detail-info">
+                        <div class="name">
+                            ${escapeHtml(honoree.name)}
+                            ${honoree.is_featured ? ' <span class="featured-badge">⭐ Featured</span>' : ''}
+                        </div>
+                        <div class="role">${escapeHtml(honoree.role_played)}</div>
+                        <div class="year">🏅 Year Inducted: ${honoree.year_added || '—'}</div>
+                    </div>
+                </div>
+                ${honoree.achievement ? `
+                    <div class="hof-detail-achievement">
+                        <div class="label">🏆 Achievement</div>
+                        <div class="text">${escapeHtml(honoree.achievement)}</div>
+                    </div>
+                ` : ''}
+                <div class="hof-detail-bio">
+                    <div class="label">📖 Biography</div>
+                    <div class="text">${escapeHtml(honoree.bio) || 'No biography provided.'}</div>
+                </div>
+            `;
+        }
+
+        function showHofGrid() {
+            document.getElementById('hofGridView').classList.remove('hidden');
+            document.getElementById('hofDetailView').classList.remove('active');
+        }
+
+        function openHallOfFame() {
+            document.getElementById('hofModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            if (honorees.length === 0) {
+                loadHallOfFame();
+            }
+        }
+
+        function closeHallOfFame() {
+            document.getElementById('hofModal').classList.remove('open');
+            document.body.style.overflow = '';
+            showHofGrid();
+        }
+
+        // Close modal on overlay click
+        document.getElementById('hofModal').addEventListener('click', function(e) {
+            if (e.target === this) closeHallOfFame();
+        });
+
         document.getElementById('logoutBtn').addEventListener('click', logout);
         document.getElementById('bottomLogoutBtn').addEventListener('click', logout);
         
@@ -1032,6 +1461,8 @@
             await loadMemberData();
             addFloatingReminderButton();
             startReminderInterval();
+            // Pre-load Hall of Fame
+            await loadHallOfFame();
         }
         init();
     </script>

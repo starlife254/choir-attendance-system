@@ -2,405 +2,665 @@
 <html lang="en">
 <head>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>University of Embu (UoEm) Students Choir - Attendance System</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>UoEm Choir · Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
-            --purple: #5b4fcf;
-            --purple-dark: #3d35a8;
-            --purple-light: #ede9ff;
-            --violet: #7c3aed;
-            --teal: #0ea5e9;
+            --primary: #5b4fcf;
+            --primary-dark: #3d35a8;
+            --primary-light: #ede9ff;
+            --gold: #d4af37;
+            --gold-light: #f5e6b8;
+            --gold-dark: #b8960f;
             --green: #10b981;
             --amber: #f59e0b;
             --red: #ef4444;
             --slate-900: #0f172a;
             --slate-700: #334155;
+            --slate-600: #475569;
             --slate-500: #64748b;
             --slate-300: #cbd5e1;
             --slate-100: #f1f5f9;
             --slate-50: #f8fafc;
             --white: #ffffff;
-            --gold: #d4af37;
-            --gold-light: #f5e6b8;
-            --gold-dark: #b8960f;
-            --card-shadow: 0 4px 24px rgba(91,79,207,0.08), 0 1px 4px rgba(0,0,0,0.06);
-            --card-shadow-hover: 0 8px 32px rgba(91,79,207,0.16), 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-card: 0 8px 24px rgba(91, 79, 207, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-hover: 0 12px 32px rgba(91, 79, 207, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06);
             --radius: 20px;
             --radius-sm: 12px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #e8e5f8;
-            background-image:
-                radial-gradient(ellipse at 20% 10%, rgba(91,79,207,0.18) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 90%, rgba(124,58,237,0.12) 0%, transparent 50%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0eef9;
+            background-image: radial-gradient(ellipse at 20% 10%, rgba(91, 79, 207, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 90%, rgba(124, 58, 237, 0.08) 0%, transparent 50%);
             min-height: 100vh;
-            padding: 14px;
+            padding: 16px;
+            color: var(--slate-900);
+            line-height: 1.5;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1024px;
             margin: 0 auto;
             background: var(--white);
             border-radius: 32px;
-            padding: 24px;
-            box-shadow: 0 32px 64px -16px rgba(91,79,207,0.22), 0 0 0 1px rgba(91,79,207,0.07);
-            margin-bottom: 76px;
-            animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+            padding: 24px 24px 32px;
+            box-shadow: 0 32px 64px -16px rgba(91, 79, 207, 0.18), 0 0 0 1px rgba(91, 79, 207, 0.05);
+            margin-bottom: 80px;
+            animation: fadeSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
+        /* header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 14px;
+            margin-bottom: 22px;
         }
+
         .header h1 {
-            color: var(--slate-900);
-            font-size: 1.45rem;
+            font-size: 1.4rem;
             font-weight: 800;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.4px;
+            color: var(--slate-900);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+
+        .header h1 i {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
         .header-actions {
             display: flex;
             gap: 10px;
             align-items: center;
             flex-wrap: wrap;
         }
-        .logout-btn {
-            background: #fee2e2;
-            color: #b91c1c;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            font-family: inherit;
-            transition: background 0.18s, transform 0.12s;
-        }
-        .logout-btn:hover { background: #fecaca; transform: scale(1.03); }
 
-        .hof-nav-btn {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: white;
-            border: none;
-            padding: 10px 20px;
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--slate-300);
+            padding: 8px 18px;
             border-radius: 40px;
-            cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             font-family: inherit;
-            transition: transform 0.18s, box-shadow 0.18s;
-            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+            color: var(--slate-700);
+            cursor: pointer;
+            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             text-decoration: none;
         }
-        .hof-nav-btn:hover {
-            transform: scale(1.03);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+
+        .btn-outline:hover {
+            background: var(--slate-50);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
+        .btn-outline i {
+            font-size: 14px;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-gold:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
+        }
+
+        /* tabs */
         .tabs {
             display: flex;
             gap: 6px;
-            margin-bottom: 26px;
             flex-wrap: wrap;
             border-bottom: 2px solid var(--slate-100);
             padding-bottom: 14px;
+            margin-bottom: 24px;
         }
+
         .tab-btn {
-            padding: 9px 20px;
+            padding: 8px 18px;
             background: var(--slate-100);
             border: none;
             border-radius: 40px;
-            cursor: pointer;
             font-weight: 600;
-            font-size: 13.5px;
+            font-size: 13px;
             font-family: inherit;
             color: var(--slate-500);
+            cursor: pointer;
             transition: all 0.2s;
-        }
-        .tab-btn:hover:not(.active) { background: var(--purple-light); color: var(--purple); }
-        .tab-btn.active {
-            background: var(--purple);
-            color: white;
-            box-shadow: 0 4px 14px rgba(91,79,207,0.35);
-        }
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.28s ease both;
-        }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .profile-card {
-            background: linear-gradient(135deg, var(--purple) 0%, var(--violet) 100%);
+        .tab-btn i {
+            font-size: 14px;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
             color: white;
-            padding: 26px 28px;
+            box-shadow: 0 4px 14px rgba(91, 79, 207, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.25s ease both;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* profile card */
+        .profile-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            color: white;
+            padding: 24px 28px;
             border-radius: 24px;
-            margin-bottom: 22px;
+            margin-bottom: 24px;
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             align-items: center;
-            box-shadow: 0 8px 28px rgba(91,79,207,0.35);
+            box-shadow: 0 8px 28px rgba(91, 79, 207, 0.3);
             position: relative;
             overflow: hidden;
         }
+
         .profile-card::before {
             content: '';
             position: absolute;
-            top: -30px; right: -30px;
-            width: 160px; height: 160px;
-            background: rgba(255,255,255,0.07);
+            top: -40px;
+            right: -40px;
+            width: 180px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 50%;
         }
+
         .profile-card::after {
             content: '';
             position: absolute;
-            bottom: -40px; left: 40px;
-            width: 100px; height: 100px;
-            background: rgba(255,255,255,0.05);
+            bottom: -50px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.04);
             border-radius: 50%;
         }
+
         .profile-avatar {
-            width: 96px;
-            height: 96px;
-            background: rgba(255,255,255,0.18);
+            width: 84px;
+            height: 84px;
+            background: rgba(255, 255, 255, 0.18);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 46px;
+            font-size: 38px;
             overflow: hidden;
-            border: 3px solid rgba(255,255,255,0.35);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             flex-shrink: 0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-info h2 { font-size: 22px; margin-bottom: 7px; font-weight: 700; letter-spacing: -0.3px; }
-        .profile-info p { opacity: 0.88; font-size: 13.5px; margin-bottom: 3px; }
 
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            opacity: 0.9;
+            font-size: 13.5px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-info p i {
+            font-size: 14px;
+            width: 18px;
+            opacity: 0.8;
+        }
+
+        /* stats */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 14px;
-            margin-bottom: 22px;
+            margin-bottom: 24px;
         }
+
         .stat-card {
             background: var(--slate-50);
-            padding: 20px 16px;
+            padding: 18px 12px;
             border-radius: var(--radius);
             text-align: center;
-            border: 1.5px solid transparent;
-            transition: box-shadow 0.18s, border-color 0.18s, transform 0.15s;
+            border: 1px solid transparent;
+            transition: box-shadow 0.2s, transform 0.15s;
             cursor: default;
         }
-        .stat-card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-2px); }
-        .stat-card.present { border-color: rgba(16,185,129,0.2); background: linear-gradient(160deg,#f0fdf4,#ecfdf5); }
-        .stat-card.late    { border-color: rgba(245,158,11,0.2); background: linear-gradient(160deg,#fffbeb,#fef3c7); }
-        .stat-card.absent  { border-color: rgba(239,68,68,0.18); background: linear-gradient(160deg,#fff1f1,#fee2e2); }
-        .stat-card.percentage { border-color: rgba(91,79,207,0.2); background: linear-gradient(160deg,#ede9ff,#f5f3ff); }
-        .stat-number { font-size: 34px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
-        .stat-label { color: var(--slate-500); font-size: 12.5px; margin-top: 7px; font-weight: 500; }
-        .stat-card.present .stat-number { color: var(--green); }
-        .stat-card.late .stat-number    { color: var(--amber); }
-        .stat-card.absent .stat-number  { color: var(--red); }
-        .stat-card.percentage .stat-number { color: var(--purple); }
 
+        .stat-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-card.present {
+            border-color: rgba(16, 185, 129, 0.2);
+            background: linear-gradient(160deg, #f0fdf4, #ecfdf5);
+        }
+
+        .stat-card.late {
+            border-color: rgba(245, 158, 11, 0.2);
+            background: linear-gradient(160deg, #fffbeb, #fef3c7);
+        }
+
+        .stat-card.absent {
+            border-color: rgba(239, 68, 68, 0.18);
+            background: linear-gradient(160deg, #fff1f1, #fee2e2);
+        }
+
+        .stat-card.percentage {
+            border-color: rgba(91, 79, 207, 0.2);
+            background: linear-gradient(160deg, #ede9ff, #f5f3ff);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            color: var(--slate-500);
+            font-size: 12.5px;
+            font-weight: 500;
+            margin-top: 6px;
+        }
+
+        .stat-card.present .stat-number {
+            color: var(--green);
+        }
+        .stat-card.late .stat-number {
+            color: var(--amber);
+        }
+        .stat-card.absent .stat-number {
+            color: var(--red);
+        }
+        .stat-card.percentage .stat-number {
+            color: var(--primary);
+        }
+
+        /* cards */
         .chart-container {
             background: var(--white);
-            padding: 22px;
+            padding: 20px 18px;
             border-radius: var(--radius);
             margin-bottom: 20px;
-            box-shadow: var(--card-shadow);
-            border: 1.5px solid rgba(91,79,207,0.08);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(91, 79, 207, 0.06);
         }
+
         .section-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             margin-bottom: 16px;
             color: var(--slate-900);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             letter-spacing: -0.2px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+            font-size: 18px;
+            width: 24px;
         }
 
         .form-card {
             background: var(--slate-50);
-            padding: 22px;
+            padding: 20px;
             border-radius: var(--radius);
             margin-bottom: 18px;
-            border: 1.5px solid var(--slate-100);
-            transition: all 0.3s ease;
+            border: 1px solid var(--slate-100);
+            transition: all 0.2s;
         }
+
         .form-card h3 {
             margin-bottom: 16px;
             color: var(--slate-900);
             font-weight: 700;
             font-size: 15px;
-            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .form-group { margin-bottom: 14px; }
+
+        .form-card h3 i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
         .form-group label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             font-weight: 600;
             color: var(--slate-700);
             font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .form-group input, .form-group textarea, .form-group select {
+
+        .form-group label i {
+            color: var(--slate-500);
+            font-size: 14px;
+            width: 20px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
             width: 100%;
-            padding: 11px 14px;
+            padding: 10px 14px;
             border: 1.5px solid var(--slate-300);
             border-radius: var(--radius-sm);
             font-size: 14px;
             font-family: inherit;
             background: white;
             color: var(--slate-900);
-            transition: border-color 0.18s, box-shadow 0.18s;
+            transition: border 0.2s, box-shadow 0.2s;
             outline: none;
         }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            border-color: var(--purple);
-            box-shadow: 0 0 0 3px rgba(91,79,207,0.12);
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(91, 79, 207, 0.1);
         }
-        .form-group textarea { min-height: 80px; resize: vertical; }
-        
+
+        .form-group textarea {
+            min-height: 76px;
+            resize: vertical;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 16px;
         }
-        @media (max-width: 640px) {
+
+        @media (max-width: 600px) {
             .form-row {
                 grid-template-columns: 1fr;
+                gap: 0;
             }
         }
 
-        .submit-btn {
-            background: linear-gradient(135deg, var(--green), #059669);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
-            padding: 12px 26px;
+            padding: 10px 24px;
             border-radius: 40px;
             font-weight: 700;
             font-size: 14px;
             font-family: inherit;
             cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.18s;
-            box-shadow: 0 4px 14px rgba(16,185,129,0.3);
-            position: relative;
-            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(91, 79, 207, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(16,185,129,0.4); }
-        .submit-btn:active { transform: translateY(0); }
-        
-        .submit-btn.saving {
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(91, 79, 207, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--green), #059669);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-success.saving {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             pointer-events: none;
         }
-        .submit-btn.saved {
+
+        .btn-success.saved {
             background: linear-gradient(135deg, var(--green), #059669);
-        }
-        .submit-btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s;
-        }
-        .submit-btn:active::after {
-            width: 200px;
-            height: 200px;
         }
 
         .export-btn {
-            background: var(--purple);
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: 40px;
             cursor: pointer;
             font-family: inherit;
             font-weight: 600;
-            font-size: 13.5px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
-            box-shadow: 0 3px 10px rgba(91,79,207,0.25);
+            font-size: 13px;
+            transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+            box-shadow: 0 3px 10px rgba(91, 79, 207, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 8px;
+            margin-bottom: 8px;
         }
-        .export-btn:hover { background: var(--purple-dark); transform: translateY(-1px); box-shadow: 0 5px 14px rgba(91,79,207,0.35); }
+
+        .export-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(91, 79, 207, 0.3);
+        }
 
         .apology-item {
             background: white;
-            padding: 16px 18px;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            border: 1.5px solid var(--slate-100);
+            padding: 14px 16px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            border: 1px solid var(--slate-100);
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             gap: 12px;
             transition: box-shadow 0.18s;
         }
-        .apology-item:hover { box-shadow: var(--card-shadow); }
+
+        .apology-item:hover {
+            box-shadow: var(--shadow-card);
+        }
 
         .status-badge {
-            padding: 4px 13px;
+            padding: 3px 14px;
             border-radius: 20px;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 700;
             display: inline-block;
             letter-spacing: 0.3px;
             text-transform: uppercase;
         }
-        .status-pending  { background: #fef3c7; color: #b45309; }
-        .status-approved { background: #d1fae5; color: #065f46; }
-        .status-rejected { background: #fee2e2; color: #991b1b; }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
 
         .leader-info {
-            background: var(--purple-light);
+            background: var(--primary-light);
             padding: 16px;
             border-radius: 14px;
-            margin-top: 14px;
-            border: 1px solid rgba(91,79,207,0.15);
+            border: 1px solid rgba(91, 79, 207, 0.12);
         }
-        .leader-info p { font-size: 14px; margin-bottom: 6px; color: var(--slate-700); }
 
-        .empty-state { text-align: center; padding: 40px; color: var(--slate-500); font-size: 15px; }
+        .leader-info p {
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: var(--slate-700);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .leader-info p i {
+            color: var(--primary);
+            width: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 36px 16px;
+            color: var(--slate-500);
+            font-size: 14px;
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            color: var(--slate-300);
+            display: block;
+            margin-bottom: 12px;
+        }
+
         .message {
-            padding: 13px 16px;
+            padding: 12px 16px;
             border-radius: var(--radius-sm);
             margin-bottom: 16px;
             display: none;
@@ -408,134 +668,214 @@
             font-size: 14px;
             animation: slideDown 0.3s ease;
         }
+
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .message.success { background: #d1fae5; color: #065f46; display: block; }
-        .message.error   { background: #fee2e2; color: #991b1b; display: block; }
-        .message.info    { background: #e0f2fe; color: #0369a1; display: block; }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+        .message.info {
+            background: #e0f2fe;
+            color: #0369a1;
+            display: block;
+        }
 
         .file-input-label {
             background: var(--slate-100);
-            padding: 9px 18px;
+            padding: 8px 18px;
             border-radius: 40px;
             cursor: pointer;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             font-size: 13px;
             font-weight: 600;
             color: var(--slate-700);
-            transition: background 0.18s;
+            transition: background 0.2s;
         }
-        .file-input-label:hover { background: var(--purple-light); color: var(--purple); }
-        input[type="file"] { display: none; }
+
+        .file-input-label:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
 
         .saved-checkmark {
             display: inline-block;
-            margin-left: 8px;
+            margin-left: 6px;
             font-size: 16px;
-            animation: bounce 0.4s ease;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.3); }
+            animation: pop 0.35s ease;
         }
 
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(255,255,255,0.96);
-            backdrop-filter: blur(12px);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 16px 12px;
-            box-shadow: 0 -1px 0 rgba(91,79,207,0.1), 0 -8px 24px rgba(91,79,207,0.08);
-            z-index: 100;
+        @keyframes pop {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.25);
+            }
         }
-        .bottom-nav-item {
+
+        /* payment reminder */
+        .reminder-banner {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 20px;
+            padding: 16px 20px;
+            border-left: 6px solid #f59e0b;
+            animation: pulse 2s infinite;
+            margin-bottom: 24px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            text-decoration: none;
-            color: var(--slate-500);
-            font-size: 10.5px;
-            font-weight: 600;
-            gap: 3px;
-            padding: 6px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-family: inherit;
-            transition: all 0.18s;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .bottom-nav-item span:first-child { font-size: 21px; }
-        .bottom-nav-item.active { color: var(--purple); background: var(--purple-light); }
-        .bottom-nav-item:hover:not(.active) { color: var(--purple); background: #f5f3ff; }
 
-        /* Hall of Fame Grid in modal */
-        .hof-modal-overlay {
+        .reminder-banner .icon {
+            font-size: 28px;
+        }
+
+        .reminder-banner .text {
+            font-weight: 600;
+            color: #92400e;
+            font-size: 14px;
+        }
+
+        .reminder-banner .text strong {
+            display: block;
+            font-size: 16px;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            }
+            50% {
+                opacity: 0.93;
+                box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
+            }
+        }
+
+        .highlight {
+            animation: flash 0.5s ease;
+        }
+
+        @keyframes flash {
+            0% {
+                background-color: var(--slate-50);
+            }
+            50% {
+                background-color: #d1fae5;
+            }
+            100% {
+                background-color: var(--slate-50);
+            }
+        }
+
+        /* modal */
+        .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
             padding: 20px;
             backdrop-filter: blur(4px);
         }
-        .hof-modal-overlay.open { display: flex; }
-        .hof-modal-box {
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
             background: white;
             border-radius: 28px;
-            max-width: 900px;
+            max-width: 560px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
             padding: 28px;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.3);
-            animation: detailFadeIn 0.3s ease;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+            animation: modalIn 0.3s ease;
         }
-        @keyframes detailFadeIn {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96) translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
-        .hof-modal-header {
+
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-        .hof-modal-header h2 {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--slate-900);
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .hof-modal-close {
+
+        .modal-close {
             background: var(--slate-100);
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             font-size: 20px;
             cursor: pointer;
-            transition: background 0.18s;
+            transition: background 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .hof-modal-close:hover { background: var(--slate-300); }
 
-        .hof-grid-modal {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+        .modal-close:hover {
+            background: var(--slate-300);
         }
-        .hof-card-modal {
+
+        /* hof */
+        .hof-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        .hof-card {
             background: var(--white);
             border: 1px solid var(--slate-100);
             border-radius: 16px;
@@ -543,46 +883,59 @@
             transition: transform 0.15s, box-shadow 0.15s;
             cursor: pointer;
         }
-        .hof-card-modal:hover {
+
+        .hof-card:hover {
             transform: translateY(-4px);
-            box-shadow: var(--card-shadow-hover);
+            box-shadow: var(--shadow-hover);
         }
-        .hof-card-modal.featured {
+
+        .hof-card.featured {
             border: 2px solid var(--gold);
         }
-        .hof-card-modal .hof-image {
+
+        .hof-card .hof-image {
             width: 100%;
-            height: 180px;
+            height: 170px;
             background: var(--slate-100);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
         }
-        .hof-card-modal .hof-image img {
+
+        .hof-card .hof-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .hof-card-modal .hof-image .placeholder {
-            font-size: 48px;
-            color: var(--slate-500);
+
+        .hof-card .hof-image .placeholder {
+            font-size: 44px;
+            color: var(--slate-400);
         }
-        .hof-card-modal .hof-body {
-            padding: 16px;
+
+        .hof-card .hof-body {
+            padding: 14px 16px;
         }
-        .hof-card-modal .hof-name {
-            font-size: 16px;
+
+        .hof-card .hof-name {
+            font-size: 15px;
             font-weight: 700;
             color: var(--slate-900);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
         }
-        .hof-card-modal .hof-role {
+
+        .hof-card .hof-role {
             font-size: 12px;
-            color: var(--purple);
+            color: var(--primary);
             font-weight: 600;
             margin-top: 2px;
         }
-        .hof-card-modal .hof-bio {
+
+        .hof-card .hof-bio {
             font-size: 13px;
             color: var(--slate-500);
             margin-top: 8px;
@@ -591,11 +944,13 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        .hof-card-modal .hof-year {
+
+        .hof-card .hof-year {
             font-size: 11px;
             color: var(--slate-400);
             margin-top: 6px;
         }
+
         .featured-badge {
             background: var(--gold);
             color: white;
@@ -603,39 +958,28 @@
             font-weight: 700;
             padding: 2px 10px;
             border-radius: 20px;
-            display: inline-block;
-            margin-left: 8px;
             text-transform: uppercase;
         }
-        .hof-empty {
-            text-align: center;
-            padding: 40px;
-            color: var(--slate-500);
-        }
-        .hof-empty i {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 12px;
-            color: var(--slate-300);
+
+        .hof-detail {
+            display: none;
+            padding: 8px 0;
         }
 
-        /* Detail view inside modal */
-        .hof-detail-view {
-            display: none;
-            padding: 20px 0;
-        }
-        .hof-detail-view.active {
+        .hof-detail.active {
             display: block;
         }
+
         .hof-detail-header {
             display: flex;
             gap: 24px;
-            margin-bottom: 20px;
             flex-wrap: wrap;
+            margin-bottom: 20px;
         }
+
         .hof-detail-image {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
             overflow: hidden;
             background: var(--slate-100);
@@ -644,232 +988,287 @@
             align-items: center;
             justify-content: center;
         }
+
         .hof-detail-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
         .hof-detail-image .placeholder {
-            font-size: 64px;
+            font-size: 56px;
             color: var(--slate-400);
         }
-        .hof-detail-info {
-            flex: 1;
-        }
+
         .hof-detail-info .name {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
             color: var(--slate-900);
         }
+
         .hof-detail-info .role {
-            font-size: 16px;
-            color: var(--purple);
+            font-size: 15px;
+            color: var(--primary);
             font-weight: 600;
-            margin-top: 4px;
+            margin-top: 2px;
         }
+
         .hof-detail-info .year {
             font-size: 14px;
             color: var(--slate-500);
             margin-top: 6px;
         }
-        .hof-detail-achievement {
+
+        .hof-achievement {
             background: var(--gold-light);
             padding: 16px;
             border-radius: 12px;
             border-left: 4px solid var(--gold);
             margin: 16px 0;
         }
-        .hof-detail-achievement .label {
+
+        .hof-achievement .label {
             font-size: 11px;
             font-weight: 700;
             color: var(--gold-dark);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .hof-detail-achievement .text {
+
+        .hof-achievement .text {
             font-size: 15px;
             color: var(--slate-900);
             margin-top: 4px;
         }
-        /* Mobile header alignment */
-@media (max-width: 768px) {
-    .header {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-    
-    .header h1 {
-        text-align: center;
-        font-size: 1.2rem;
-    }
-    
-    .header-actions {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-    }
-    
-    .header-actions .bottom-nav-item {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 14px;
-        background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-        color: white;
-        border-radius: 40px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        border: none;
-        box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
-        transition: transform 0.18s, box-shadow 0.18s;
-    }
-    
-    .header-actions .bottom-nav-item:hover {
-        transform: scale(1.03);
-        box-shadow: 0 6px 20px rgba(178, 212, 55, 0.5);
-    }
-    
-    .header-actions .bottom-nav-item span:first-child {
-        font-size: 16px;
-    }
-    
-    .header-actions .bottom-nav-item span:last-child {
-        font-size: 11px;
-    }
-    
-    .logout-btn {
-        padding: 8px 14px;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-}
-        .hof-detail-bio {
-            margin-top: 12px;
-        }
-        .hof-detail-bio .label {
+
+        .hof-bio-section .label {
             font-size: 11px;
             font-weight: 700;
             color: var(--slate-400);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .hof-detail-bio .text {
+
+        .hof-bio-section .text {
             font-size: 15px;
             color: var(--slate-700);
-            line-height: 1.8;
+            line-height: 1.7;
             margin-top: 4px;
         }
+
         .hof-back-btn {
             background: var(--slate-100);
             border: none;
-            padding: 8px 16px;
+            padding: 6px 16px;
             border-radius: 40px;
             cursor: pointer;
             font-weight: 600;
             font-size: 13px;
             font-family: inherit;
-            transition: background 0.18s;
+            transition: background 0.2s;
             margin-bottom: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .hof-back-btn:hover { background: var(--slate-200); }
-        .hof-grid-view {
-            display: block;
+
+        .hof-back-btn:hover {
+            background: var(--slate-200);
         }
+
         .hof-grid-view.hidden {
             display: none;
         }
 
-        @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
-        @media (max-width: 640px) {
-            .profile-card { flex-direction: column; text-align: center; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .tabs { justify-content: center; }
-            .tab-btn { padding: 8px 14px; font-size: 13px; }
-            .hof-modal-box { padding: 16px; }
-            .hof-grid-modal { grid-template-columns: 1fr 1fr; gap: 12px; }
-            .hof-detail-header { flex-direction: column; align-items: center; text-align: center; }
-        }
-        @media (max-width: 480px) {
-            .hof-grid-modal { grid-template-columns: 1fr; }
+        /* bottom nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 12px 12px;
+            box-shadow: 0 -1px 0 rgba(91, 79, 207, 0.08), 0 -8px 24px rgba(91, 79, 207, 0.06);
+            z-index: 100;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
-            50% { opacity: 0.93; box-shadow: 0 4px 20px rgba(245,158,11,0.6); }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--slate-500);
+            font-size: 10px;
+            font-weight: 600;
+            gap: 2px;
+            padding: 6px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+            transition: all 0.18s;
         }
-        
-        @keyframes highlightFlash {
-            0% { background-color: var(--slate-50); }
-            50% { background-color: #d1fae5; }
-            100% { background-color: var(--slate-50); }
+
+        .bottom-nav-item i {
+            font-size: 20px;
         }
-        .form-card.highlight {
-            animation: highlightFlash 0.6s ease;
+
+        .bottom-nav-item.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .bottom-nav-item:hover:not(.active) {
+            color: var(--primary);
+            background: #f5f3ff;
+        }
+
+        @media (min-width: 768px) {
+            .bottom-nav {
+                display: none;
+            }
+            .container {
+                margin-bottom: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 16px;
+                border-radius: 24px;
+            }
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+            .profile-avatar {
+                width: 72px;
+                height: 72px;
+                font-size: 32px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .tabs {
+                justify-content: center;
+            }
+            .tab-btn {
+                padding: 6px 14px;
+                font-size: 12px;
+            }
+            .tab-btn i {
+                font-size: 12px;
+            }
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            .header-actions .btn-gold span {
+                display: none;
+            }
+            .modal-box {
+                padding: 20px;
+            }
+            .hof-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .hof-detail-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hof-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header-actions .btn-gold {
+                padding: 6px 14px;
+            }
+            .header-actions .btn-gold i {
+                margin-right: 0;
+            }
+            .header-actions .btn-gold span {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    
-<div class="container">
-    <div class="header">
-        <h1>🎵 My Dashboard</h1>
-        <div class="header-actions">
-            <div class="bottom-nav-item" onclick="window.location.href='hall-of-fame-public.html'">
-                <span>🏆</span><span>Hall of Fame</span>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-music"></i> My Dashboard</h1>
+            <div class="header-actions">
+                <button class="btn-gold" onclick="openHallOfFame()">
+                    <i class="fas fa-trophy"></i>
+                    <span>Hall of Fame</span>
+                </button>
+                <button class="btn-danger" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
-            <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
         </div>
-    </div>
+
+        <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('stats')">📊 My Stats</button>
-            <button class="tab-btn" onclick="switchTab('profile')">👤 My Profile</button>
-            <button class="tab-btn" onclick="switchTab('apology')">📝 Request Apology</button>
-            <button class="tab-btn" onclick="switchTab('history')">📜 My History</button>
+            <button class="tab-btn active" onclick="switchTab('stats')"><i class="fas fa-chart-pie"></i> Stats</button>
+            <button class="tab-btn" onclick="switchTab('profile')"><i class="fas fa-user"></i> Profile</button>
+            <button class="tab-btn" onclick="switchTab('apology')"><i class="fas fa-pen"></i> Apology</button>
+            <button class="tab-btn" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
         </div>
 
         <!-- Stats Tab -->
         <div id="statsTab" class="tab-content active">
-            <div id="welcomeCard" class="profile-card">
-                <div class="profile-avatar" id="avatarPreview">👤</div>
+            <div class="profile-card" id="welcomeCard">
+                <div class="profile-avatar" id="avatarPreview"><i class="fas fa-user"></i></div>
                 <div class="profile-info">
                     <h2 id="memberName">Loading...</h2>
-                    <p id="memberVoice">🎭 Loading...</p>
-                    <p id="memberId">🆔 Loading...</p>
+                    <p><i class="fas fa-microphone"></i> <span id="memberVoice">Loading...</span></p>
+                    <p><i class="fas fa-id-card"></i> <span id="memberId">Loading...</span></p>
                 </div>
             </div>
-            
-            <div id="paymentReminder" style="display: none; margin-bottom: 24px;">
-                <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 20px; padding: 16px; border-left: 6px solid #f59e0b; animation: pulse 2s infinite;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="font-size: 32px;">⚠️</div>
-                            <div>
-                                <div style="font-weight: bold; color: #92400e; font-size: 16px;">You have pending fines!</div>
-                                <div id="reminderText" style="color: #78350f; font-size: 13px;"></div>
-                            </div>
+
+            <div id="paymentReminder" style="display:none; margin-bottom:24px;">
+                <div class="reminder-banner">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span class="icon"><i class="fas fa-triangle-exclamation"></i></span>
+                        <div class="text">
+                            <strong>You have pending fines!</strong>
+                            <span id="reminderText"></span>
                         </div>
-                        <button onclick="scrollToPenalties()" style="background: #f59e0b; color: white; border: none; padding: 8px 20px; border-radius: 40px; cursor: pointer; font-weight: 500;">Pay Now →</button>
                     </div>
+                    <button onclick="scrollToPenalties()" style="background:#f59e0b; color:white; border:none; padding:8px 20px; border-radius:40px; cursor:pointer; font-weight:600; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-arrow-right"></i> Pay Now
+                    </button>
                 </div>
             </div>
-            
-            <div id="statsGrid" class="stats-grid"></div>
-            
+
+            <div class="stats-grid" id="statsGrid"></div>
+
             <div class="chart-container">
-                <div class="section-title">📈 Attendance Trend (Last 30 Days)</div>
+                <div class="section-title"><i class="fas fa-chart-line"></i> Attendance Trend (Last 30 Days)</div>
                 <canvas id="trendChart"></canvas>
             </div>
-            
+
             <div class="chart-container">
-                <div class="section-title">💰 Penalties & Fines</div>
+                <div class="section-title"><i class="fas fa-coins"></i> Penalties & Fines</div>
                 <div id="penaltiesList"></div>
-                <div id="penaltySummary" style="margin-top: 15px; text-align: center;"></div>
+                <div id="penaltySummary" style="margin-top:16px; text-align:center;"></div>
             </div>
         </div>
 
@@ -877,107 +1276,151 @@
         <div id="profileTab" class="tab-content">
             <div id="profileMessage" class="message"></div>
             <div class="form-card" id="contactFormCard">
-                <h3>📱 Contact Information</h3>
+                <h3><i class="fas fa-address-card"></i> Contact Information</h3>
                 <div class="form-group">
-                    <label>📞 Phone Number</label>
+                    <label><i class="fas fa-phone"></i> Phone Number</label>
                     <input type="tel" id="phoneInput" placeholder="e.g., 0712345678">
                 </div>
-                
                 <div class="form-row">
                     <div class="form-group">
-                        <label>👤 Emergency Contact Name</label>
+                        <label><i class="fas fa-user-plus"></i> Emergency Contact Name</label>
                         <input type="text" id="emergencyNameInput" placeholder="Full name of emergency contact">
                     </div>
                     <div class="form-group">
-                        <label>🔗 Relationship</label>
+                        <label><i class="fas fa-link"></i> Relationship</label>
                         <select id="emergencyRelationshipInput">
-                            <option value="">Select relationship</option>
-                            <option value="Parent">👨‍👩‍👧 Parent</option>
-                            <option value="Sibling">👫 Sibling</option>
-                            <option value="Spouse">💑 Spouse</option>
-                            <option value="Relative">👪 Relative</option>
-                            <option value="Friend">🤝 Friend</option>
-                            <option value="Roommate">🏠 Roommate</option>
-                            <option value="Guardian">🛡️ Guardian</option>
-                            <option value="Other">📌 Other</option>
+                            <option value="">Select</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Relative">Relative</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Roommate">Roommate</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                 </div>
-                
                 <div class="form-group">
-                    <label>📱 Emergency Contact Phone</label>
+                    <label><i class="fas fa-phone-alt"></i> Emergency Contact Phone</label>
                     <input type="tel" id="emergencyPhoneInput" placeholder="e.g., 0712345678">
                 </div>
             </div>
-            
+
             <div class="form-card" id="photoFormCard">
-                <h3>🖼️ Profile Photo</h3>
-                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                    <div id="photoPreview" style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; overflow: hidden;">👤</div>
-                    <label class="file-input-label">📷 Choose Photo<input type="file" id="photoInput" accept="image/*"></label>
-                    <button onclick="uploadPhoto()" class="submit-btn" style="padding: 8px 16px;">Upload</button>
+                <h3><i class="fas fa-image"></i> Profile Photo</h3>
+                <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                    <div id="photoPreview" style="width:76px; height:76px; background:#e2e8f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; overflow:hidden;"><i class="fas fa-user"></i></div>
+                    <label class="file-input-label"><i class="fas fa-camera"></i> Choose Photo<input type="file" id="photoInput" accept="image/*"></label>
+                    <button onclick="uploadPhoto()" class="btn-primary" style="padding:8px 18px; font-size:13px;"><i class="fas fa-upload"></i> Upload</button>
                 </div>
-                <p style="font-size: 12px; color: #666; margin-top: 10px;">Recommended: Square image, max 2MB</p>
+                <p style="font-size:12px; color:var(--slate-500); margin-top:10px;"><i class="fas fa-info-circle"></i> Square image, max 2MB</p>
             </div>
-            
+
             <div class="form-card">
-                <h3>👥 Section Leader Contact</h3>
+                <h3><i class="fas fa-users"></i> Section Leader Contact</h3>
                 <div id="leaderInfo" class="leader-info">Loading leader information...</div>
             </div>
-            
-            <button onclick="saveProfile()" class="submit-btn" id="saveProfileBtn">💾 Save Profile Changes</button>
+
+            <button onclick="saveProfile()" class="btn-success" id="saveProfileBtn"><i class="fas fa-save"></i> Save Profile</button>
         </div>
 
-        <!-- Apology Request Tab -->
+        <!-- Apology Tab -->
         <div id="apologyTab" class="tab-content">
             <div id="apologyMessage" class="message"></div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 24px;">
-                <button id="showLateBtn" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 20px; padding: 30px 20px; cursor: pointer; color: white;">
-                    <div style="font-size: 48px;">⏰</div>
-                    <div style="font-size: 20px; font-weight: bold;">Late Arrival</div>
-                    <div style="font-size: 12px;">Submit late apology</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px;">
+                <button id="showLateBtn" style="background:linear-gradient(135deg,#f59e0b,#d97706); border:none; border-radius:20px; padding:28px 16px; cursor:pointer; color:white; text-align:center; transition:transform 0.15s; box-shadow:0 4px 12px rgba(245,158,11,0.3);">
+                    <div style="font-size:40px;"><i class="fas fa-clock"></i></div>
+                    <div style="font-size:18px; font-weight:700;">Late Arrival</div>
+                    <div style="font-size:12px; opacity:0.9;">Submit late apology</div>
                 </button>
-                <button id="showAbsentBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; border-radius: 20px; padding: 30px 20px; cursor: pointer; color: white;">
-                    <div style="font-size: 48px;">❌</div>
-                    <div style="font-size: 20px; font-weight: bold;">Absent</div>
-                    <div style="font-size: 12px;">Submit absence apology</div>
+                <button id="showAbsentBtn" style="background:linear-gradient(135deg,#ef4444,#dc2626); border:none; border-radius:20px; padding:28px 16px; cursor:pointer; color:white; text-align:center; transition:transform 0.15s; box-shadow:0 4px 12px rgba(239,68,68,0.3);">
+                    <div style="font-size:40px;"><i class="fas fa-xmark-circle"></i></div>
+                    <div style="font-size:18px; font-weight:700;">Absent</div>
+                    <div style="font-size:12px; opacity:0.9;">Submit absence apology</div>
                 </button>
             </div>
-            <div id="lateFormContainer" style="display: none;"><div class="form-card"><div style="display: flex; justify-content: space-between;"><h3>⏰ Late Arrival Apology</h3><button onclick="closeLateForm()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button></div><div id="lateTimeWarning" style="background:#fef3c7;padding:12px;border-radius:12px;margin-bottom:20px;display:none;"></div><div class="form-group"><label>Practice Session</label><select id="lateSessionSelect"></select></div><div class="form-group"><label>Expected Arrival Time</label><input type="time" id="lateTimeInput"></div><div class="form-group"><label>Reason for Lateness</label><textarea id="lateReasonInput" rows="3"></textarea></div><button onclick="submitLateApology()" class="submit-btn" style="width:100%;">Submit Late Apology</button></div></div>
-            <div id="absentFormContainer" style="display: none;"><div class="form-card"><div style="display: flex; justify-content: space-between;"><h3>❌ Absence Apology</h3><button onclick="closeAbsentForm()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button></div><div id="absentTimeWarning" style="background:#fef3c7;padding:12px;border-radius:12px;margin-bottom:20px;display:none;"></div><div class="form-group"><label>Practice Session</label><select id="absentSessionSelect"></select></div><div class="form-group"><label>Date of Absence</label><input type="date" id="absentDateInput"></div><div class="form-group"><label>Reason for Absence</label><textarea id="absentReasonInput" rows="3"></textarea></div><button onclick="submitAbsentApology()" class="submit-btn" style="width:100%;">Submit Absence Apology</button></div></div>
-            <div class="form-card"><h3>📋 My Apology Requests</h3><div id="myApologiesList"></div></div>
+
+            <div id="lateFormContainer" style="display:none;">
+                <div class="form-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3><i class="fas fa-clock"></i> Late Arrival Apology</h3>
+                        <button onclick="closeLateForm()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--slate-500);">&times;</button>
+                    </div>
+                    <div id="lateTimeWarning" style="background:#fef3c7;padding:12px;border-radius:12px;margin-bottom:18px;display:none;color:#92400e;font-size:14px;"><i class="fas fa-triangle-exclamation"></i> No sessions available for late apology right now.</div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Practice Session</label>
+                        <select id="lateSessionSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-hourglass-start"></i> Expected Arrival Time</label>
+                        <input type="time" id="lateTimeInput">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-comment"></i> Reason for Lateness</label>
+                        <textarea id="lateReasonInput" rows="3"></textarea>
+                    </div>
+                    <button onclick="submitLateApology()" class="btn-success" style="width:100%; justify-content:center;"><i class="fas fa-paper-plane"></i> Submit Late Apology</button>
+                </div>
+            </div>
+
+            <div id="absentFormContainer" style="display:none;">
+                <div class="form-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3><i class="fas fa-xmark-circle"></i> Absence Apology</h3>
+                        <button onclick="closeAbsentForm()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--slate-500);">&times;</button>
+                    </div>
+                    <div id="absentTimeWarning" style="background:#fef3c7;padding:12px;border-radius:12px;margin-bottom:18px;display:none;color:#92400e;font-size:14px;"><i class="fas fa-triangle-exclamation"></i> No sessions available for absence apology right now.</div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Practice Session</label>
+                        <select id="absentSessionSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-xmark"></i> Date of Absence</label>
+                        <input type="date" id="absentDateInput">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-comment"></i> Reason for Absence</label>
+                        <textarea id="absentReasonInput" rows="3"></textarea>
+                    </div>
+                    <button onclick="submitAbsentApology()" class="btn-success" style="width:100%; justify-content:center;"><i class="fas fa-paper-plane"></i> Submit Absence Apology</button>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h3><i class="fas fa-list"></i> My Apology Requests</h3>
+                <div id="myApologiesList"></div>
+            </div>
         </div>
 
         <!-- History Tab -->
         <div id="historyTab" class="tab-content">
             <div class="form-card">
-                <h3>📄 Export Attendance History</h3>
-                <button onclick="exportToPDF()" class="export-btn">📄 Export as PDF</button>
-                <button onclick="exportToCSV()" class="export-btn">📊 Export as CSV</button>
-                <button onclick="window.print()" class="export-btn">🖨️ Print Friendly</button>
+                <h3><i class="fas fa-file-export"></i> Export Attendance History</h3>
+                <button onclick="exportToPDF()" class="export-btn"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button onclick="exportToCSV()" class="export-btn"><i class="fas fa-file-csv"></i> CSV</button>
+                <button onclick="window.print()" class="export-btn"><i class="fas fa-print"></i> Print</button>
             </div>
             <div class="chart-container" id="historyContainer">
-                <div class="section-title">📋 Full Attendance History</div>
-                <div id="attendanceHistoryList" style="max-height: 500px; overflow-y: auto;"></div>
+                <div class="section-title"><i class="fas fa-list-ul"></i> Full Attendance History</div>
+                <div id="attendanceHistoryList" style="max-height:480px; overflow-y:auto;"></div>
             </div>
         </div>
     </div>
 
     <!-- Hall of Fame Modal -->
-    <div class="hof-modal-overlay" id="hofModal">
-        <div class="hof-modal-box">
-            <div class="hof-modal-header">
-                <h2><i class="fas fa-trophy" style="color: var(--gold);"></i> Hall of Fame</h2>
-                <button class="hof-modal-close" onclick="closeHallOfFame()">&times;</button>
+    <div class="modal-overlay" id="hofModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-trophy" style="color:var(--gold);"></i> Hall of Fame</h3>
+                <button class="modal-close" onclick="closeHallOfFame()">&times;</button>
             </div>
             <div id="hofContent">
-                <!-- Grid View -->
                 <div id="hofGridView" class="hof-grid-view">
-                    <div id="hofGridContainer" style="margin-top: 16px;"></div>
+                    <div id="hofGridContainer" style="margin-top:8px;"></div>
                 </div>
-                <!-- Detail View -->
-                <div id="hofDetailView" class="hof-detail-view">
-                    <button class="hof-back-btn" onclick="showHofGrid()">← Back to Hall of Fame</button>
+                <div id="hofDetailView" class="hof-detail">
+                    <button class="hof-back-btn" onclick="showHofGrid()"><i class="fas fa-arrow-left"></i> Back</button>
                     <div id="hofDetailContent"></div>
                 </div>
             </div>
@@ -985,63 +1428,64 @@
     </div>
 
     <!-- Payment Modal -->
-    <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 28px; padding: 25px; max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="color: #1e293b;">💰 Pay Fine</h3>
-                <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 28px; cursor: pointer;">&times;</button>
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-hand-holding-dollar" style="color:var(--green);"></i> Pay Fine</h3>
+                <button class="modal-close" onclick="closePaymentModal()">&times;</button>
             </div>
-            <div style="text-align: center;">
-                <div style="font-size: 48px; margin-bottom: 15px;">💳</div>
-                <p style="margin-bottom: 15px;">Pay <strong style="font-size: 24px; color: #dc2626;" id="modalAmount"></strong> for:</p>
-                <p id="modalDescription" style="font-size: 14px; color: #666; margin-bottom: 20px; padding: 10px; background: #f1f5f9; border-radius: 12px;"></p>
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 20px; margin: 20px 0;">
-                    <p style="margin-bottom: 10px;">📱 <strong>POCHI LA BIASHARA</strong></p>
-                    <p style="font-size: 32px; font-weight: bold; letter-spacing: 2px;">0117085859</p>
-                    <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
-                    <p style="margin-bottom: 10px;"><strong> Peter Manundu</strong></p>
-                    <p id="modalAccountNumber" style="font-size: 24px; font-weight: bold; letter-spacing: 1px;"></p>
-                    <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
-                    <p style="margin-bottom: 10px;">💰 <strong>Amount to Pay</strong></p>
-                    <p id="modalAmount2" style="font-size: 28px; font-weight: bold;"></p>
-                    <hr style="margin: 15px 0; border-color: rgba(255,255,255,0.3);">
-                    <p style="margin-bottom: 5px; font-size: 12px; opacity: 0.9;">💡 Total Pending Fines: <span id="pendingTotalDisplay">KSh 0</span></p>
+            <div style="text-align:center;">
+                <div style="font-size:44px; margin-bottom:12px;"><i class="fas fa-credit-card"></i></div>
+                <p style="margin-bottom:8px;">Pay <strong style="font-size:24px; color:var(--red);" id="modalAmount"></strong> for:</p>
+                <p id="modalDescription" style="font-size:14px; color:var(--slate-600); margin-bottom:16px; padding:10px; background:var(--slate-50); border-radius:12px;"></p>
+                <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:20px; border-radius:20px; margin:16px 0;">
+                    <p style="margin-bottom:6px;"><i class="fas fa-mobile-screen-button"></i> <strong>POCHI LA BIASHARA</strong></p>
+                    <p style="font-size:28px; font-weight:700; letter-spacing:2px;">0117085859</p>
+                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                    <p><strong>Peter Manundu</strong></p>
+                    <p style="font-size:18px; font-weight:600; letter-spacing:1px;" id="modalAccountNumber"></p>
+                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                    <p style="margin-bottom:4px;">💰 <strong>Amount</strong></p>
+                    <p style="font-size:26px; font-weight:700;" id="modalAmount2"></p>
+                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                    <p style="font-size:12px; opacity:0.9;">Total Pending: <span id="pendingTotalDisplay">KSh 0</span></p>
                 </div>
-                <div style="background: #fef3c7; padding: 12px; border-radius: 12px; margin: 15px 0;">
-                    <p style="font-size: 13px; color: #92400e;">📌 <strong>Instructions:</strong></p>
-                    <p style="font-size: 12px; color: #92400e;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
-                    <p style="font-size: 12px; color: #92400e;">2. Enter Phone Number: <strong>0117085859</strong></p>
-                    <strong id="instructionAccountNumber"></strong></p>
-                    <p style="font-size: 12px; color: #92400e;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
-                    <p style="font-size: 12px; color: #92400e;">4. Enter your M-Pesa PIN and complete payment</p>
+                <div style="background:#fef3c7; padding:12px; border-radius:12px; margin:12px 0; text-align:left;">
+                    <p style="font-size:12px; color:#92400e; font-weight:600;"><i class="fas fa-info-circle"></i> Instructions</p>
+                    <p style="font-size:12px; color:#92400e; margin:2px 0;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
+                    <p style="font-size:12px; color:#92400e; margin:2px 0;">2. Enter Phone: <strong>0117085859</strong></p>
+                    <p style="font-size:12px; color:#92400e; margin:2px 0;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
+                    <p style="font-size:12px; color:#92400e; margin:2px 0;">4. Enter your M-Pesa PIN & complete</p>
                 </div>
-                <div style="margin: 20px 0;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">📱 Your Mpesa Name</label>
-                    <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                <div style="margin:16px 0;">
+                    <label style="display:block; margin-bottom:4px; font-weight:500; font-size:13px;"><i class="fas fa-user"></i> Your M-Pesa Name</label>
+                    <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width:100%; padding:10px 14px; border:1.5px solid var(--slate-300); border-radius:12px; font-family:inherit;">
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="recordPayment()" class="submit-btn" style="flex: 1; background: #10b981;">✅ I Have Paid</button>
-                    <button onclick="closePaymentModal()" style="flex: 1; background: #ef4444; color: white; border: none; border-radius: 40px; cursor: pointer;">Cancel</button>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="recordPayment()" class="btn-success" style="flex:1; justify-content:center;"><i class="fas fa-check"></i> I Have Paid</button>
+                    <button onclick="closePaymentModal()" style="flex:1; background:#ef4444; color:white; border:none; border-radius:40px; cursor:pointer; font-weight:600; padding:10px;"><i class="fas fa-times"></i> Cancel</button>
                 </div>
-                <p style="font-size: 11px; color: #666; margin-top: 20px;">After payment, admin will confirm within 24 hours.</p>
+                <p style="font-size:11px; color:var(--slate-500); margin-top:16px;">Admin will confirm within 24 hours.</p>
             </div>
         </div>
     </div>
 
+    <!-- Bottom Nav -->
     <div class="bottom-nav">
-        <div class="bottom-nav-item active" onclick="switchTab('stats')"><span>📊</span><span>Stats</span></div>
-        <div class="bottom-nav-item" onclick="switchTab('profile')"><span>👤</span><span>Profile</span></div>
-        <div class="bottom-nav-item" onclick="switchTab('apology')"><span>📝</span><span>Apology</span></div>
-        <div class="bottom-nav-item" onclick="switchTab('history')"><span>📜</span><span>History</span></div>
-        <div class="bottom-nav-item" onclick="openHallOfFame()"><span>🏆</span><span>Hall of Fame</span></div>
-        <div class="bottom-nav-item" id="bottomLogoutBtn"><span>🚪</span><span>Logout</span></div>
+        <button class="bottom-nav-item active" onclick="switchTab('stats')"><i class="fas fa-chart-pie"></i><span>Stats</span></button>
+        <button class="bottom-nav-item" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
+        <button class="bottom-nav-item" onclick="switchTab('apology')"><i class="fas fa-pen"></i><span>Apology</span></button>
+        <button class="bottom-nav-item" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i><span>History</span></button>
+        <button class="bottom-nav-item" onclick="openHallOfFame()"><i class="fas fa-trophy"></i><span>HOF</span></button>
+        <button class="bottom-nav-item" id="bottomLogoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+        const SUPABASE_ANON_KEY =
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
+
         let trendChart;
         let currentMember = null;
         let currentUserId = null;
@@ -1052,26 +1496,29 @@
         let honorees = [];
 
         const SESSION_CONFIG = {
-            Morning: { startTime: "9:00 AM", endTime: "1:00 PM", lateCutoff: "8:30 AM", absentCutoff: "8:00 AM", lateCutoffMinutes: 8*60+30, absentCutoffMinutes: 8*60 },
-            Afternoon: { startTime: "2:00 PM", endTime: "4:00 PM", lateCutoff: "1:30 PM", absentCutoff: "1:00 PM", lateCutoffMinutes: 13*60+30, absentCutoffMinutes: 13*60 },
-            Evening: { startTime: "7:00 PM", endTime: "10:30 PM", lateCutoff: "6:30 PM", absentCutoff: "6:00 PM", lateCutoffMinutes: 18*60+30, absentCutoffMinutes: 18*60 }
+            Morning: { startTime: "9:00 AM", endTime: "1:00 PM", lateCutoff: "8:30 AM", absentCutoff: "8:00 AM",
+                lateCutoffMinutes: 8 * 60 + 30, absentCutoffMinutes: 8 * 60 },
+            Afternoon: { startTime: "2:00 PM", endTime: "4:00 PM", lateCutoff: "1:30 PM", absentCutoff: "1:00 PM",
+                lateCutoffMinutes: 13 * 60 + 30, absentCutoffMinutes: 13 * 60 },
+            Evening: { startTime: "7:00 PM", endTime: "10:30 PM", lateCutoff: "6:30 PM", absentCutoff: "6:00 PM",
+                lateCutoffMinutes: 18 * 60 + 30, absentCutoffMinutes: 18 * 60 }
         };
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             const tabs = ['stats', 'profile', 'apology', 'history'];
-            const index = tabs.indexOf(tab);
-            if (index !== -1) {
-                document.querySelectorAll('.tab-btn')[index].classList.add('active');
+            const idx = tabs.indexOf(tab);
+            if (idx !== -1) {
+                document.querySelectorAll('.tab-btn')[idx].classList.add('active');
                 document.getElementById(`${tab}Tab`).classList.add('active');
             }
-            document.querySelectorAll('.bottom-nav-item').forEach((item, idx) => {
-                if (idx === index) item.classList.add('active');
-                else item.classList.remove('active');
+            document.querySelectorAll('.bottom-nav-item').forEach((item, i) => {
+                item.classList.toggle('active', i === idx);
             });
             if (tab === 'profile') loadProfileData();
-            if (tab === 'apology') { loadMyApologies(); initApologyTab(); }
+            if (tab === 'apology') { loadMyApologies();
+                initApologyTab(); }
             if (tab === 'history') loadAttendanceHistory();
         }
 
@@ -1084,24 +1531,21 @@
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) { window.location.href = '../login.html'; return null; }
             currentUserId = user.id;
-            
-            const { data: userMember } = await supabaseClient.from('user_members').select('member_id').eq('user_id', user.id).single();
-            
+            const { data: userMember } = await supabaseClient.from('user_members').select('member_id').eq('user_id', user.id)
+                .single();
             if (userMember) {
-                const { data: member } = await supabaseClient.from('members').select('*').eq('member_id', userMember.member_id).single();
-                
+                const { data: member } = await supabaseClient.from('members').select('*').eq('member_id', userMember
+                    .member_id).single();
                 if (member && member.status !== 'active') {
                     alert('⚠️ Your account has been deactivated or moved to alumni. Please contact the choir administrator.');
                     await supabaseClient.auth.signOut();
                     window.location.href = '../login.html';
                     return null;
                 }
-                
                 currentMember = member;
             }
-            
             if (!currentMember) {
-                document.getElementById('memberName').textContent = 'Account not linked to a member';
+                document.getElementById('memberName').textContent = 'Account not linked';
                 document.getElementById('memberName').style.color = '#ef4444';
                 return null;
             }
@@ -1112,29 +1556,34 @@
             const member = await getCurrentMember();
             if (!member) return;
             document.getElementById('memberName').textContent = member.name;
-            document.getElementById('memberVoice').innerHTML = `🎭 ${member.voice_part}`;
-            document.getElementById('memberId').innerHTML = `🆔 ${member.member_id}`;
+            document.getElementById('memberVoice').textContent = member.voice_part;
+            document.getElementById('memberId').textContent = member.member_id;
             await loadAttendanceStats();
             await loadPenalties();
             await loadProfileData();
         }
-       
+
         async function loadAttendanceStats() {
             if (!currentMember) return;
-            const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember.member_id);
+            const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember
+                .member_id);
             const present = attendance?.filter(a => a.status === 'Present').length || 0;
             const late = attendance?.filter(a => a.status === 'Late').length || 0;
             const absent = attendance?.filter(a => a.status === 'Absent').length || 0;
             const total = present + late + absent;
             const percentage = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
-            document.getElementById('statsGrid').innerHTML = `<div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label">✅ Present</div></div>
-                <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label">⏰ Late</div></div>
-                <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label">❌ Absent</div></div>
-                <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label">Attendance Rate</div></div>`;
-            
-            const last30Days = [], presentData = [], lateData = [];
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label"><i class="fas fa-check-circle"></i> Present</div></div>
+                <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label"><i class="fas fa-clock"></i> Late</div></div>
+                <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label"><i class="fas fa-times-circle"></i> Absent</div></div>
+                <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label"><i class="fas fa-percent"></i> Attendance Rate</div></div>
+            `;
+            const last30Days = [],
+                presentData = [],
+                lateData = [];
             for (let i = 29; i >= 0; i--) {
-                const date = new Date(); date.setDate(date.getDate() - i);
+                const date = new Date();
+                date.setDate(date.getDate() - i);
                 const dateStr = date.toISOString().split('T')[0];
                 last30Days.push(dateStr.substring(5));
                 const dayAttendance = attendance?.filter(a => a.date === dateStr) || [];
@@ -1143,30 +1592,54 @@
             }
             if (trendChart) trendChart.destroy();
             const ctx = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(ctx, { type: 'line', data: { labels: last30Days, datasets: [{ label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true }, { label: 'Late', data: lateData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.3, fill: true }] }, options: { responsive: true, maintainAspectRatio: true } });
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last30Days,
+                    datasets: [
+                        { label: 'Present', data: presentData, borderColor: '#10b981',
+                            backgroundColor: 'rgba(16,185,129,0.08)', tension: 0.3, fill: true },
+                        { label: 'Late', data: lateData, borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.3, fill: true }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { usePointStyle: true,
+                                pointStyle: 'circle' } } } }
+            });
         }
-        
+
         async function loadPenalties() {
             if (!currentMember) return;
-            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember.member_id).order('date', { ascending: false });
+            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember
+                .member_id).order('date', { ascending: false });
             const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
             const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
-            document.getElementById('penaltySummary').innerHTML = `<div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;"><div><strong>💰 Total Fines:</strong> KSh ${pendingTotal + paidTotal}</div><div><strong>⏳ Pending:</strong> KSh ${pendingTotal}</div><div><strong>✅ Paid:</strong> KSh ${paidTotal}</div></div><div style="margin-top: 10px; font-size: 12px; color: #666;">📞 Payment: POCHI 0117085859 | Peter Manundu</div>`;
-            
+            document.getElementById('penaltySummary').innerHTML = `
+                <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
+                    <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
+                    <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
+                    <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
+                </div>
+                <div style="margin-top:8px; font-size:12px; color:var(--slate-500);"><i class="fas fa-phone"></i> Payment: POCHI 0117085859 | Peter Manundu</div>
+            `;
             if (!penalties?.length) {
-                document.getElementById('penaltiesList').innerHTML = '<div class="empty-state">🎉 No penalties recorded!</div>';
-            } else {
-                document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
-                    <div class="apology-item">
-                        <div><div><strong>${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</strong></div><div style="font-size: 13px; color: #666;">${p.date} • ${p.session || ''}</div></div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 18px; font-weight: bold; color: #dc2626;">KSh ${p.amount}</div>
-                            <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
-                            ${p.status === 'pending' ? `<div style="margin-top: 10px;"><button onclick="showPaymentModal('${p.id}', ${p.amount}, '${p.penalty_type === 'late' ? 'Late Fine' : 'Absent Fine'} - ${p.date}')" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 13px; width: 100%;">💳 Pay Fine</button></div>` : ''}
-                        </div>
-                    </div>
-                `).join('');
+                document.getElementById('penaltiesList').innerHTML =
+                    '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
+                return;
             }
+            document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
+                <div class="apology-item">
+                    <div>
+                        <div><strong>${p.penalty_type === 'late' ? '<i class="fas fa-clock" style="color:var(--amber);"></i> Late' : '<i class="fas fa-times-circle" style="color:var(--red);"></i> Absent'}</strong></div>
+                        <div style="font-size:13px; color:var(--slate-500);">${p.date} • ${p.session || ''}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:18px; font-weight:700; color:var(--red);">KSh ${p.amount}</div>
+                        <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
+                        ${p.status === 'pending' ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${p.amount}, '${p.penalty_type === 'late' ? 'Late Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
+                    </div>
+                </div>
+            `).join('');
             await checkPendingPenalties();
             await updateFloatingReminder();
         }
@@ -1174,57 +1647,72 @@
         async function showPaymentModal(penaltyId, amount, description) {
             const { data: penalty } = await supabaseClient.from('penalties').select('status').eq('id', penaltyId).single();
             if (!penalty || penalty.status !== 'pending') { alert('This fine has already been paid or does not exist.'); return; }
-            currentPenaltyId = penaltyId; currentPenaltyAmount = amount; currentPenaltyDescription = description;
-            const { data: penalties } = await supabaseClient.from('penalties').select('amount').eq('member_id', currentMember.member_id).eq('status', 'pending');
+            currentPenaltyId = penaltyId;
+            currentPenaltyAmount = amount;
+            currentPenaltyDescription = description;
+            const { data: penalties } = await supabaseClient.from('penalties').select('amount').eq('member_id', currentMember
+                .member_id).eq('status', 'pending');
             const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
             document.getElementById('modalAmount').innerHTML = `KSh ${amount}`;
             document.getElementById('modalDescription').innerHTML = description;
             document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
             document.getElementById('modalAmount2').innerHTML = `KSh ${amount}`;
             document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal}`;
-            document.getElementById('instructionAccountNumber').innerHTML = currentMember.member_id;
             document.getElementById('instructionAmount').innerHTML = `KSh ${amount}`;
             document.getElementById('transactionCode').value = '';
-            document.getElementById('paymentModal').style.display = 'flex';
+            document.getElementById('paymentModal').classList.add('open');
         }
-        
-        function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; currentPenaltyId = null; }
-        
+
+        function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open');
+            currentPenaltyId = null; }
+
         async function recordPayment() {
             if (!currentPenaltyId) { alert('No payment selected'); return; }
             const transactionCode = document.getElementById('transactionCode').value.trim();
-            
-            const { error } = await supabaseClient.from('payments').insert({ 
-                member_id: currentMember.member_id, 
-                penalty_id: currentPenaltyId, 
-                amount: currentPenaltyAmount, 
-                payment_method: 'mpesa', 
-                status: 'pending', 
-                payment_date: new Date().toISOString().split('T')[0], 
+            const { error } = await supabaseClient.from('payments').insert({
+                member_id: currentMember.member_id,
+                penalty_id: currentPenaltyId,
+                amount: currentPenaltyAmount,
+                payment_method: 'mpesa',
+                status: 'pending',
+                payment_date: new Date().toISOString().split('T')[0],
                 reference: transactionCode || null
             });
-            
             if (error) alert('❌ Error recording payment: ' + error.message);
-            else { alert('✅ Payment recorded! Admin will confirm within 24 hours.'); closePaymentModal(); loadPenalties(); }
+            else { alert('✅ Payment recorded! Admin will confirm within 24 hours.');
+                closePaymentModal();
+                loadPenalties(); }
         }
 
         async function loadProfileData() {
             if (!currentMember) return;
-            const { data: profile } = await supabaseClient.from('user_profiles').select('*').eq('user_id', currentUserId).maybeSingle();
+            const { data: profile } = await supabaseClient.from('user_profiles').select('*').eq('user_id', currentUserId)
+                .maybeSingle();
             if (profile) {
                 document.getElementById('phoneInput').value = profile.phone || '';
                 document.getElementById('emergencyNameInput').value = profile.emergency_contact || '';
                 document.getElementById('emergencyPhoneInput').value = profile.emergency_phone || '';
                 document.getElementById('emergencyRelationshipInput').value = profile.emergency_relationship || '';
-                if (profile.profile_photo_url) { 
+                if (profile.profile_photo_url) {
                     const cleanUrl = profile.profile_photo_url.split(',')[0].trim();
-                    document.getElementById('photoPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`; 
-                    document.getElementById('avatarPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`; 
+                    document.getElementById('photoPreview').innerHTML =
+                        `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover;">`;
+                    document.getElementById('avatarPreview').innerHTML =
+                        `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover;">`;
                 }
             }
-            const { data: leader } = await supabaseClient.from('members').select('name, phone, email').eq('voice_part', currentMember.voice_part).eq('is_leader', true).maybeSingle();
-            if (leader) document.getElementById('leaderInfo').innerHTML = `<p><strong>🎵 Section Leader:</strong> ${leader.name}</p><p><strong>📞 Contact:</strong> ${leader.phone || 'Not available'}</p><p><strong>📧 Email:</strong> ${leader.email || 'Not available'}</p>`;
-            else document.getElementById('leaderInfo').innerHTML = `<p>📢 Section leader contact information will be updated soon.</p><p>For any urgent matters, contact the choir director.</p>`;
+            const { data: leader } = await supabaseClient.from('members').select('name, phone, email').eq('voice_part',
+                currentMember.voice_part).eq('is_leader', true).maybeSingle();
+            if (leader) {
+                document.getElementById('leaderInfo').innerHTML = `
+                    <p><i class="fas fa-user-tie"></i> <strong>Section Leader:</strong> ${leader.name}</p>
+                    <p><i class="fas fa-phone"></i> ${leader.phone || 'Not available'}</p>
+                    <p><i class="fas fa-envelope"></i> ${leader.email || 'Not available'}</p>
+                `;
+            } else {
+                document.getElementById('leaderInfo').innerHTML =
+                    `<p><i class="fas fa-info-circle"></i> Section leader contact will be updated soon.</p>`;
+            }
         }
 
         async function saveProfile() {
@@ -1232,46 +1720,38 @@
             const emergencyContact = document.getElementById('emergencyNameInput').value;
             const emergencyPhone = document.getElementById('emergencyPhoneInput').value;
             const emergencyRelationship = document.getElementById('emergencyRelationshipInput').value;
-            
             const saveBtn = document.getElementById('saveProfileBtn');
             const originalText = saveBtn.innerHTML;
-            
-            saveBtn.innerHTML = '⏳ Saving...';
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             saveBtn.classList.add('saving');
-            
             const contactCard = document.getElementById('contactFormCard');
             contactCard.classList.add('highlight');
             setTimeout(() => contactCard.classList.remove('highlight'), 600);
-            
-            const { error } = await supabaseClient.from('user_profiles').upsert({ 
-                user_id: currentUserId, 
-                member_id: currentMember.member_id, 
-                phone, 
-                emergency_contact: emergencyContact, 
+            const { error } = await supabaseClient.from('user_profiles').upsert({
+                user_id: currentUserId,
+                member_id: currentMember.member_id,
+                phone,
+                emergency_contact: emergencyContact,
                 emergency_phone: emergencyPhone,
                 emergency_relationship: emergencyRelationship,
-                updated_at: new Date() 
+                updated_at: new Date()
             });
-            
             const msgDiv = document.getElementById('profileMessage');
-            
-            if (error) { 
-                msgDiv.className = 'message error'; 
-                msgDiv.innerHTML = '❌ Error saving profile: ' + error.message + ' <span class="saved-checkmark">⚠️</span>';
+            if (error) {
+                msgDiv.className = 'message error';
+                msgDiv.innerHTML = '❌ Error saving profile: ' + error.message;
                 saveBtn.innerHTML = originalText;
                 saveBtn.classList.remove('saving');
                 setTimeout(() => msgDiv.className = 'message', 4000);
-            } else { 
-                msgDiv.className = 'message success'; 
+            } else {
+                msgDiv.className = 'message success';
                 msgDiv.innerHTML = '✅ Profile saved successfully! <span class="saved-checkmark">✓</span>';
-                saveBtn.innerHTML = '✓ Saved!';
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
                 saveBtn.classList.add('saved');
-                
                 setTimeout(() => {
                     saveBtn.innerHTML = originalText;
                     saveBtn.classList.remove('saving', 'saved');
                 }, 2000);
-                
                 setTimeout(() => msgDiv.className = 'message', 4000);
             }
         }
@@ -1280,33 +1760,26 @@
             const fileInput = document.getElementById('photoInput');
             const file = fileInput.files[0];
             if (!file) return;
-            
             const fileExt = file.name.split('.').pop();
             const fileName = `${currentUserId}_${Date.now()}.${fileExt}`;
             const filePath = `profile_photos/${fileName}`;
-            
             const uploadBtn = event.target;
             const originalText = uploadBtn.innerHTML;
-            uploadBtn.innerHTML = '⏳ Uploading...';
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
             uploadBtn.disabled = true;
-            
             const { error: uploadError } = await supabaseClient.storage
                 .from('profiles')
                 .upload(filePath, file);
-            
             if (uploadError) {
                 alert('Upload error: ' + uploadError.message);
                 uploadBtn.innerHTML = originalText;
                 uploadBtn.disabled = false;
                 return;
             }
-            
             const { data: { publicUrl } } = supabaseClient.storage
                 .from('profiles')
                 .getPublicUrl(filePath);
-            
             const cleanUrl = publicUrl.split(',')[0].trim();
-            
             const { error: updateError } = await supabaseClient
                 .from('user_profiles')
                 .upsert({
@@ -1315,23 +1788,21 @@
                     profile_photo_url: cleanUrl,
                     updated_at: new Date()
                 });
-            
             if (updateError) {
                 alert('Error updating profile: ' + updateError.message);
             } else {
-                document.getElementById('photoPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`;
-                document.getElementById('avatarPreview').innerHTML = `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">`;
-                
+                document.getElementById('photoPreview').innerHTML =
+                    `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover;">`;
+                document.getElementById('avatarPreview').innerHTML =
+                    `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover;">`;
                 const msgDiv = document.getElementById('profileMessage');
                 msgDiv.className = 'message success';
-                msgDiv.innerHTML = '✅ Photo uploaded successfully! <span class="saved-checkmark">📸</span>';
+                msgDiv.innerHTML = '✅ Photo uploaded! <span class="saved-checkmark">📸</span>';
                 setTimeout(() => msgDiv.className = 'message', 3000);
-                
                 const photoCard = document.getElementById('photoFormCard');
                 photoCard.classList.add('highlight');
                 setTimeout(() => photoCard.classList.remove('highlight'), 600);
             }
-            
             uploadBtn.innerHTML = originalText;
             uploadBtn.disabled = false;
             fileInput.value = '';
@@ -1339,63 +1810,255 @@
 
         async function checkPendingPenalties() {
             if (!currentMember) return;
-            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember.member_id).eq('status', 'pending');
+            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember
+                .member_id).eq('status', 'pending');
             const pendingCount = penalties?.length || 0;
             const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
             const reminderDiv = document.getElementById('paymentReminder');
             const reminderText = document.getElementById('reminderText');
             if (pendingCount > 0) {
                 reminderDiv.style.display = 'block';
-                reminderText.innerHTML = pendingCount === 1 ? `You have 1 pending fine of KSh ${pendingTotal}. Please clear it to avoid extra charges.` : `You have ${pendingCount} pending fines totaling KSh ${pendingTotal}. Please clear them to avoid extra charges.`;
+                reminderText.innerHTML = pendingCount === 1 ?
+                    `You have 1 pending fine of KSh ${pendingTotal}. Please clear it.` :
+                    `You have ${pendingCount} pending fines totaling KSh ${pendingTotal}.`;
             } else { reminderDiv.style.display = 'none'; }
         }
-        
-        function scrollToPenalties() { const section = document.getElementById('penaltiesList'); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-        
+
+        function scrollToPenalties() {
+            const section = document.getElementById('penaltiesList');
+            if (section) section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
         function addFloatingReminderButton() {
             if (document.getElementById('floatingReminderBtn')) return;
             const floatingBtn = document.createElement('div');
             floatingBtn.id = 'floatingReminderBtn';
-            floatingBtn.innerHTML = `<div style="position: fixed; bottom: 80px; right: 20px; background: #ef4444; color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99;"><span style="font-size: 24px;">💰</span><span id="floatingCount" style="position: absolute; top: -5px; right: -5px; background: #f59e0b; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold;">0</span></div>`;
+            floatingBtn.innerHTML = `
+                <div style="position:fixed; bottom:80px; right:20px; background:#ef4444; color:white; width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:99;">
+                    <i class="fas fa-hand-holding-dollar" style="font-size:22px;"></i>
+                    <span id="floatingCount" style="position:absolute; top:-4px; right:-4px; background:#f59e0b; color:white; border-radius:50%; width:22px; height:22px; font-size:12px; display:flex; align-items:center; justify-content:center; font-weight:bold;">0</span>
+                </div>
+            `;
             floatingBtn.style.display = 'none';
             document.body.appendChild(floatingBtn);
             floatingBtn.onclick = () => scrollToPenalties();
         }
-        
+
         async function updateFloatingReminder() {
             if (!currentMember) return;
-            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember.member_id).eq('status', 'pending');
+            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember
+                .member_id).eq('status', 'pending');
             const pendingCount = penalties?.length || 0;
             const floatingBtn = document.getElementById('floatingReminderBtn');
             if (floatingBtn) {
-                if (pendingCount > 0) { floatingBtn.style.display = 'block'; const countSpan = floatingBtn.querySelector('#floatingCount'); if (countSpan) countSpan.textContent = pendingCount; }
-                else { floatingBtn.style.display = 'none'; }
+                if (pendingCount > 0) {
+                    floatingBtn.style.display = 'block';
+                    const countSpan = floatingBtn.querySelector('#floatingCount');
+                    if (countSpan) countSpan.textContent = pendingCount;
+                } else { floatingBtn.style.display = 'none'; }
             }
         }
-        
-        function startReminderInterval() { checkPendingPenalties(); updateFloatingReminder(); setInterval(() => { checkPendingPenalties(); updateFloatingReminder(); }, 5 * 60 * 1000); }
-        
-        function getCurrentMinutes() { const now = new Date(); return now.getHours() * 60 + now.getMinutes(); }
-        function isLateSessionAvailable(session) { return getCurrentMinutes() <= SESSION_CONFIG[session].lateCutoffMinutes; }
-        function isAbsentSessionAvailable(session, date) { const selectedDate = new Date(date); const today = new Date(); today.setHours(0,0,0,0); if (selectedDate > today) return true; if (selectedDate.getTime() === today.getTime()) return getCurrentMinutes() <= SESSION_CONFIG[session].absentCutoffMinutes; return false; }
-        function getAvailableLateSessions() { const available = []; for (const [session] of Object.entries(SESSION_CONFIG)) if (isLateSessionAvailable(session)) available.push(session); return available; }
-        function populateLateSessions() { const select = document.getElementById('lateSessionSelect'); const available = getAvailableLateSessions(); const warningDiv = document.getElementById('lateTimeWarning'); if (available.length === 0) { select.innerHTML = '<option disabled>No sessions available</option>'; warningDiv.style.display = 'block'; } else { warningDiv.style.display = 'none'; select.innerHTML = available.map(s => `<option value="${s}">${s} (${SESSION_CONFIG[s].startTime} - ${SESSION_CONFIG[s].endTime})</option>`).join(''); } }
-        function populateAbsentSessions() { const date = document.getElementById('absentDateInput').value; const select = document.getElementById('absentSessionSelect'); const warningDiv = document.getElementById('absentTimeWarning'); if (!date) return; const available = []; for (const [session] of Object.entries(SESSION_CONFIG)) if (isAbsentSessionAvailable(session, date)) available.push(session); if (available.length === 0) { select.innerHTML = '<option disabled>No sessions available</option>'; warningDiv.style.display = 'block'; } else { warningDiv.style.display = 'none'; select.innerHTML = available.map(s => `<option value="${s}">${s} (${SESSION_CONFIG[s].startTime} - ${SESSION_CONFIG[s].endTime})</option>`).join(''); } }
-        function showLateForm() { document.getElementById('lateFormContainer').style.display = 'block'; document.getElementById('absentFormContainer').style.display = 'none'; populateLateSessions(); }
-        function showAbsentForm() { document.getElementById('absentFormContainer').style.display = 'block'; document.getElementById('lateFormContainer').style.display = 'none'; const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); document.getElementById('absentDateInput').value = tomorrow.toISOString().split('T')[0]; populateAbsentSessions(); }
-        function closeLateForm() { document.getElementById('lateFormContainer').style.display = 'none'; }
-        function closeAbsentForm() { document.getElementById('absentFormContainer').style.display = 'none'; }
-        async function submitLateApology() { const session = document.getElementById('lateSessionSelect').value; const reason = document.getElementById('lateReasonInput').value; if (!session || !reason) { showApologyMessage('Please fill all fields', 'error'); return; } const date = new Date().toISOString().split('T')[0]; const { error } = await supabaseClient.from('apology_requests').insert({ member_id: currentMember.member_id, apology_type: 'late', date, session, reason, status: 'pending' }); if (error) showApologyMessage('Error: ' + error.message, 'error'); else { showApologyMessage('✅ Late apology submitted!', 'success'); closeLateForm(); loadMyApologies(); } }
-        async function submitAbsentApology() { const session = document.getElementById('absentSessionSelect').value; const date = document.getElementById('absentDateInput').value; const reason = document.getElementById('absentReasonInput').value; if (!session || !date || !reason) { showApologyMessage('Please fill all fields', 'error'); return; } const { error } = await supabaseClient.from('apology_requests').insert({ member_id: currentMember.member_id, apology_type: 'absent', date, session, reason, status: 'pending' }); if (error) showApologyMessage('Error: ' + error.message, 'error'); else { showApologyMessage('✅ Absence apology submitted!', 'success'); closeAbsentForm(); loadMyApologies(); } }
-        function showApologyMessage(msg, type) { const msgDiv = document.getElementById('apologyMessage'); msgDiv.className = `message ${type}`; msgDiv.innerHTML = msg; setTimeout(() => msgDiv.className = 'message', 3000); }
-        async function loadMyApologies() { if (!currentMember) return; const { data: apologies } = await supabaseClient.from('apology_requests').select('*').eq('member_id', currentMember.member_id).order('date', { ascending: false }); const container = document.getElementById('myApologiesList'); if (!apologies?.length) { container.innerHTML = '<div class="empty-state">📭 No apology requests submitted yet.</div>'; return; } container.innerHTML = apologies.map(a => `<div class="apology-item"><div><div><strong>${a.apology_type === 'late' ? '⏰ Late' : '❌ Absent'}</strong> 📅 ${a.date} - ${a.session}</div><div style="font-size:13px;margin-top:5px;">${escapeHtml(a.reason)}</div>${a.admin_notes ? `<div style="font-size:12px;color:#666;">📝 Admin: ${escapeHtml(a.admin_notes)}</div>` : ''}</div><div><span class="status-badge status-${a.status}">${a.status.toUpperCase()}</span></div></div>`).join(''); }
-        function initApologyTab() { document.getElementById('showLateBtn').onclick = showLateForm; document.getElementById('showAbsentBtn').onclick = showAbsentForm; const absentDate = document.getElementById('absentDateInput'); if (absentDate) absentDate.onchange = populateAbsentSessions; const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); if (absentDate) absentDate.value = tomorrow.toISOString().split('T')[0]; }
-        async function loadAttendanceHistory() { if (!currentMember) return; const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember.member_id).order('date', { ascending: false }); attendanceHistory = attendance || []; const container = document.getElementById('attendanceHistoryList'); if (!attendanceHistory.length) { container.innerHTML = '<div class="empty-state">📭 No attendance records found.</div>'; return; } container.innerHTML = `<table style="width:100%; border-collapse: collapse;"><thead><tr style="background:#f1f5f9;"><th style="padding:10px;">Date</th><th style="padding:10px;">Session</th><th style="padding:10px;">Status</th></tr></thead><tbody>${attendanceHistory.map(a => `<tr><td style="padding:10px;">${a.date}</td><td style="padding:10px;">${a.session}</td><td style="padding:10px;"><span class="status-badge ${a.status === 'Present' ? 'status-approved' : a.status === 'Late' ? 'status-pending' : 'status-rejected'}">${a.status === 'Present' ? '✅ Present' : a.status === 'Late' ? '⏰ Late' : '❌ Absent'}</span></td></tr>`).join('')}</tbody></table>`; }
-        async function exportToPDF() { const element = document.getElementById('historyContainer'); await html2pdf().set({ margin: [0.5,0.5,0.5,0.5], filename: `attendance_${currentMember?.name}_${new Date().toISOString().split('T')[0]}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(element).save(); }
-        function exportToCSV() { if (!attendanceHistory.length) { alert('No attendance data to export'); return; } const headers = ['Date', 'Session', 'Status']; const rows = attendanceHistory.map(a => [a.date, a.session, a.status]); const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n'); const blob = new Blob([csvContent], { type: 'text/csv' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `attendance_${currentMember?.name}_${new Date().toISOString().split('T')[0]}.csv`; link.click(); URL.revokeObjectURL(link.href); }
-        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : m === '>' ? '&gt;' : m); }
 
-        // ===== HALL OF FAME FUNCTIONS =====
+        function startReminderInterval() {
+            checkPendingPenalties();
+            updateFloatingReminder();
+            setInterval(() => { checkPendingPenalties();
+                updateFloatingReminder(); }, 5 * 60 * 1000);
+        }
+
+        function getCurrentMinutes() { const now = new Date(); return now.getHours() * 60 + now.getMinutes(); }
+
+        function isLateSessionAvailable(session) { return getCurrentMinutes() <= SESSION_CONFIG[session].lateCutoffMinutes; }
+
+        function isAbsentSessionAvailable(session, date) {
+            const selectedDate = new Date(date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (selectedDate > today) return true;
+            if (selectedDate.getTime() === today.getTime()) return getCurrentMinutes() <= SESSION_CONFIG[session]
+                .absentCutoffMinutes;
+            return false;
+        }
+
+        function getAvailableLateSessions() { const available = []; for (const [session] of Object.entries(SESSION_CONFIG))
+            if (isLateSessionAvailable(session)) available.push(session); return available; }
+
+        function populateLateSessions() {
+            const select = document.getElementById('lateSessionSelect');
+            const available = getAvailableLateSessions();
+            const warningDiv = document.getElementById('lateTimeWarning');
+            if (available.length === 0) { select.innerHTML = '<option disabled>No sessions available</option>';
+                warningDiv.style.display = 'block'; } else { warningDiv.style.display = 'none';
+                select.innerHTML = available.map(s =>
+                    `<option value="${s}">${s} (${SESSION_CONFIG[s].startTime} - ${SESSION_CONFIG[s].endTime})</option>`
+                    ).join(''); }
+        }
+
+        function populateAbsentSessions() {
+            const date = document.getElementById('absentDateInput').value;
+            const select = document.getElementById('absentSessionSelect');
+            const warningDiv = document.getElementById('absentTimeWarning');
+            if (!date) return;
+            const available = [];
+            for (const [session] of Object.entries(SESSION_CONFIG))
+                if (isAbsentSessionAvailable(session, date)) available.push(session);
+            if (available.length === 0) { select.innerHTML = '<option disabled>No sessions available</option>';
+                warningDiv.style.display = 'block'; } else { warningDiv.style.display = 'none';
+                select.innerHTML = available.map(s =>
+                    `<option value="${s}">${s} (${SESSION_CONFIG[s].startTime} - ${SESSION_CONFIG[s].endTime})</option>`
+                    ).join(''); }
+        }
+
+        function showLateForm() { document.getElementById('lateFormContainer').style.display = 'block';
+            document.getElementById('absentFormContainer').style.display = 'none';
+            populateLateSessions(); }
+
+        function showAbsentForm() { document.getElementById('absentFormContainer').style.display = 'block';
+            document.getElementById('lateFormContainer').style.display = 'none'; const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('absentDateInput').value = tomorrow.toISOString().split('T')[0];
+            populateAbsentSessions(); }
+
+        function closeLateForm() { document.getElementById('lateFormContainer').style.display = 'none'; }
+
+        function closeAbsentForm() { document.getElementById('absentFormContainer').style.display = 'none'; }
+
+        async function submitLateApology() {
+            const session = document.getElementById('lateSessionSelect').value;
+            const reason = document.getElementById('lateReasonInput').value;
+            if (!session || !reason) { showApologyMessage('Please fill all fields', 'error'); return; }
+            const date = new Date().toISOString().split('T')[0];
+            const { error } = await supabaseClient.from('apology_requests').insert({
+                member_id: currentMember.member_id,
+                apology_type: 'late',
+                date,
+                session,
+                reason,
+                status: 'pending'
+            });
+            if (error) showApologyMessage('Error: ' + error.message, 'error');
+            else { showApologyMessage('✅ Late apology submitted!', 'success');
+                closeLateForm();
+                loadMyApologies(); }
+        }
+
+        async function submitAbsentApology() {
+            const session = document.getElementById('absentSessionSelect').value;
+            const date = document.getElementById('absentDateInput').value;
+            const reason = document.getElementById('absentReasonInput').value;
+            if (!session || !date || !reason) { showApologyMessage('Please fill all fields', 'error'); return; }
+            const { error } = await supabaseClient.from('apology_requests').insert({
+                member_id: currentMember.member_id,
+                apology_type: 'absent',
+                date,
+                session,
+                reason,
+                status: 'pending'
+            });
+            if (error) showApologyMessage('Error: ' + error.message, 'error');
+            else { showApologyMessage('✅ Absence apology submitted!', 'success');
+                closeAbsentForm();
+                loadMyApologies(); }
+        }
+
+        function showApologyMessage(msg, type) {
+            const msgDiv = document.getElementById('apologyMessage');
+            msgDiv.className = `message ${type}`;
+            msgDiv.innerHTML = msg;
+            setTimeout(() => msgDiv.className = 'message', 3000);
+        }
+
+        async function loadMyApologies() {
+            if (!currentMember) return;
+            const { data: apologies } = await supabaseClient.from('apology_requests').select('*').eq('member_id',
+                currentMember.member_id).order('date', { ascending: false });
+            const container = document.getElementById('myApologiesList');
+            if (!apologies?.length) {
+                container.innerHTML =
+                '<div class="empty-state"><i class="fas fa-inbox"></i> No apology requests submitted yet.</div>';
+                return;
+            }
+            container.innerHTML = apologies.map(a => `
+                <div class="apology-item">
+                    <div>
+                        <div><strong>${a.apology_type === 'late' ? '<i class="fas fa-clock" style="color:var(--amber);"></i> Late' : '<i class="fas fa-times-circle" style="color:var(--red);"></i> Absent'}</strong> 📅 ${a.date} - ${a.session}</div>
+                        <div style="font-size:13px; margin-top:4px; color:var(--slate-600);">${escapeHtml(a.reason)}</div>
+                        ${a.admin_notes ? `<div style="font-size:12px; color:var(--slate-500);"><i class="fas fa-pen"></i> Admin: ${escapeHtml(a.admin_notes)}</div>` : ''}
+                    </div>
+                    <div><span class="status-badge status-${a.status}">${a.status.toUpperCase()}</span></div>
+                </div>
+            `).join('');
+        }
+
+        function initApologyTab() {
+            document.getElementById('showLateBtn').onclick = showLateForm;
+            document.getElementById('showAbsentBtn').onclick = showAbsentForm;
+            const absentDate = document.getElementById('absentDateInput');
+            if (absentDate) absentDate.onchange = populateAbsentSessions;
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            if (absentDate) absentDate.value = tomorrow.toISOString().split('T')[0];
+        }
+
+        async function loadAttendanceHistory() {
+            if (!currentMember) return;
+            const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember
+                .member_id).order('date', { ascending: false });
+            attendanceHistory = attendance || [];
+            const container = document.getElementById('attendanceHistoryList');
+            if (!attendanceHistory.length) {
+                container.innerHTML =
+                    '<div class="empty-state"><i class="fas fa-clock"></i> No attendance records found.</div>';
+                return;
+            }
+            container.innerHTML = `
+                <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                    <thead><tr style="background:var(--slate-50); text-align:left;">
+                        <th style="padding:10px 8px;"><i class="fas fa-calendar-day"></i> Date</th>
+                        <th style="padding:10px 8px;"><i class="fas fa-clock"></i> Session</th>
+                        <th style="padding:10px 8px;"><i class="fas fa-circle-check"></i> Status</th>
+                    </tr></thead>
+                    <tbody>
+                        ${attendanceHistory.map(a => `
+                            <tr style="border-bottom:1px solid var(--slate-100);">
+                                <td style="padding:10px 8px;">${a.date}</td>
+                                <td style="padding:10px 8px;">${a.session}</td>
+                                <td style="padding:10px 8px;"><span class="status-badge ${a.status === 'Present' ? 'status-approved' : a.status === 'Late' ? 'status-pending' : 'status-rejected'}">${a.status === 'Present' ? '<i class="fas fa-check"></i> Present' : a.status === 'Late' ? '<i class="fas fa-clock"></i> Late' : '<i class="fas fa-times"></i> Absent'}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        async function exportToPDF() {
+            const element = document.getElementById('historyContainer');
+            await html2pdf().set({
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `attendance_${currentMember?.name}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            }).from(element).save();
+        }
+
+        function exportToCSV() {
+            if (!attendanceHistory.length) { alert('No attendance data to export'); return; }
+            const headers = ['Date', 'Session', 'Status'];
+            const rows = attendanceHistory.map(a => [a.date, a.session, a.status]);
+            const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `attendance_${currentMember?.name}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m ===
+                '<' ? '&lt;' : '&gt;'); }
+
+        // Hall of Fame
         async function loadHallOfFame() {
             try {
                 const { data, error } = await supabaseClient
@@ -1404,46 +2067,32 @@
                     .order('is_featured', { ascending: false })
                     .order('sort_order', { ascending: true })
                     .order('created_at', { ascending: false });
-
-                if (error) {
-                    console.error('Error loading honorees:', error);
-                    return;
-                }
-
+                if (error) { console.error('Error loading honorees:', error); return; }
                 honorees = data || [];
                 renderHallOfFame();
-            } catch (error) {
-                console.error('Load error:', error);
-            }
+            } catch (e) { console.error(e); }
         }
 
         function renderHallOfFame() {
             const container = document.getElementById('hofGridContainer');
-            
             if (!honorees.length) {
-                container.innerHTML = `
-                    <div class="hof-empty">
-                        <i class="fas fa-trophy"></i>
-                        <p>No honorees yet. Check back soon!</p>
-                    </div>
-                `;
+                container.innerHTML =
+                    `<div class="empty-state"><i class="fas fa-trophy"></i> No honorees yet. Check back soon!</div>`;
                 return;
             }
-
             container.innerHTML = honorees.map(h => `
-                <div class="hof-card-modal ${h.is_featured ? 'featured' : ''}" onclick="showHofDetail('${h.id}')">
+                <div class="hof-card ${h.is_featured ? 'featured' : ''}" onclick="showHofDetail('${h.id}')">
                     <div class="hof-image">
-                        ${h.photo_url ? `<img src="${h.photo_url}?t=${Date.now()}" alt="${escapeHtml(h.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-user\\'></i></div>';">` : 
-                        `<div class="placeholder"><i class="fas fa-user"></i></div>`}
+                        ${h.photo_url ? `<img src="${h.photo_url}?t=${Date.now()}" alt="${escapeHtml(h.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-user\\'></i></div>';">` : `<div class="placeholder"><i class="fas fa-user"></i></div>`}
                     </div>
                     <div class="hof-body">
                         <div class="hof-name">
                             ${escapeHtml(h.name)}
-                            ${h.is_featured ? '<span class="featured-badge">⭐ Featured</span>' : ''}
+                            ${h.is_featured ? '<span class="featured-badge"><i class="fas fa-star"></i> Featured</span>' : ''}
                         </div>
                         <div class="hof-role">${escapeHtml(h.role_played)}</div>
                         <div class="hof-bio">${escapeHtml(h.bio)}</div>
-                        <div class="hof-year">🏅 ${h.year_added || '—'}</div>
+                        <div class="hof-year"><i class="fas fa-calendar"></i> ${h.year_added || '—'}</div>
                     </div>
                 </div>
             `).join('');
@@ -1452,34 +2101,28 @@
         function showHofDetail(id) {
             const honoree = honorees.find(h => h.id === id);
             if (!honoree) return;
-
             document.getElementById('hofGridView').classList.add('hidden');
             document.getElementById('hofDetailView').classList.add('active');
-
             const content = document.getElementById('hofDetailContent');
             content.innerHTML = `
                 <div class="hof-detail-header">
                     <div class="hof-detail-image">
-                        ${honoree.photo_url ? `<img src="${honoree.photo_url}?t=${Date.now()}" alt="${escapeHtml(honoree.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-user\\'></i></div>';">` : 
-                        `<div class="placeholder"><i class="fas fa-user"></i></div>`}
+                        ${honoree.photo_url ? `<img src="${honoree.photo_url}?t=${Date.now()}" alt="${escapeHtml(honoree.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-user\\'></i></div>';">` : `<div class="placeholder"><i class="fas fa-user"></i></div>`}
                     </div>
                     <div class="hof-detail-info">
-                        <div class="name">
-                            ${escapeHtml(honoree.name)}
-                            ${honoree.is_featured ? ' <span class="featured-badge">⭐ Featured</span>' : ''}
-                        </div>
+                        <div class="name">${escapeHtml(honoree.name)} ${honoree.is_featured ? '<span class="featured-badge"><i class="fas fa-star"></i> Featured</span>' : ''}</div>
                         <div class="role">${escapeHtml(honoree.role_played)}</div>
-                        <div class="year">🏅 Year Inducted: ${honoree.year_added || '—'}</div>
+                        <div class="year"><i class="fas fa-calendar"></i> Year Inducted: ${honoree.year_added || '—'}</div>
                     </div>
                 </div>
                 ${honoree.achievement ? `
-                    <div class="hof-detail-achievement">
-                        <div class="label">🏆 Achievement</div>
+                    <div class="hof-achievement">
+                        <div class="label"><i class="fas fa-trophy"></i> Achievement</div>
                         <div class="text">${escapeHtml(honoree.achievement)}</div>
                     </div>
                 ` : ''}
-                <div class="hof-detail-bio">
-                    <div class="label">📖 Biography</div>
+                <div class="hof-bio-section">
+                    <div class="label"><i class="fas fa-book-open"></i> Biography</div>
                     <div class="text">${escapeHtml(honoree.bio) || 'No biography provided.'}</div>
                 </div>
             `;
@@ -1493,9 +2136,7 @@
         function openHallOfFame() {
             document.getElementById('hofModal').classList.add('open');
             document.body.style.overflow = 'hidden';
-            if (honorees.length === 0) {
-                loadHallOfFame();
-            }
+            if (honorees.length === 0) loadHallOfFame();
         }
 
         function closeHallOfFame() {
@@ -1504,21 +2145,19 @@
             showHofGrid();
         }
 
-        // Close modal on overlay click
         document.getElementById('hofModal').addEventListener('click', function(e) {
             if (e.target === this) closeHallOfFame();
         });
 
         document.getElementById('logoutBtn').addEventListener('click', logout);
         document.getElementById('bottomLogoutBtn').addEventListener('click', logout);
-        
+
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.href = '../login.html'; return; }
             await loadMemberData();
             addFloatingReminderButton();
             startReminderInterval();
-            // Pre-load Hall of Fame
             await loadHallOfFame();
         }
         init();

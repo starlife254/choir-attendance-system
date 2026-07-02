@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Members View | University of Embu Choir</title>
@@ -12,13 +12,20 @@
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
-            --indigo: #4f46e5; --indigo-light: #eef2ff;
-            --green: #10b981; --green-light: #d1fae5;
-            --amber: #f59e0b; --amber-light: #fef9c3;
-            --red: #ef4444; --red-light: #fee2e2;
-            --bg: #f8fafc; --surface: #ffffff;
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --bg: #f8fafc;
+            --surface: #ffffff;
             --border: rgba(0,0,0,0.08);
-            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
             --sidebar-w: 240px;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
@@ -128,7 +135,7 @@
         .penalties-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 18px; display: none; }
         .penalties-panel.active { display: block; animation: fadeIn .25s ease; }
         .penalty-summary { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 14px; background: var(--bg); border-radius: 10px; font-size: 13px; }
-        .penalty-summary span { display: flex; gap: 5px; }
+        .penalty-summary span { display: flex; gap: 5px; align-items: center; }
 
         .penalty-item { background: var(--bg); padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; cursor: pointer; transition: background .15s; }
         .penalty-item:hover { background: var(--indigo-light); }
@@ -142,12 +149,177 @@
         .placeholder-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); background: var(--surface); border-radius: 16px; border: 1px dashed var(--border); }
         .placeholder-state i { font-size: 40px; display: block; margin-bottom: 12px; }
 
+        .emergency-info { background: var(--surface); border-radius: 16px; padding: 18px; border: 1px solid var(--border); display: none; }
+        .emergency-info .panel-title i { color: var(--green); }
+        .emergency-details { display: flex; flex-direction: column; gap: 8px; }
+        .emergency-details p { font-size: 13px; color: var(--text-secondary); }
+        .emergency-details p strong { color: var(--text-primary); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
         .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
         .bottom-nav-item i { font-size: 22px; }
         .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* Custom Penalty Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 420px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: modalIn 0.25s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-box h3 {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            transition: color .15s;
+        }
+        .modal-close-btn:hover { color: var(--text-primary); }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .form-group label i { font-size: 14px; }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 0.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--indigo);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 0.5px solid var(--border);
+            color: var(--text-primary);
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: background .15s, transform .1s;
+        }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-outline:active { transform: scale(0.97); }
+
+        .btn-amber { 
+            background: var(--amber); 
+            color: #fff; 
+            border: none; 
+            padding: 9px 18px; 
+            border-radius: 10px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 7px; 
+            transition: opacity .15s, transform .1s; 
+        }
+        .btn-amber:hover { opacity: .88; }
+        .btn-amber:active { transform: scale(0.97); }
+        .btn-amber:disabled { opacity: .6; cursor: not-allowed; }
+
+        .action-btn {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: opacity .15s, transform .1s;
+        }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pill-amber { background: var(--amber-light); color: #854d0e; }
+
+        .member-name-display {
+            padding: 8px 14px;
+            background: var(--bg);
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
 
         @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 900px)  { .two-col { grid-template-columns: 1fr; } .search-panel { position: static; } }
@@ -163,6 +335,8 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .profile-content { flex-direction: column; text-align: center; }
             .profile-badges { justify-content: center; }
+            .form-row { grid-template-columns: 1fr; }
+            .modal-box { padding: 20px 16px; }
         }
         button { cursor: pointer; touch-action: manipulation; }
     </style>
@@ -188,9 +362,8 @@
         <a href="members.html" class="nav-item active"><i class="ti ti-users"></i> Members view</a>
         <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
         <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
-         <div class="nav-section-label">Recognition</div>
-        <a href="hall-of-fame.html" class="nav-item active"><i class="fas fa-trophy"></i> Hall of Fame</a>
-  
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
     </nav>
     <div class="sidebar-bottom">
         <div class="user-card">
@@ -229,36 +402,88 @@
 
             <div class="detail-panel">
                 <div id="profileCard" class="profile-card"></div>
+                
+                <div id="emergencyCard" class="emergency-info">
+                    <div class="panel-title"><i class="ti ti-phone-call" style="color:var(--green)"></i> Emergency Contact</div>
+                    <div class="emergency-details">
+                        <p><strong>📞 Phone:</strong> <span id="memberPhone">-</span></p>
+                        <div class="form-row">
+                            <p><strong>👤 Emergency Contact:</strong> <span id="emergencyName">-</span></p>
+                            <p><strong>🔗 Relationship:</strong> <span id="emergencyRelationship">-</span></p>
+                        </div>
+                        <p><strong>📱 Emergency Phone:</strong> <span id="emergencyPhone">-</span></p>
+                    </div>
+                </div>
+
                 <div class="stats-grid" id="statsGrid"></div>
                 <div id="chartContainer" class="chart-panel">
                     <div class="panel-title"><i class="ti ti-chart-line" style="color:var(--indigo)"></i> Attendance trend (last 30 days)</div>
                     <canvas id="trendChart" height="90"></canvas>
                 </div>
+                
                 <div id="penaltiesContainer" class="penalties-panel">
-                    <div class="panel-title"><i class="ti ti-cash" style="color:var(--red)"></i> Penalties &amp; fines</div>
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <span><i class="ti ti-cash" style="color:var(--red)"></i> Penalties &amp; fines</span>
+                        <button onclick="showAddCustomPenalty()" class="action-btn btn-amber" style="padding:6px 14px; font-size:12px;">
+                            <i class="ti ti-plus"></i> Add Custom Penalty
+                        </button>
+                    </div>
                     <div id="penaltySummary" class="penalty-summary"></div>
                     <div id="penaltiesList"></div>
                 </div>
+
                 <div id="placeholderState" class="placeholder-state">
                     <i class="ti ti-user-search" style="color:var(--text-tertiary)"></i>
                     Select a member on the left to view their full attendance record and penalties.
                 </div>
-                <!-- Add this new section in the detail-panel, after profile-card -->
-<div id="emergencyCard" class="emergency-info" style="display: none; background: var(--surface); border-radius: 16px; padding: 18px; border: 1px solid var(--border); margin-bottom: 16px;">
-    <div class="panel-title"><i class="ti ti-phone-call" style="color:var(--green)"></i> Emergency Contact</div>
-    <div id="emergencyDetails" style="display: flex; flex-direction: column; gap: 8px;">
-        <p><strong>📞 Phone:</strong> <span id="memberPhone">-</span></p>
-        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <p><strong>👤 Emergency Contact:</strong> <span id="emergencyName">-</span></p></br>
-            <p><strong>🔗 Relationship:</strong> <span id="emergencyRelationship">-</span></p>
-        </div>
-        <p><strong>📱 Emergency Phone:</strong> <span id="emergencyPhone">-</span></p>
-    </div>
-</div>
-</div>
             </div>
         </div>
     </main>
+</div>
+
+<!-- Custom Penalty Modal -->
+<div class="modal-overlay" id="customPenaltyModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="ti ti-cash" style="color:var(--amber)"></i> Add Custom Penalty</h3>
+            <button class="modal-close-btn" onclick="closeCustomPenaltyModal()">&times;</button>
+        </div>
+        <div>
+            <div class="form-group">
+                <label><i class="ti ti-user"></i> Member</label>
+                <div class="member-name-display" id="penaltyMemberName">—</div>
+            </div>
+            <div class="form-group">
+                <label><i class="ti ti-list"></i> Penalty Type</label>
+                <select id="customPenaltyType" class="form-select">
+                    <option value="phone">📱 Using Phone During Practice</option>
+                    <option value="disruptive">🗣️ Disruptive Behavior</option>
+                    <option value="uniform">👕 Incorrect Uniform</option>
+                    <option value="tardy">⏰ Excessive Tardiness</option>
+                    <option value="unprepared">📝 Unprepared for Practice</option>
+                    <option value="other">📌 Other (specify below)</option>
+                </select>
+            </div>
+            <div class="form-group" id="customReasonGroup" style="display:none;">
+                <label><i class="ti ti-pencil"></i> Custom Reason *</label>
+                <input type="text" id="customPenaltyReason" class="form-input" placeholder="e.g., Not following instructions">
+            </div>
+            <div class="form-group">
+                <label><i class="ti ti-calendar"></i> Date</label>
+                <input type="date" id="customPenaltyDate" class="form-input">
+            </div>
+            <div class="form-group">
+                <label><i class="ti ti-cash"></i> Amount (KSh)</label>
+                <input type="number" id="customPenaltyAmount" class="form-input" placeholder="e.g., 50" min="0">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button type="button" onclick="closeCustomPenaltyModal()" class="btn-outline" style="flex:1; justify-content:center;">Cancel</button>
+                <button type="button" onclick="submitCustomPenalty()" class="btn-amber" style="flex:1; justify-content:center;">
+                    <i class="ti ti-device-floppy"></i> Add Penalty
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <nav class="bottom-nav">
@@ -274,7 +499,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let allMembers = [], selectedMember = null, trendChart;
-    let profilePhotoMap = {}; // member_id -> photo_url
+    let profilePhotoMap = {};
 
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
     
@@ -324,12 +549,8 @@
         } catch(e) { console.warn(e); }
     }
 
-    // SIMPLIFIED: Direct approach - get all user_profiles and map to member_id via user_members
     async function loadProfilePhotos() {
         try {
-            console.log('Loading profile photos...');
-            
-            // Step 1: Get all user_members (links users to members)
             const { data: userMembers, error: umError } = await supabaseClient
                 .from('user_members')
                 .select('member_id, user_id');
@@ -339,17 +560,10 @@
                 return;
             }
             
-            if (!userMembers || userMembers.length === 0) {
-                console.log('No user_members records found');
-                return;
-            }
+            if (!userMembers || userMembers.length === 0) return;
             
-            console.log(`Found ${userMembers.length} user_members records`);
-            
-            // Step 2: Get user_ids from userMembers
             const userIds = [...new Set(userMembers.map(um => um.user_id))];
             
-            // Step 3: Get profiles for those user_ids (same as member dashboard)
             const { data: profiles, error: pError } = await supabaseClient
                 .from('user_profiles')
                 .select('user_id, profile_photo_url')
@@ -361,14 +575,8 @@
                 return;
             }
             
-            if (!profiles || profiles.length === 0) {
-                console.log('No profiles with photos found for these users');
-                return;
-            }
+            if (!profiles || profiles.length === 0) return;
             
-            console.log(`Found ${profiles.length} profiles with photos`);
-            
-            // Step 4: Create map of user_id -> photo_url
             const userPhotoMap = {};
             profiles.forEach(profile => {
                 if (profile.user_id && profile.profile_photo_url) {
@@ -377,14 +585,11 @@
                 }
             });
             
-            // Step 5: Map to member_id
             userMembers.forEach(um => {
                 if (userPhotoMap[um.user_id]) {
                     profilePhotoMap[um.member_id] = userPhotoMap[um.user_id];
                 }
             });
-            
-            console.log(`Successfully mapped ${Object.keys(profilePhotoMap).length} members to profile photos`);
             
         } catch(e) {
             console.error('Error in loadProfilePhotos:', e);
@@ -402,14 +607,8 @@
             return; 
         }
         
-        // Filter active members only
         allMembers = members.filter(m => m.status === 'active');
-        
-        console.log(`Loaded ${allMembers.length} active members`);
-        
-        // Load profile photos
         await loadProfilePhotos();
-        
         renderMemberList(allMembers);
     }
 
@@ -424,7 +623,7 @@
             const photoUrl = profilePhotoMap[m.member_id];
             let avatarHtml = '';
             if (photoUrl) {
-                avatarHtml = `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="console.log('Image failed to load for ${m.name}'); this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
+                avatarHtml = `<img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(m.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>';">`;
             } else {
                 avatarHtml = `<span>${escapeHtml(m.name.charAt(0).toUpperCase())}</span>`;
             }
@@ -458,14 +657,12 @@
         selectedMember = allMembers.find(m => m.member_id === memberId);
         if (!selectedMember) return;
         
-        // Update UI
         document.querySelectorAll('.member-list-item').forEach(el => {
             el.classList.remove('selected');
         });
         const selectedEl = document.getElementById(`member-item-${memberId}`);
         if (selectedEl) selectedEl.classList.add('selected');
         
-        // Show detail panels
         document.getElementById('placeholderState').style.display = 'none';
         document.getElementById('profileCard').classList.add('active');
         document.getElementById('chartContainer').classList.add('active');
@@ -485,7 +682,6 @@
             avatarHtml = `<span>${escapeHtml(member.name.charAt(0).toUpperCase())}</span>`;
         }
         
-        // Profile card
         document.getElementById('profileCard').innerHTML = `
             <div class="profile-content">
                 <div class="profile-avatar">
@@ -504,7 +700,6 @@
             </div>
         `;
         
-        // Load attendance stats
         const { data: attendance } = await supabaseClient
             .from('attendance')
             .select('*')
@@ -536,25 +731,23 @@
             </div>
         `;
 
+        const { data: userProfile } = await supabaseClient
+            .from('user_profiles')
+            .select('phone, emergency_contact, emergency_phone, emergency_relationship')
+            .eq('member_id', member.member_id)
+            .maybeSingle();
 
-    // Load emergency contact info from user_profiles
-const { data: userProfile } = await supabaseClient
-    .from('user_profiles')
-    .select('phone, emergency_contact, emergency_phone, emergency_relationship')
-    .eq('member_id', member.member_id)
-    .maybeSingle();
+        const emergencyCard = document.getElementById('emergencyCard');
+        if (userProfile && (userProfile.phone || userProfile.emergency_contact || userProfile.emergency_phone || userProfile.emergency_relationship)) {
+            document.getElementById('memberPhone').textContent = userProfile.phone || 'Not provided';
+            document.getElementById('emergencyName').textContent = userProfile.emergency_contact || 'Not provided';
+            document.getElementById('emergencyRelationship').textContent = userProfile.emergency_relationship || 'Not specified';
+            document.getElementById('emergencyPhone').textContent = userProfile.emergency_phone || 'Not provided';
+            emergencyCard.style.display = 'block';
+        } else {
+            emergencyCard.style.display = 'none';
+        }
 
-const emergencyCard = document.getElementById('emergencyCard');
-if (userProfile && (userProfile.phone || userProfile.emergency_contact || userProfile.emergency_phone || userProfile.emergency_relationship)) {
-    document.getElementById('memberPhone').textContent = userProfile.phone || 'Not provided';
-    document.getElementById('emergencyName').textContent = userProfile.emergency_contact || 'Not provided';
-    document.getElementById('emergencyRelationship').textContent = userProfile.emergency_relationship || 'Not specified';
-    document.getElementById('emergencyPhone').textContent = userProfile.emergency_phone || 'Not provided';
-    emergencyCard.style.display = 'block';
-} else {
-    emergencyCard.style.display = 'none';
-}
-        // Chart data
         const last30Days = [], presentData = [], lateData = [];
         for (let i = 29; i >= 0; i--) {
             const date = new Date(); 
@@ -591,8 +784,6 @@ if (userProfile && (userProfile.phone || userProfile.emergency_contact || userPr
         });
         
         await loadPenalties(member.member_id);
-
-
     }
 
     async function loadPenalties(memberId) {
@@ -610,11 +801,13 @@ if (userProfile && (userProfile.phone || userProfile.emergency_contact || userPr
             
         const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
         const paidTotal    = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0)    || 0;
+        const customCount  = penalties?.filter(p => p.is_custom || p.penalty_type === 'custom').length || 0;
         
         document.getElementById('penaltySummary').innerHTML = `
             <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
             <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
             <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
+            <span style="color:var(--amber);"><strong>📌 Custom:</strong> ${customCount}</span>
         `;
         
         if (!penalties?.length) { 
@@ -622,20 +815,166 @@ if (userProfile && (userProfile.phone || userProfile.emergency_contact || userPr
             return; 
         }
         
-        document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
-            <div class="penalty-item">
-                <div>
-                    <div style="font-size:13px;font-weight:600;">${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'}</div>
-                    <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">${p.date} · ${p.session || ''}</div>
-                    ${p.reason ? `<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">📝 ${escapeHtml(p.reason)}</div>` : ''}
+        document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
+            const isCustom = p.is_custom || p.penalty_type === 'custom';
+            const typeIcon = isCustom ? '📌' : (p.penalty_type === 'late' ? '⏰' : '❌');
+            const typeLabel = isCustom ? 'Custom' : (p.penalty_type === 'late' ? 'Late' : 'Absent');
+            const reasonText = p.custom_reason || p.reason || '';
+            
+            return `
+                <div class="penalty-item">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;">
+                            ${typeIcon} ${typeLabel}
+                            ${isCustom ? '<span class="pill pill-amber" style="font-size:9px;padding:1px 8px;">Custom</span>' : ''}
+                        </div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">
+                            ${p.date} · ${p.session || 'Custom'}
+                            ${reasonText ? ` · 📝 ${escapeHtml(reasonText)}` : ''}
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="penalty-amount">KSh ${p.amount}</div>
+                        <span class="penalty-status-badge ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status.toUpperCase()}</span>
+                    </div>
                 </div>
-                <div style="text-align:right;">
-                    <div class="penalty-amount">KSh ${p.amount}</div>
-                    <span class="penalty-status-badge ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status.toUpperCase()}</span>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
+
+    // ── CUSTOM PENALTY FUNCTIONS ──
+
+    let selectedMemberForPenalty = null;
+
+    function showAddCustomPenalty() {
+        if (!selectedMember) {
+            alert('Please select a member first from the list on the left.');
+            return;
+        }
+        selectedMemberForPenalty = selectedMember;
+        
+        document.getElementById('penaltyMemberName').textContent = selectedMember.name;
+        document.getElementById('customPenaltyDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('customPenaltyAmount').value = '';
+        document.getElementById('customPenaltyReason').value = '';
+        document.getElementById('customPenaltyType').value = 'phone';
+        document.getElementById('customReasonGroup').style.display = 'none';
+        document.getElementById('customPenaltyReason').removeAttribute('required');
+        
+        document.getElementById('customPenaltyModal').classList.add('open');
+    }
+
+    function closeCustomPenaltyModal() {
+        document.getElementById('customPenaltyModal').classList.remove('open');
+        selectedMemberForPenalty = null;
+        document.getElementById('customPenaltyReason').removeAttribute('required');
+        document.getElementById('customReasonGroup').style.display = 'none';
+    }
+
+    // Handle type change
+    document.getElementById('customPenaltyType').addEventListener('change', function() {
+        const reasonGroup = document.getElementById('customReasonGroup');
+        const reasonInput = document.getElementById('customPenaltyReason');
+        
+        if (this.value === 'other') {
+            reasonGroup.style.display = 'block';
+            reasonInput.setAttribute('required', 'required');
+        } else {
+            reasonGroup.style.display = 'none';
+            reasonInput.removeAttribute('required');
+            reasonInput.value = '';
+        }
+    });
+
+    // Submit function (called from button click, not form submit)
+    async function submitCustomPenalty() {
+        if (!selectedMemberForPenalty) {
+            alert('No member selected.');
+            return;
+        }
+        
+        const penaltyType = document.getElementById('customPenaltyType').value;
+        const customReason = document.getElementById('customPenaltyReason').value.trim();
+        const date = document.getElementById('customPenaltyDate').value;
+        const amount = parseInt(document.getElementById('customPenaltyAmount').value);
+        
+        // Validate based on type
+        if (penaltyType === 'other' && !customReason) {
+            alert('Please enter a custom reason for the penalty.');
+            document.getElementById('customPenaltyReason').focus();
+            return;
+        }
+        
+        const typeLabels = {
+            'phone': 'Using phone during practice',
+            'disruptive': 'Disruptive behavior during practice',
+            'uniform': 'Incorrect uniform',
+            'tardy': 'Excessive tardiness',
+            'unprepared': 'Unprepared for practice',
+            'other': customReason || 'Custom penalty'
+        };
+        const reason = penaltyType === 'other' ? customReason : typeLabels[penaltyType];
+        
+        if (!date) {
+            alert('Please select a date.');
+            document.getElementById('customPenaltyDate').focus();
+            return;
+        }
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount (KSh).');
+            document.getElementById('customPenaltyAmount').focus();
+            return;
+        }
+        
+        const submitBtn = document.querySelector('#customPenaltyModal .btn-amber');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="ti ti-loader"></i> Adding...';
+        submitBtn.disabled = true;
+        
+    // Replace the INSERT section in submitCustomPenalty() with this:
+
+try {
+    const { error } = await supabaseClient.from('penalties').upsert({
+        member_id: selectedMemberForPenalty.member_id,
+        date: date,
+        session: 'Custom',
+        penalty_type: 'custom',
+        amount: amount,
+        status: 'pending',
+        reason: reason,
+        is_custom: true,
+        custom_reason: reason
+    }, { 
+        onConflict: 'member_id,date,session'  // This handles duplicates
+    });
+    
+    if (error) throw error;
+    
+    alert(`✅ Custom penalty added for ${selectedMemberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
+    closeCustomPenaltyModal();
+    await loadPenalties(selectedMemberForPenalty.member_id);
+    
+} catch (error) {
+    alert('❌ Error adding penalty: ' + error.message);
+} finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('customPenaltyModal').addEventListener('click', function(e) {
+        if (e.target === this) closeCustomPenaltyModal();
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('customPenaltyModal').classList.contains('open')) {
+                closeCustomPenaltyModal();
+            }
+        }
+    });
 
     document.getElementById('searchInput').addEventListener('input', searchMembers);
 
@@ -654,6 +993,9 @@ if (userProfile && (userProfile.phone || userProfile.emergency_contact || userPr
     window.selectMember = selectMember;
     window.toggleSidebar = toggleSidebar;
     window.closeSidebar = closeSidebar;
+    window.showAddCustomPenalty = showAddCustomPenalty;
+    window.closeCustomPenaltyModal = closeCustomPenaltyModal;
+    window.submitCustomPenalty = submitCustomPenalty;
 </script>
 </body>
 </html>

@@ -1609,59 +1609,124 @@
         }
 
         async function loadPenalties() {
-            if (!currentMember) return;
-            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember
-                .member_id).order('date', { ascending: false });
-            const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
-            const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
-            document.getElementById('penaltySummary').innerHTML = `
-                <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
-                    <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
-                    <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
-                    <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
-                </div>
-                <div style="margin-top:8px; font-size:12px; color:var(--slate-500);"><i class="fas fa-phone"></i> Payment: POCHI 0117085859 | Peter Manundu</div>
-            `;
-            if (!penalties?.length) {
-                document.getElementById('penaltiesList').innerHTML =
-                    '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
-                return;
-            }
-            document.getElementById('penaltiesList').innerHTML = penalties.map(p => `
-                <div class="apology-item">
+    if (!currentMember) return;
+    const { data: penalties } = await supabaseClient
+        .from('penalties')
+        .select('*')
+        .eq('member_id', currentMember.member_id)
+        .order('date', { ascending: false });
+    
+    const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
+    const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
+    
+    document.getElementById('penaltySummary').innerHTML = `
+        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
+            <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
+            <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
+            <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
+        </div>
+        <div style="margin-top:8px; font-size:12px; color:var(--slate-500);"><i class="fas fa-phone"></i> Payment: POCHI 0117085859 | Peter Manundu</div>
+    `;
+    
+    if (!penalties?.length) {
+        document.getElementById('penaltiesList').innerHTML =
+            '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
+        return;
+    }
+    
+    document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
+        // Check if it's a custom penalty
+        const isCustom = p.is_custom || p.penalty_type === 'custom';
+        
+        // Get the display reason
+        let displayReason = '';
+        let displayIcon = '';
+        let displayType = '';
+        
+        if (isCustom) {
+            // Custom penalty - show the custom reason
+            displayReason = p.custom_reason || p.reason || 'Custom penalty';
+            displayIcon = '📌';
+            displayType = 'Custom';
+        } else if (p.penalty_type === 'late') {
+            displayReason = 'Late arrival';
+            displayIcon = '⏰';
+            displayType = 'Late';
+        } else {
+            displayReason = 'Absent without apology';
+            displayIcon = '❌';
+            displayType = 'Absent';
+        }
+        
+        return `
+            <div class="apology-item">
+                <div>
                     <div>
-                        <div><strong>${p.penalty_type === 'late' ? '<i class="fas fa-clock" style="color:var(--amber);"></i> Late' : '<i class="fas fa-times-circle" style="color:var(--red);"></i> Absent'}</strong></div>
-                        <div style="font-size:13px; color:var(--slate-500);">${p.date} • ${p.session || ''}</div>
+                        <strong>
+                            ${displayIcon} ${displayType}
+                            ${isCustom ? '<span style="background:var(--amber-light);color:#854d0e;padding:2px 8px;border-radius:40px;font-size:10px;margin-left:6px;">Custom</span>' : ''}
+                        </strong>
+                        ${p.reason && !isCustom ? `<div style="font-size:12px;color:var(--slate-500);margin-top:2px;">${p.reason}</div>` : ''}
                     </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:18px; font-weight:700; color:var(--red);">KSh ${p.amount}</div>
-                        <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
-                        ${p.status === 'pending' ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${p.amount}, '${p.penalty_type === 'late' ? 'Late Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
+                    <div style="font-size:13px; color:var(--slate-500);">
+                        ${p.date} • ${p.session || 'Custom'}
+                        ${isCustom ? ` • <span style="color:var(--amber);font-weight:500;">${escapeHtml(displayReason)}</span>` : ''}
                     </div>
+                    ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;">📝 ${escapeHtml(displayReason)}</div>` : ''}
                 </div>
-            `).join('');
-            await checkPendingPenalties();
-            await updateFloatingReminder();
-        }
-
-        async function showPaymentModal(penaltyId, amount, description) {
-            const { data: penalty } = await supabaseClient.from('penalties').select('status').eq('id', penaltyId).single();
-            if (!penalty || penalty.status !== 'pending') { alert('This fine has already been paid or does not exist.'); return; }
-            currentPenaltyId = penaltyId;
-            currentPenaltyAmount = amount;
-            currentPenaltyDescription = description;
-            const { data: penalties } = await supabaseClient.from('penalties').select('amount').eq('member_id', currentMember
-                .member_id).eq('status', 'pending');
-            const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
-            document.getElementById('modalAmount').innerHTML = `KSh ${amount}`;
-            document.getElementById('modalDescription').innerHTML = description;
-            document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
-            document.getElementById('modalAmount2').innerHTML = `KSh ${amount}`;
-            document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal}`;
-            document.getElementById('instructionAmount').innerHTML = `KSh ${amount}`;
-            document.getElementById('transactionCode').value = '';
-            document.getElementById('paymentModal').classList.add('open');
-        }
+                <div style="text-align:right;">
+                    <div style="font-size:18px; font-weight:700; color:var(--red);">KSh ${p.amount}</div>
+                    <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
+                    ${p.status === 'pending' ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${p.amount}, '${p.penalty_type === 'late' ? 'Late Fine' : p.is_custom ? p.custom_reason || p.reason || 'Custom Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    await checkPendingPenalties();
+    await updateFloatingReminder();
+}
+ async function showPaymentModal(penaltyId, amount, description) {
+    const { data: penalty } = await supabaseClient
+        .from('penalties')
+        .select('status, is_custom, custom_reason, reason')
+        .eq('id', penaltyId)
+        .single();
+        
+    if (!penalty || penalty.status !== 'pending') {
+        alert('This fine has already been paid or does not exist.');
+        return;
+    }
+    
+    currentPenaltyId = penaltyId;
+    currentPenaltyAmount = amount;
+    
+    // Build description with custom reason
+    let displayDescription = description;
+    if (penalty.is_custom) {
+        const customText = penalty.custom_reason || penalty.reason || 'Custom penalty';
+        displayDescription = `📌 Custom Penalty: ${customText} - ${description.split(' - ')[1] || ''}`;
+    }
+    
+    currentPenaltyDescription = displayDescription;
+    
+    const { data: penalties } = await supabaseClient
+        .from('penalties')
+        .select('amount')
+        .eq('member_id', currentMember.member_id)
+        .eq('status', 'pending');
+        
+    const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
+    
+    document.getElementById('modalAmount').innerHTML = `KSh ${amount}`;
+    document.getElementById('modalDescription').innerHTML = displayDescription;
+    document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
+    document.getElementById('modalAmount2').innerHTML = `KSh ${amount}`;
+    document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal}`;
+    document.getElementById('instructionAmount').innerHTML = `KSh ${amount}`;
+    document.getElementById('transactionCode').value = '';
+    document.getElementById('paymentModal').classList.add('open');
+}
 
         function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open');
             currentPenaltyId = null; }

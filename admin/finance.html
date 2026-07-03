@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Finance | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --blue: #3b82f6;
+            --blue-light: #dbeafe;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; overflow: hidden; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        .balance-hero { background: linear-gradient(135deg, var(--indigo) 0%, #7c3aed 100%); border-radius: 20px; padding: 24px 28px; color: #fff; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .balance-hero .balance-amount { font-size: 32px; font-weight: 700; }
+        .balance-hero .balance-label { font-size: 13px; opacity: 0.8; }
+        .balance-hero .status-badge { padding: 4px 16px; border-radius: 40px; font-size: 12px; font-weight: 600; }
+        .balance-hero .status-badge.healthy { background: rgba(16,185,129,0.3); color: #6ee7b7; }
+        .balance-hero .status-badge.warning { background: rgba(245,158,11,0.3); color: #fcd34d; }
+        .balance-hero .status-badge.danger { background: rgba(239,68,68,0.3); color: #fca5a5; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px; }
+        .stat-card .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+        .stat-card .value { font-size: 22px; font-weight: 700; }
+        .stat-card .value.green { color: var(--green); }
+        .stat-card .value.red { color: var(--red); }
+        .stat-card .value.amber { color: var(--amber); }
+        .stat-card .value.indigo { color: var(--indigo); }
+
+        .tabs-bar { display: flex; gap: 4px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 5px; margin-bottom: 24px; flex-wrap: wrap; }
+        .tab-btn { padding: 8px 18px; background: transparent; border: none; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 9px; color: var(--text-secondary); display: flex; align-items: center; gap: 7px; transition: background .12s, color .12s; }
+        .tab-btn i { font-size: 15px; }
+        .tab-btn.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .tab-content { display: none; animation: fadeIn .22s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .controls-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 16px 18px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
+        .form-input, .form-select { padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; background: var(--bg); font-family: inherit; color: var(--text-primary); outline: none; transition: border-color .15s; width: 100%; }
+        .form-input:focus, .form-select:focus { border-color: var(--indigo); }
+
+        .action-btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-amber { background: var(--amber); color: #fff; }
+        .btn-outline { background: transparent; border: 0.5px solid var(--border); color: var(--text-primary); }
+
+        .table-wrapper { overflow-x: auto; border-radius: 14px; border: 0.5px solid var(--border); background: var(--surface); }
+        .finance-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .finance-table th { background: var(--bg); padding: 11px 16px; font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: left; text-transform: uppercase; letter-spacing: .5px; border-bottom: 0.5px solid var(--border); }
+        .finance-table td { padding: 11px 16px; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+        .finance-table tr:last-child td { border-bottom: none; }
+        .finance-table tr:hover td { background: var(--bg); }
+
+        .badge { padding: 3px 10px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-income { background: var(--green-light); color: #065f46; }
+        .badge-expense { background: var(--red-light); color: #991b1b; }
+        .badge-confirmed { background: var(--green-light); color: #065f46; }
+        .badge-pending { background: var(--amber-light); color: #854d0e; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-tertiary); }
+        .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--surface); border-radius: 20px; padding: 28px 24px; max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-header h3 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .modal-close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-tertiary); }
+
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* Payment settings styles */
+        .payment-settings-panel {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 0.5px solid #f59e0b;
+            border-left: 4px solid var(--amber);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+
+        .payment-settings-panel .label {
+            font-size: 12px;
+            color: #92400e;
+            opacity: 0.7;
+        }
+
+        .payment-settings-panel .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        .payment-settings-panel .updated-at {
+            font-size: 11px;
+            color: #92400e;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .controls-panel { flex-direction: column; align-items: stretch; }
+            .action-btn { justify-content: center; }
+            .tabs-bar { width: 100%; }
+            .balance-hero { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">98th Music Festival 2026</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="fas fa-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="fas fa-check-circle"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="fas fa-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="fas fa-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="fas fa-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="fas fa-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="fas fa-cash"></i> Confirm penalties</a>
+        <div class="nav-section-label">Finance</div>
+        <a href="finance.html" class="nav-item active"><i class="fas fa-wallet"></i> Finance</a>
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="fas fa-trophy"></i> Hall of Fame</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar"><span>A</span></div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-left">
+                <h2>💰 Choir Finance</h2>
+                <p>Track income, expenses, and choir funds</p>
+            </div>
+        </div>
+        <div class="topbar-right"><div class="topbar-chip" id="topTime">--:--</div></div>
+    </header>
+
+    <main class="content">
+
+        <!-- Balance Hero -->
+        <div class="balance-hero" id="balanceHero">
+            <div>
+                <div class="balance-label"><i class="fas fa-wallet"></i> Current Balance</div>
+                <div class="balance-amount" id="currentBalance">KSh 0</div>
+                <div style="margin-top:8px;">
+                    <span class="status-badge healthy" id="balanceStatus">✅ Healthy</span>
+                </div>
+            </div>
+            <div style="display:flex; gap:24px; flex-wrap:wrap;">
+                <div>
+                    <div class="balance-label"><i class="fas fa-arrow-up" style="color:#6ee7b7;"></i> Total Income</div>
+                    <div style="font-size:20px; font-weight:600; color:#6ee7b7;" id="totalIncome">KSh 0</div>
+                </div>
+                <div>
+                    <div class="balance-label"><i class="fas fa-arrow-down" style="color:#fca5a5;"></i> Total Expenses</div>
+                    <div style="font-size:20px; font-weight:600; color:#fca5a5;" id="totalExpenses">KSh 0</div>
+                </div>
+                <div>
+                    <div class="balance-label"><i class="fas fa-users"></i> Members Owing</div>
+                    <div style="font-size:20px; font-weight:600;" id="membersOwing">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <!-- Payment Settings Panel -->
+        <div class="payment-settings-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <h3 style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; color:#92400e; margin:0;">
+                        <i class="fas fa-mobile-alt" style="color:var(--amber);"></i> Payment Settings
+                    </h3>
+                    <p style="font-size:12px; color:#92400e; opacity:0.8; margin:4px 0 0 0;">Update the payment phone number displayed to members</p>
+                </div>
+                <button onclick="togglePaymentSettings()" class="action-btn btn-amber" style="padding:6px 16px; font-size:12px; background:#f59e0b; color:#fff; border:none; border-radius:40px; cursor:pointer;">
+                    <i class="fas fa-edit"></i> Edit Settings
+                </button>
+            </div>
+            <div id="paymentSettingsDisplay" style="margin-top:12px; display:flex; gap:20px; flex-wrap:wrap; font-size:13px;">
+                <span><strong>📱 Phone:</strong> <span id="displayPhone">0117085859</span></span>
+                <span><strong>👤 Name:</strong> <span id="displayName">Peter Manundu</span></span>
+                <span style="font-size:11px; color:#92400e; opacity:0.7;">Last updated: <span id="displayUpdated">—</span></span>
+            </div>
+        </div>
+
+        <!-- Payment Settings Modal -->
+        <div class="modal-overlay" id="paymentSettingsModal">
+            <div class="modal-box" style="max-width:450px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-mobile-alt" style="color:var(--amber);"></i> Payment Settings</h3>
+                    <button class="modal-close-btn" onclick="closePaymentSettings()">&times;</button>
+                </div>
+                <form id="paymentSettingsForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> M-Pesa Phone Number</label>
+                        <input type="tel" id="settingsPhone" class="form-input" placeholder="e.g., 0117085859" required>
+                        <p style="font-size:11px; color:var(--text-tertiary); margin-top:4px;">This number will be shown to members for fine payments</p>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> M-Pesa Name</label>
+                        <input type="text" id="settingsName" class="form-input" placeholder="e.g., Peter Manundu" required>
+                        <p style="font-size:11px; color:var(--text-tertiary); margin-top:4px;">Name displayed on payment instructions</p>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:8px;">
+                        <button type="button" onclick="closePaymentSettings()" class="action-btn btn-outline" style="flex:1; justify-content:center; background:transparent; border:0.5px solid var(--border); color:var(--text-primary); padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer;">Cancel</button>
+                        <button type="submit" class="action-btn btn-amber" style="flex:1; justify-content:center; background:#f59e0b; color:#fff; border:none; padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer;">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" data-tab="overview"><i class="fas fa-chart-pie"></i> Overview</button>
+            <button class="tab-btn" data-tab="transactions"><i class="fas fa-list"></i> Transactions</button>
+            <button class="tab-btn" data-tab="members"><i class="fas fa-users"></i> Members</button>
+            <button class="tab-btn" data-tab="reports"><i class="fas fa-file"></i> Reports</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overviewTab" class="tab-content active">
+            <div class="controls-panel">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar"></i> Year</label>
+                    <select id="overviewYear" class="form-select">
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <button class="action-btn btn-primary" onclick="loadOverview()"><i class="fas fa-refresh"></i> Refresh</button>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div class="table-wrapper">
+                    <div style="padding:14px 16px; font-weight:600; border-bottom:0.5px solid var(--border);">
+                        <i class="fas fa-arrow-up" style="color:var(--green)"></i> Income Sources
+                    </div>
+                    <div id="incomeSources" style="padding:16px;"></div>
+                </div>
+                <div class="table-wrapper">
+                    <div style="padding:14px 16px; font-weight:600; border-bottom:0.5px solid var(--border);">
+                        <i class="fas fa-arrow-down" style="color:var(--red)"></i> Expenses
+                    </div>
+                    <div id="expenseCategories" style="padding:16px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Tab -->
+        <div id="transactionsTab" class="tab-content">
+            <div class="controls-panel">
+                <div class="form-group">
+                    <label><i class="fas fa-filter"></i> Type</label>
+                    <select id="transactionTypeFilter" class="form-select">
+                        <option value="all">All</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+                <button class="action-btn btn-green" onclick="showAddModal()"><i class="fas fa-plus"></i> Add Income</button>
+                <button class="action-btn btn-red" onclick="showAddExpenseModal()"><i class="fas fa-minus"></i> Add Expense</button>
+                <button class="action-btn btn-primary" onclick="loadTransactions()"><i class="fas fa-refresh"></i> Refresh</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsList">
+                        <tr><td colspan="7" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading transactions...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Members Tab -->
+        <div id="membersTab" class="tab-content">
+            <div class="controls-panel">
+                <div class="form-group">
+                    <label><i class="fas fa-search"></i> Search</label>
+                    <input type="text" id="memberSearch" class="form-input" placeholder="Search member..." oninput="loadMemberBalances()">
+                </div>
+                <button class="action-btn btn-primary" onclick="loadMemberBalances()"><i class="fas fa-refresh"></i> Refresh</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Voice Part</th>
+                            <th>Total Paid</th>
+                            <th>Pending Penalties</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberBalancesList">
+                        <tr><td colspan="6" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reportsTab" class="tab-content">
+            <div class="controls-panel">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar"></i> Month</label>
+                    <input type="month" id="reportMonth" class="form-input">
+                </div>
+                <button class="action-btn btn-primary" onclick="generateReport()"><i class="fas fa-file"></i> Generate</button>
+            </div>
+            <div id="reportContent" style="background:var(--surface); border:0.5px solid var(--border); border-radius:16px; padding:20px;">
+                <div class="empty-state"><i class="fas fa-chart-bar"></i> Select a month and click Generate</div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Add Income Modal -->
+<div class="modal-overlay" id="addIncomeModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus-circle" style="color:var(--green)"></i> Add Income</h3>
+            <button class="modal-close-btn" onclick="closeAddModal()">&times;</button>
+        </div>
+        <form id="incomeForm">
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> Category</label>
+                <select id="incomeCategory" class="form-select" required></select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-dollar-sign"></i> Amount (KSh)</label>
+                <input type="number" id="incomeAmount" class="form-input" placeholder="0.00" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Date</label>
+                <input type="date" id="incomeDate" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Member (optional)</label>
+                <select id="incomeMember" class="form-select">
+                    <option value="">— Not member related —</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-comment"></i> Description</label>
+                <input type="text" id="incomeDescription" class="form-input" placeholder="Brief description">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button type="button" onclick="closeAddModal()" class="action-btn btn-outline" style="flex:1; justify-content:center;">Cancel</button>
+                <button type="submit" class="action-btn btn-green" style="flex:1; justify-content:center;">
+                    <i class="fas fa-save"></i> Add Income
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Expense Modal -->
+<div class="modal-overlay" id="addExpenseModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-minus-circle" style="color:var(--red)"></i> Add Expense</h3>
+            <button class="modal-close-btn" onclick="closeAddExpenseModal()">&times;</button>
+        </div>
+        <form id="expenseForm">
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> Category</label>
+                <select id="expenseCategory" class="form-select" required></select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-dollar-sign"></i> Amount (KSh)</label>
+                <input type="number" id="expenseAmount" class="form-input" placeholder="0.00" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Date</label>
+                <input type="date" id="expenseDate" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-comment"></i> Description</label>
+                <input type="text" id="expenseDescription" class="form-input" placeholder="What was this for?">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button type="button" onclick="closeAddExpenseModal()" class="action-btn btn-outline" style="flex:1; justify-content:center;">Cancel</button>
+                <button type="submit" class="action-btn btn-red" style="flex:1; justify-content:center;">
+                    <i class="fas fa-save"></i> Add Expense
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="fas fa-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="fas fa-check-circle"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
+    <a href="finance.html" class="bottom-nav-item active"><i class="fas fa-wallet"></i><span>Finance</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let allMembers = [];
+    let incomeCategories = [];
+    let expenseCategories = [];
+
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+
+    function tick() {
+        document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+    }
+    setInterval(tick, 1000); tick();
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    async function doLogout() {
+        try { await sb.auth.signOut(); } catch {}
+        window.location.href = '../login.html';
+    }
+
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').innerHTML = `<span>${name.charAt(0).toUpperCase()}</span>`;
+        } catch(e) { console.warn(e); }
+    }
+
+    // ── LOAD CATEGORIES ──
+    async function loadCategories() {
+        const { data: income } = await sb.from('income_categories').select('*').eq('is_active', true);
+        const { data: expense } = await sb.from('expense_categories').select('*').eq('is_active', true);
+        incomeCategories = income || [];
+        expenseCategories = expense || [];
+        populateCategorySelects();
+    }
+
+    function populateCategorySelects() {
+        const incomeSelect = document.getElementById('incomeCategory');
+        incomeSelect.innerHTML = incomeCategories.map(c => 
+            `<option value="${c.name}">${c.name}</option>`
+        ).join('');
+
+        const expenseSelect = document.getElementById('expenseCategory');
+        expenseSelect.innerHTML = expenseCategories.map(c => 
+            `<option value="${c.name}">${c.name}</option>`
+        ).join('');
+    }
+
+    // ── PAYMENT SETTINGS FUNCTIONS ──
+    async function loadPaymentSettings() {
+        try {
+            const { data, error } = await sb
+                .from('settings')
+                .select('setting_key, setting_value, updated_at')
+                .like('setting_key', 'payment_%');
+
+            if (error) throw error;
+
+            const settings = {};
+            data.forEach(row => {
+                settings[row.setting_key] = row.setting_value;
+            });
+
+            // Update display
+            document.getElementById('displayPhone').textContent = settings['payment_phone'] || '0117085859';
+            document.getElementById('displayName').textContent = settings['payment_name'] || 'Peter Manundu';
+            
+            // Update updated time
+            const updatedRow = data.find(r => r.setting_key === 'payment_phone');
+            if (updatedRow && updatedRow.updated_at) {
+                document.getElementById('displayUpdated').textContent = 
+                    new Date(updatedRow.updated_at).toLocaleString();
+            }
+
+            // Save to localStorage for member side
+            localStorage.setItem('payment_phone', settings['payment_phone'] || '0117085859');
+            localStorage.setItem('payment_name', settings['payment_name'] || 'Peter Manundu');
+
+        } catch (error) {
+            console.error('Error loading payment settings:', error);
+        }
+    }
+
+    function togglePaymentSettings() {
+        const phone = document.getElementById('displayPhone').textContent;
+        const name = document.getElementById('displayName').textContent;
+        
+        document.getElementById('settingsPhone').value = phone;
+        document.getElementById('settingsName').value = name;
+        
+        document.getElementById('paymentSettingsModal').classList.add('open');
+    }
+
+    function closePaymentSettings() {
+        document.getElementById('paymentSettingsModal').classList.remove('open');
+    }
+
+    document.getElementById('paymentSettingsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const phone = document.getElementById('settingsPhone').value.trim();
+        const name = document.getElementById('settingsName').value.trim();
+        
+        if (!phone || !name) {
+            alert('Please fill in all fields.');
+            return;
+        }
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        submitBtn.disabled = true;
+        
+        try {
+            // Update payment phone
+            const { error: phoneError } = await sb
+                .from('settings')
+                .upsert({
+                    setting_key: 'payment_phone',
+                    setting_value: phone,
+                    updated_by: 'admin',
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'setting_key' });
+            
+            if (phoneError) throw phoneError;
+            
+            // Update payment name
+            const { error: nameError } = await sb
+                .from('settings')
+                .upsert({
+                    setting_key: 'payment_name',
+                    setting_value: name,
+                    updated_by: 'admin',
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'setting_key' });
+            
+            if (nameError) throw nameError;
+            
+            alert('✅ Payment settings updated successfully!');
+            closePaymentSettings();
+            await loadPaymentSettings();
+            
+            // Sync with localStorage for member side
+            localStorage.setItem('payment_phone', phone);
+            localStorage.setItem('payment_name', name);
+            
+        } catch (error) {
+            alert('❌ Error saving settings: ' + error.message);
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Close modal on outside click
+    document.getElementById('paymentSettingsModal').addEventListener('click', function(e) {
+        if (e.target === this) closePaymentSettings();
+    });
+
+    // ── LOAD MEMBERS ──
+    async function loadMembers() {
+        const { data } = await sb.from('members').select('member_id, name').eq('status', 'active').order('name');
+        allMembers = data || [];
+        const select = document.getElementById('incomeMember');
+        select.innerHTML = '<option value="">— Not member related —</option>';
+        allMembers.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.member_id;
+            opt.textContent = m.name;
+            select.appendChild(opt);
+        });
+    }
+
+    // ── TABS ──
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById(`${tab}Tab`).classList.add('active');
+            if (tab === 'overview') loadOverview();
+            if (tab === 'transactions') loadTransactions();
+            if (tab === 'members') loadMemberBalances();
+        });
+    });
+
+    // ── LOAD BALANCE ──
+    async function loadBalance() {
+        const { data } = await sb.from('choir_balance').select('*');
+        if (!data || data.length === 0) return;
+        const info = data[0];
+        const balance = info.current_balance || 0;
+        
+        document.getElementById('currentBalance').textContent = `KSh ${balance.toLocaleString()}`;
+        document.getElementById('totalIncome').textContent = `KSh ${(info.total_income || 0).toLocaleString()}`;
+        document.getElementById('totalExpenses').textContent = `KSh ${(info.total_expenses || 0).toLocaleString()}`;
+
+        // Status
+        const statusEl = document.getElementById('balanceStatus');
+        if (balance > 20000) {
+            statusEl.textContent = '✅ Healthy';
+            statusEl.className = 'status-badge healthy';
+        } else if (balance > 5000) {
+            statusEl.textContent = '⚠️ Moderate';
+            statusEl.className = 'status-badge warning';
+        } else {
+            statusEl.textContent = '🔴 Low Funds';
+            statusEl.className = 'status-badge danger';
+        }
+
+        // Members owing
+        const { data: owing } = await sb.from('member_financial_status').select('*').gt('balance', 0);
+        document.getElementById('membersOwing').textContent = owing?.length || 0;
+    }
+
+    // ── OVERVIEW ──
+    async function loadOverview() {
+        const year = document.getElementById('overviewYear').value;
+        const startDate = `${year}-01-01`;
+        const endDate = `${year}-12-31`;
+
+        const { data } = await sb
+            .from('financial_transactions')
+            .select('*')
+            .gte('date', startDate)
+            .lte('date', endDate)
+            .eq('status', 'confirmed');
+
+        const income = data?.filter(t => t.transaction_type === 'income') || [];
+        const expenses = data?.filter(t => t.transaction_type === 'expense') || [];
+        const totalIncome = income.reduce((s, t) => s + t.amount, 0);
+        const totalExpenses = expenses.reduce((s, t) => s + t.amount, 0);
+
+        // Income by category
+        const incomeByCat = {};
+        income.forEach(t => {
+            if (!incomeByCat[t.category]) incomeByCat[t.category] = 0;
+            incomeByCat[t.category] += t.amount;
+        });
+
+        const incomeHtml = Object.entries(incomeByCat)
+            .sort((a, b) => b[1] - a[1])
+            .map(([cat, amt]) => `
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:0.5px solid var(--border);">
+                    <span>${escapeHtml(cat)}</span>
+                    <span style="font-weight:600; color:var(--green);">KSh ${amt.toLocaleString()}</span>
+                </div>
+            `).join('') || '<div class="empty-state" style="padding:20px;">No income recorded</div>';
+        document.getElementById('incomeSources').innerHTML = incomeHtml;
+
+        // Expenses by category
+        const expByCat = {};
+        expenses.forEach(t => {
+            if (!expByCat[t.category]) expByCat[t.category] = 0;
+            expByCat[t.category] += t.amount;
+        });
+
+        const expHtml = Object.entries(expByCat)
+            .sort((a, b) => b[1] - a[1])
+            .map(([cat, amt]) => `
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:0.5px solid var(--border);">
+                    <span>${escapeHtml(cat)}</span>
+                    <span style="font-weight:600; color:var(--red);">KSh ${amt.toLocaleString()}</span>
+                </div>
+            `).join('') || '<div class="empty-state" style="padding:20px;">No expenses recorded</div>';
+        document.getElementById('expenseCategories').innerHTML = expHtml;
+
+        // Update stats
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="stat-card">
+                <div class="label"><i class="fas fa-arrow-up" style="color:var(--green)"></i> Total Income</div>
+                <div class="value green">KSh ${totalIncome.toLocaleString()}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label"><i class="fas fa-arrow-down" style="color:var(--red)"></i> Total Expenses</div>
+                <div class="value red">KSh ${totalExpenses.toLocaleString()}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label"><i class="fas fa-wallet"></i> Net Balance</div>
+                <div class="value amber">KSh ${(totalIncome - totalExpenses).toLocaleString()}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label"><i class="fas fa-exchange-alt"></i> Transactions</div>
+                <div class="value indigo">${(income.length + expenses.length)}</div>
+            </div>
+        `;
+
+        await loadBalance();
+    }
+
+    // ── TRANSACTIONS ──
+    async function loadTransactions() {
+        const type = document.getElementById('transactionTypeFilter').value;
+        let query = sb.from('financial_transactions').select('*').order('date', { ascending: false });
+
+        if (type !== 'all') query = query.eq('transaction_type', type);
+
+        const { data, error } = await query;
+        if (error) {
+            document.getElementById('transactionsList').innerHTML = `<tr><td colspan="7" class="empty-state">Error loading transactions</td></tr>`;
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            document.getElementById('transactionsList').innerHTML = `<tr><td colspan="7" class="empty-state"><i class="fas fa-inbox"></i> No transactions found</td></tr>`;
+            return;
+        }
+
+        document.getElementById('transactionsList').innerHTML = data.map(t => `
+            <tr>
+                <td>${t.date}</td>
+                <td><span class="badge ${t.transaction_type === 'income' ? 'badge-income' : 'badge-expense'}">${t.transaction_type === 'income' ? '💰 Income' : '💸 Expense'}</span></td>
+                <td>${escapeHtml(t.category)}</td>
+                <td>${escapeHtml(t.description || '—')}</td>
+                <td style="font-weight:600; color:${t.transaction_type === 'income' ? 'var(--green)' : 'var(--red)'};">KSh ${t.amount.toLocaleString()}</td>
+                <td><span class="badge badge-${t.status}">${t.status.toUpperCase()}</span></td>
+                <td>
+                    ${t.status === 'pending' ? `<button class="action-btn btn-green" style="padding:4px 10px; font-size:11px;" onclick="confirmTransaction('${t.id}')"><i class="fas fa-check"></i></button>` : ''}
+                    <button class="action-btn btn-red" style="padding:4px 10px; font-size:11px;" onclick="deleteTransaction('${t.id}')"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ── ADD INCOME ──
+    function showAddModal() {
+        document.getElementById('incomeForm').reset();
+        document.getElementById('incomeDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('addIncomeModal').classList.add('open');
+    }
+
+    function closeAddModal() {
+        document.getElementById('addIncomeModal').classList.remove('open');
+    }
+
+    document.getElementById('incomeForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        btn.disabled = true;
+
+        const category = document.getElementById('incomeCategory').value;
+        const amount = parseFloat(document.getElementById('incomeAmount').value);
+        const date = document.getElementById('incomeDate').value;
+        const memberId = document.getElementById('incomeMember').value || null;
+        const description = document.getElementById('incomeDescription').value || null;
+
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount.');
+            btn.innerHTML = original; btn.disabled = false; return;
+        }
+
+        const { error } = await sb.from('financial_transactions').insert({
+            transaction_id: `INC-${Date.now()}`,
+            transaction_type: 'income',
+            category,
+            amount,
+            date,
+            member_id: memberId,
+            description,
+            status: 'confirmed'
+        });
+
+        if (error) {
+            alert('❌ Error: ' + error.message);
+        } else {
+            alert('✅ Income added successfully!');
+            closeAddModal();
+            loadTransactions();
+            loadOverview();
+        }
+
+        btn.innerHTML = original;
+        btn.disabled = false;
+    });
+
+    // ── ADD EXPENSE ──
+    function showAddExpenseModal() {
+        document.getElementById('expenseForm').reset();
+        document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('addExpenseModal').classList.add('open');
+    }
+
+    function closeAddExpenseModal() {
+        document.getElementById('addExpenseModal').classList.remove('open');
+    }
+
+    document.getElementById('expenseForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        btn.disabled = true;
+
+        const category = document.getElementById('expenseCategory').value;
+        const amount = parseFloat(document.getElementById('expenseAmount').value);
+        const date = document.getElementById('expenseDate').value;
+        const description = document.getElementById('expenseDescription').value || null;
+
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount.');
+            btn.innerHTML = original; btn.disabled = false; return;
+        }
+
+        const { error } = await sb.from('financial_transactions').insert({
+            transaction_id: `EXP-${Date.now()}`,
+            transaction_type: 'expense',
+            category,
+            amount,
+            date,
+            description,
+            status: 'confirmed'
+        });
+
+        if (error) {
+            alert('❌ Error: ' + error.message);
+        } else {
+            alert('✅ Expense added successfully!');
+            closeAddExpenseModal();
+            loadTransactions();
+            loadOverview();
+        }
+
+        btn.innerHTML = original;
+        btn.disabled = false;
+    });
+
+    // ── CONFIRM / DELETE ──
+    async function confirmTransaction(id) {
+        if (!confirm('Confirm this transaction?')) return;
+        const { error } = await sb.from('financial_transactions').update({ status: 'confirmed' }).eq('id', id);
+        if (error) alert('Error: ' + error.message);
+        else { loadTransactions(); loadOverview(); }
+    }
+
+    async function deleteTransaction(id) {
+        if (!confirm('Delete this transaction?')) return;
+        const { error } = await sb.from('financial_transactions').delete().eq('id', id);
+        if (error) alert('Error: ' + error.message);
+        else { loadTransactions(); loadOverview(); }
+    }
+
+    // ── MEMBER BALANCES ──
+    async function loadMemberBalances() {
+        const search = document.getElementById('memberSearch').value.toLowerCase();
+        const { data, error } = await sb.from('member_financial_status').select('*');
+        if (error) {
+            document.getElementById('memberBalancesList').innerHTML = `<tr><td colspan="6" class="empty-state">Error loading balances</td></tr>`;
+            return;
+        }
+
+        let filtered = data || [];
+        if (search) filtered = filtered.filter(m => m.name.toLowerCase().includes(search));
+
+        if (!filtered.length) {
+            document.getElementById('memberBalancesList').innerHTML = `<tr><td colspan="6" class="empty-state"><i class="fas fa-inbox"></i> No members found</td></tr>`;
+            return;
+        }
+
+        document.getElementById('memberBalancesList').innerHTML = filtered.map(m => {
+            const balance = m.balance || 0;
+            const status = balance > 0 ? '🔴 Owing' : balance < 0 ? '🟢 Credit' : '⚪ Settled';
+            const statusColor = balance > 0 ? 'var(--red)' : balance < 0 ? 'var(--green)' : 'var(--text-secondary)';
+            return `
+                <tr>
+                    <td><strong>${escapeHtml(m.name)}</strong></td>
+                    <td>${escapeHtml(m.voice_part || '—')}</td>
+                    <td style="color:var(--green);">KSh ${(m.total_paid || 0).toLocaleString()}</td>
+                    <td style="color:var(--red);">KSh ${(m.pending_penalties || 0).toLocaleString()}</td>
+                    <td style="font-weight:700; color:${statusColor};">KSh ${balance.toLocaleString()}</td>
+                    <td>${status}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // ── REPORT ──
+    async function generateReport() {
+        const month = document.getElementById('reportMonth').value;
+        if (!month) { alert('Please select a month.'); return; }
+        const [year, monthNum] = month.split('-');
+        const startDate = `${year}-${monthNum}-01`;
+        const endDate = `${year}-${monthNum}-${new Date(year, monthNum, 0).getDate()}`;
+
+        const { data } = await sb
+            .from('financial_transactions')
+            .select('*')
+            .gte('date', startDate)
+            .lte('date', endDate)
+            .eq('status', 'confirmed');
+
+        const income = data?.filter(t => t.transaction_type === 'income') || [];
+        const expenses = data?.filter(t => t.transaction_type === 'expense') || [];
+        const totalIncome = income.reduce((s, t) => s + t.amount, 0);
+        const totalExpenses = expenses.reduce((s, t) => s + t.amount, 0);
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthName = monthNames[parseInt(monthNum) - 1];
+
+        const content = document.getElementById('reportContent');
+        content.innerHTML = `
+            <div style="text-align:center; margin-bottom:20px;">
+                <h2 style="font-size:20px; font-weight:700;">💰 Financial Report - ${monthName} ${year}</h2>
+                <p style="color:var(--text-secondary);">University of Embu Students' Choir</p>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px;">
+                <div style="background:var(--bg); padding:16px; border-radius:12px; text-align:center;">
+                    <div style="font-size:12px; color:var(--text-secondary);">Total Income</div>
+                    <div style="font-size:24px; font-weight:700; color:var(--green);">KSh ${totalIncome.toLocaleString()}</div>
+                </div>
+                <div style="background:var(--bg); padding:16px; border-radius:12px; text-align:center;">
+                    <div style="font-size:12px; color:var(--text-secondary);">Total Expenses</div>
+                    <div style="font-size:24px; font-weight:700; color:var(--red);">KSh ${totalExpenses.toLocaleString()}</div>
+                </div>
+                <div style="background:var(--bg); padding:16px; border-radius:12px; text-align:center;">
+                    <div style="font-size:12px; color:var(--text-secondary);">Net Balance</div>
+                    <div style="font-size:24px; font-weight:700; color:var(--amber);">KSh ${(totalIncome - totalExpenses).toLocaleString()}</div>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div>
+                    <h4 style="font-size:14px; margin-bottom:10px; color:var(--green);"><i class="fas fa-arrow-up"></i> Income</h4>
+                    ${income.length ? income.map(t => `
+                        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:0.5px solid var(--border);">
+                            <span>${escapeHtml(t.category)} ${t.description ? '- ' + escapeHtml(t.description) : ''}</span>
+                            <span style="color:var(--green);">KSh ${t.amount.toLocaleString()}</span>
+                        </div>
+                    `).join('') : '<div style="color:var(--text-tertiary);">No income recorded</div>'}
+                </div>
+                <div>
+                    <h4 style="font-size:14px; margin-bottom:10px; color:var(--red);"><i class="fas fa-arrow-down"></i> Expenses</h4>
+                    ${expenses.length ? expenses.map(t => `
+                        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:0.5px solid var(--border);">
+                            <span>${escapeHtml(t.category)} ${t.description ? '- ' + escapeHtml(t.description) : ''}</span>
+                            <span style="color:var(--red);">KSh ${t.amount.toLocaleString()}</span>
+                        </div>
+                    `).join('') : '<div style="color:var(--text-tertiary);">No expenses recorded</div>'}
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:20px; font-size:12px; color:var(--text-tertiary);">
+                Generated on ${new Date().toLocaleDateString()}
+            </div>
+        `;
+    }
+
+    // ── INIT ──
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await loadUserInfo();
+        await loadCategories();
+        await loadMembers();
+        await loadPaymentSettings(); // Load payment settings
+        await loadOverview();
+        await loadTransactions();
+        document.getElementById('reportMonth').value = new Date().toISOString().substring(0, 7);
+    }
+
+    init();
+
+    // Expose globals
+    window.doLogout = doLogout;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.loadOverview = loadOverview;
+    window.loadTransactions = loadTransactions;
+    window.loadMemberBalances = loadMemberBalances;
+    window.showAddModal = showAddModal;
+    window.closeAddModal = closeAddModal;
+    window.showAddExpenseModal = showAddExpenseModal;
+    window.closeAddExpenseModal = closeAddExpenseModal;
+    window.confirmTransaction = confirmTransaction;
+    window.deleteTransaction = deleteTransaction;
+    window.generateReport = generateReport;
+    window.togglePaymentSettings = togglePaymentSettings;
+    window.closePaymentSettings = closePaymentSettings;
+    window.loadPaymentSettings = loadPaymentSettings;
+</script>
+</body>
+</html>

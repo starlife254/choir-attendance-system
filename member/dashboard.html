@@ -38,6 +38,8 @@
             --slate-100: #f1f5f9;
             --slate-50: #f8fafc;
             --white: #ffffff;
+            --border: #e2e8f0;
+            --bg: #f8fafc;
             --shadow-card: 0 8px 24px rgba(91, 79, 207, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
             --shadow-hover: 0 12px 32px rgba(91, 79, 207, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06);
             --radius: 20px;
@@ -1230,6 +1232,7 @@
             <button class="tab-btn" onclick="switchTab('profile')"><i class="fas fa-user"></i> Profile</button>
             <button class="tab-btn" onclick="switchTab('apology')"><i class="fas fa-pen"></i> Apology</button>
             <button class="tab-btn" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
+            <button class="tab-btn" onclick="switchTab('finance')"><i class="fas fa-wallet"></i> Finance</button>
         </div>
 
         <!-- Stats Tab -->
@@ -1393,6 +1396,36 @@
             </div>
         </div>
 
+        <!-- Finance Tab -->
+        <div id="financeTab" class="tab-content">
+            <div class="chart-container">
+                <div class="section-title"><i class="fas fa-wallet"></i> Choir Financial Health</div>
+                <div style="background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius:16px; padding:20px; color:white; margin-bottom:20px;">
+                    <div style="font-size:13px; opacity:0.8;">Current Balance</div>
+                    <div style="font-size:32px; font-weight:700;" id="memberBalanceDisplay">KSh 0</div>
+                    <div style="margin-top:8px; display:flex; gap:20px; flex-wrap:wrap;">
+                        <span><i class="fas fa-arrow-up" style="color:#6ee7b7;"></i> Income: <strong id="memberTotalIncome">KSh 0</strong></span>
+                        <span><i class="fas fa-arrow-down" style="color:#fca5a5;"></i> Expenses: <strong id="memberTotalExpenses">KSh 0</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="section-title"><i class="fas fa-arrow-up" style="color:var(--green);"></i> Income Sources</div>
+                <div id="memberIncomeSources"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div></div>
+            </div>
+
+            <div class="chart-container">
+                <div class="section-title"><i class="fas fa-arrow-down" style="color:var(--red);"></i> Where Money Goes</div>
+                <div id="memberExpenseCategories"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div></div>
+            </div>
+
+            <div class="chart-container">
+                <div class="section-title"><i class="fas fa-list"></i> Recent Transactions</div>
+                <div id="memberRecentTransactions"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div></div>
+            </div>
+        </div>
+
         <!-- History Tab -->
         <div id="historyTab" class="tab-content">
             <div class="form-card">
@@ -1427,48 +1460,48 @@
         </div>
     </div>
 
-    <!-- Payment Modal -->
-    <div class="modal-overlay" id="paymentModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3><i class="fas fa-hand-holding-dollar" style="color:var(--green);"></i> Pay Fine</h3>
-                <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+<!-- Payment Modal -->
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-hand-holding-dollar" style="color:var(--green);"></i> Pay Fine</h3>
+            <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+        </div>
+        <div style="text-align:center;">
+            <div style="font-size:44px; margin-bottom:12px;"><i class="fas fa-credit-card"></i></div>
+            <p style="margin-bottom:8px;">Pay <strong style="font-size:24px; color:var(--red);" id="modalAmount"></strong> for:</p>
+            <p id="modalDescription" style="font-size:14px; color:var(--slate-600); margin-bottom:16px; padding:10px; background:var(--slate-50); border-radius:12px;"></p>
+            <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:20px; border-radius:20px; margin:16px 0;">
+                <p style="margin-bottom:6px;"><i class="fas fa-mobile-screen-button"></i> <strong>POCHI LA BIASHARA</strong></p>
+                <p style="font-size:28px; font-weight:700; letter-spacing:2px;" id="paymentPhoneDisplay">0117085859</p>
+                <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                <p><strong id="paymentNameDisplay">Peter Manundu</strong></p>
+                <p style="font-size:18px; font-weight:600; letter-spacing:1px;" id="modalAccountNumber"></p>
+                <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                <p style="margin-bottom:4px;">💰 <strong>Amount</strong></p>
+                <p style="font-size:26px; font-weight:700;" id="modalAmount2"></p>
+                <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                <p style="font-size:12px; opacity:0.9;">Total Pending: <span id="pendingTotalDisplay">KSh 0</span></p>
             </div>
-            <div style="text-align:center;">
-                <div style="font-size:44px; margin-bottom:12px;"><i class="fas fa-credit-card"></i></div>
-                <p style="margin-bottom:8px;">Pay <strong style="font-size:24px; color:var(--red);" id="modalAmount"></strong> for:</p>
-                <p id="modalDescription" style="font-size:14px; color:var(--slate-600); margin-bottom:16px; padding:10px; background:var(--slate-50); border-radius:12px;"></p>
-                <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:20px; border-radius:20px; margin:16px 0;">
-                    <p style="margin-bottom:6px;"><i class="fas fa-mobile-screen-button"></i> <strong>POCHI LA BIASHARA</strong></p>
-                    <p style="font-size:28px; font-weight:700; letter-spacing:2px;">0117085859</p>
-                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
-                    <p><strong>Peter Manundu</strong></p>
-                    <p style="font-size:18px; font-weight:600; letter-spacing:1px;" id="modalAccountNumber"></p>
-                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
-                    <p style="margin-bottom:4px;">💰 <strong>Amount</strong></p>
-                    <p style="font-size:26px; font-weight:700;" id="modalAmount2"></p>
-                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
-                    <p style="font-size:12px; opacity:0.9;">Total Pending: <span id="pendingTotalDisplay">KSh 0</span></p>
-                </div>
-                <div style="background:#fef3c7; padding:12px; border-radius:12px; margin:12px 0; text-align:left;">
-                    <p style="font-size:12px; color:#92400e; font-weight:600;"><i class="fas fa-info-circle"></i> Instructions</p>
-                    <p style="font-size:12px; color:#92400e; margin:2px 0;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
-                    <p style="font-size:12px; color:#92400e; margin:2px 0;">2. Enter Phone: <strong>0117085859</strong></p>
-                    <p style="font-size:12px; color:#92400e; margin:2px 0;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
-                    <p style="font-size:12px; color:#92400e; margin:2px 0;">4. Enter your M-Pesa PIN & complete</p>
-                </div>
-                <div style="margin:16px 0;">
-                    <label style="display:block; margin-bottom:4px; font-weight:500; font-size:13px;"><i class="fas fa-user"></i> Your M-Pesa Name</label>
-                    <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width:100%; padding:10px 14px; border:1.5px solid var(--slate-300); border-radius:12px; font-family:inherit;">
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="recordPayment()" class="btn-success" style="flex:1; justify-content:center;"><i class="fas fa-check"></i> I Have Paid</button>
-                    <button onclick="closePaymentModal()" style="flex:1; background:#ef4444; color:white; border:none; border-radius:40px; cursor:pointer; font-weight:600; padding:10px;"><i class="fas fa-times"></i> Cancel</button>
-                </div>
-                <p style="font-size:11px; color:var(--slate-500); margin-top:16px;">Admin will confirm within 24 hours.</p>
+            <div style="background:#fef3c7; padding:12px; border-radius:12px; margin:12px 0; text-align:left;">
+                <p style="font-size:12px; color:#92400e; font-weight:600;"><i class="fas fa-info-circle"></i> Instructions</p>
+                <p style="font-size:12px; color:#92400e; margin:2px 0;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
+                <p style="font-size:12px; color:#92400e; margin:2px 0;" id="instructionPhone">2. Enter Phone: <strong>0117085859</strong></p>
+                <p style="font-size:12px; color:#92400e; margin:2px 0;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
+                <p style="font-size:12px; color:#92400e; margin:2px 0;">4. Enter your M-Pesa PIN & complete</p>
             </div>
+            <div style="margin:16px 0;">
+                <label style="display:block; margin-bottom:4px; font-weight:500; font-size:13px;"><i class="fas fa-user"></i> Your M-Pesa Name</label>
+                <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width:100%; padding:10px 14px; border:1.5px solid var(--slate-300); border-radius:12px; font-family:inherit;">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="recordPayment()" class="btn-success" style="flex:1; justify-content:center;"><i class="fas fa-check"></i> I Have Paid</button>
+                <button onclick="closePaymentModal()" style="flex:1; background:#ef4444; color:white; border:none; border-radius:40px; cursor:pointer; font-weight:600; padding:10px;"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+            <p style="font-size:11px; color:var(--slate-500); margin-top:16px;">Admin will confirm within 24 hours.</p>
         </div>
     </div>
+</div>
 
     <!-- Bottom Nav -->
     <div class="bottom-nav">
@@ -1476,7 +1509,7 @@
         <button class="bottom-nav-item" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
         <button class="bottom-nav-item" onclick="switchTab('apology')"><i class="fas fa-pen"></i><span>Apology</span></button>
         <button class="bottom-nav-item" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i><span>History</span></button>
-        <button class="bottom-nav-item" onclick="openHallOfFame()"><i class="fas fa-trophy"></i><span>HOF</span></button>
+        <button class="bottom-nav-item" onclick="switchTab('finance')"><i class="fas fa-wallet"></i><span>Finance</span></button>
         <button class="bottom-nav-item" id="bottomLogoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
     </div>
 
@@ -1504,29 +1537,45 @@
                 lateCutoffMinutes: 18 * 60 + 30, absentCutoffMinutes: 18 * 60 }
         };
 
+        // ── TAB SWITCHING ──
         function switchTab(tab) {
+            // Remove active class from all tabs
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            const tabs = ['stats', 'profile', 'apology', 'history'];
+
+            // Define all tabs
+            const tabs = ['stats', 'profile', 'apology', 'history', 'finance'];
             const idx = tabs.indexOf(tab);
+
+            // Activate the selected tab
             if (idx !== -1) {
-                document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-                document.getElementById(`${tab}Tab`).classList.add('active');
+                const tabBtns = document.querySelectorAll('.tab-btn');
+                if (tabBtns[idx]) tabBtns[idx].classList.add('active');
+
+                const tabContent = document.getElementById(`${tab}Tab`);
+                if (tabContent) tabContent.classList.add('active');
             }
+
+            // Update bottom nav
             document.querySelectorAll('.bottom-nav-item').forEach((item, i) => {
                 item.classList.toggle('active', i === idx);
             });
+
+            // Load data for specific tabs
             if (tab === 'profile') loadProfileData();
             if (tab === 'apology') { loadMyApologies();
                 initApologyTab(); }
             if (tab === 'history') loadAttendanceHistory();
+            if (tab === 'finance') loadMemberFinance();
         }
 
+        // ── AUTH ──
         async function logout() {
             await supabaseClient.auth.signOut();
             window.location.href = '../login.html';
         }
 
+        // ── GET CURRENT MEMBER ──
         async function getCurrentMember() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) { window.location.href = '../login.html'; return null; }
@@ -1552,6 +1601,7 @@
             return currentMember;
         }
 
+        // ── LOAD MEMBER DATA ──
         async function loadMemberData() {
             const member = await getCurrentMember();
             if (!member) return;
@@ -1563,6 +1613,7 @@
             await loadProfileData();
         }
 
+        // ── LOAD ATTENDANCE STATS ──
         async function loadAttendanceStats() {
             if (!currentMember) return;
             const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember
@@ -1608,43 +1659,46 @@
             });
         }
 
-        async function loadPenalties() {
+       // ── LOAD PENALTIES ──
+async function loadPenalties() {
     if (!currentMember) return;
     const { data: penalties } = await supabaseClient
         .from('penalties')
         .select('*')
         .eq('member_id', currentMember.member_id)
         .order('date', { ascending: false });
-    
+
     const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
     const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
-    
+
+    // ✅ Use dynamic settings from window variables
+    const phone = window.paymentPhone || '0117085859';
+    const name = window.paymentName || 'Peter Manundu';
+
     document.getElementById('penaltySummary').innerHTML = `
         <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
             <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
             <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
             <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
         </div>
-        <div style="margin-top:8px; font-size:12px; color:var(--slate-500);"><i class="fas fa-phone"></i> Payment: POCHI 0117085859 | Peter Manundu</div>
+        <div style="margin-top:8px; font-size:12px; color:var(--slate-500);">
+            <i class="fas fa-phone"></i> Payment: POCHI ${phone} | ${name}
+        </div>
     `;
-    
+
     if (!penalties?.length) {
         document.getElementById('penaltiesList').innerHTML =
             '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
         return;
     }
-    
+
     document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
-        // Check if it's a custom penalty
         const isCustom = p.is_custom || p.penalty_type === 'custom';
-        
-        // Get the display reason
         let displayReason = '';
         let displayIcon = '';
         let displayType = '';
-        
+
         if (isCustom) {
-            // Custom penalty - show the custom reason
             displayReason = p.custom_reason || p.reason || 'Custom penalty';
             displayIcon = '📌';
             displayType = 'Custom';
@@ -1657,7 +1711,7 @@
             displayIcon = '❌';
             displayType = 'Absent';
         }
-        
+
         return `
             <div class="apology-item">
                 <div>
@@ -1682,11 +1736,65 @@
             </div>
         `;
     }).join('');
-    
+
     await checkPendingPenalties();
     await updateFloatingReminder();
 }
- async function showPaymentModal(penaltyId, amount, description) {
+       // ── PAYMENT SETTINGS FUNCTIONS ──
+
+// Load payment settings - ALWAYS fetch from Supabase first
+async function loadPaymentSettings() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('settings')
+            .select('setting_key, setting_value')
+            .like('setting_key', 'payment_%');
+        
+        if (error) throw error;
+        
+        const settings = {};
+        data.forEach(row => {
+            settings[row.setting_key] = row.setting_value;
+        });
+        
+        const phone = settings['payment_phone'] || '0117085859';
+        const name = settings['payment_name'] || 'Peter Manundu';
+        
+        // Update localStorage
+        localStorage.setItem('payment_phone', phone);
+        localStorage.setItem('payment_name', name);
+        
+        // ✅ Store in global variables (this is what loadPenalties uses)
+        window.paymentPhone = phone;
+        window.paymentName = name;
+        
+        // If payment modal is open, update it
+        if (document.getElementById('paymentModal').classList.contains('open')) {
+            updatePaymentModalWithSettings();
+        }
+        
+        console.log('✅ Payment settings loaded:', { phone, name });
+        
+    } catch (error) {
+        console.warn('Error loading payment settings, using defaults:', error);
+        const phone = localStorage.getItem('payment_phone') || '0117085859';
+        const name = localStorage.getItem('payment_name') || 'Peter Manundu';
+        window.paymentPhone = phone;
+        window.paymentName = name;
+    }
+}
+// Update payment modal with dynamic settings
+function updatePaymentModalWithSettings() {
+    const phone = window.paymentPhone || '0117085859';
+    const name = window.paymentName || 'Peter Manundu';
+    
+    document.getElementById('paymentPhoneDisplay').textContent = phone;
+    document.getElementById('paymentNameDisplay').textContent = name;
+    document.getElementById('instructionPhone').innerHTML = `2. Enter Phone: <strong>${phone}</strong>`;
+}
+
+// Modify showPaymentModal to use dynamic settings
+async function showPaymentModal(penaltyId, amount, description) {
     const { data: penalty } = await supabaseClient
         .from('penalties')
         .select('status, is_custom, custom_reason, reason')
@@ -1701,7 +1809,6 @@
     currentPenaltyId = penaltyId;
     currentPenaltyAmount = amount;
     
-    // Build description with custom reason
     let displayDescription = description;
     if (penalty.is_custom) {
         const customText = penalty.custom_reason || penalty.reason || 'Custom penalty';
@@ -1725,12 +1832,35 @@
     document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal}`;
     document.getElementById('instructionAmount').innerHTML = `KSh ${amount}`;
     document.getElementById('transactionCode').value = '';
+    
+    // Update payment details with dynamic settings
+    updatePaymentModalWithSettings();
+    
     document.getElementById('paymentModal').classList.add('open');
 }
 
-        function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open');
-            currentPenaltyId = null; }
+// Listen for storage changes (when admin updates settings)
+window.addEventListener('storage', function(e) {
+    if (e.key === 'payment_phone' || e.key === 'payment_name') {
+        // Reload payment settings
+        loadPaymentSettings();
+        // Update modal if open
+        if (document.getElementById('paymentModal').classList.contains('open')) {
+            updatePaymentModalWithSettings();
+        }
+    }
+});
 
+// Initialize payment settings
+loadPaymentSettings();
+        // ── SHOW PAYMENT MODAL ──
+        
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('open');
+            currentPenaltyId = null;
+        }
+
+        // ── RECORD PAYMENT ──
         async function recordPayment() {
             if (!currentPenaltyId) { alert('No payment selected'); return; }
             const transactionCode = document.getElementById('transactionCode').value.trim();
@@ -1744,11 +1874,14 @@
                 reference: transactionCode || null
             });
             if (error) alert('❌ Error recording payment: ' + error.message);
-            else { alert('✅ Payment recorded! Admin will confirm within 24 hours.');
+            else {
+                alert('✅ Payment recorded! Admin will confirm within 24 hours.');
                 closePaymentModal();
-                loadPenalties(); }
+                loadPenalties();
+            }
         }
 
+        // ── LOAD PROFILE DATA ──
         async function loadProfileData() {
             if (!currentMember) return;
             const { data: profile } = await supabaseClient.from('user_profiles').select('*').eq('user_id', currentUserId)
@@ -1780,6 +1913,7 @@
             }
         }
 
+        // ── SAVE PROFILE ──
         async function saveProfile() {
             const phone = document.getElementById('phoneInput').value;
             const emergencyContact = document.getElementById('emergencyNameInput').value;
@@ -1821,6 +1955,7 @@
             }
         }
 
+        // ── UPLOAD PHOTO ──
         async function uploadPhoto() {
             const fileInput = document.getElementById('photoInput');
             const file = fileInput.files[0];
@@ -1873,6 +2008,7 @@
             fileInput.value = '';
         }
 
+        // ── CHECK PENDING PENALTIES ──
         async function checkPendingPenalties() {
             if (!currentMember) return;
             const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember
@@ -1894,6 +2030,7 @@
             if (section) section.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
+        // ── FLOATING REMINDER ──
         function addFloatingReminderButton() {
             if (document.getElementById('floatingReminderBtn')) return;
             const floatingBtn = document.createElement('div');
@@ -1931,6 +2068,7 @@
                 updateFloatingReminder(); }, 5 * 60 * 1000);
         }
 
+        // ── APOLOGY FUNCTIONS ──
         function getCurrentMinutes() { const now = new Date(); return now.getHours() * 60 + now.getMinutes(); }
 
         function isLateSessionAvailable(session) { return getCurrentMinutes() <= SESSION_CONFIG[session].lateCutoffMinutes; }
@@ -2040,7 +2178,7 @@
             const container = document.getElementById('myApologiesList');
             if (!apologies?.length) {
                 container.innerHTML =
-                '<div class="empty-state"><i class="fas fa-inbox"></i> No apology requests submitted yet.</div>';
+                    '<div class="empty-state"><i class="fas fa-inbox"></i> No apology requests submitted yet.</div>';
                 return;
             }
             container.innerHTML = apologies.map(a => `
@@ -2065,6 +2203,7 @@
             if (absentDate) absentDate.value = tomorrow.toISOString().split('T')[0];
         }
 
+        // ── ATTENDANCE HISTORY ──
         async function loadAttendanceHistory() {
             if (!currentMember) return;
             const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember
@@ -2096,6 +2235,7 @@
             `;
         }
 
+        // ── EXPORTS ──
         async function exportToPDF() {
             const element = document.getElementById('historyContainer');
             await html2pdf().set({
@@ -2120,10 +2260,121 @@
             URL.revokeObjectURL(link.href);
         }
 
+        // ── ESCAPE HTML ──
         function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m ===
                 '<' ? '&lt;' : '&gt;'); }
 
-        // Hall of Fame
+        // ── LOAD MEMBER FINANCE ──
+        async function loadMemberFinance() {
+            if (!currentMember) return;
+
+            try {
+                // Get balance
+                const { data: balance, error: balanceError } = await supabaseClient.from('choir_balance').select('*');
+                if (balanceError) {
+                    console.warn('Balance table not found:', balanceError);
+                    document.getElementById('memberBalanceDisplay').textContent = 'Not available';
+                } else if (balance && balance.length > 0) {
+                    const b = balance[0];
+                    document.getElementById('memberBalanceDisplay').textContent = `KSh ${(b.current_balance || 0).toLocaleString()}`;
+                    document.getElementById('memberTotalIncome').textContent = `KSh ${(b.total_income || 0).toLocaleString()}`;
+                    document.getElementById('memberTotalExpenses').textContent = `KSh ${(b.total_expenses || 0).toLocaleString()}`;
+                }
+
+                // Get income by category
+                const { data: income, error: incomeError } = await supabaseClient
+                    .from('financial_transactions')
+                    .select('category, amount')
+                    .eq('transaction_type', 'income')
+                    .eq('status', 'confirmed')
+                    .order('date', { ascending: false });
+
+                if (incomeError) throw incomeError;
+
+                const incomeByCat = {};
+                (income || []).forEach(t => {
+                    if (!incomeByCat[t.category]) incomeByCat[t.category] = 0;
+                    incomeByCat[t.category] += t.amount;
+                });
+
+                const incomeHtml = Object.entries(incomeByCat)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([cat, amt]) => `
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:0.5px solid var(--slate-300);">
+                            <span>${escapeHtml(cat)}</span>
+                            <span style="font-weight:600; color:var(--green);">KSh ${amt.toLocaleString()}</span>
+                        </div>
+                    `).join('') || '<div class="empty-state"><i class="fas fa-inbox"></i> No income recorded</div>';
+                document.getElementById('memberIncomeSources').innerHTML = incomeHtml;
+
+                // Get expenses by category
+                const { data: expenses, error: expError } = await supabaseClient
+                    .from('financial_transactions')
+                    .select('category, amount')
+                    .eq('transaction_type', 'expense')
+                    .eq('status', 'confirmed')
+                    .order('date', { ascending: false });
+
+                if (expError) throw expError;
+
+                const expByCat = {};
+                (expenses || []).forEach(t => {
+                    if (!expByCat[t.category]) expByCat[t.category] = 0;
+                    expByCat[t.category] += t.amount;
+                });
+
+                const expHtml = Object.entries(expByCat)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([cat, amt]) => `
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:0.5px solid var(--slate-300);">
+                            <span>${escapeHtml(cat)}</span>
+                            <span style="font-weight:600; color:var(--red);">KSh ${amt.toLocaleString()}</span>
+                        </div>
+                    `).join('') || '<div class="empty-state"><i class="fas fa-inbox"></i> No expenses recorded</div>';
+                document.getElementById('memberExpenseCategories').innerHTML = expHtml;
+
+                // Recent transactions
+                const { data: recent, error: recentError } = await supabaseClient
+                    .from('financial_transactions')
+                    .select('*')
+                    .eq('status', 'confirmed')
+                    .order('date', { ascending: false })
+                    .limit(10);
+
+                if (recentError) throw recentError;
+
+                if (!recent || recent.length === 0) {
+                    document.getElementById('memberRecentTransactions').innerHTML =
+                        '<div class="empty-state"><i class="fas fa-inbox"></i> No recent transactions</div>';
+                    return;
+                }
+
+                document.getElementById('memberRecentTransactions').innerHTML = recent.map(t => `
+                    <div class="apology-item">
+                        <div>
+                            <div>
+                                <strong>${t.transaction_type === 'income' ? '💰' : '💸'} ${escapeHtml(t.category)}</strong>
+                                ${t.description ? `<span style="font-size:12px; color:var(--slate-500); margin-left:8px;">${escapeHtml(t.description)}</span>` : ''}
+                            </div>
+                            <div style="font-size:12px; color:var(--slate-500);">${t.date}</div>
+                        </div>
+                        <div style="font-weight:600; color:${t.transaction_type === 'income' ? 'var(--green)' : 'var(--red)'};">KSh ${t.amount.toLocaleString()}</div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading finance data:', error);
+                document.getElementById('memberIncomeSources').innerHTML =
+                    '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Finance data not available.</div>';
+                document.getElementById('memberExpenseCategories').innerHTML =
+                    '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Finance data not available.</div>';
+                document.getElementById('memberRecentTransactions').innerHTML =
+                    '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Finance data not available.</div>';
+                document.getElementById('memberBalanceDisplay').textContent = '⚠️ Not available';
+            }
+        }
+
+        // ── HALL OF FAME ──
         async function loadHallOfFame() {
             try {
                 const { data, error } = await supabaseClient
@@ -2217,14 +2468,16 @@
         document.getElementById('logoutBtn').addEventListener('click', logout);
         document.getElementById('bottomLogoutBtn').addEventListener('click', logout);
 
-        async function init() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) { window.location.href = '../login.html'; return; }
-            await loadMemberData();
-            addFloatingReminderButton();
-            startReminderInterval();
-            await loadHallOfFame();
-        }
+       // ── INIT ──
+async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    await loadMemberData();
+    await loadPaymentSettings(); // Load settings on page load
+    addFloatingReminderButton();
+    startReminderInterval();
+    await loadHallOfFame();
+}
         init();
     </script>
 </body>

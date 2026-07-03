@@ -847,29 +847,32 @@
     let selectedMemberForPenalty = null;
 
     function showAddCustomPenalty() {
-        if (!selectedMember) {
-            alert('Please select a member first from the list on the left.');
-            return;
-        }
-        selectedMemberForPenalty = selectedMember;
-        
-        document.getElementById('penaltyMemberName').textContent = selectedMember.name;
-        document.getElementById('customPenaltyDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('customPenaltyAmount').value = '';
-        document.getElementById('customPenaltyReason').value = '';
-        document.getElementById('customPenaltyType').value = 'phone';
-        document.getElementById('customReasonGroup').style.display = 'none';
-        document.getElementById('customPenaltyReason').removeAttribute('required');
-        
-        document.getElementById('customPenaltyModal').classList.add('open');
+    // Use the global selectedMember
+    if (!selectedMember) {
+        alert('Please select a member first from the list on the left.');
+        return;
     }
+    
+    // Store reference
+    selectedMemberForPenalty = selectedMember;
+    
+    document.getElementById('penaltyMemberName').textContent = selectedMember.name;
+    document.getElementById('customPenaltyDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('customPenaltyAmount').value = '';
+    document.getElementById('customPenaltyReason').value = '';
+    document.getElementById('customPenaltyType').value = 'phone';
+    document.getElementById('customReasonGroup').style.display = 'none';
+    document.getElementById('customPenaltyReason').removeAttribute('required');
+    
+    document.getElementById('customPenaltyModal').classList.add('open');
+}
 
     function closeCustomPenaltyModal() {
-        document.getElementById('customPenaltyModal').classList.remove('open');
-        selectedMemberForPenalty = null;
-        document.getElementById('customPenaltyReason').removeAttribute('required');
-        document.getElementById('customReasonGroup').style.display = 'none';
-    }
+    document.getElementById('customPenaltyModal').classList.remove('open');
+    // Don't clear selectedMemberForPenalty here - let the calling function handle it
+    document.getElementById('customPenaltyReason').removeAttribute('required');
+    document.getElementById('customReasonGroup').style.display = 'none';
+}
 
     // Handle type change
     document.getElementById('customPenaltyType').addEventListener('change', function() {
@@ -887,81 +890,119 @@
     });
 
     // Submit function (called from button click, not form submit)
-    async function submitCustomPenalty() {
-        if (!selectedMemberForPenalty) {
-            alert('No member selected.');
-            return;
-        }
-        
-        const penaltyType = document.getElementById('customPenaltyType').value;
-        const customReason = document.getElementById('customPenaltyReason').value.trim();
-        const date = document.getElementById('customPenaltyDate').value;
-        const amount = parseInt(document.getElementById('customPenaltyAmount').value);
-        
-        // Validate based on type
-        if (penaltyType === 'other' && !customReason) {
-            alert('Please enter a custom reason for the penalty.');
-            document.getElementById('customPenaltyReason').focus();
-            return;
-        }
-        
-        const typeLabels = {
-            'phone': 'Using phone during practice',
-            'disruptive': 'Disruptive behavior during practice',
-            'uniform': 'Incorrect uniform',
-            'tardy': 'Excessive tardiness',
-            'unprepared': 'Unprepared for practice',
-            'other': customReason || 'Custom penalty'
-        };
-        const reason = penaltyType === 'other' ? customReason : typeLabels[penaltyType];
-        
-        if (!date) {
-            alert('Please select a date.');
-            document.getElementById('customPenaltyDate').focus();
-            return;
-        }
-        if (!amount || amount <= 0) {
-            alert('Please enter a valid amount (KSh).');
-            document.getElementById('customPenaltyAmount').focus();
-            return;
-        }
-        
-        const submitBtn = document.querySelector('#customPenaltyModal .btn-amber');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="ti ti-loader"></i> Adding...';
-        submitBtn.disabled = true;
-        
-    // Replace the INSERT section in submitCustomPenalty() with this:
-
-try {
-    const { error } = await supabaseClient.from('penalties').upsert({
-        member_id: selectedMemberForPenalty.member_id,
-        date: date,
-        session: 'Custom',
-        penalty_type: 'custom',
-        amount: amount,
-        status: 'pending',
-        reason: reason,
-        is_custom: true,
-        custom_reason: reason
-    }, { 
-        onConflict: 'member_id,date,session'  // This handles duplicates
-    });
+async function submitCustomPenalty() {
+    // Store the member reference BEFORE any async operations
+    const memberForPenalty = selectedMemberForPenalty;
     
-    if (error) throw error;
-    
-    alert(`✅ Custom penalty added for ${selectedMemberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
-    closeCustomPenaltyModal();
-    await loadPenalties(selectedMemberForPenalty.member_id);
-    
-} catch (error) {
-    alert('❌ Error adding penalty: ' + error.message);
-} finally {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }
+    if (!memberForPenalty) {
+        alert('No member selected. Please select a member first.');
+        return;
     }
-
+    
+    const penaltyType = document.getElementById('customPenaltyType').value;
+    const customReason = document.getElementById('customPenaltyReason').value.trim();
+    const date = document.getElementById('customPenaltyDate').value;
+    const amount = parseInt(document.getElementById('customPenaltyAmount').value);
+    
+    // Validate based on type
+    if (penaltyType === 'other' && !customReason) {
+        alert('Please enter a custom reason for the penalty.');
+        document.getElementById('customPenaltyReason').focus();
+        return;
+    }
+    
+    const typeLabels = {
+        'phone': 'Using phone during practice',
+        'disruptive': 'Disruptive behavior during practice',
+        'uniform': 'Incorrect uniform',
+        'tardy': 'Excessive tardiness',
+        'unprepared': 'Unprepared for practice',
+        'other': customReason || 'Custom penalty'
+    };
+    const reason = penaltyType === 'other' ? customReason : typeLabels[penaltyType];
+    
+    if (!date) {
+        alert('Please select a date.');
+        document.getElementById('customPenaltyDate').focus();
+        return;
+    }
+    if (!amount || amount <= 0) {
+        alert('Please enter a valid amount (KSh).');
+        document.getElementById('customPenaltyAmount').focus();
+        return;
+    }
+    
+    const submitBtn = document.querySelector('#customPenaltyModal .btn-amber');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="ti ti-loader"></i> Adding...';
+    submitBtn.disabled = true;
+    
+    try {
+        // Use the stored member reference
+        const memberId = memberForPenalty.member_id;
+        
+        // Check if a penalty already exists for this date
+        const { data: existing, error: checkError } = await supabaseClient
+            .from('penalties')
+            .select('id, amount, status')
+            .eq('member_id', memberId)
+            .eq('date', date)
+            .eq('session', 'Custom');
+        
+        if (checkError) throw checkError;
+        
+        if (existing && existing.length > 0) {
+            // Update existing penalty
+            const { error: updateError } = await supabaseClient
+                .from('penalties')
+                .update({
+                    amount: amount,
+                    status: 'pending',
+                    reason: reason,
+                    is_custom: true,
+                    custom_reason: reason,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existing[0].id);
+            
+            if (updateError) throw updateError;
+            
+            alert(`✅ Penalty updated for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
+        } else {
+            // Insert new penalty
+            const { error: insertError } = await supabaseClient
+                .from('penalties')
+                .insert({
+                    member_id: memberId,
+                    date: date,
+                    session: 'Custom',
+                    penalty_type: 'custom',
+                    amount: amount,
+                    status: 'pending',
+                    reason: reason,
+                    is_custom: true,
+                    custom_reason: reason
+                });
+            
+            if (insertError) throw insertError;
+            
+            alert(`✅ Custom penalty added for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
+        }
+        
+        // Close modal FIRST
+        closeCustomPenaltyModal();
+        
+        // THEN reload penalties for the member
+        await loadPenalties(memberId);
+        
+    } catch (error) {
+        console.error('Penalty error:', error);
+        alert('❌ Error adding penalty: ' + error.message);
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
     // Close modal when clicking outside
     document.getElementById('customPenaltyModal').addEventListener('click', function(e) {
         if (e.target === this) closeCustomPenaltyModal();

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Manage Apologies | University of Embu Choir</title>
@@ -74,6 +74,7 @@
         .filters-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
         .filter-select { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 13px; color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer; }
         .filter-select:focus { border-color: var(--indigo); }
+        .filter-select option { padding: 4px; }
         .refresh-btn { padding: 8px 16px; border: none; border-radius: 10px; background: var(--indigo); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .refresh-btn:hover { opacity: .88; }
 
@@ -90,13 +91,36 @@
         .apology-member-meta span { display: flex; align-items: center; gap: 4px; }
         .apology-member-meta i { font-size: 13px; }
 
+        /* Type Badge - NEW */
+        .type-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 4px; 
+            padding: 3px 12px; 
+            border-radius: 40px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .type-badge.late { 
+            background: #fef3c7; 
+            color: #92400e; 
+            border: 1px solid #f59e0b;
+        }
+        .type-badge.absent { 
+            background: #fee2e2; 
+            color: #991b1b; 
+            border: 1px solid #ef4444;
+        }
+
         .status-badge { padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; }
         .status-pending  { background: var(--amber-light); color: #d97706; }
         .status-approved { background: var(--green-light);  color: #059669; }
         .status-rejected { background: var(--red-light);    color: #dc2626; }
 
         .apology-details { background: var(--bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
-        .apology-details p { margin: 5px 0; font-size: 13px; color: var(--text-primary); display: flex; gap: 6px; }
+        .apology-details p { margin: 5px 0; font-size: 13px; color: var(--text-primary); display: flex; gap: 6px; flex-wrap: wrap; }
         .apology-details p strong { color: var(--text-secondary); min-width: 90px; }
 
         .admin-note { width: 100%; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: 10px; margin-top: 10px; font-family: inherit; font-size: 13px; resize: vertical; outline: none; background: var(--bg); }
@@ -129,6 +153,7 @@
             .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
             .filters-panel { flex-direction: column; align-items: stretch; }
             .refresh-btn { justify-content: center; }
+            .apology-header { flex-direction: column; }
         }
         button { cursor: pointer; touch-action: manipulation; }
     </style>
@@ -144,48 +169,25 @@
         <div class="logo-sub">Attendance System · 98th Festival</div>
     </div>
        
- <nav class="sidebar-nav">
-    <div class="nav-section-label">Main</div>
-    <a href="index.html" class="nav-item active">
-        <i class="ti ti-layout-dashboard"></i> Dashboard
-    </a>
-    <a href="mark-attendance.html" class="nav-item">
-        <i class="ti ti-circle-check"></i> Mark attendance
-        <span class="nav-badge">Today</span>
-    </a>
-    <a href="reports.html" class="nav-item">
-        <i class="ti ti-chart-bar"></i> Reports
-    </a>
-    <a href="analytics.html" class="nav-item">
-        <i class="ti ti-trending-up"></i> Analytics
-    </a>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
 
-    <div class="nav-section-label">Management</div>
-    <a href="apologies.html" class="nav-item">
-        <i class="ti ti-file-text"></i> Apologies
-        <span class="nav-badge amber" id="apologiesBadge" style="display:none">0</span>
-    </a>
-    <a href="members.html" class="nav-item">
-        <i class="ti ti-users"></i> Members view
-    </a>
-    <a href="manage-members.html" class="nav-item">
-        <i class="ti ti-user-edit"></i> Manage members
-    </a>
-    <a href="confirm-payments.html" class="nav-item">
-        <i class="ti ti-cash"></i> Confirm penalties
-    </a>
-    <a href="finance.html" class="nav-item">
-        <i class="ti ti-currency-dollar"></i> Finance Management
-    </a>
- <div class="nav-section-label">Committee</div>
-        <a href="executive.html" class="nav-item active"><i class="fas fa-users-cog"></i> Executive Committee</a>
-        
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item active"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance Management</a>
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
+    </nav>
 
-    <div class="nav-section-label">Recognition</div>
-    <a href="hall-of-fame.html" class="nav-item">
-        <i class="ti ti-trophy"></i> Hall of Fame
-    </a>
-</nav>
     <div class="sidebar-bottom">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar">A</div>
@@ -221,6 +223,11 @@
                 <option value="pending">Pending only</option>
                 <option value="approved">Approved only</option>
                 <option value="rejected">Rejected only</option>
+            </select>
+            <select id="typeFilter" class="filter-select">
+                <option value="all">All types</option>
+                <option value="late">⏰ Late only</option>
+                <option value="absent">❌ Absent only</option>
             </select>
             <button class="refresh-btn" onclick="loadApologies()">
                 <i class="ti ti-refresh"></i> Refresh
@@ -265,10 +272,21 @@
 
     async function loadApologies() {
         const statusFilter = document.getElementById('statusFilter').value;
-        let query = supabaseClient.from('apology_requests').select('*, members(member_id, name, voice_part)').order('created_at', { ascending: false });
+        const typeFilter = document.getElementById('typeFilter').value;
+        
+        let query = supabaseClient
+            .from('apology_requests')
+            .select('*, members(member_id, name, voice_part)')
+            .order('created_at', { ascending: false });
+            
         if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+        if (typeFilter !== 'all') query = query.eq('apology_type', typeFilter);
+        
         const { data: apologies, error } = await query;
-        if (error) { document.getElementById('apologiesList').innerHTML = `<div class="empty-state"><i class="ti ti-alert-circle"></i> Error: ${escapeHtml(error.message)}</div>`; return; }
+        if (error) { 
+            document.getElementById('apologiesList').innerHTML = `<div class="empty-state"><i class="ti ti-alert-circle"></i> Error: ${escapeHtml(error.message)}</div>`; 
+            return; 
+        }
 
         const pending  = apologies?.filter(a => a.status === 'pending').length  || 0;
         const approved = apologies?.filter(a => a.status === 'approved').length || 0;
@@ -281,59 +299,154 @@
             <div class="kpi-card indigo"><div class="kpi-label"><i class="ti ti-file-text" style="color:var(--indigo)"></i>Total</div><div class="kpi-value">${apologies?.length||0}</div><div class="kpi-meta">All requests</div></div>
         `;
 
-        if (!apologies?.length) { document.getElementById('apologiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i>No apology requests found.</div>'; return; }
+        if (!apologies?.length) { 
+            document.getElementById('apologiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i>No apology requests found.</div>'; 
+            return; 
+        }
 
-        document.getElementById('apologiesList').innerHTML = apologies.map(a => `
-            <div class="apology-card ${a.status}" id="apology-${a.id}">
-                <div class="apology-header">
-                    <div>
-                        <div class="apology-member-name">${escapeHtml(a.members?.name || 'Unknown')}</div>
-                        <div class="apology-member-meta">
-                            <span><i class="ti ti-microphone"></i>${escapeHtml(a.members?.voice_part || '—')}</span>
-                            <span><i class="ti ti-id"></i>${escapeHtml(a.member_id)}</span>
+        document.getElementById('apologiesList').innerHTML = apologies.map(a => {
+            // Determine if late or absent
+            const isLate = a.apology_type === 'late';
+            const typeIcon = isLate ? '⏰' : '❌';
+            const typeLabel = isLate ? 'Late Arrival' : 'Absent';
+            const typeClass = isLate ? 'late' : 'absent';
+            const typeColor = isLate ? '#f59e0b' : '#ef4444';
+            
+            // Status badge class
+            const statusClass = a.status === 'pending' ? 'status-pending' : 
+                               a.status === 'approved' ? 'status-approved' : 'status-rejected';
+            
+            return `
+                <div class="apology-card ${a.status}" id="apology-${a.id}">
+                    <div class="apology-header">
+                        <div>
+                            <div class="apology-member-name">${escapeHtml(a.members?.name || 'Unknown')}</div>
+                            <div class="apology-member-meta">
+                                <span><i class="ti ti-microphone"></i>${escapeHtml(a.members?.voice_part || '—')}</span>
+                                <span><i class="ti ti-id"></i>${escapeHtml(a.member_id)}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                            <span class="type-badge ${typeClass}">
+                                ${typeIcon} ${typeLabel}
+                            </span>
+                            <span class="status-badge ${statusClass}">${a.status.toUpperCase()}</span>
                         </div>
                     </div>
-                    <span class="status-badge status-${a.status}">${a.status.toUpperCase()}</span>
-                </div>
-                <div class="apology-details">
-                    <p><strong><i class="ti ti-calendar"></i> Date:</strong> ${a.date} · ${a.session}</p>
-                    <p><strong><i class="ti ti-file-description"></i> Reason:</strong> ${escapeHtml(a.reason)}</p>
-                    <p><strong><i class="ti ti-clock"></i> Submitted:</strong> ${new Date(a.created_at).toLocaleString()}</p>
-                    ${a.admin_notes ? `<p><strong><i class="ti ti-note"></i> Admin note:</strong> ${escapeHtml(a.admin_notes)}</p>` : ''}
-                </div>
-                ${a.status === 'pending' ? `
-                    <textarea id="note-${a.id}" class="admin-note" placeholder="Add optional admin note (visible to member)…"></textarea>
-                    <div class="action-btns">
-                        <button class="approve-btn" onclick="updateApology('${a.id}', 'approved')"><i class="ti ti-check"></i> Approve</button>
-                        <button class="reject-btn"  onclick="updateApology('${a.id}', 'rejected')"><i class="ti ti-x"></i> Reject</button>
+                    <div class="apology-details">
+                        <p>
+                            <strong><i class="ti ti-calendar"></i> Date:</strong> 
+                            ${a.date} · ${a.session}
+                        </p>
+                        <p>
+                            <strong><i class="ti ti-file-description"></i> Reason:</strong> 
+                            ${escapeHtml(a.reason)}
+                        </p>
+                        <p>
+                            <strong><i class="ti ti-clock"></i> Submitted:</strong> 
+                            ${new Date(a.created_at).toLocaleString()}
+                        </p>
+                        ${a.admin_notes ? `<p><strong><i class="ti ti-note"></i> Admin note:</strong> ${escapeHtml(a.admin_notes)}</p>` : ''}
                     </div>
-                ` : ''}
-            </div>
-        `).join('');
+                    ${a.status === 'pending' ? `
+                        <textarea id="note-${a.id}" class="admin-note" placeholder="Add optional admin note (visible to member)…"></textarea>
+                        <div class="action-btns">
+                            <button class="approve-btn" onclick="updateApology('${a.id}', 'approved')">
+                                <i class="ti ti-check"></i> Approve
+                            </button>
+                            <button class="reject-btn" onclick="updateApology('${a.id}', 'rejected')">
+                                <i class="ti ti-x"></i> Reject
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
     }
 
     async function updateApology(id, status) {
         const note = document.getElementById(`note-${id}`)?.value || '';
-        const { data: apology, error: fetchError } = await supabaseClient.from('apology_requests').select('*').eq('id', id).single();
-        if (fetchError) { alert('❌ Error fetching apology: ' + fetchError.message); return; }
-        const { error: updateError } = await supabaseClient.from('apology_requests').update({ status, admin_notes: note, updated_at: new Date() }).eq('id', id);
-        if (updateError) { alert('❌ Error: ' + updateError.message); return; }
+        const { data: apology, error: fetchError } = await supabaseClient
+            .from('apology_requests')
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+        if (fetchError) { 
+            alert('❌ Error fetching apology: ' + fetchError.message); 
+            return; 
+        }
+        
+        const { error: updateError } = await supabaseClient
+            .from('apology_requests')
+            .update({ 
+                status, 
+                admin_notes: note, 
+                updated_at: new Date() 
+            })
+            .eq('id', id);
+            
+        if (updateError) { 
+            alert('❌ Error: ' + updateError.message); 
+            return; 
+        }
+        
         if (status === 'approved') {
+            // Determine attendance status based on apology type
+            // Late → Late (with apology), Absent → Present (excused)
             const attendanceStatus = apology.apology_type === 'late' ? 'Late' : 'Present';
-            const { data: existingAttendance } = await supabaseClient.from('attendance').select('*').eq('member_id', apology.member_id).eq('date', apology.date).eq('session', apology.session).maybeSingle();
+            
+            // Check if attendance record exists
+            const { data: existingAttendance } = await supabaseClient
+                .from('attendance')
+                .select('*')
+                .eq('member_id', apology.member_id)
+                .eq('date', apology.date)
+                .eq('session', apology.session)
+                .maybeSingle();
+                
             if (existingAttendance) {
-                await supabaseClient.from('attendance').update({ status: attendanceStatus, has_apology: true, apology_approved: true }).eq('id', existingAttendance.id);
+                await supabaseClient
+                    .from('attendance')
+                    .update({ 
+                        status: attendanceStatus, 
+                        has_apology: true, 
+                        apology_approved: true 
+                    })
+                    .eq('id', existingAttendance.id);
             } else {
-                await supabaseClient.from('attendance').insert({ member_id: apology.member_id, date: apology.date, session: apology.session, status: attendanceStatus, has_apology: true, apology_approved: true, marked_at: new Date() });
+                await supabaseClient
+                    .from('attendance')
+                    .insert({ 
+                        member_id: apology.member_id, 
+                        date: apology.date, 
+                        session: apology.session, 
+                        status: attendanceStatus, 
+                        has_apology: true, 
+                        apology_approved: true, 
+                        marked_at: new Date() 
+                    });
             }
-            alert(`✅ Apology ${status}! Attendance has been updated.`);
+            
+            // If it was an absence, remove any existing penalty for this date
+            if (apology.apology_type === 'absent') {
+                await supabaseClient
+                    .from('penalties')
+                    .update({ status: 'waived', admin_notes: 'Apology approved - penalty waived' })
+                    .eq('member_id', apology.member_id)
+                    .eq('date', apology.date)
+                    .eq('session', apology.session);
+            }
+            
+            alert(`✅ Apology approved! ${apology.apology_type === 'late' ? 'Late marked with apology.' : 'Absence excused and penalty waived.'}`);
         } else {
-            alert(`✅ Apology ${status}!`);
+            alert(`❌ Apology rejected.`);
         }
         loadApologies();
     }
 
     document.getElementById('statusFilter').addEventListener('change', loadApologies);
+    document.getElementById('typeFilter').addEventListener('change', loadApologies);
 
     async function init() {
         const { data: { session } } = await supabaseClient.auth.getSession();

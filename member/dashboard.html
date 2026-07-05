@@ -1233,6 +1233,20 @@
             <button class="tab-btn" onclick="switchTab('apology')"><i class="fas fa-pen"></i> Apology</button>
             <button class="tab-btn" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
             <button class="tab-btn" onclick="switchTab('finance')"><i class="fas fa-wallet"></i> Finance</button>
+            <button class="tab-btn" onclick="switchTab('committee')"><i class="fas fa-users-cog"></i> Committee</button>
+        </div>
+
+        <!-- Committee Tab -->
+        <div id="committeeTab" class="tab-content">
+            <div class="chart-container">
+                <div class="section-title"><i class="fas fa-users-cog"></i> Executive Committee</div>
+                <p style="color:var(--slate-500); font-size:14px; margin-bottom:16px;">
+                    Meet the leadership team of the University of Embu Students' Choir
+                </p>
+                <div id="committeeDisplay" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:16px;">
+                    <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading committee...</div>
+                </div>
+            </div>
         </div>
 
         <!-- Stats Tab -->
@@ -1460,56 +1474,57 @@
         </div>
     </div>
 
-<!-- Payment Modal -->
-<div class="modal-overlay" id="paymentModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h3><i class="fas fa-hand-holding-dollar" style="color:var(--green);"></i> Pay Fine</h3>
-            <button class="modal-close" onclick="closePaymentModal()">&times;</button>
-        </div>
-        <div style="text-align:center;">
-            <div style="font-size:44px; margin-bottom:12px;"><i class="fas fa-credit-card"></i></div>
-            <p style="margin-bottom:8px;">Pay <strong style="font-size:24px; color:var(--red);" id="modalAmount"></strong> for:</p>
-            <p id="modalDescription" style="font-size:14px; color:var(--slate-600); margin-bottom:16px; padding:10px; background:var(--slate-50); border-radius:12px;"></p>
-            <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:20px; border-radius:20px; margin:16px 0;">
-                <p style="margin-bottom:6px;"><i class="fas fa-mobile-screen-button"></i> <strong>POCHI LA BIASHARA</strong></p>
-                <p style="font-size:28px; font-weight:700; letter-spacing:2px;" id="paymentPhoneDisplay">0117085859</p>
-                <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
-                <p><strong id="paymentNameDisplay">Peter Manundu</strong></p>
-                <p style="font-size:18px; font-weight:600; letter-spacing:1px;" id="modalAccountNumber"></p>
-                <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
-                <p style="margin-bottom:4px;">💰 <strong>Amount</strong></p>
-                <p style="font-size:26px; font-weight:700;" id="modalAmount2"></p>
-                <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
-                <p style="font-size:12px; opacity:0.9;">Total Pending: <span id="pendingTotalDisplay">KSh 0</span></p>
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-hand-holding-dollar" style="color:var(--green);"></i> Pay Fine</h3>
+                <button class="modal-close" onclick="closePaymentModal()">&times;</button>
             </div>
-            <div style="background:#fef3c7; padding:12px; border-radius:12px; margin:12px 0; text-align:left;">
-                <p style="font-size:12px; color:#92400e; font-weight:600;"><i class="fas fa-info-circle"></i> Instructions</p>
-                <p style="font-size:12px; color:#92400e; margin:2px 0;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
-                <p style="font-size:12px; color:#92400e; margin:2px 0;" id="instructionPhone">2. Enter Phone: <strong>0117085859</strong></p>
-                <p style="font-size:12px; color:#92400e; margin:2px 0;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
-                <p style="font-size:12px; color:#92400e; margin:2px 0;">4. Enter your M-Pesa PIN & complete</p>
+            <div style="text-align:center;">
+                <div style="font-size:44px; margin-bottom:12px;"><i class="fas fa-credit-card"></i></div>
+                <p style="margin-bottom:8px;">Pay <strong style="font-size:24px; color:var(--red);" id="modalAmount"></strong> for:</p>
+                <p id="modalDescription" style="font-size:14px; color:var(--slate-600); margin-bottom:16px; padding:10px; background:var(--slate-50); border-radius:12px;"></p>
+                <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:20px; border-radius:20px; margin:16px 0;">
+                    <p style="margin-bottom:6px;"><i class="fas fa-mobile-screen-button"></i> <strong>POCHI LA BIASHARA</strong></p>
+                    <p style="font-size:28px; font-weight:700; letter-spacing:2px;" id="paymentPhoneDisplay">0117085859</p>
+                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                    <p><strong id="paymentNameDisplay">Peter Manundu</strong></p>
+                    <p style="font-size:18px; font-weight:600; letter-spacing:1px;" id="modalAccountNumber"></p>
+                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                    <p style="margin-bottom:4px;">💰 <strong>Amount</strong></p>
+                    <p style="font-size:26px; font-weight:700;" id="modalAmount2"></p>
+                    <hr style="margin:12px 0; border-color:rgba(255,255,255,0.2);">
+                    <p style="font-size:12px; opacity:0.9;">Total Pending: <span id="pendingTotalDisplay">KSh 0</span></p>
+                </div>
+                <div style="background:#fef3c7; padding:12px; border-radius:12px; margin:12px 0; text-align:left;">
+                    <p style="font-size:12px; color:#92400e; font-weight:600;"><i class="fas fa-info-circle"></i> Instructions</p>
+                    <p style="font-size:12px; color:#92400e; margin:2px 0;">1. Go to M-Pesa → Lipa Na M-Pesa → Pochi</p>
+                    <p style="font-size:12px; color:#92400e; margin:2px 0;" id="instructionPhone">2. Enter Phone: <strong>0117085859</strong></p>
+                    <p style="font-size:12px; color:#92400e; margin:2px 0;">3. Enter Amount: <strong id="instructionAmount"></strong></p>
+                    <p style="font-size:12px; color:#92400e; margin:2px 0;">4. Enter your M-Pesa PIN & complete</p>
+                </div>
+                <div style="margin:16px 0;">
+                    <label style="display:block; margin-bottom:4px; font-weight:500; font-size:13px;"><i class="fas fa-user"></i> Your M-Pesa Name</label>
+                    <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width:100%; padding:10px 14px; border:1.5px solid var(--slate-300); border-radius:12px; font-family:inherit;">
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="recordPayment()" class="btn-success" style="flex:1; justify-content:center;"><i class="fas fa-check"></i> I Have Paid</button>
+                    <button onclick="closePaymentModal()" style="flex:1; background:#ef4444; color:white; border:none; border-radius:40px; cursor:pointer; font-weight:600; padding:10px;"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+                <p style="font-size:11px; color:var(--slate-500); margin-top:16px;">Admin will confirm within 24 hours.</p>
             </div>
-            <div style="margin:16px 0;">
-                <label style="display:block; margin-bottom:4px; font-weight:500; font-size:13px;"><i class="fas fa-user"></i> Your M-Pesa Name</label>
-                <input type="text" id="transactionCode" placeholder="e.g., John Ndumia" style="width:100%; padding:10px 14px; border:1.5px solid var(--slate-300); border-radius:12px; font-family:inherit;">
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button onclick="recordPayment()" class="btn-success" style="flex:1; justify-content:center;"><i class="fas fa-check"></i> I Have Paid</button>
-                <button onclick="closePaymentModal()" style="flex:1; background:#ef4444; color:white; border:none; border-radius:40px; cursor:pointer; font-weight:600; padding:10px;"><i class="fas fa-times"></i> Cancel</button>
-            </div>
-            <p style="font-size:11px; color:var(--slate-500); margin-top:16px;">Admin will confirm within 24 hours.</p>
         </div>
     </div>
-</div>
 
     <!-- Bottom Nav -->
     <div class="bottom-nav">
-        <button class="bottom-nav-item active" onclick="switchTab('stats')"><i class="fas fa-chart-pie"></i><span>Stats</span></button>
+        <button class="bottom-nav-item" onclick="switchTab('stats')"><i class="fas fa-chart-pie"></i><span>Stats</span></button>
         <button class="bottom-nav-item" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
         <button class="bottom-nav-item" onclick="switchTab('apology')"><i class="fas fa-pen"></i><span>Apology</span></button>
         <button class="bottom-nav-item" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i><span>History</span></button>
         <button class="bottom-nav-item" onclick="switchTab('finance')"><i class="fas fa-wallet"></i><span>Finance</span></button>
+        <button class="bottom-nav-item" onclick="switchTab('committee')"><i class="fas fa-users-cog"></i><span>Committee</span></button>
         <button class="bottom-nav-item" id="bottomLogoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
     </div>
 
@@ -1544,7 +1559,7 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
             // Define all tabs
-            const tabs = ['stats', 'profile', 'apology', 'history', 'finance'];
+            const tabs = ['stats', 'profile', 'apology', 'history', 'finance', 'committee'];
             const idx = tabs.indexOf(tab);
 
             // Activate the selected tab
@@ -1556,17 +1571,99 @@
                 if (tabContent) tabContent.classList.add('active');
             }
 
-            // Update bottom nav
+            // Update bottom nav - only for tab buttons (first 7 items)
             document.querySelectorAll('.bottom-nav-item').forEach((item, i) => {
-                item.classList.toggle('active', i === idx);
+                if (i < 7) {
+                    item.classList.toggle('active', i === idx);
+                }
             });
 
             // Load data for specific tabs
             if (tab === 'profile') loadProfileData();
-            if (tab === 'apology') { loadMyApologies();
-                initApologyTab(); }
+            if (tab === 'apology') { loadMyApologies(); initApologyTab(); }
             if (tab === 'history') loadAttendanceHistory();
-            if (tab === 'finance') loadMemberFinance();
+            if (tab === 'finance') {
+                loadPaymentSettings().then(() => {
+                    loadMemberFinance();
+                    loadPenalties();
+                });
+            }
+            if (tab === 'committee') loadCommitteeDisplay();
+        }
+
+        // ── LOAD COMMITTEE (MEMBER VIEW) ──
+        async function loadCommitteeDisplay() {
+            const container = document.getElementById('committeeDisplay');
+            if (!container) return;
+            
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading committee...</div>';
+
+            const { data, error } = await supabaseClient
+                .from('executive_committee')
+                .select('*')
+                .eq('is_active', true)
+                .order('academic_year', { ascending: false })
+                .order('display_order', { ascending: true });
+
+            if (error) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Could not load committee</div>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-users"></i> No committee members listed yet.</div>`;
+                return;
+            }
+
+            // Group by academic year
+            const grouped = {};
+            data.forEach(m => {
+                if (!grouped[m.academic_year]) grouped[m.academic_year] = [];
+                grouped[m.academic_year].push(m);
+            });
+
+            const roleColors = {
+                'Chairman': '#4f46e5',
+                'Vice Chair': '#7c3aed',
+                'Secretary': '#059669',
+                'Treasurer': '#d97706',
+                'Disciplinarian': '#dc2626',
+                'Welfare Secretary': '#0891b2'
+            };
+
+            let html = '';
+            const sortedYears = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+            sortedYears.forEach(year => {
+                html += `
+                    <div style="grid-column: 1 / -1; margin-top:8px;">
+                        <h4 style="font-size:14px; font-weight:700; color:var(--slate-700); display:flex; align-items:center; gap:8px; padding-bottom:6px; border-bottom:1px solid var(--slate-200);">
+                            <i class="fas fa-calendar" style="color:var(--primary);"></i> ${escapeHtml(year)}
+                        </h4>
+                    </div>
+                `;
+
+                grouped[year].forEach(m => {
+                    const color = roleColors[m.role] || '#4f46e5';
+                    const photoHtml = m.photo_url ? 
+                        `<img src="${m.photo_url}?t=${Date.now()}" alt="${escapeHtml(m.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\\'fas fa-user\\' style=\\'font-size:32px; color:#94a3b8;\\'></i>';">` :
+                        `<i class="fas fa-user" style="font-size:32px; color:#94a3b8;"></i>`;
+
+                    html += `
+                        <div style="background:var(--slate-50); border-radius:14px; padding:14px; text-align:center; border:1px solid var(--slate-100); transition:transform .15s, box-shadow .15s; cursor:default;">
+                            <div style="width:80px; height:80px; border-radius:50%; overflow:hidden; margin:0 auto 10px; border:3px solid ${color}; background:var(--slate-100); display:flex; align-items:center; justify-content:center;">
+                                ${photoHtml}
+                            </div>
+                            <div style="font-size:14px; font-weight:700; color:var(--slate-900);">${escapeHtml(m.name)}</div>
+                            <div style="font-size:12px; font-weight:600; color:${color}; margin-top:3px;">${escapeHtml(m.role)}</div>
+                            ${m.bio ? `<div style="font-size:11px; color:var(--slate-500); margin-top:6px; line-height:1.4;">${escapeHtml(m.bio)}</div>` : ''}
+                            ${m.phone ? `<div style="font-size:11px; color:var(--slate-400); margin-top:4px;"><i class="fas fa-phone"></i> ${escapeHtml(m.phone)}</div>` : ''}
+                        </div>
+                    `;
+                });
+            });
+
+            container.innerHTML = html;
         }
 
         // ── AUTH ──
@@ -1659,208 +1756,195 @@
             });
         }
 
-       // ── LOAD PENALTIES ──
-async function loadPenalties() {
-    if (!currentMember) return;
-    const { data: penalties } = await supabaseClient
-        .from('penalties')
-        .select('*')
-        .eq('member_id', currentMember.member_id)
-        .order('date', { ascending: false });
+        // ── LOAD PENALTIES ──
+        async function loadPenalties() {
+            if (!currentMember) return;
+            const { data: penalties } = await supabaseClient
+                .from('penalties')
+                .select('*')
+                .eq('member_id', currentMember.member_id)
+                .order('date', { ascending: false });
 
-    const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
-    const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
+            const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
+            const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
 
-    // ✅ Use dynamic settings from window variables
-    const phone = window.paymentPhone || '0117085859';
-    const name = window.paymentName || 'Peter Manundu';
+            // Use dynamic settings from window variables
+            const phone = window.paymentPhone || '0117085859';
+            const name = window.paymentName || 'Peter Manundu';
 
-    document.getElementById('penaltySummary').innerHTML = `
-        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
-            <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
-            <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
-            <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
-        </div>
-        <div style="margin-top:8px; font-size:12px; color:var(--slate-500);">
-            <i class="fas fa-phone"></i> Payment: POCHI ${phone} | ${name}
-        </div>
-    `;
+            document.getElementById('penaltySummary').innerHTML = `
+                <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
+                    <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
+                    <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
+                    <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
+                </div>
+                <div style="margin-top:8px; font-size:12px; color:var(--slate-500);">
+                    <i class="fas fa-phone"></i> Payment: POCHI ${phone} | ${name}
+                </div>
+            `;
 
-    if (!penalties?.length) {
-        document.getElementById('penaltiesList').innerHTML =
-            '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
-        return;
-    }
+            if (!penalties?.length) {
+                document.getElementById('penaltiesList').innerHTML =
+                    '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
+                return;
+            }
 
-    document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
-        const isCustom = p.is_custom || p.penalty_type === 'custom';
-        let displayReason = '';
-        let displayIcon = '';
-        let displayType = '';
+            document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
+                const isCustom = p.is_custom || p.penalty_type === 'custom';
+                let displayReason = '';
+                let displayIcon = '';
+                let displayType = '';
 
-        if (isCustom) {
-            displayReason = p.custom_reason || p.reason || 'Custom penalty';
-            displayIcon = '📌';
-            displayType = 'Custom';
-        } else if (p.penalty_type === 'late') {
-            displayReason = 'Late arrival';
-            displayIcon = '⏰';
-            displayType = 'Late';
-        } else {
-            displayReason = 'Absent without apology';
-            displayIcon = '❌';
-            displayType = 'Absent';
+                if (isCustom) {
+                    displayReason = p.custom_reason || p.reason || 'Custom penalty';
+                    displayIcon = '📌';
+                    displayType = 'Custom';
+                } else if (p.penalty_type === 'late') {
+                    displayReason = 'Late arrival';
+                    displayIcon = '⏰';
+                    displayType = 'Late';
+                } else {
+                    displayReason = 'Absent without apology';
+                    displayIcon = '❌';
+                    displayType = 'Absent';
+                }
+
+                return `
+                    <div class="apology-item">
+                        <div>
+                            <div>
+                                <strong>
+                                    ${displayIcon} ${displayType}
+                                    ${isCustom ? '<span style="background:var(--amber-light);color:#854d0e;padding:2px 8px;border-radius:40px;font-size:10px;margin-left:6px;">Custom</span>' : ''}
+                                </strong>
+                                ${p.reason && !isCustom ? `<div style="font-size:12px;color:var(--slate-500);margin-top:2px;">${p.reason}</div>` : ''}
+                            </div>
+                            <div style="font-size:13px; color:var(--slate-500);">
+                                ${p.date} • ${p.session || 'Custom'}
+                                ${isCustom ? ` • <span style="color:var(--amber);font-weight:500;">${escapeHtml(displayReason)}</span>` : ''}
+                            </div>
+                            ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;">📝 ${escapeHtml(displayReason)}</div>` : ''}
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:18px; font-weight:700; color:var(--red);">KSh ${p.amount}</div>
+                            <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
+                            ${p.status === 'pending' ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${p.amount}, '${p.penalty_type === 'late' ? 'Late Fine' : p.is_custom ? p.custom_reason || p.reason || 'Custom Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            await checkPendingPenalties();
+            await updateFloatingReminder();
         }
 
-        return `
-            <div class="apology-item">
-                <div>
-                    <div>
-                        <strong>
-                            ${displayIcon} ${displayType}
-                            ${isCustom ? '<span style="background:var(--amber-light);color:#854d0e;padding:2px 8px;border-radius:40px;font-size:10px;margin-left:6px;">Custom</span>' : ''}
-                        </strong>
-                        ${p.reason && !isCustom ? `<div style="font-size:12px;color:var(--slate-500);margin-top:2px;">${p.reason}</div>` : ''}
-                    </div>
-                    <div style="font-size:13px; color:var(--slate-500);">
-                        ${p.date} • ${p.session || 'Custom'}
-                        ${isCustom ? ` • <span style="color:var(--amber);font-weight:500;">${escapeHtml(displayReason)}</span>` : ''}
-                    </div>
-                    ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;">📝 ${escapeHtml(displayReason)}</div>` : ''}
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-size:18px; font-weight:700; color:var(--red);">KSh ${p.amount}</div>
-                    <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
-                    ${p.status === 'pending' ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${p.amount}, '${p.penalty_type === 'late' ? 'Late Fine' : p.is_custom ? p.custom_reason || p.reason || 'Custom Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
+        // ── PAYMENT SETTINGS FUNCTIONS ──
+        async function loadPaymentSettings() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('settings')
+                    .select('setting_key, setting_value')
+                    .like('setting_key', 'payment_%');
+                
+                if (error) throw error;
+                
+                const settings = {};
+                data.forEach(row => {
+                    settings[row.setting_key] = row.setting_value;
+                });
+                
+                const phone = settings['payment_phone'] || '0117085859';
+                const name = settings['payment_name'] || 'Peter Manundu';
+                
+                localStorage.setItem('payment_phone', phone);
+                localStorage.setItem('payment_name', name);
+                
+                window.paymentPhone = phone;
+                window.paymentName = name;
+                
+                if (document.getElementById('paymentModal').classList.contains('open')) {
+                    updatePaymentModalWithSettings();
+                }
+                
+                console.log('✅ Payment settings loaded:', { phone, name });
+                
+            } catch (error) {
+                console.warn('Error loading payment settings, using defaults:', error);
+                const phone = localStorage.getItem('payment_phone') || '0117085859';
+                const name = localStorage.getItem('payment_name') || 'Peter Manundu';
+                window.paymentPhone = phone;
+                window.paymentName = name;
+            }
+        }
 
-    await checkPendingPenalties();
-    await updateFloatingReminder();
-}
-       // ── PAYMENT SETTINGS FUNCTIONS ──
+        function updatePaymentModalWithSettings() {
+            const phone = window.paymentPhone || '0117085859';
+            const name = window.paymentName || 'Peter Manundu';
+            
+            document.getElementById('paymentPhoneDisplay').textContent = phone;
+            document.getElementById('paymentNameDisplay').textContent = name;
+            document.getElementById('instructionPhone').innerHTML = `2. Enter Phone: <strong>${phone}</strong>`;
+        }
 
-// Load payment settings - ALWAYS fetch from Supabase first
-async function loadPaymentSettings() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('settings')
-            .select('setting_key, setting_value')
-            .like('setting_key', 'payment_%');
-        
-        if (error) throw error;
-        
-        const settings = {};
-        data.forEach(row => {
-            settings[row.setting_key] = row.setting_value;
+        async function showPaymentModal(penaltyId, amount, description) {
+            const { data: penalty } = await supabaseClient
+                .from('penalties')
+                .select('status, is_custom, custom_reason, reason')
+                .eq('id', penaltyId)
+                .single();
+                
+            if (!penalty || penalty.status !== 'pending') {
+                alert('This fine has already been paid or does not exist.');
+                return;
+            }
+            
+            currentPenaltyId = penaltyId;
+            currentPenaltyAmount = amount;
+            
+            let displayDescription = description;
+            if (penalty.is_custom) {
+                const customText = penalty.custom_reason || penalty.reason || 'Custom penalty';
+                displayDescription = `📌 Custom Penalty: ${customText} - ${description.split(' - ')[1] || ''}`;
+            }
+            
+            currentPenaltyDescription = displayDescription;
+            
+            const { data: penalties } = await supabaseClient
+                .from('penalties')
+                .select('amount')
+                .eq('member_id', currentMember.member_id)
+                .eq('status', 'pending');
+                
+            const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
+            
+            document.getElementById('modalAmount').innerHTML = `KSh ${amount}`;
+            document.getElementById('modalDescription').innerHTML = displayDescription;
+            document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
+            document.getElementById('modalAmount2').innerHTML = `KSh ${amount}`;
+            document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal}`;
+            document.getElementById('instructionAmount').innerHTML = `KSh ${amount}`;
+            document.getElementById('transactionCode').value = '';
+            
+            updatePaymentModalWithSettings();
+            
+            document.getElementById('paymentModal').classList.add('open');
+        }
+
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'payment_phone' || e.key === 'payment_name') {
+                loadPaymentSettings();
+                if (document.getElementById('paymentModal').classList.contains('open')) {
+                    updatePaymentModalWithSettings();
+                }
+            }
         });
-        
-        const phone = settings['payment_phone'] || '0117085859';
-        const name = settings['payment_name'] || 'Peter Manundu';
-        
-        // Update localStorage
-        localStorage.setItem('payment_phone', phone);
-        localStorage.setItem('payment_name', name);
-        
-        // ✅ Store in global variables (this is what loadPenalties uses)
-        window.paymentPhone = phone;
-        window.paymentName = name;
-        
-        // If payment modal is open, update it
-        if (document.getElementById('paymentModal').classList.contains('open')) {
-            updatePaymentModalWithSettings();
-        }
-        
-        console.log('✅ Payment settings loaded:', { phone, name });
-        
-    } catch (error) {
-        console.warn('Error loading payment settings, using defaults:', error);
-        const phone = localStorage.getItem('payment_phone') || '0117085859';
-        const name = localStorage.getItem('payment_name') || 'Peter Manundu';
-        window.paymentPhone = phone;
-        window.paymentName = name;
-    }
-}
-// Update payment modal with dynamic settings
-function updatePaymentModalWithSettings() {
-    const phone = window.paymentPhone || '0117085859';
-    const name = window.paymentName || 'Peter Manundu';
-    
-    document.getElementById('paymentPhoneDisplay').textContent = phone;
-    document.getElementById('paymentNameDisplay').textContent = name;
-    document.getElementById('instructionPhone').innerHTML = `2. Enter Phone: <strong>${phone}</strong>`;
-}
 
-// Modify showPaymentModal to use dynamic settings
-async function showPaymentModal(penaltyId, amount, description) {
-    const { data: penalty } = await supabaseClient
-        .from('penalties')
-        .select('status, is_custom, custom_reason, reason')
-        .eq('id', penaltyId)
-        .single();
-        
-    if (!penalty || penalty.status !== 'pending') {
-        alert('This fine has already been paid or does not exist.');
-        return;
-    }
-    
-    currentPenaltyId = penaltyId;
-    currentPenaltyAmount = amount;
-    
-    let displayDescription = description;
-    if (penalty.is_custom) {
-        const customText = penalty.custom_reason || penalty.reason || 'Custom penalty';
-        displayDescription = `📌 Custom Penalty: ${customText} - ${description.split(' - ')[1] || ''}`;
-    }
-    
-    currentPenaltyDescription = displayDescription;
-    
-    const { data: penalties } = await supabaseClient
-        .from('penalties')
-        .select('amount')
-        .eq('member_id', currentMember.member_id)
-        .eq('status', 'pending');
-        
-    const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
-    
-    document.getElementById('modalAmount').innerHTML = `KSh ${amount}`;
-    document.getElementById('modalDescription').innerHTML = displayDescription;
-    document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
-    document.getElementById('modalAmount2').innerHTML = `KSh ${amount}`;
-    document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal}`;
-    document.getElementById('instructionAmount').innerHTML = `KSh ${amount}`;
-    document.getElementById('transactionCode').value = '';
-    
-    // Update payment details with dynamic settings
-    updatePaymentModalWithSettings();
-    
-    document.getElementById('paymentModal').classList.add('open');
-}
-
-// Listen for storage changes (when admin updates settings)
-window.addEventListener('storage', function(e) {
-    if (e.key === 'payment_phone' || e.key === 'payment_name') {
-        // Reload payment settings
-        loadPaymentSettings();
-        // Update modal if open
-        if (document.getElementById('paymentModal').classList.contains('open')) {
-            updatePaymentModalWithSettings();
-        }
-    }
-});
-
-// Initialize payment settings
-loadPaymentSettings();
-        // ── SHOW PAYMENT MODAL ──
-        
+        // ── PAYMENT MODAL FUNCTIONS ──
         function closePaymentModal() {
             document.getElementById('paymentModal').classList.remove('open');
             currentPenaltyId = null;
         }
 
-        // ── RECORD PAYMENT ──
         async function recordPayment() {
             if (!currentPenaltyId) { alert('No payment selected'); return; }
             const transactionCode = document.getElementById('transactionCode').value.trim();
@@ -2468,16 +2552,16 @@ loadPaymentSettings();
         document.getElementById('logoutBtn').addEventListener('click', logout);
         document.getElementById('bottomLogoutBtn').addEventListener('click', logout);
 
-       // ── INIT ──
-async function init() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) { window.location.href = '../login.html'; return; }
-    await loadMemberData();
-    await loadPaymentSettings(); // Load settings on page load
-    addFloatingReminderButton();
-    startReminderInterval();
-    await loadHallOfFame();
-}
+        // ── INIT ──
+        async function init() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = '../login.html'; return; }
+            await loadMemberData();
+            await loadPaymentSettings();
+            addFloatingReminderButton();
+            startReminderInterval();
+            await loadHallOfFame();
+        }
         init();
     </script>
 </body>

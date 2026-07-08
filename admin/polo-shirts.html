@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Polo Shirt Orders | Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5; --indigo-light: #eef2ff;
+            --green: #10b981; --green-light: #d1fae5;
+            --amber: #f59e0b; --amber-light: #fef9c3;
+            --red: #ef4444; --red-light: #fee2e2;
+            --bg: #f8fafc; --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* KPI Cards */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; border-left: 4px solid var(--indigo); }
+        .kpi-card.green { border-left-color: var(--green); }
+        .kpi-card.amber { border-left-color: var(--amber); }
+        .kpi-card.red { border-left-color: var(--red); }
+        .kpi-card .number { font-size: 28px; font-weight: 700; }
+        .kpi-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+        .controls-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .filter-select { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 13px; font-family: inherit; outline: none; cursor: pointer; }
+        .filter-select:focus { border-color: var(--indigo); }
+        .action-btn { padding: 8px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .15s; }
+        .action-btn:hover { opacity: .85; }
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-gold { background: linear-gradient(135deg, #d4af37, #b8960f); color: #fff; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-pdf { background: #dc2626; color: #fff; }
+        .btn-pdf:hover { opacity: .85; }
+
+        .table-wrapper { overflow-x: auto; border-radius: 14px; border: 0.5px solid var(--border); background: var(--surface); }
+        .orders-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .orders-table th { background: var(--bg); padding: 11px 14px; font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: left; text-transform: uppercase; letter-spacing: .5px; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; }
+        .orders-table td { padding: 11px 14px; border-bottom: 0.5px solid var(--border); font-size: 13px; vertical-align: middle; }
+        .orders-table tr:last-child td { border-bottom: none; }
+        .orders-table tr:hover td { background: var(--bg); }
+
+        .badge { padding: 3px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-paid { background: var(--green-light); color: #065f46; }
+        .badge-pending { background: var(--amber-light); color: #854d0e; }
+
+        .size-badge { display: inline-block; padding: 2px 10px; border-radius: 40px; font-size: 12px; font-weight: 700; background: var(--indigo-light); color: var(--indigo); }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
+        .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; }
+
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--surface); border-radius: 20px; padding: 28px 24px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-header h3 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .modal-close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-tertiary); }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-secondary); font-size: 12px; }
+        .form-input { width: 100%; padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; font-family: inherit; background: var(--bg); outline: none; }
+        .form-input:focus { border-color: var(--indigo); }
+
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .bottom-nav { display: flex; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .controls-panel { flex-direction: column; align-items: stretch; }
+            .action-btn { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">98th Music Festival 2026</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="fas fa-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="fas fa-check-circle"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="fas fa-trending-up"></i> Analytics</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="fas fa-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="fas fa-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="fas fa-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="fas fa-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="fas fa-wallet"></i> Finance Management</a>
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+        <div class="nav-section-label">Polo Shirts</div>
+        <a href="polo-shirts.html" class="nav-item active"><i class="fas fa-tshirt"></i> Polo Shirt Orders</a>
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="fas fa-trophy"></i> Hall of Fame</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar"><span>A</span></div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-left">
+                <h2>👕 Polo Shirt Orders</h2>
+                <p>Manage member shirt orders and payments</p>
+            </div>
+        </div>
+        <div class="topbar-right"><div class="topbar-chip" id="topTime">--:--</div></div>
+    </header>
+
+    <main class="content">
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="kpiGrid">
+            <div class="kpi-card">
+                <div class="number" id="totalOrders">0</div>
+                <div class="label">Total Orders</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="number" id="paidOrders">0</div>
+                <div class="label">✅ Paid</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="number" id="pendingOrders">0</div>
+                <div class="label">⏳ Pending</div>
+            </div>
+            <div class="kpi-card">
+                <div class="number" id="totalAmount">KSh 0</div>
+                <div class="label">💰 Total Collected</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-panel">
+            <select id="statusFilter" class="filter-select">
+                <option value="all">All Orders</option>
+                <option value="paid">✅ Paid</option>
+                <option value="pending">⏳ Pending</option>
+            </select>
+            <select id="sizeFilter" class="filter-select">
+                <option value="all">All Sizes</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+            </select>
+            <button class="action-btn btn-primary" onclick="loadOrders()"><i class="fas fa-refresh"></i> Refresh</button>
+            
+            <!-- Export Buttons -->
+            <button class="action-btn btn-gold" onclick="exportCSV('all')"><i class="fas fa-file-csv"></i> CSV All</button>
+            <button class="action-btn btn-green" onclick="exportCSV('paid')"><i class="fas fa-file-csv"></i> CSV Paid</button>
+            <button class="action-btn btn-red" onclick="exportCSV('pending')"><i class="fas fa-file-csv"></i> CSV Pending</button>
+            
+            <!-- PDF Export Buttons -->
+            <button class="action-btn btn-pdf" onclick="exportPDF('all')"><i class="fas fa-file-pdf"></i> PDF All</button>
+            <button class="action-btn btn-pdf" onclick="exportPDF('paid')"><i class="fas fa-file-pdf"></i> PDF Paid</button>
+            <button class="action-btn btn-pdf" onclick="exportPDF('pending')"><i class="fas fa-file-pdf"></i> PDF Pending</button>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-wrapper">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Member</th>
+                        <th>Voice Part</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                        <th>Amount Paid</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersList">
+                    <tr><td colspan="7" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading orders...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-hand-holding-dollar" style="color:var(--green);"></i> Record Payment</h3>
+            <button class="modal-close-btn" onclick="closePaymentModal()">&times;</button>
+        </div>
+        <form id="paymentForm">
+            <input type="hidden" id="payOrderId">
+            <div class="form-group">
+                <label>Member</label>
+                <p id="payMemberName" style="font-weight:600; color:var(--text-primary);">—</p>
+            </div>
+            <div class="form-group">
+                <label>Size</label>
+                <p id="paySize" style="font-weight:600; color:var(--text-primary);">—</p>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-dollar-sign"></i> Amount Paid (KSh)</label>
+                <input type="number" id="payAmount" class="form-input" placeholder="e.g., 700" required min="0">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Payment Date</label>
+                <input type="date" id="payDate" class="form-input" required>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button type="button" onclick="closePaymentModal()" class="action-btn" style="flex:1; justify-content:center; background:var(--bg); color:var(--text-secondary);">Cancel</button>
+                <button type="submit" class="action-btn btn-green" style="flex:1; justify-content:center;">
+                    <i class="fas fa-check"></i> Confirm Payment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="fas fa-dashboard"></i><span>Home</span></a>
+    <a href="mark-attendance.html" class="bottom-nav-item"><i class="fas fa-check-circle"></i><span>Mark</span></a>
+    <a href="reports.html" class="bottom-nav-item"><i class="fas fa-chart-bar"></i><span>Reports</span></a>
+    <a href="polo-shirts.html" class="bottom-nav-item active"><i class="fas fa-tshirt"></i><span>Polo</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let allOrders = [];
+
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+
+    function tick() {
+        document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+    }
+    setInterval(tick, 1000); tick();
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    async function doLogout() {
+        try { await sb.auth.signOut(); } catch {}
+        window.location.href = '../login.html';
+    }
+
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').innerHTML = `<span>${name.charAt(0).toUpperCase()}</span>`;
+        } catch(e) { console.warn(e); }
+    }
+
+    // ── LOAD ORDERS ──
+    async function loadOrders() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const sizeFilter = document.getElementById('sizeFilter').value;
+
+        let query = sb
+            .from('polo_shirt_orders')
+            .select('*, members(name, voice_part)')
+            .order('ordered_at', { ascending: false });
+
+        if (statusFilter !== 'all') query = query.eq('payment_status', statusFilter);
+        if (sizeFilter !== 'all') query = query.eq('size', sizeFilter);
+
+        const { data, error } = await query;
+
+        if (error) {
+            document.getElementById('ordersList').innerHTML = `<tr><td colspan="7" class="empty-state">Error: ${escapeHtml(error.message)}</td></tr>`;
+            return;
+        }
+
+        allOrders = data || [];
+
+        // Update KPIs
+        const total = allOrders.length;
+        const paid = allOrders.filter(o => o.payment_status === 'paid').length;
+        const pending = allOrders.filter(o => o.payment_status === 'pending').length;
+        const totalAmount = allOrders.filter(o => o.payment_status === 'paid').reduce((s, o) => s + (o.amount_paid || 0), 0);
+
+        document.getElementById('totalOrders').textContent = total;
+        document.getElementById('paidOrders').textContent = paid;
+        document.getElementById('pendingOrders').textContent = pending;
+        document.getElementById('totalAmount').textContent = `KSh ${totalAmount.toLocaleString()}`;
+
+        if (!allOrders.length) {
+            document.getElementById('ordersList').innerHTML = `<tr><td colspan="7" class="empty-state"><i class="fas fa-inbox"></i> No orders found</td></tr>`;
+            return;
+        }
+
+        document.getElementById('ordersList').innerHTML = allOrders.map((o, i) => {
+            const isPaid = o.payment_status === 'paid';
+            return `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${escapeHtml(o.members?.name || 'Unknown')}</strong></td>
+                    <td>${escapeHtml(o.members?.voice_part || '—')}</td>
+                    <td><span class="size-badge">${escapeHtml(o.size)}</span></td>
+                    <td><span class="badge ${isPaid ? 'badge-paid' : 'badge-pending'}">${isPaid ? '✅ Paid' : '⏳ Pending'}</span></td>
+                    <td>${o.amount_paid > 0 ? `KSh ${o.amount_paid}` : '—'}</td>
+                    <td>
+                        ${!isPaid ? `<button class="action-btn btn-green" style="padding:4px 12px; font-size:11px;" onclick="openPaymentModal('${o.id}', '${escapeHtml(o.members?.name || 'Unknown')}', '${o.size}')"><i class="fas fa-check"></i> Pay</button>` : ''}
+                        <button class="action-btn" style="padding:4px 12px; font-size:11px; background:var(--red-light); color:var(--red);" onclick="deleteOrder('${o.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // ── PAYMENT MODAL ──
+    function openPaymentModal(id, name, size) {
+        document.getElementById('payOrderId').value = id;
+        document.getElementById('payMemberName').textContent = name;
+        document.getElementById('paySize').textContent = size;
+        document.getElementById('payAmount').value = '';
+        document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('paymentModal').classList.add('open');
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.remove('open');
+    }
+
+    document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const id = document.getElementById('payOrderId').value;
+        const amount = parseFloat(document.getElementById('payAmount').value);
+        const date = document.getElementById('payDate').value;
+
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount.');
+            return;
+        }
+
+        const btn = this.querySelector('button[type="submit"]');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        btn.disabled = true;
+
+        const { error } = await sb
+            .from('polo_shirt_orders')
+            .update({
+                payment_status: 'paid',
+                amount_paid: amount,
+                payment_date: date,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+        if (error) {
+            alert('❌ Error: ' + error.message);
+        } else {
+            alert('✅ Payment recorded!');
+            closePaymentModal();
+            loadOrders();
+        }
+
+        btn.innerHTML = original;
+        btn.disabled = false;
+    });
+
+    // ── DELETE ORDER ──
+    async function deleteOrder(id) {
+        if (!confirm('Delete this order?')) return;
+        const { error } = await sb.from('polo_shirt_orders').delete().eq('id', id);
+        if (error) alert('Error: ' + error.message);
+        else { alert('Order deleted.'); loadOrders(); }
+    }
+
+    // ── EXPORT CSV ──
+    function exportCSV(type) {
+        let data = getFilteredData(type);
+        if (!data.length) {
+            alert('No orders to export.');
+            return;
+        }
+
+        let csv = 'No.,Member,Voice Part,Size,Status,Amount Paid,Order Date\n';
+        data.forEach((o, i) => {
+            csv += `${i+1},${o.members?.name || 'Unknown'},${o.members?.voice_part || '—'},${o.size},${o.payment_status},${o.amount_paid || 0},${o.ordered_at?.split('T')[0] || ''}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        const date = new Date().toISOString().split('T')[0];
+        link.download = `polo_orders_${type}_${date}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    // ── GET FILTERED DATA ──
+    function getFilteredData(type) {
+        if (type === 'all') return allOrders;
+        else if (type === 'paid') return allOrders.filter(o => o.payment_status === 'paid');
+        else return allOrders.filter(o => o.payment_status === 'pending');
+    }
+
+    // ── EXPORT PDF ──
+    async function exportPDF(type) {
+        let data = getFilteredData(type);
+        if (!data.length) {
+            alert('No orders to export.');
+            return;
+        }
+
+        const pdfContent = document.createElement('div');
+        pdfContent.style.padding = '30px';
+        pdfContent.style.fontFamily = 'Arial, sans-serif';
+        pdfContent.style.backgroundColor = 'white';
+        pdfContent.style.color = '#1a1a2e';
+
+        const date = new Date().toISOString().split('T')[0];
+        const typeLabel = type === 'all' ? 'All Orders' : type === 'paid' ? 'Paid Orders' : 'Pending Orders';
+        const totalAmount = data.filter(o => o.payment_status === 'paid').reduce((s, o) => s + (o.amount_paid || 0), 0);
+
+        // Build table rows
+        let tableRows = '';
+        data.forEach((o, i) => {
+            tableRows += `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px 12px; text-align: center;">${i + 1}</td>
+                    <td style="padding: 10px 12px;">${o.members?.name || 'Unknown'}</td>
+                    <td style="padding: 10px 12px;">${o.members?.voice_part || '—'}</td>
+                    <td style="padding: 10px 12px; text-align: center; font-weight: 700;">${o.size}</td>
+                    <td style="padding: 10px 12px; text-align: center;">
+                        <span style="background: ${o.payment_status === 'paid' ? '#d1fae5' : '#fef3c7'}; 
+                             color: ${o.payment_status === 'paid' ? '#065f46' : '#854d0e'}; 
+                             padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+                            ${o.payment_status === 'paid' ? '✅ PAID' : '⏳ PENDING'}
+                        </span>
+                    </td>
+                    <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: ${o.payment_status === 'paid' ? '#065f46' : '#94a3b8'};">
+                        ${o.amount_paid > 0 ? `KSh ${o.amount_paid}` : '—'}
+                    </td>
+                    <td style="padding: 10px 12px; text-align: center; color: #64748b; font-size: 12px;">
+                        ${o.ordered_at?.split('T')[0] || ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        pdfContent.innerHTML = `
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #4f46e5; padding-bottom: 20px;">
+                <h1 style="color: #4f46e5; font-size: 28px; margin-bottom: 5px;">🎵 University of Embu Students' Choir</h1>
+                <h2 style="color: #1a1f36; font-size: 22px; font-weight: 700;">Polo Shirt Orders Report</h2>
+                <p style="color: #64748b; font-size: 14px; margin-top: 5px;">
+                    ${typeLabel} · Generated on ${new Date().toLocaleString()}
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+                <div style="background: #eef2ff; padding: 14px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Total Orders</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #4f46e5;">${data.length}</div>
+                </div>
+                <div style="background: #d1fae5; padding: 14px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Paid</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #065f46;">${data.filter(o => o.payment_status === 'paid').length}</div>
+                </div>
+                <div style="background: #fef3c7; padding: 14px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Pending</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #854d0e;">${data.filter(o => o.payment_status === 'pending').length}</div>
+                </div>
+                <div style="background: #ede9fe; padding: 14px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Total Collected</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">KSh ${totalAmount.toLocaleString()}</div>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                    <tr style="background: #1a1f36; color: white;">
+                        <th style="padding: 12px 14px; text-align: center; font-size: 11px; text-transform: uppercase;">#</th>
+                        <th style="padding: 12px 14px; text-align: left; font-size: 11px; text-transform: uppercase;">Member</th>
+                        <th style="padding: 12px 14px; text-align: left; font-size: 11px; text-transform: uppercase;">Voice Part</th>
+                        <th style="padding: 12px 14px; text-align: center; font-size: 11px; text-transform: uppercase;">Size</th>
+                        <th style="padding: 12px 14px; text-align: center; font-size: 11px; text-transform: uppercase;">Status</th>
+                        <th style="padding: 12px 14px; text-align: right; font-size: 11px; text-transform: uppercase;">Amount</th>
+                        <th style="padding: 12px 14px; text-align: center; font-size: 11px; text-transform: uppercase;">Order Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
+                <p>University of Embu Students' Choir · 98th Music Festival 2026</p>
+                <p>Report generated on ${new Date().toLocaleString()}</p>
+            </div>
+        `;
+
+        // Generate PDF
+        const btn = document.querySelector(`.btn-pdf[onclick*="${type}"]`) || document.querySelector('.btn-pdf');
+        const originalText = btn?.innerHTML || 'Exporting...';
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            btn.disabled = true;
+        }
+
+        const opt = {
+            margin: [0.5, 0.5, 0.5, 0.5],
+            filename: `polo_orders_${type}_${date}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        await html2pdf().set(opt).from(pdfContent).save();
+
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // ── INIT ──
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await loadUserInfo();
+        loadOrders();
+    }
+
+    init();
+
+    // Event listeners for filters
+    document.getElementById('statusFilter').addEventListener('change', loadOrders);
+    document.getElementById('sizeFilter').addEventListener('change', loadOrders);
+
+    // Expose globals
+    window.doLogout = doLogout;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.loadOrders = loadOrders;
+    window.openPaymentModal = openPaymentModal;
+    window.closePaymentModal = closePaymentModal;
+    window.deleteOrder = deleteOrder;
+    window.exportCSV = exportCSV;
+    window.exportPDF = exportPDF;
+</script>
+</body>
+</html>

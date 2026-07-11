@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Late Fees | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            padding: 24px 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        /* header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header h1 i {
+            color: #4f46e5;
+        }
+
+        .header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* KPI grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .kpi-card {
+            background: #f8fafc;
+            padding: 16px 14px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            transition: background 0.15s;
+        }
+
+        .kpi-card .number {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .kpi-card .label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .kpi-card .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .btn {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity .15s, transform .1s;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            opacity: .85;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-amber {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-green {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            color: #0f172a;
+        }
+
+        /* table wrapper */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 12px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 3px 12px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-late {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 16px;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ── responsive tweaks ── */
+        @media (max-width: 900px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .container {
+                padding: 18px 14px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 8px 14px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                padding: 14px 10px;
+                border-radius: 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                justify-content: center;
+            }
+
+            .header-actions {
+                justify-content: center;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .kpi-card {
+                padding: 12px 10px;
+            }
+
+            .kpi-card .number {
+                font-size: 22px;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+
+            .controls .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+
+            .table-wrapper {
+                border-radius: 12px;
+            }
+
+            table {
+                min-width: 600px;
+                font-size: 12px;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+            }
+
+            .status-badge {
+                font-size: 10px;
+                padding: 2px 10px;
+            }
+
+            .back-link {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+
+            .btn-amber,
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .kpi-card .badge {
+                font-size: 10px;
+                padding: 1px 8px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .kpi-card {
+                padding: 10px 8px;
+            }
+
+            .kpi-card .number {
+                font-size: 20px;
+            }
+
+            .container {
+                padding: 10px 6px;
+            }
+
+            .btn {
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+
+            th,
+            td {
+                padding: 8px 6px;
+                font-size: 11px;
+            }
+
+            table {
+                min-width: 480px;
+            }
+        }
+
+        /* small extra: avoid horizontal overflow */
+        .kpi-card .label {
+            word-break: break-word;
+        }
+
+        .btn i {
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .btn i {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+        <div class="header">
+            <h1><i class="fas fa-clock"></i> Late Fee Management</h1>
+            <div class="header-actions">
+                <button class="btn btn-amber" onclick="calculateLateFees()">
+                    <i class="fas fa-calculator"></i> Calculate
+                </button>
+                <button class="btn btn-primary" onclick="loadLateFees()">
+                    <i class="fas fa-refresh"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="kpiGrid">
+            <div class="kpi-card">
+                <div class="number" id="totalPending">0</div>
+                <div class="label">Pending Penalties</div>
+            </div>
+            <div class="kpi-card">
+                <div class="number" id="totalLateFees">KSh 0</div>
+                <div class="label">Total Late Fees</div>
+                <span class="badge badge-warning">Pending</span>
+            </div>
+            <div class="kpi-card">
+                <div class="number" id="avgLateDays">0</div>
+                <div class="label">Avg Days Late</div>
+                <span class="badge badge-danger">Overdue</span>
+            </div>
+            <div class="kpi-card">
+                <div class="number" id="totalWithFees">KSh 0</div>
+                <div class="label">Total Due (with fees)</div>
+                <span class="badge badge-success">Total Due</span>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-primary" onclick="updateAllLateFees()">
+                <i class="fas fa-sync"></i> Update All
+            </button>
+            <button class="btn btn-amber" onclick="exportLateFees()">
+                <i class="fas fa-file-csv"></i> Export Report
+            </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Voice</th>
+                        <th>Type</th>
+                        <th>Original</th>
+                        <th>Days Late</th>
+                        <th>Late Fee</th>
+                        <th>Total Due</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="penaltiesList">
+                    <tr>
+                        <td colspan="8" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading penalties...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+
+        // ── LOAD LATE FEES ──
+        async function loadLateFees() {
+            const tbody = document.getElementById('penaltiesList');
+            tbody.innerHTML =
+            '<tr><td colspan="8" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+
+            const { data: penalties, error } = await supabaseClient
+                .from('penalties')
+                .select('*, members(name, voice_part)')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                tbody.innerHTML =
+                    `<tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i> Error: ${escapeHtml(error.message)}</td></tr>`;
+                return;
+            }
+
+            if (!penalties || penalties.length === 0) {
+                tbody.innerHTML =
+                '<tr><td colspan="8" class="empty-state"><i class="fas fa-check-circle"></i> No penalties found!</td></tr>';
+                return;
+            }
+
+            let totalPending = 0;
+            let totalLateFees = 0;
+            let totalWithFees = 0;
+            let totalDaysLate = 0;
+            let countWithLate = 0;
+
+            const html = penalties.map(p => {
+                const isPending = p.status === 'pending';
+                const originalAmount = p.original_amount || p.amount || 0;
+                const lateFee = p.late_fee_amount || 0;
+                const totalAmount = p.total_with_late_fee || originalAmount + lateFee;
+                const daysLate = p.late_fee_days || 0;
+
+                if (isPending) {
+                    totalPending++;
+                    totalLateFees += lateFee;
+                    totalWithFees += totalAmount;
+                    if (daysLate > 0) {
+                        totalDaysLate += daysLate;
+                        countWithLate++;
+                    }
+                }
+
+                const isLate = isPending && daysLate > 0;
+
+                const statusClass = p.status === 'paid' ? 'status-paid' :
+                    isLate ? 'status-late' : 'status-pending';
+                const statusLabel = p.status === 'paid' ? 'Paid' :
+                    isLate ? '⚠️ Late' : 'Pending';
+
+                const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent';
+
+                return `
+                        <tr>
+                            <td><strong>${escapeHtml(p.members?.name || 'Unknown')}</strong></td>
+                            <td>${escapeHtml(p.members?.voice_part || '—')}</td>
+                            <td>${typeLabel}</td>
+                            <td>KSh ${originalAmount.toFixed(2)}</td>
+                            <td>${daysLate > 0 ? `${daysLate} days` : '—'}</td>
+                            <td style="color:${lateFee > 0 ? '#dc2626' : '#64748b'}; font-weight:${lateFee > 0 ? '700' : '400'};">
+                                ${lateFee > 0 ? `+KSh ${lateFee.toFixed(2)}` : '—'}
+                            </td>
+                            <td style="font-weight:700; color:${isPending ? '#dc2626' : '#10b981'};">
+                                KSh ${totalAmount.toFixed(2)}
+                            </td>
+                            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                        </tr>
+                    `;
+            }).join('');
+
+            tbody.innerHTML = html;
+
+            document.getElementById('totalPending').textContent = totalPending;
+            document.getElementById('totalLateFees').textContent = `KSh ${totalLateFees.toFixed(2)}`;
+            document.getElementById('totalWithFees').textContent = `KSh ${totalWithFees.toFixed(2)}`;
+            document.getElementById('avgLateDays').textContent = countWithLate > 0 ?
+                (totalDaysLate / countWithLate).toFixed(1) : 0;
+        }
+
+        // ── CALCULATE LATE FEES ──
+        async function calculateLateFees() {
+            if (!confirm('This will calculate late fees for all pending penalties.\n\nContinue?')) return;
+
+            const btn = document.querySelector('[onclick="calculateLateFees()"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculating...';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .rpc('update_all_late_fees');
+
+                if (error) throw error;
+
+                const result = data || { updated_count: 0, total_late_fee_collected: 0 };
+                alert(
+                    `✅ Late fees updated!\n\n✅ Updated: ${result.updated_count || 0} penalties\n💰 Total late fees: KSh ${(result.total_late_fee_collected || 0).toFixed(2)}`);
+                loadLateFees();
+
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-calculator"></i> Calculate';
+            }
+        }
+
+        // ── UPDATE ALL LATE FEES (RPC) ──
+        async function updateAllLateFees() {
+            if (!confirm('This will update all pending penalties with late fees based on current date.\n\nContinue?')) return;
+
+            const btn = document.querySelector('[onclick="updateAllLateFees()"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .rpc('update_all_late_fees');
+
+                if (error) throw error;
+
+                loadLateFees();
+                alert('✅ Late fees updated!');
+
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sync"></i> Update All';
+            }
+        }
+
+        // ── EXPORT LATE FEES ──
+        async function exportLateFees() {
+            const { data: penalties } = await supabaseClient
+                .from('penalties')
+                .select('*, members(name, voice_part)')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false });
+
+            if (!penalties || penalties.length === 0) {
+                alert('No pending penalties to export.');
+                return;
+            }
+
+            let csv = 'Member,Voice Part,Type,Original Amount,Days Late,Late Fee,Total Due\n';
+            penalties.forEach(p => {
+                const original = p.original_amount || p.amount || 0;
+                const lateFee = p.late_fee_amount || 0;
+                const total = p.total_with_late_fee || original + lateFee;
+                csv +=
+                    `${p.members?.name || 'Unknown'},${p.members?.voice_part || '—'},${p.penalty_type},${original},${p.late_fee_days || 0},${lateFee},${total}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `late_fees_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        // ── INIT ──
+        loadLateFees();
+
+        window.loadLateFees = loadLateFees;
+        window.calculateLateFees = calculateLateFees;
+        window.updateAllLateFees = updateAllLateFees;
+        window.exportLateFees = exportLateFees;
+    </script>
+</body>
+</html>

@@ -1956,87 +1956,185 @@ async function submitShirtOrder() {
             });
         }
 
-        // ── LOAD PENALTIES ──
-        async function loadPenalties() {
-            if (!currentMember) return;
-            const { data: penalties } = await supabaseClient
-                .from('penalties')
-                .select('*')
-                .eq('member_id', currentMember.member_id)
-                .order('date', { ascending: false });
+      // ── LOAD PENALTIES WITH LATE FEES ──
+async function loadPenalties() {
+    if (!currentMember) return;
+    
+    // First, calculate late fees for all pending penalties
+    await calculateLateFeesForMember(currentMember.member_id);
+    
+    const { data: penalties, error } = await supabaseClient
+        .from('penalties')
+        .select('*')
+        .eq('member_id', currentMember.member_id)
+        .order('date', { ascending: false });
 
-            const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
-            const paidTotal = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0) || 0;
+    if (error) {
+        console.error('Error loading penalties:', error);
+        return;
+    }
 
-            // Use dynamic settings from window variables
-            const phone = window.paymentPhone || '0117085859';
-            const name = window.paymentName || 'Peter Manundu';
+    // Calculate totals with late fees
+    let pendingTotal = 0;
+    let paidTotal = 0;
+    let totalWithLateFees = 0;
+    let hasLateFees = false;
 
-            document.getElementById('penaltySummary').innerHTML = `
-                <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
-                    <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
-                    <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
-                    <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
+    penalties?.forEach(p => {
+        if (p.status === 'pending') {
+            const totalAmount = p.total_with_late_fee || p.amount || 0;
+            pendingTotal += totalAmount;
+            totalWithLateFees += totalAmount;
+            if (p.late_fee_amount > 0) hasLateFees = true;
+        } else if (p.status === 'paid') {
+            paidTotal += p.amount || 0;
+        }
+    });
+
+    // Use dynamic settings from window variables
+    const phone = window.paymentPhone || '0117085859';
+    const name = window.paymentName || 'Peter Manundu';
+
+    document.getElementById('penaltySummary').innerHTML = `
+        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
+            <span><strong>💰 Total:</strong> KSh ${(pendingTotal + paidTotal).toFixed(2)}</span>
+            <span><strong>⏳ Pending:</strong> KSh ${pendingTotal.toFixed(2)}</span>
+            <span><strong>✅ Paid:</strong> KSh ${paidTotal.toFixed(2)}</span>
+            ${hasLateFees ? `<span style="color:var(--red);"><strong>⚠️ Late Fees:</strong> Included in pending</span>` : ''}
+        </div>
+        <div style="margin-top:8px; font-size:12px; color:var(--slate-500);">
+            <i class="fas fa-phone"></i> Payment: POCHI ${phone} | ${name}
+        </div>
+        ${hasLateFees ? `<div style="margin-top:6px; font-size:11px; color:var(--red); background:#fee2e2; padding:6px 12px; border-radius:8px; display:inline-block;">
+            <i class="fas fa-clock"></i> Late fees (10%/day after 48hrs) applied to overdue penalties
+        </div>` : ''}
+    `;
+
+    if (!penalties?.length) {
+        document.getElementById('penaltiesList').innerHTML =
+            '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
+        return;
+    }
+
+    document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
+        const isCustom = p.is_custom || p.penalty_type === 'custom';
+        const isPending = p.status === 'pending';
+        const totalAmount = p.total_with_late_fee || p.amount || 0;
+        const lateFee = p.late_fee_amount || 0;
+        const daysLate = p.late_fee_days || 0;
+        
+        let displayReason = '';
+        let displayIcon = '';
+        let displayType = '';
+
+        if (isCustom) {
+            displayReason = p.custom_reason || p.reason || 'Custom penalty';
+            displayIcon = '📌';
+            displayType = 'Custom';
+        } else if (p.penalty_type === 'late') {
+            displayReason = 'Late arrival';
+            displayIcon = '⏰';
+            displayType = 'Late';
+        } else {
+            displayReason = 'Absent without apology';
+            displayIcon = '❌';
+            displayType = 'Absent';
+        }
+
+        // Show late fee badge if applicable
+        const lateFeeBadge = (isPending && lateFee > 0) ? 
+            `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:40px; font-size:9px; font-weight:600; margin-left:6px;">
+                +${lateFee.toFixed(2)} fee (${daysLate}d late)
+            </span>` : '';
+
+        return `
+            <div class="apology-item">
+                <div>
+                    <div>
+                        <strong>
+                            ${displayIcon} ${displayType}
+                            ${isCustom ? '<span style="background:var(--amber-light);color:#854d0e;padding:2px 8px;border-radius:40px;font-size:10px;margin-left:6px;">Custom</span>' : ''}
+                            ${lateFeeBadge}
+                        </strong>
+                        ${p.reason && !isCustom ? `<div style="font-size:12px;color:var(--slate-500);margin-top:2px;">${p.reason}</div>` : ''}
+                    </div>
+                    <div style="font-size:13px; color:var(--slate-500);">
+                        ${p.date} • ${p.session || 'Custom'}
+                        ${isCustom ? ` • <span style="color:var(--amber);font-weight:500;">${escapeHtml(displayReason)}</span>` : ''}
+                        ${isPending && lateFee > 0 ? ` • <span style="color:var(--red);font-weight:500;">+${lateFee.toFixed(2)} late fee</span>` : ''}
+                    </div>
+                    ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;">📝 ${escapeHtml(displayReason)}</div>` : ''}
+                    ${isPending && daysLate > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px;">⏰ ${daysLate} day${daysLate > 1 ? 's' : ''} overdue (10% per day)</div>` : ''}
                 </div>
-                <div style="margin-top:8px; font-size:12px; color:var(--slate-500);">
-                    <i class="fas fa-phone"></i> Payment: POCHI ${phone} | ${name}
+                <div style="text-align:right;">
+                    <div style="font-size:18px; font-weight:700; color:${isPending ? 'var(--red)' : 'var(--green)'};">
+                        KSh ${totalAmount.toFixed(2)}
+                    </div>
+                    <span class="status-badge ${isPending ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
+                    ${isPending ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${totalAmount}, '${p.penalty_type === 'late' ? 'Late Fine' : p.is_custom ? p.custom_reason || p.reason || 'Custom Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
                 </div>
-            `;
+            </div>
+        `;
+    }).join('');
 
-            if (!penalties?.length) {
-                document.getElementById('penaltiesList').innerHTML =
-                    '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
-                return;
+    await checkPendingPenalties();
+    await updateFloatingReminder();
+}
+      // ── CALCULATE LATE FEES FOR MEMBER ──
+async function calculateLateFeesForMember(memberId) {
+    try {
+        // Get all pending penalties for this member
+        const { data: penalties, error } = await supabaseClient
+            .from('penalties')
+            .select('id, created_at, original_amount, amount')
+            .eq('member_id', memberId)
+            .eq('status', 'pending');
+
+        if (error) throw error;
+        if (!penalties || penalties.length === 0) return;
+
+        let updated = 0;
+
+        for (const p of penalties) {
+            const originalAmount = p.original_amount || p.amount || 0;
+            const createdDate = new Date(p.created_at);
+            const now = new Date();
+            const hoursLate = (now - createdDate) / (1000 * 60 * 60);
+
+            let daysLate = 0;
+            let lateFee = 0;
+            let totalAmount = originalAmount;
+
+            // If more than 48 hours, calculate late fees
+            if (hoursLate > 48) {
+                daysLate = Math.floor((hoursLate - 48) / 24) + 1;
+                lateFee = originalAmount * 0.10 * daysLate;
+                // Optional: Cap at 100% of original
+                // if (lateFee > originalAmount) lateFee = originalAmount;
+                totalAmount = originalAmount + lateFee;
             }
 
-            document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
-                const isCustom = p.is_custom || p.penalty_type === 'custom';
-                let displayReason = '';
-                let displayIcon = '';
-                let displayType = '';
+            // Update the penalty with late fee calculation
+            const { error: updateError } = await supabaseClient
+                .from('penalties')
+                .update({
+                    original_amount: originalAmount,
+                    late_fee_amount: lateFee,
+                    total_with_late_fee: totalAmount,
+                    late_fee_days: daysLate,
+                    last_late_fee_calculated: new Date().toISOString()
+                })
+                .eq('id', p.id);
 
-                if (isCustom) {
-                    displayReason = p.custom_reason || p.reason || 'Custom penalty';
-                    displayIcon = '📌';
-                    displayType = 'Custom';
-                } else if (p.penalty_type === 'late') {
-                    displayReason = 'Late arrival';
-                    displayIcon = '⏰';
-                    displayType = 'Late';
-                } else {
-                    displayReason = 'Absent without apology';
-                    displayIcon = '❌';
-                    displayType = 'Absent';
-                }
-
-                return `
-                    <div class="apology-item">
-                        <div>
-                            <div>
-                                <strong>
-                                    ${displayIcon} ${displayType}
-                                    ${isCustom ? '<span style="background:var(--amber-light);color:#854d0e;padding:2px 8px;border-radius:40px;font-size:10px;margin-left:6px;">Custom</span>' : ''}
-                                </strong>
-                                ${p.reason && !isCustom ? `<div style="font-size:12px;color:var(--slate-500);margin-top:2px;">${p.reason}</div>` : ''}
-                            </div>
-                            <div style="font-size:13px; color:var(--slate-500);">
-                                ${p.date} • ${p.session || 'Custom'}
-                                ${isCustom ? ` • <span style="color:var(--amber);font-weight:500;">${escapeHtml(displayReason)}</span>` : ''}
-                            </div>
-                            ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;">📝 ${escapeHtml(displayReason)}</div>` : ''}
-                        </div>
-                        <div style="text-align:right;">
-                            <div style="font-size:18px; font-weight:700; color:var(--red);">KSh ${p.amount}</div>
-                            <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
-                            ${p.status === 'pending' ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${p.amount}, '${p.penalty_type === 'late' ? 'Late Fine' : p.is_custom ? p.custom_reason || p.reason || 'Custom Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            await checkPendingPenalties();
-            await updateFloatingReminder();
+            if (!updateError) updated++;
         }
+
+        console.log(`✅ Updated late fees for ${updated} penalties`);
+
+    } catch (error) {
+        console.error('Error calculating late fees:', error);
+    }
+}
 
         // ── PAYMENT SETTINGS FUNCTIONS ──
         async function loadPaymentSettings() {
@@ -2086,49 +2184,56 @@ async function submitShirtOrder() {
             document.getElementById('instructionPhone').innerHTML = `2. Enter Phone: <strong>${phone}</strong>`;
         }
 
-        async function showPaymentModal(penaltyId, amount, description) {
-            const { data: penalty } = await supabaseClient
-                .from('penalties')
-                .select('status, is_custom, custom_reason, reason')
-                .eq('id', penaltyId)
-                .single();
-                
-            if (!penalty || penalty.status !== 'pending') {
-                alert('This fine has already been paid or does not exist.');
-                return;
-            }
-            
-            currentPenaltyId = penaltyId;
-            currentPenaltyAmount = amount;
-            
-            let displayDescription = description;
-            if (penalty.is_custom) {
-                const customText = penalty.custom_reason || penalty.reason || 'Custom penalty';
-                displayDescription = `📌 Custom Penalty: ${customText} - ${description.split(' - ')[1] || ''}`;
-            }
-            
-            currentPenaltyDescription = displayDescription;
-            
-            const { data: penalties } = await supabaseClient
-                .from('penalties')
-                .select('amount')
-                .eq('member_id', currentMember.member_id)
-                .eq('status', 'pending');
-                
-            const pendingTotal = penalties?.reduce((sum, p) => sum + p.amount, 0) || 0;
-            
-            document.getElementById('modalAmount').innerHTML = `KSh ${amount}`;
-            document.getElementById('modalDescription').innerHTML = displayDescription;
-            document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
-            document.getElementById('modalAmount2').innerHTML = `KSh ${amount}`;
-            document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal}`;
-            document.getElementById('instructionAmount').innerHTML = `KSh ${amount}`;
-            document.getElementById('transactionCode').value = '';
-            
-            updatePaymentModalWithSettings();
-            
-            document.getElementById('paymentModal').classList.add('open');
-        }
+      async function showPaymentModal(penaltyId, amount, description) {
+    const { data: penalty, error } = await supabaseClient
+        .from('penalties')
+        .select('status, is_custom, custom_reason, reason, late_fee_amount, total_with_late_fee')
+        .eq('id', penaltyId)
+        .single();
+        
+    if (error || !penalty || penalty.status !== 'pending') {
+        alert('This fine has already been paid or does not exist.');
+        return;
+    }
+    
+    currentPenaltyId = penaltyId;
+    
+    // Use total_with_late_fee if available, otherwise use the passed amount
+    const totalAmount = penalty.total_with_late_fee || amount;
+    currentPenaltyAmount = totalAmount;
+    
+    let displayDescription = description;
+    if (penalty.is_custom) {
+        const customText = penalty.custom_reason || penalty.reason || 'Custom penalty';
+        displayDescription = `📌 Custom Penalty: ${customText}`;
+    }
+    
+    // Add late fee info to description
+    if (penalty.late_fee_amount > 0) {
+        displayDescription += ` (includes KSh ${penalty.late_fee_amount.toFixed(2)} late fee)`;
+    }
+    
+    currentPenaltyDescription = displayDescription;
+    
+    const { data: penalties } = await supabaseClient
+        .from('penalties')
+        .select('total_with_late_fee, amount')
+        .eq('member_id', currentMember.member_id)
+        .eq('status', 'pending');
+        
+    const pendingTotal = penalties?.reduce((sum, p) => sum + (p.total_with_late_fee || p.amount || 0), 0) || 0;
+    
+    document.getElementById('modalAmount').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+    document.getElementById('modalDescription').innerHTML = displayDescription;
+    document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
+    document.getElementById('modalAmount2').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+    document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal.toFixed(2)}`;
+    document.getElementById('instructionAmount').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+    document.getElementById('transactionCode').value = '';
+    
+    updatePaymentModalWithSettings();
+    document.getElementById('paymentModal').classList.add('open');
+}
 
         window.addEventListener('storage', function(e) {
             if (e.key === 'payment_phone' || e.key === 'payment_name') {
@@ -2240,58 +2345,68 @@ async function submitShirtOrder() {
         }
 
         // ── UPLOAD PHOTO ──
-        async function uploadPhoto() {
-            const fileInput = document.getElementById('photoInput');
-            const file = fileInput.files[0];
-            if (!file) return;
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${currentUserId}_${Date.now()}.${fileExt}`;
-            const filePath = `profile_photos/${fileName}`;
-            const uploadBtn = event.target;
-            const originalText = uploadBtn.innerHTML;
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-            uploadBtn.disabled = true;
-            const { error: uploadError } = await supabaseClient.storage
-                .from('profiles')
-                .upload(filePath, file);
-            if (uploadError) {
-                alert('Upload error: ' + uploadError.message);
-                uploadBtn.innerHTML = originalText;
-                uploadBtn.disabled = false;
-                return;
-            }
-            const { data: { publicUrl } } = supabaseClient.storage
-                .from('profiles')
-                .getPublicUrl(filePath);
-            const cleanUrl = publicUrl.split(',')[0].trim();
-            const { error: updateError } = await supabaseClient
-                .from('user_profiles')
-                .upsert({
-                    user_id: currentUserId,
-                    member_id: currentMember.member_id,
-                    profile_photo_url: cleanUrl,
-                    updated_at: new Date()
-                });
-            if (updateError) {
-                alert('Error updating profile: ' + updateError.message);
-            } else {
-                document.getElementById('photoPreview').innerHTML =
-                    `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover;">`;
-                document.getElementById('avatarPreview').innerHTML =
-                    `<img src="${cleanUrl}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover;">`;
-                const msgDiv = document.getElementById('profileMessage');
-                msgDiv.className = 'message success';
-                msgDiv.innerHTML = '✅ Photo uploaded! <span class="saved-checkmark">📸</span>';
-                setTimeout(() => msgDiv.className = 'message', 3000);
-                const photoCard = document.getElementById('photoFormCard');
-                photoCard.classList.add('highlight');
-                setTimeout(() => photoCard.classList.remove('highlight'), 600);
-            }
-            uploadBtn.innerHTML = originalText;
-            uploadBtn.disabled = false;
-            fileInput.value = '';
-        }
+// ── CLOUDINARY UPLOAD ──
+const CLOUD_NAME = 'surgtbdr';
+const UPLOAD_PRESET = 'uoem_choir_uploads';
 
+async function uploadPhoto() {
+    const fileInput = document.getElementById('photoInput');
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const uploadBtn = document.querySelector('#photoFormCard .btn-primary');
+    const originalText = uploadBtn.innerHTML;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    uploadBtn.disabled = true;
+
+    try {
+        // Upload to Cloudinary using fetch API
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
+        formData.append('folder', `choir/profile_photos/${currentUserId}`);
+        formData.append('public_id', `profile_${currentUserId}`);
+
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+            { method: 'POST', body: formData }
+        );
+
+        const result = await response.json();
+        if (!result.secure_url) throw new Error('Upload failed');
+
+        // Save URL to Supabase database (not storage)
+        const { error } = await supabaseClient
+            .from('user_profiles')
+            .upsert({
+                user_id: currentUserId,
+                member_id: currentMember.member_id,
+                profile_photo_url: result.secure_url,
+                updated_at: new Date()
+            });
+
+        if (error) throw error;
+
+        // Update preview
+        document.getElementById('photoPreview').innerHTML = 
+            `<img src="${result.secure_url}" style="width:100%;height:100%;object-fit:cover;">`;
+        document.getElementById('avatarPreview').innerHTML = 
+            `<img src="${result.secure_url}" style="width:100%;height:100%;object-fit:cover;">`;
+
+        // Show success message
+        const msgDiv = document.getElementById('profileMessage');
+        msgDiv.className = 'message success';
+        msgDiv.innerHTML = '✅ Photo uploaded to Cloudinary! 📸';
+        setTimeout(() => msgDiv.className = 'message', 3000);
+
+    } catch (error) {
+        alert('❌ Upload failed: ' + error.message);
+    } finally {
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
+        fileInput.value = '';
+    }
+}
         // ── CHECK PENDING PENALTIES ──
         async function checkPendingPenalties() {
             if (!currentMember) return;

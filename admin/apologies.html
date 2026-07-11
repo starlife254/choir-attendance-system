@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Manage Apologies | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -22,7 +23,6 @@
         }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
 
-        /* SIDEBAR */
         .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
         .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
         .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
@@ -45,7 +45,6 @@
         .logout-link i { font-size: 17px; }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
 
-        /* MAIN */
         .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
         .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
         .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
@@ -54,10 +53,8 @@
         .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
         .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
 
-        /* CONTENT */
         .content { padding: 24px 28px 40px; flex: 1; }
 
-        /* KPI */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
         .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; position: relative; overflow: hidden; }
         .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
@@ -70,7 +67,6 @@
         .kpi-value { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
         .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
 
-        /* FILTERS */
         .filters-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
         .filter-select { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 13px; color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer; }
         .filter-select:focus { border-color: var(--indigo); }
@@ -78,7 +74,23 @@
         .refresh-btn { padding: 8px 16px; border: none; border-radius: 10px; background: var(--indigo); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .refresh-btn:hover { opacity: .88; }
 
-        /* APOLOGY CARDS */
+        /* Fixed: Action button styles */
+        .action-btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity .15s;
+            font-family: inherit;
+        }
+        .action-btn:hover { opacity: .85; }
+        .btn-amber { background: var(--amber); color: #fff; }
+
         .apologies-list { display: flex; flex-direction: column; gap: 12px; }
         .apology-card { background: var(--surface); border: 0.5px solid var(--border); border-left: 4px solid var(--amber); border-radius: 14px; padding: 18px 20px; transition: box-shadow .15s; }
         .apology-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
@@ -91,7 +103,6 @@
         .apology-member-meta span { display: flex; align-items: center; gap: 4px; }
         .apology-member-meta i { font-size: 13px; }
 
-        /* Type Badge - NEW */
         .type-badge { 
             display: inline-flex; 
             align-items: center; 
@@ -134,7 +145,6 @@
         .empty-state { text-align: center; padding: 48px 20px; font-size: 13px; color: var(--text-tertiary); }
         .empty-state i { font-size: 32px; display: block; margin-bottom: 10px; }
 
-        /* BOTTOM NAV */
         .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
         .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
         .bottom-nav-item i { font-size: 22px; }
@@ -232,6 +242,7 @@
             <button class="refresh-btn" onclick="loadApologies()">
                 <i class="ti ti-refresh"></i> Refresh
             </button>
+           
         </div>
 
         <div id="apologiesList" class="apologies-list">
@@ -269,6 +280,107 @@
             if (p) { if (p.full_name) { const f=p.full_name.split(' ')[0]; document.getElementById('userName').textContent=f; document.getElementById('userAvatar').textContent=f.charAt(0).toUpperCase(); } if (p.role) document.getElementById('userRole').textContent=p.role; }
         } catch(e) { console.warn(e); }
     }
+      
+    // ── SYNC ALL PENALTIES ──
+    async function syncAllPenalties() {
+        if (!confirm('This will recalculate ALL penalties based on attendance and apology status.\n\nContinue?')) return;
+        
+        const btn = document.querySelector('[onclick="syncAllPenalties()"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+        
+        try {
+            const { data: attendance } = await supabaseClient
+                .from('attendance')
+                .select('member_id, date, session, status');
+            
+            let created = 0, updated = 0, deleted = 0;
+            
+            for (const a of attendance || []) {
+                const { data: apology } = await supabaseClient
+                    .from('apology_requests')
+                    .select('id')
+                    .eq('member_id', a.member_id)
+                    .eq('date', a.date)
+                    .eq('session', a.session)
+                    .eq('status', 'approved')
+                    .maybeSingle();
+                
+                const hasApprovedApology = !!apology;
+                
+                let penaltyAmount = 0;
+                let shouldExist = false;
+                
+                if (a.status === 'Present') {
+                    shouldExist = false;
+                } else if (a.status === 'Late') {
+                    if (!hasApprovedApology) {
+                        shouldExist = true;
+                        penaltyAmount = 20;
+                    }
+                } else if (a.status === 'Absent') {
+                    if (!hasApprovedApology) {
+                        shouldExist = true;
+                        penaltyAmount = 50;
+                    }
+                }
+                
+                const { data: existing } = await supabaseClient
+                    .from('penalties')
+                    .select('id')
+                    .eq('member_id', a.member_id)
+                    .eq('date', a.date)
+                    .eq('session', a.session)
+                    .maybeSingle();
+                
+                if (shouldExist) {
+                    if (existing) {
+                        await supabaseClient
+                            .from('penalties')
+                            .update({
+                                amount: penaltyAmount,
+                                status: 'pending',
+                                is_calculated: true,
+                                last_synced_at: new Date().toISOString()
+                            })
+                            .eq('id', existing.id);
+                        updated++;
+                    } else {
+                        await supabaseClient
+                            .from('penalties')
+                            .insert({
+                                member_id: a.member_id,
+                                date: a.date,
+                                session: a.session,
+                                penalty_type: a.status === 'Late' ? 'late' : 'absent',
+                                amount: penaltyAmount,
+                                status: 'pending',
+                                is_calculated: true,
+                                last_synced_at: new Date().toISOString()
+                            });
+                        created++;
+                    }
+                } else {
+                    if (existing) {
+                        await supabaseClient
+                            .from('penalties')
+                            .delete()
+                            .eq('id', existing.id);
+                        deleted++;
+                    }
+                }
+            }
+            
+            alert(`✅ Sync Complete!\n\n✅ Created: ${created}\n✅ Updated: ${updated}\n✅ Deleted: ${deleted}`);
+            
+        } catch (error) {
+            alert('❌ Error: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sync"></i> Sync All Penalties';
+            loadApologies();
+        }
+    }  
 
     async function loadApologies() {
         const statusFilter = document.getElementById('statusFilter').value;
@@ -305,14 +417,11 @@
         }
 
         document.getElementById('apologiesList').innerHTML = apologies.map(a => {
-            // Determine if late or absent
             const isLate = a.apology_type === 'late';
             const typeIcon = isLate ? '⏰' : '❌';
             const typeLabel = isLate ? 'Late Arrival' : 'Absent';
             const typeClass = isLate ? 'late' : 'absent';
-            const typeColor = isLate ? '#f59e0b' : '#ef4444';
             
-            // Status badge class
             const statusClass = a.status === 'pending' ? 'status-pending' : 
                                a.status === 'approved' ? 'status-approved' : 'status-rejected';
             
@@ -364,12 +473,16 @@
         }).join('');
     }
 
-    async function updateApology(id, status) {
-        const note = document.getElementById(`note-${id}`)?.value || '';
+  async function updateApology(id, status) {
+    const apologyId = String(id).trim();
+    const note = document.getElementById(`note-${apologyId}`)?.value || '';
+    
+    try {
+        // Fetch the apology
         const { data: apology, error: fetchError } = await supabaseClient
             .from('apology_requests')
             .select('*')
-            .eq('id', id)
+            .eq('id', apologyId)
             .single();
             
         if (fetchError) { 
@@ -377,23 +490,22 @@
             return; 
         }
         
+        // Update the apology status - removed updated_at
         const { error: updateError } = await supabaseClient
             .from('apology_requests')
             .update({ 
-                status, 
-                admin_notes: note, 
-                updated_at: new Date() 
+                status: status, 
+                admin_notes: note
             })
-            .eq('id', id);
+            .eq('id', apology.id);
             
         if (updateError) { 
-            alert('❌ Error: ' + updateError.message); 
+            console.error('Update error:', updateError);
+            alert('❌ Error updating apology: ' + updateError.message); 
             return; 
         }
         
         if (status === 'approved') {
-            // Determine attendance status based on apology type
-            // Late → Late (with apology), Absent → Present (excused)
             const attendanceStatus = apology.apology_type === 'late' ? 'Late' : 'Present';
             
             // Check if attendance record exists
@@ -411,7 +523,7 @@
                     .update({ 
                         status: attendanceStatus, 
                         has_apology: true, 
-                        apology_approved: true 
+                        apology_approved: true
                     })
                     .eq('id', existingAttendance.id);
             } else {
@@ -424,27 +536,30 @@
                         status: attendanceStatus, 
                         has_apology: true, 
                         apology_approved: true, 
-                        marked_at: new Date() 
+                        marked_at: new Date().toISOString() 
                     });
             }
             
-            // If it was an absence, remove any existing penalty for this date
-            if (apology.apology_type === 'absent') {
-                await supabaseClient
-                    .from('penalties')
-                    .update({ status: 'waived', admin_notes: 'Apology approved - penalty waived' })
-                    .eq('member_id', apology.member_id)
-                    .eq('date', apology.date)
-                    .eq('session', apology.session);
-            }
+            // ✅ Delete any existing penalty for this date (JavaScript handles it)
+            await supabaseClient
+                .from('penalties')
+                .delete()
+                .eq('member_id', apology.member_id)
+                .eq('date', apology.date)
+                .eq('session', apology.session);
             
-            alert(`✅ Apology approved! ${apology.apology_type === 'late' ? 'Late marked with apology.' : 'Absence excused and penalty waived.'}`);
+            alert(`✅ Apology approved! ${apology.apology_type === 'late' ? 'Late marked with apology.' : 'Absence excused and penalty removed.'}`);
         } else {
             alert(`❌ Apology rejected.`);
         }
+        
         loadApologies();
+        
+    } catch (error) {
+        console.error('Error in updateApology:', error);
+        alert('❌ Error: ' + error.message);
     }
-
+}
     document.getElementById('statusFilter').addEventListener('change', loadApologies);
     document.getElementById('typeFilter').addEventListener('change', loadApologies);
 

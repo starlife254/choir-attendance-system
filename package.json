@@ -1,0 +1,26 @@
+{
+  "name": "attendance-master",
+  "version": "1.0.0",
+  "description": "",
+  "main": "supabase-client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/starlife254/choir-attendance-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/starlife254/choir-attendance-system/issues"
+  },
+  "homepage": "https://github.com/starlife254/choir-attendance-system#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.2",
+    "form-data": "^4.0.6",
+    "node-fetch": "^3.3.2"
+  }
+}

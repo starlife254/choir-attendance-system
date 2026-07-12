@@ -2200,7 +2200,7 @@ async function calculateLateFeesForMember(memberId) {
             document.getElementById('instructionPhone').innerHTML = `2. Enter Phone: <strong>${phone}</strong>`;
         }
 
-      // ── PAY ALL PENALTIES ──
+// ── PAY ALL PENALTIES (BULK PAYMENT) ──
 async function payAllPenalties() {
     // Get all pending penalties
     const { data: penalties, error } = await supabaseClient
@@ -2245,7 +2245,7 @@ async function payAllPenalties() {
 
     if (!confirm(confirmMessage)) return;
 
-    // Create a single payment record for all penalties
+    // Get M-Pesa name
     const transactionCode = prompt('Enter your M-Pesa name (as displayed in your M-Pesa statement):');
     if (!transactionCode || transactionCode.trim() === '') {
         alert('❌ Payment cancelled. M-Pesa name is required.');
@@ -2258,37 +2258,38 @@ async function payAllPenalties() {
     btn.disabled = true;
 
     try {
-        // Create one payment record for all penalties
-        const { error: paymentError } = await supabaseClient.from('payments').insert({
-            member_id: currentMember.member_id,
-            penalty_id: null, // No single penalty ID - bulk payment
-            amount: totalAmount,
-            payment_method: 'mpesa',
-            status: 'pending',
-            payment_date: new Date().toISOString().split('T')[0],
-            reference: transactionCode.trim(),
-            notes: `Bulk payment for ${penalties.length} penalties: ${penaltyDescriptions.join('; ')}`
-        });
-
-        if (paymentError) throw paymentError;
-
-        // Also create individual payment records for each penalty (for tracking)
-        for (const p of penalties) {
-            const amount = p.total_with_late_fee || p.amount || 0;
-            await supabaseClient.from('payments').insert({
+        // ✅ CREATE ONE SINGLE PAYMENT RECORD for the total amount
+        const { data: payment, error: paymentError } = await supabaseClient
+            .from('payments')
+            .insert({
                 member_id: currentMember.member_id,
-                penalty_id: p.id,
-                amount: amount,
+                penalty_id: null, // No single penalty - it's a bulk payment
+                amount: totalAmount,
                 payment_method: 'mpesa',
                 status: 'pending',
                 payment_date: new Date().toISOString().split('T')[0],
                 reference: transactionCode.trim(),
-                notes: `Bulk payment - part of total KSh ${totalAmount.toFixed(2)}`
-            });
-        }
+                notes: `Bulk payment - clearing ${penalties.length} penalties. Penalty IDs: ${penalties.map(p => p.id).join(', ')}`
+            })
+            .select()
+            .single();
 
-        alert(`✅ Bulk payment recorded!\n\n💰 Total: KSh ${totalAmount.toFixed(2)}\n📝 ${penalties.length} penalties\n\nAdmin will confirm within 24 hours.`);
+        if (paymentError) throw paymentError;
+
+        // ✅ Store the list of penalty IDs in the payment record for admin approval
+        // We'll store them in the notes field as a comma-separated list
+        const penaltyIds = penalties.map(p => p.id).join(',');
         
+        // ✅ Update the payment record with penalty IDs (for admin to reference)
+        await supabaseClient
+            .from('payments')
+            .update({
+                notes: `Bulk payment - clearing ${penalties.length} penalties. Penalty IDs: ${penaltyIds}`
+            })
+            .eq('id', payment.id);
+
+        alert(`✅ Bulk payment recorded!\n\n💰 Total: KSh ${totalAmount.toFixed(2)}\n📝 ${penalties.length} penalties\n\n✅ Admin will confirm within 24 hours.\n⏳ All penalties will be cleared upon approval.`);
+
         // Refresh penalties
         loadPenalties();
 

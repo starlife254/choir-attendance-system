@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
     <meta charset="UTF-8">
     <meta name="google-site-verification" content="9B0aEWHLVVsKurOwYXzYI-2kswRtSRcJPDlWQ4sm6Cg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
@@ -333,6 +333,7 @@
         .pill-red    { background: var(--red-light);    color: #991b1b; }
         .pill-indigo { background: var(--indigo-light); color: var(--indigo); }
         .pill-gray   { background: var(--bg); color: var(--text-secondary); border: 0.5px solid var(--border); }
+        .pill-purple { background: var(--purple-light); color: #5b21b6; }
 
         /* ── INLINE BUTTONS ── */
         .row-btn {
@@ -472,7 +473,6 @@
             .hamburger { display: block; }
             .main { margin-left: 0; }
             .content { padding: 16px 16px 90px; }
-            .topbar { padding: 0 16px; }
             .footer { display: none; }
             .bottom-nav { display: flex; }
             .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -493,48 +493,27 @@
         <div class="logo-sub">Attendance System · 98th Festival</div>
     </div>
     
- <nav class="sidebar-nav">
-    <div class="nav-section-label">Main</div>
-    <a href="index.html" class="nav-item active">
-        <i class="ti ti-layout-dashboard"></i> Dashboard
-    </a>
-    <a href="mark-attendance.html" class="nav-item">
-        <i class="ti ti-circle-check"></i> Mark attendance
-        <span class="nav-badge">Today</span>
-    </a>
-    <a href="reports.html" class="nav-item">
-        <i class="ti ti-chart-bar"></i> Reports
-    </a>
-    <a href="analytics.html" class="nav-item">
-        <i class="ti ti-trending-up"></i> Analytics
-    </a>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
 
-    <div class="nav-section-label">Management</div>
-    <a href="apologies.html" class="nav-item">
-        <i class="ti ti-file-text"></i> Apologies
-        <span class="nav-badge amber" id="apologiesBadge" style="display:none">0</span>
-    </a>
-    <a href="members.html" class="nav-item">
-        <i class="ti ti-users"></i> Members view
-    </a>
-    <a href="manage-members.html" class="nav-item">
-        <i class="ti ti-user-edit"></i> Manage members
-    </a>
-    <a href="confirm-payments.html" class="nav-item">
-        <i class="ti ti-cash"></i> Confirm penalties
-    </a>
-    <a href="finance.html" class="nav-item">
-        <i class="ti ti-currency-dollar"></i> Finance Management
-    </a>
- <div class="nav-section-label">Committee</div>
-        <a href="executive.html" class="nav-item active"><i class="fas fa-users-cog"></i> Executive Committee</a>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item active"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance Management</a>
         
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
 
-    <div class="nav-section-label">Recognition</div>
-    <a href="hall-of-fame.html" class="nav-item">
-        <i class="ti ti-trophy"></i> Hall of Fame
-    </a>
-</nav>
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
+    </nav>
+    
     <div class="sidebar-bottom">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar">A</div>
@@ -669,7 +648,7 @@
         <p>This will mark the fine as <strong>paid</strong> and close the penalty record.</p>
         <div class="modal-buttons">
             <button class="btn-cancel-modal" onclick="closeModals()">Cancel</button>
-            <button class="btn-confirm-modal" id="confirmYesBtn" onclick="if(pendingAction){doConfirm(pendingAction.paymentId,pendingAction.penaltyId)}">Yes, confirm</button>
+            <button class="btn-confirm-modal" id="confirmYesBtn">Yes, confirm</button>
         </div>
     </div>
 </div>
@@ -684,7 +663,7 @@
         <p>The member's fine will remain <strong>unpaid</strong> and they'll need to resubmit.</p>
         <div class="modal-buttons">
             <button class="btn-cancel-modal" onclick="closeModals()">Cancel</button>
-            <button class="btn-reject-modal" id="rejectYesBtn" onclick="if(pendingAction){doReject(pendingAction.paymentId)}">Yes, reject</button>
+            <button class="btn-reject-modal" id="rejectYesBtn">Yes, reject</button>
         </div>
     </div>
 </div>
@@ -733,14 +712,24 @@
     function openConfirmModal(paymentId, penaltyId) {
         pendingAction = { type: 'confirm', paymentId, penaltyId };
         document.getElementById('confirmModal').classList.add('open');
+        document.getElementById('confirmYesBtn').onclick = function() {
+            if (pendingAction) {
+                doConfirm(pendingAction.paymentId, pendingAction.penaltyId);
+            }
+        };
     }
 
     function openRejectModal(paymentId) {
         pendingAction = { type: 'reject', paymentId };
         document.getElementById('rejectModal').classList.add('open');
+        document.getElementById('rejectYesBtn').onclick = function() {
+            if (pendingAction) {
+                doReject(pendingAction.paymentId);
+            }
+        };
     }
 
-    // ── CONFIRM ACTION ──
+    // ── CONFIRM ACTION (UPDATED FOR BULK PAYMENTS) ──
     async function doConfirm(paymentId, penaltyId) {
         showToast('Processing confirmation…', 'info');
         
@@ -750,24 +739,99 @@
 
         const { data: { user } } = await sb.auth.getUser();
 
-        const { error: pErr } = await sb.from('payments')
-            .update({ status: 'confirmed', confirmed_at: new Date().toISOString(), confirmed_by: user?.email })
-            .eq('id', paymentId);
+        try {
+            // 1. Get payment details to check if it's a bulk payment
+            const { data: payment, error: fetchError } = await sb
+                .from('payments')
+                .select('*')
+                .eq('id', paymentId)
+                .single();
 
-        if (pErr) { 
-            showToast('Error: ' + pErr.message, 'error'); 
+            if (fetchError) throw fetchError;
+
+            // 2. Update payment status to confirmed
+            const { error: pErr } = await sb.from('payments')
+                .update({ 
+                    status: 'confirmed', 
+                    confirmed_at: new Date().toISOString(), 
+                    confirmed_by: user?.email || 'admin'
+                })
+                .eq('id', paymentId);
+
+            if (pErr) throw pErr;
+
+            // 3. Extract penalty IDs from notes (for bulk payments)
+            let penaltyIds = [];
+            let isBulk = false;
+
+            if (payment.notes && payment.notes.includes('Penalty IDs:')) {
+                isBulk = true;
+                const match = payment.notes.match(/Penalty IDs:\s*(.+)/);
+                if (match) {
+                    penaltyIds = match[1].split(',').map(id => id.trim()).filter(id => id && id !== 'null');
+                }
+            }
+
+            // 4. Mark penalties as paid
+            if (penaltyIds.length > 0) {
+                // Bulk payment: mark all listed penalties as paid
+                for (const pid of penaltyIds) {
+                    if (pid) {
+                        await sb.from('penalties')
+                            .update({ 
+                                status: 'paid', 
+                                payment_id: paymentId,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', pid);
+                    }
+                }
+                
+                // Also mark any other pending penalties for this member as paid
+                await sb.from('penalties')
+                    .update({ 
+                        status: 'paid', 
+                        payment_id: paymentId,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('member_id', payment.member_id)
+                    .eq('status', 'pending')
+                    .is('payment_id', null);
+                    
+            } else if (penaltyId && penaltyId !== 'null' && penaltyId !== 'undefined') {
+                // Single penalty payment
+                await sb.from('penalties')
+                    .update({ 
+                        status: 'paid', 
+                        payment_id: paymentId,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', penaltyId);
+            } else {
+                // If no penalty ID, mark all pending penalties for this member as paid
+                await sb.from('penalties')
+                    .update({ 
+                        status: 'paid', 
+                        payment_id: paymentId,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('member_id', payment.member_id)
+                    .eq('status', 'pending');
+            }
+
+            closeModals();
+            showToast(isBulk ? 
+                `✅ Bulk payment confirmed! All ${penaltyIds.length} penalties marked paid!` : 
+                '✅ Payment confirmed and fine marked paid!', 
+                'success'
+            );
+            await loadPayments();
+
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
             confirmBtn.disabled = false;
             confirmBtn.textContent = 'Yes, confirm';
-            return; 
         }
-
-        if (penaltyId && penaltyId !== 'null' && penaltyId !== 'undefined') {
-            await sb.from('penalties').update({ status: 'paid' }).eq('id', penaltyId);
-        }
-
-        closeModals();
-        showToast('Payment confirmed and fine marked paid!', 'success');
-        await loadPayments();
     }
 
     // ── REJECT ACTION ──
@@ -778,23 +842,24 @@
         rejectBtn.disabled = true;
         rejectBtn.textContent = 'Processing...';
 
-        const { error } = await sb.from('payments')
-            .update({ status: 'rejected', notes: 'Payment rejected by admin' })
-            .eq('id', paymentId);
+        try {
+            const { error } = await sb.from('payments')
+                .update({ status: 'rejected', notes: 'Payment rejected by admin' })
+                .eq('id', paymentId);
 
-        if (error) { 
-            showToast('Error: ' + error.message, 'error'); 
+            if (error) throw error;
+
+            closeModals();
+            showToast('Payment rejected', 'error');
+            await loadPayments();
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
             rejectBtn.disabled = false;
             rejectBtn.textContent = 'Yes, reject';
-            return; 
         }
-
-        closeModals();
-        showToast('Payment rejected', 'error');
-        await loadPayments();
     }
 
-    // ── LOAD PAYMENTS ──
+    // ── LOAD PAYMENTS (UPDATED WITH BULK BADGE) ──
     async function loadPayments() {
         const statusFilter = document.getElementById('statusFilter').value;
 
@@ -806,7 +871,7 @@
 
         let query = sb
             .from('payments')
-            .select(`id, member_id, penalty_id, amount, payment_method, status, payment_date, reference, created_at, confirmed_at, confirmed_by,
+            .select(`id, member_id, penalty_id, amount, payment_method, status, payment_date, reference, created_at, confirmed_at, confirmed_by, notes,
                 members!payments_member_id_fkey(name, voice_part)`)
             .order('created_at', { ascending: false });
 
@@ -860,6 +925,10 @@
         document.getElementById('paymentsList').innerHTML = payments.map(p => {
             const name  = p.members ? (Array.isArray(p.members) ? p.members[0]?.name : p.members.name) : 'Unknown';
             const voice = p.members ? (Array.isArray(p.members) ? p.members[0]?.voice_part : p.members.voice_part) : '—';
+            
+            // ✅ Check if it's a bulk payment
+            const isBulk = p.notes && p.notes.includes('Bulk payment');
+            const penaltyCount = isBulk ? (p.notes.match(/clearing (\d+) penalties/)?.[1] || '?') : '1';
 
             let statusPill = '';
             let actions = '';
@@ -888,7 +957,14 @@
 
             return `<tr>
                 <td style="font-weight:600">${esc(name)}</td>
-                <td><span class="pill pill-indigo">${esc(voice)}</span></td>
+                <td>
+                    <span class="pill pill-indigo">${esc(voice)}</span>
+                    ${isBulk ? ` 
+                        <span class="pill pill-purple" style="margin-left:6px;">
+                            📦 Bulk (${penaltyCount})
+                        </span>
+                    ` : ''}
+                </td>
                 <td style="font-weight:700;color:var(--red)">KSh ${fmt(p.amount)}</td>
                 <td>
                     <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);">

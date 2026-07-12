@@ -144,6 +144,17 @@
         .status-pending { background: var(--amber-light); color: #d97706; }
         .status-paid    { background: var(--green-light);  color: #059669; }
 
+        .late-fee-badge {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 2px 8px;
+            border-radius: 40px;
+            font-size: 9px;
+            font-weight: 600;
+            margin-left: 6px;
+            display: inline-block;
+        }
+
         .empty-state { text-align: center; padding: 40px; color: var(--text-tertiary); font-size: 13px; }
         .empty-state i { font-size: 28px; display: block; margin-bottom: 8px; }
         .placeholder-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); background: var(--surface); border-radius: 16px; border: 1px dashed var(--border); }
@@ -312,6 +323,7 @@
             white-space: nowrap;
         }
         .pill-amber { background: var(--amber-light); color: #854d0e; }
+        .pill-red { background: var(--red-light); color: #991b1b; }
 
         .member-name-display {
             padding: 8px 14px;
@@ -352,48 +364,47 @@
         <div class="logo-sub">Attendance System · 98th Festival</div>
     </div>
         
- <nav class="sidebar-nav">
-    <div class="nav-section-label">Main</div>
-    <a href="index.html" class="nav-item active">
-        <i class="ti ti-layout-dashboard"></i> Dashboard
-    </a>
-    <a href="mark-attendance.html" class="nav-item">
-        <i class="ti ti-circle-check"></i> Mark attendance
-        <span class="nav-badge">Today</span>
-    </a>
-    <a href="reports.html" class="nav-item">
-        <i class="ti ti-chart-bar"></i> Reports
-    </a>
-    <a href="analytics.html" class="nav-item">
-        <i class="ti ti-trending-up"></i> Analytics
-    </a>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item active">
+            <i class="ti ti-layout-dashboard"></i> Dashboard
+        </a>
+        <a href="mark-attendance.html" class="nav-item">
+            <i class="ti ti-circle-check"></i> Mark attendance
+            <span class="nav-badge">Today</span>
+        </a>
+        <a href="reports.html" class="nav-item">
+            <i class="ti ti-chart-bar"></i> Reports
+        </a>
+        <a href="analytics.html" class="nav-item">
+            <i class="ti ti-trending-up"></i> Analytics
+        </a>
 
-    <div class="nav-section-label">Management</div>
-    <a href="apologies.html" class="nav-item">
-        <i class="ti ti-file-text"></i> Apologies
-        <span class="nav-badge amber" id="apologiesBadge" style="display:none">0</span>
-    </a>
-    <a href="members.html" class="nav-item">
-        <i class="ti ti-users"></i> Members view
-    </a>
-    <a href="manage-members.html" class="nav-item">
-        <i class="ti ti-user-edit"></i> Manage members
-    </a>
-    <a href="confirm-payments.html" class="nav-item">
-        <i class="ti ti-cash"></i> Confirm penalties
-    </a>
-    <a href="finance.html" class="nav-item">
-        <i class="ti ti-currency-dollar"></i> Finance Management
-    </a>
- <div class="nav-section-label">Committee</div>
-        <a href="executive.html" class="nav-item active"><i class="fas fa-users-cog"></i> Executive Committee</a>
-        
-
-    <div class="nav-section-label">Recognition</div>
-    <a href="hall-of-fame.html" class="nav-item">
-        <i class="ti ti-trophy"></i> Hall of Fame
-    </a>
-</nav>
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item">
+            <i class="ti ti-file-text"></i> Apologies
+            <span class="nav-badge amber" id="apologiesBadge" style="display:none">0</span>
+        </a>
+        <a href="members.html" class="nav-item">
+            <i class="ti ti-users"></i> Members view
+        </a>
+        <a href="manage-members.html" class="nav-item">
+            <i class="ti ti-user-edit"></i> Manage members
+        </a>
+        <a href="confirm-payments.html" class="nav-item">
+            <i class="ti ti-cash"></i> Confirm penalties
+        </a>
+        <a href="finance.html" class="nav-item">
+            <i class="ti ti-currency-dollar"></i> Finance Management
+        </a>
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item">
+            <i class="ti ti-trophy"></i> Hall of Fame
+        </a>
+    </nav>
+    
     <div class="sidebar-bottom">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar"><span>A</span></div>
@@ -700,8 +711,65 @@
         await loadMemberData(selectedMember);
     }
 
+    // ── CALCULATE LATE FEES FOR MEMBER ──
+    async function calculateLateFeesForMember(memberId) {
+        try {
+            // Get all pending penalties for this member
+            const { data: penalties, error } = await supabaseClient
+                .from('penalties')
+                .select('id, created_at, original_amount, amount')
+                .eq('member_id', memberId)
+                .eq('status', 'pending');
+
+            if (error) throw error;
+            if (!penalties || penalties.length === 0) return;
+
+            let updated = 0;
+
+            for (const p of penalties) {
+                const originalAmount = p.original_amount || p.amount || 0;
+                const createdDate = new Date(p.created_at);
+                const now = new Date();
+                const hoursLate = (now - createdDate) / (1000 * 60 * 60);
+
+                let daysLate = 0;
+                let lateFee = 0;
+                let totalAmount = originalAmount;
+
+                // If more than 48 hours, calculate late fees
+                if (hoursLate > 48) {
+                    daysLate = Math.floor((hoursLate - 48) / 24) + 1;
+                    lateFee = originalAmount * 0.10 * daysLate;
+                    totalAmount = originalAmount + lateFee;
+                }
+
+                // Update the penalty with late fee calculation
+                const { error: updateError } = await supabaseClient
+                    .from('penalties')
+                    .update({
+                        original_amount: originalAmount,
+                        late_fee_amount: lateFee,
+                        total_with_late_fee: totalAmount,
+                        late_fee_days: daysLate,
+                        last_late_fee_calculated: new Date().toISOString()
+                    })
+                    .eq('id', p.id);
+
+                if (!updateError) updated++;
+            }
+
+            console.log(`✅ Updated late fees for ${updated} penalties for member ${memberId}`);
+
+        } catch (error) {
+            console.error('Error calculating late fees:', error);
+        }
+    }
+
     async function loadMemberData(member) {
         if (!member) return;
+        
+        // Calculate late fees before loading penalties
+        await calculateLateFeesForMember(member.member_id);
         
         const photoUrl = profilePhotoMap[member.member_id];
         let avatarHtml = '';
@@ -828,15 +896,28 @@
             return;
         }
             
-        const pendingTotal = penalties?.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0) || 0;
-        const paidTotal    = penalties?.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0)    || 0;
-        const customCount  = penalties?.filter(p => p.is_custom || p.penalty_type === 'custom').length || 0;
+        let pendingTotal = 0;
+        let paidTotal = 0;
+        let customCount = 0;
+        let hasLateFees = false;
+
+        penalties?.forEach(p => {
+            if (p.status === 'pending') {
+                const totalAmount = p.total_with_late_fee || p.amount || 0;
+                pendingTotal += totalAmount;
+                if (p.late_fee_amount > 0) hasLateFees = true;
+            } else if (p.status === 'paid') {
+                paidTotal += p.amount || 0;
+            }
+            if (p.is_custom || p.penalty_type === 'custom') customCount++;
+        });
         
         document.getElementById('penaltySummary').innerHTML = `
-            <span><strong>💰 Total:</strong> KSh ${pendingTotal + paidTotal}</span>
-            <span><strong>⏳ Pending:</strong> KSh ${pendingTotal}</span>
-            <span><strong>✅ Paid:</strong> KSh ${paidTotal}</span>
+            <span><strong>💰 Total:</strong> KSh ${(pendingTotal + paidTotal).toFixed(2)}</span>
+            <span><strong>⏳ Pending:</strong> KSh ${pendingTotal.toFixed(2)}</span>
+            <span><strong>✅ Paid:</strong> KSh ${paidTotal.toFixed(2)}</span>
             <span style="color:var(--amber);"><strong>📌 Custom:</strong> ${customCount}</span>
+            ${hasLateFees ? `<span style="color:var(--red);"><strong>⚠️ Late Fees:</strong> Included in pending</span>` : ''}
         `;
         
         if (!penalties?.length) { 
@@ -846,24 +927,35 @@
         
         document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
             const isCustom = p.is_custom || p.penalty_type === 'custom';
+            const isPending = p.status === 'pending';
+            const totalAmount = p.total_with_late_fee || p.amount || 0;
+            const lateFee = p.late_fee_amount || 0;
+            const daysLate = p.late_fee_days || 0;
+            
             const typeIcon = isCustom ? '📌' : (p.penalty_type === 'late' ? '⏰' : '❌');
             const typeLabel = isCustom ? 'Custom' : (p.penalty_type === 'late' ? 'Late' : 'Absent');
             const reasonText = p.custom_reason || p.reason || '';
             
+            const lateFeeBadge = (isPending && lateFee > 0) ? 
+                `<span class="late-fee-badge">+${lateFee.toFixed(2)} fee (${daysLate}d late)</span>` : '';
+            
             return `
                 <div class="penalty-item">
                     <div>
-                        <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;">
+                        <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                             ${typeIcon} ${typeLabel}
                             ${isCustom ? '<span class="pill pill-amber" style="font-size:9px;padding:1px 8px;">Custom</span>' : ''}
+                            ${lateFeeBadge}
                         </div>
                         <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">
                             ${p.date} · ${p.session || 'Custom'}
                             ${reasonText ? ` · 📝 ${escapeHtml(reasonText)}` : ''}
+                            ${isPending && lateFee > 0 ? ` · <span style="color:var(--red);font-weight:500;">+${lateFee.toFixed(2)} late fee</span>` : ''}
                         </div>
+                        ${isPending && daysLate > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px;">⏰ ${daysLate} day${daysLate > 1 ? 's' : ''} overdue (10% per day)</div>` : ''}
                     </div>
                     <div style="text-align:right;">
-                        <div class="penalty-amount">KSh ${p.amount}</div>
+                        <div class="penalty-amount" style="color:${isPending ? 'var(--red)' : 'var(--green)'};">KSh ${totalAmount.toFixed(2)}</div>
                         <span class="penalty-status-badge ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status.toUpperCase()}</span>
                     </div>
                 </div>
@@ -876,34 +968,30 @@
     let selectedMemberForPenalty = null;
 
     function showAddCustomPenalty() {
-    // Use the global selectedMember
-    if (!selectedMember) {
-        alert('Please select a member first from the list on the left.');
-        return;
+        if (!selectedMember) {
+            alert('Please select a member first from the list on the left.');
+            return;
+        }
+        
+        selectedMemberForPenalty = selectedMember;
+        
+        document.getElementById('penaltyMemberName').textContent = selectedMember.name;
+        document.getElementById('customPenaltyDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('customPenaltyAmount').value = '';
+        document.getElementById('customPenaltyReason').value = '';
+        document.getElementById('customPenaltyType').value = 'phone';
+        document.getElementById('customReasonGroup').style.display = 'none';
+        document.getElementById('customPenaltyReason').removeAttribute('required');
+        
+        document.getElementById('customPenaltyModal').classList.add('open');
     }
-    
-    // Store reference
-    selectedMemberForPenalty = selectedMember;
-    
-    document.getElementById('penaltyMemberName').textContent = selectedMember.name;
-    document.getElementById('customPenaltyDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('customPenaltyAmount').value = '';
-    document.getElementById('customPenaltyReason').value = '';
-    document.getElementById('customPenaltyType').value = 'phone';
-    document.getElementById('customReasonGroup').style.display = 'none';
-    document.getElementById('customPenaltyReason').removeAttribute('required');
-    
-    document.getElementById('customPenaltyModal').classList.add('open');
-}
 
     function closeCustomPenaltyModal() {
-    document.getElementById('customPenaltyModal').classList.remove('open');
-    // Don't clear selectedMemberForPenalty here - let the calling function handle it
-    document.getElementById('customPenaltyReason').removeAttribute('required');
-    document.getElementById('customReasonGroup').style.display = 'none';
-}
+        document.getElementById('customPenaltyModal').classList.remove('open');
+        document.getElementById('customPenaltyReason').removeAttribute('required');
+        document.getElementById('customReasonGroup').style.display = 'none';
+    }
 
-    // Handle type change
     document.getElementById('customPenaltyType').addEventListener('change', function() {
         const reasonGroup = document.getElementById('customReasonGroup');
         const reasonInput = document.getElementById('customPenaltyReason');
@@ -918,126 +1006,115 @@
         }
     });
 
-    // Submit function (called from button click, not form submit)
-async function submitCustomPenalty() {
-    // Store the member reference BEFORE any async operations
-    const memberForPenalty = selectedMemberForPenalty;
-    
-    if (!memberForPenalty) {
-        alert('No member selected. Please select a member first.');
-        return;
-    }
-    
-    const penaltyType = document.getElementById('customPenaltyType').value;
-    const customReason = document.getElementById('customPenaltyReason').value.trim();
-    const date = document.getElementById('customPenaltyDate').value;
-    const amount = parseInt(document.getElementById('customPenaltyAmount').value);
-    
-    // Validate based on type
-    if (penaltyType === 'other' && !customReason) {
-        alert('Please enter a custom reason for the penalty.');
-        document.getElementById('customPenaltyReason').focus();
-        return;
-    }
-    
-    const typeLabels = {
-        'phone': 'Using phone during practice',
-        'disruptive': 'Disruptive behavior during practice',
-        'uniform': 'Incorrect uniform',
-        'tardy': 'Excessive tardiness',
-        'unprepared': 'Unprepared for practice',
-        'other': customReason || 'Custom penalty'
-    };
-    const reason = penaltyType === 'other' ? customReason : typeLabels[penaltyType];
-    
-    if (!date) {
-        alert('Please select a date.');
-        document.getElementById('customPenaltyDate').focus();
-        return;
-    }
-    if (!amount || amount <= 0) {
-        alert('Please enter a valid amount (KSh).');
-        document.getElementById('customPenaltyAmount').focus();
-        return;
-    }
-    
-    const submitBtn = document.querySelector('#customPenaltyModal .btn-amber');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="ti ti-loader"></i> Adding...';
-    submitBtn.disabled = true;
-    
-    try {
-        // Use the stored member reference
-        const memberId = memberForPenalty.member_id;
+    async function submitCustomPenalty() {
+        const memberForPenalty = selectedMemberForPenalty;
         
-        // Check if a penalty already exists for this date
-        const { data: existing, error: checkError } = await supabaseClient
-            .from('penalties')
-            .select('id, amount, status')
-            .eq('member_id', memberId)
-            .eq('date', date)
-            .eq('session', 'Custom');
-        
-        if (checkError) throw checkError;
-        
-        if (existing && existing.length > 0) {
-            // Update existing penalty
-            const { error: updateError } = await supabaseClient
-                .from('penalties')
-                .update({
-                    amount: amount,
-                    status: 'pending',
-                    reason: reason,
-                    is_custom: true,
-                    custom_reason: reason,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', existing[0].id);
-            
-            if (updateError) throw updateError;
-            
-            alert(`✅ Penalty updated for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
-        } else {
-            // Insert new penalty
-            const { error: insertError } = await supabaseClient
-                .from('penalties')
-                .insert({
-                    member_id: memberId,
-                    date: date,
-                    session: 'Custom',
-                    penalty_type: 'custom',
-                    amount: amount,
-                    status: 'pending',
-                    reason: reason,
-                    is_custom: true,
-                    custom_reason: reason
-                });
-            
-            if (insertError) throw insertError;
-            
-            alert(`✅ Custom penalty added for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
+        if (!memberForPenalty) {
+            alert('No member selected. Please select a member first.');
+            return;
         }
         
-        // Close modal FIRST
-        closeCustomPenaltyModal();
+        const penaltyType = document.getElementById('customPenaltyType').value;
+        const customReason = document.getElementById('customPenaltyReason').value.trim();
+        const date = document.getElementById('customPenaltyDate').value;
+        const amount = parseInt(document.getElementById('customPenaltyAmount').value);
         
-        // THEN reload penalties for the member
-        await loadPenalties(memberId);
+        if (penaltyType === 'other' && !customReason) {
+            alert('Please enter a custom reason for the penalty.');
+            document.getElementById('customPenaltyReason').focus();
+            return;
+        }
         
-    } catch (error) {
-        console.error('Penalty error:', error);
-        alert('❌ Error adding penalty: ' + error.message);
-    } finally {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        const typeLabels = {
+            'phone': 'Using phone during practice',
+            'disruptive': 'Disruptive behavior during practice',
+            'uniform': 'Incorrect uniform',
+            'tardy': 'Excessive tardiness',
+            'unprepared': 'Unprepared for practice',
+            'other': customReason || 'Custom penalty'
+        };
+        const reason = penaltyType === 'other' ? customReason : typeLabels[penaltyType];
+        
+        if (!date) {
+            alert('Please select a date.');
+            document.getElementById('customPenaltyDate').focus();
+            return;
+        }
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount (KSh).');
+            document.getElementById('customPenaltyAmount').focus();
+            return;
+        }
+        
+        const submitBtn = document.querySelector('#customPenaltyModal .btn-amber');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="ti ti-loader"></i> Adding...';
+        submitBtn.disabled = true;
+        
+        try {
+            const memberId = memberForPenalty.member_id;
+            
+            const { data: existing, error: checkError } = await supabaseClient
+                .from('penalties')
+                .select('id, amount, status')
+                .eq('member_id', memberId)
+                .eq('date', date)
+                .eq('session', 'Custom');
+            
+            if (checkError) throw checkError;
+            
+            if (existing && existing.length > 0) {
+                const { error: updateError } = await supabaseClient
+                    .from('penalties')
+                    .update({
+                        amount: amount,
+                        status: 'pending',
+                        reason: reason,
+                        is_custom: true,
+                        custom_reason: reason,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', existing[0].id);
+                
+                if (updateError) throw updateError;
+                
+                alert(`✅ Penalty updated for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
+            } else {
+                const { error: insertError } = await supabaseClient
+                    .from('penalties')
+                    .insert({
+                        member_id: memberId,
+                        date: date,
+                        session: 'Custom',
+                        penalty_type: 'custom',
+                        amount: amount,
+                        status: 'pending',
+                        reason: reason,
+                        is_custom: true,
+                        custom_reason: reason
+                    });
+                
+                if (insertError) throw insertError;
+                
+                alert(`✅ Custom penalty added for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
+            }
+            
+            closeCustomPenaltyModal();
+            await loadPenalties(memberId);
+            
+        } catch (error) {
+            console.error('Penalty error:', error);
+            alert('❌ Error adding penalty: ' + error.message);
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
     }
-}
-    // Close modal when clicking outside
+
     document.getElementById('customPenaltyModal').addEventListener('click', function(e) {
         if (e.target === this) closeCustomPenaltyModal();
     });
 
-    // Close modal on Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (document.getElementById('customPenaltyModal').classList.contains('open')) {

@@ -1956,7 +1956,7 @@ async function submitShirtOrder() {
             });
         }
 
-      // ── LOAD PENALTIES WITH LATE FEES ──
+// ── LOAD PENALTIES WITH LATE FEES ──
 async function loadPenalties() {
     if (!currentMember) return;
     
@@ -1977,14 +1977,14 @@ async function loadPenalties() {
     // Calculate totals with late fees
     let pendingTotal = 0;
     let paidTotal = 0;
-    let totalWithLateFees = 0;
+    let pendingCount = 0;
     let hasLateFees = false;
 
     penalties?.forEach(p => {
         if (p.status === 'pending') {
             const totalAmount = p.total_with_late_fee || p.amount || 0;
             pendingTotal += totalAmount;
-            totalWithLateFees += totalAmount;
+            pendingCount++;
             if (p.late_fee_amount > 0) hasLateFees = true;
         } else if (p.status === 'paid') {
             paidTotal += p.amount || 0;
@@ -1995,7 +1995,8 @@ async function loadPenalties() {
     const phone = window.paymentPhone || '0117085859';
     const name = window.paymentName || 'Peter Manundu';
 
-    document.getElementById('penaltySummary').innerHTML = `
+    // Build the summary HTML with Pay All button
+    let summaryHTML = `
         <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
             <span><strong>💰 Total:</strong> KSh ${(pendingTotal + paidTotal).toFixed(2)}</span>
             <span><strong>⏳ Pending:</strong> KSh ${pendingTotal.toFixed(2)}</span>
@@ -2009,6 +2010,22 @@ async function loadPenalties() {
             <i class="fas fa-clock"></i> Late fees (10%/day after 48hrs) applied to overdue penalties
         </div>` : ''}
     `;
+
+    // Add Pay All button if there are pending penalties
+    if (pendingCount > 0) {
+        summaryHTML += `
+            <div style="margin-top:12px;">
+                <button onclick="payAllPenalties()" class="btn-success" style="padding:12px 24px; font-size:15px; width:auto;">
+                    <i class="fas fa-hand-holding-dollar"></i> Pay All (KSh ${pendingTotal.toFixed(2)})
+                </button>
+                <span style="font-size:12px; color:var(--slate-500); margin-left:10px;">
+                    ${pendingCount} pending fine${pendingCount > 1 ? 's' : ''}
+                </span>
+            </div>
+        `;
+    }
+
+    document.getElementById('penaltySummary').innerHTML = summaryHTML;
 
     if (!penalties?.length) {
         document.getElementById('penaltiesList').innerHTML =
@@ -2041,7 +2058,6 @@ async function loadPenalties() {
             displayType = 'Absent';
         }
 
-        // Show late fee badge if applicable
         const lateFeeBadge = (isPending && lateFee > 0) ? 
             `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:40px; font-size:9px; font-weight:600; margin-left:6px;">
                 +${lateFee.toFixed(2)} fee (${daysLate}d late)
@@ -2183,6 +2199,107 @@ async function calculateLateFeesForMember(memberId) {
             document.getElementById('paymentNameDisplay').textContent = name;
             document.getElementById('instructionPhone').innerHTML = `2. Enter Phone: <strong>${phone}</strong>`;
         }
+
+      // ── PAY ALL PENALTIES ──
+async function payAllPenalties() {
+    // Get all pending penalties
+    const { data: penalties, error } = await supabaseClient
+        .from('penalties')
+        .select('id, amount, total_with_late_fee, penalty_type, date, reason, is_custom, custom_reason')
+        .eq('member_id', currentMember.member_id)
+        .eq('status', 'pending');
+
+    if (error) {
+        alert('❌ Error fetching penalties: ' + error.message);
+        return;
+    }
+
+    if (!penalties || penalties.length === 0) {
+        alert('✅ You have no pending penalties!');
+        return;
+    }
+
+    // Calculate total amount
+    let totalAmount = 0;
+    let penaltyDescriptions = [];
+    
+    penalties.forEach(p => {
+        const amount = p.total_with_late_fee || p.amount || 0;
+        totalAmount += amount;
+        
+        let desc = '';
+        if (p.is_custom || p.penalty_type === 'custom') {
+            desc = p.custom_reason || p.reason || 'Custom penalty';
+        } else if (p.penalty_type === 'late') {
+            desc = 'Late arrival';
+        } else {
+            desc = 'Absent';
+        }
+        penaltyDescriptions.push(`${desc} (${p.date}) - KSh ${amount.toFixed(2)}`);
+    });
+
+    // Confirm with user
+    const confirmMessage = `You have ${penalties.length} pending fine(s) totaling KSh ${totalAmount.toFixed(2)}.\n\n` +
+        penaltyDescriptions.join('\n') + 
+        `\n\n⚠️ This will record ONE payment for ALL pending fines.\n\nProceed?`;
+
+    if (!confirm(confirmMessage)) return;
+
+    // Create a single payment record for all penalties
+    const transactionCode = prompt('Enter your M-Pesa name (as displayed in your M-Pesa statement):');
+    if (!transactionCode || transactionCode.trim() === '') {
+        alert('❌ Payment cancelled. M-Pesa name is required.');
+        return;
+    }
+
+    const btn = document.querySelector('.btn-success[onclick="payAllPenalties()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    btn.disabled = true;
+
+    try {
+        // Create one payment record for all penalties
+        const { error: paymentError } = await supabaseClient.from('payments').insert({
+            member_id: currentMember.member_id,
+            penalty_id: null, // No single penalty ID - bulk payment
+            amount: totalAmount,
+            payment_method: 'mpesa',
+            status: 'pending',
+            payment_date: new Date().toISOString().split('T')[0],
+            reference: transactionCode.trim(),
+            notes: `Bulk payment for ${penalties.length} penalties: ${penaltyDescriptions.join('; ')}`
+        });
+
+        if (paymentError) throw paymentError;
+
+        // Also create individual payment records for each penalty (for tracking)
+        for (const p of penalties) {
+            const amount = p.total_with_late_fee || p.amount || 0;
+            await supabaseClient.from('payments').insert({
+                member_id: currentMember.member_id,
+                penalty_id: p.id,
+                amount: amount,
+                payment_method: 'mpesa',
+                status: 'pending',
+                payment_date: new Date().toISOString().split('T')[0],
+                reference: transactionCode.trim(),
+                notes: `Bulk payment - part of total KSh ${totalAmount.toFixed(2)}`
+            });
+        }
+
+        alert(`✅ Bulk payment recorded!\n\n💰 Total: KSh ${totalAmount.toFixed(2)}\n📝 ${penalties.length} penalties\n\nAdmin will confirm within 24 hours.`);
+        
+        // Refresh penalties
+        loadPenalties();
+
+    } catch (error) {
+        alert('❌ Error recording payment: ' + error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+     
 
       async function showPaymentModal(penaltyId, amount, description) {
     const { data: penalty, error } = await supabaseClient

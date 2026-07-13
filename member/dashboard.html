@@ -10,7 +10,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+        
     </script>
+    <!-- In ALL HTML files, use this -->
+<script src="/cache-helper.js"></script>
+   
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -1913,8 +1917,10 @@ async function submitShirtOrder() {
         // ── LOAD ATTENDANCE STATS ──
         async function loadAttendanceStats() {
             if (!currentMember) return;
-            const { data: attendance } = await supabaseClient.from('attendance').select('*').eq('member_id', currentMember
-                .member_id);
+           const { data: attendance } = await supabaseClient
+    .from('attendance')
+    .select('date, session, status') // ✅ Only needed columns
+    .eq('member_id', currentMember.member_id);
             const present = attendance?.filter(a => a.status === 'Present').length || 0;
             const late = attendance?.filter(a => a.status === 'Late').length || 0;
             const absent = attendance?.filter(a => a.status === 'Absent').length || 0;
@@ -2565,8 +2571,11 @@ async function uploadPhoto() {
 
         async function updateFloatingReminder() {
             if (!currentMember) return;
-            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember
-                .member_id).eq('status', 'pending');
+            const { data: penalties } = await supabaseClient
+    .from('penalties')
+    .select('id, date, session, penalty_type, amount, status, late_fee_amount, total_with_late_fee')
+    .eq('member_id', currentMember.member_id);
+
             const pendingCount = penalties?.length || 0;
             const floatingBtn = document.getElementById('floatingReminderBtn');
             if (floatingBtn) {

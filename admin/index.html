@@ -10,6 +10,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
    <title>University of Embu (UoEm) Students Choir - Attendance System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- In ALL HTML files, use this -->
+<script src="/cache-helper.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
         *, *::before, *::after {
@@ -1159,7 +1161,7 @@
         setInterval(tick, 1000);
         await loadUserInfo();
         await refreshAll();
-        refreshInterval = setInterval(refreshAll, 35000);
+        refreshInterval = setInterval(refreshAll, 300000);
     }
 
     init();

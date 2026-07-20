@@ -1291,27 +1291,7 @@
                 </div>
             </div>
 
-            <!-- Add this anywhere in the stats tab or as a new tab -->
-<div class="chart-container" style="border: 2px solid var(--gold);">
-    <div class="section-title">
-        <i class="fas fa-tshirt" style="color:var(--gold);"></i> 
-        Festival Polo Shirt Order
-    </div>
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
-        <div>
-            <p style="font-size:14px; color:var(--slate-600);">
-                Order your official 98th Music Festival polo shirt!
-            </p>
-            <p style="font-size:13px; color:var(--slate-500); margin-top:4px;">
-                💰 Price: <strong id="shirtPrice">KSh 700</strong>
-            </p>
-        </div>
-        <button onclick="openShirtOrder()" class="btn-gold" style="padding:12px 24px; font-size:15px;">
-            <i class="fas fa-tshirt"></i> Order Now
-        </button>
-    </div>
-    <div id="shirtOrderStatus" style="margin-top:12px;"></div>
-</div>
+         
 
             <div id="paymentReminder" style="display:none; margin-bottom:24px;">
                 <div class="reminder-banner">
@@ -1527,40 +1507,8 @@
         </div>
     </div>
 
-    <!-- Polo Shirt Order Modal -->
-<div class="modal-overlay" id="shirtOrderModal">
-    <div class="modal-box" style="max-width:440px;">
-        <div class="modal-header">
-            <h3><i class="fas fa-tshirt" style="color:var(--gold);"></i> Choose Your Size</h3>
-            <button class="modal-close" onclick="closeShirtOrder()">&times;</button>
-        </div>
-        <div style="text-align:center; padding:10px 0;">
-            <p style="font-size:14px; color:var(--slate-600); margin-bottom:16px;">
-                Select your preferred polo shirt size
-            </p>
-            <div id="sizeOptions" style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px; max-width:400px; margin:0 auto;">
-                <button class="size-btn" data-size="S" onclick="selectSize('S')">S</button>
-                <button class="size-btn" data-size="M" onclick="selectSize('M')">M</button>
-                <button class="size-btn" data-size="L" onclick="selectSize('L')">L</button>
-                <button class="size-btn" data-size="XL" onclick="selectSize('XL')">XL</button>
-                <button class="size-btn" data-size="XXL" onclick="selectSize('XXL')">XXL</button>
-            </div>
-            <div id="selectedSizeDisplay" style="margin:16px 0; font-size:16px; font-weight:600; color:var(--primary);">
-                <span id="selectedSizeText">No size selected</span>
-            </div>
-            <p style="font-size:13px; color:var(--slate-500);">
-                💰 Price: <strong id="modalShirtPrice">KSh 700</strong>
-            </p>
-            <div style="display:flex; gap:10px; margin-top:16px;">
-                <button onclick="closeShirtOrder()" class="btn-outline" style="flex:1; justify-content:center; padding:12px;">Cancel</button>
-                <button onclick="submitShirtOrder()" class="btn-gold" style="flex:1; justify-content:center; padding:12px;" id="submitShirtBtn" disabled>
-                    <i class="fas fa-check"></i> Confirm Order
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
+  
+   
     <!-- Payment Modal -->
     <div class="modal-overlay" id="paymentModal">
         <div class="modal-box">
@@ -1678,122 +1626,6 @@
             if (tab === 'committee') loadCommitteeDisplay();
         }
 
-        // ── POLO SHIRT ORDER FUNCTIONS ──
-
-let selectedShirtSize = null;
-let shirtPrice = 700;
-
-async function loadShirtPrice() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('polo_shirt_settings')
-            .select('setting_value')
-            .eq('setting_key', 'price')
-            .single();
-            
-        if (!error && data) {
-            shirtPrice = parseInt(data.setting_value) || 700;
-            document.getElementById('shirtPrice').textContent = `KSh ${shirtPrice}`;
-            document.getElementById('modalShirtPrice').textContent = `KSh ${shirtPrice}`;
-        }
-    } catch(e) { console.warn('Could not load shirt price:', e); }
-}
-
-async function checkShirtOrderStatus() {
-    if (!currentMember) return;
-    
-    const { data, error } = await supabaseClient
-        .from('polo_shirt_orders')
-        .select('size, payment_status, amount_paid')
-        .eq('member_id', currentMember.member_id)
-        .maybeSingle();
-        
-    const statusDiv = document.getElementById('shirtOrderStatus');
-    
-    if (data) {
-        const paidIcon = data.payment_status === 'paid' ? '✅' : '⏳';
-        const paidText = data.payment_status === 'paid' ? 'Paid' : 'Pending Payment';
-        statusDiv.innerHTML = `
-            <div style="background:${data.payment_status === 'paid' ? 'var(--green-light)' : 'var(--amber-light)'}; 
-                        padding:10px 14px; border-radius:10px; font-size:13px;">
-                <strong>👕 Your Order:</strong> Size ${data.size} · ${paidIcon} ${paidText}
-                ${data.amount_paid > 0 ? ` · KSh ${data.amount_paid}` : ''}
-            </div>
-        `;
-    } else {
-        statusDiv.innerHTML = '';
-    }
-}
-
-function openShirtOrder() {
-    // Check if member already ordered
-    supabaseClient
-        .from('polo_shirt_orders')
-        .select('size')
-        .eq('member_id', currentMember.member_id)
-        .maybeSingle()
-        .then(({ data }) => {
-            if (data) {
-                alert(`You have already ordered a ${data.size} shirt. Contact admin if you need to change.`);
-                return;
-            }
-            selectedShirtSize = null;
-            document.getElementById('selectedSizeText').textContent = 'No size selected';
-            document.getElementById('submitShirtBtn').disabled = true;
-            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('shirtOrderModal').classList.add('open');
-        });
-}
-
-function closeShirtOrder() {
-    document.getElementById('shirtOrderModal').classList.remove('open');
-    selectedShirtSize = null;
-}
-
-function selectSize(size) {
-    selectedShirtSize = size;
-    document.querySelectorAll('.size-btn').forEach(btn => {
-        btn.classList.toggle('selected', btn.dataset.size === size);
-    });
-    document.getElementById('selectedSizeText').textContent = `Size ${size} selected ✓`;
-    document.getElementById('submitShirtBtn').disabled = false;
-}
-
-async function submitShirtOrder() {
-    if (!selectedShirtSize || !currentMember) return;
-    
-    const btn = document.getElementById('submitShirtBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-    btn.disabled = true;
-    
-    const { error } = await supabaseClient
-        .from('polo_shirt_orders')
-        .insert({
-            member_id: currentMember.member_id,
-            size: selectedShirtSize,
-            payment_status: 'pending',
-            amount_paid: 0
-        });
-        
-    if (error) {
-        alert('❌ Error: ' + error.message);
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        return;
-    }
-    
-    alert(`✅ Order confirmed! Size ${selectedShirtSize}\n\nPay KSh ${shirtPrice} to POCHI 0112765902(FAITH MWENJA)\nAdmin will confirm payment.`);
-    closeShirtOrder();
-    checkShirtOrderStatus();
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-}
-
-// Load shirt price and status on page load
-// Add this to your init() function:
-// await loadShirtPrice();
-// await checkShirtOrderStatus();s
 
         // ── LOAD COMMITTEE (MEMBER VIEW) ──
         async function loadCommitteeDisplay() {
@@ -3000,8 +2832,7 @@ async function uploadPhoto() {
             if (!session) { window.location.href = '../login.html'; return; }
             await loadMemberData();
             await loadPaymentSettings();
-            await loadShirtPrice();        // Add this
-            await checkShirtOrderStatus(); // Add this
+           
             addFloatingReminderButton();
             startReminderInterval();
             await loadHallOfFame();

@@ -8,8 +8,8 @@
     <title>Late Fees | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
     </script>
-    <!-- In ALL HTML files, use this -->
-<script src="/cache-helper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * {
@@ -162,10 +162,26 @@
             color: white;
         }
 
+        .btn-red {
+            background: #dc2626;
+            color: white;
+        }
+
         .btn-outline {
             background: transparent;
             border: 1px solid #e2e8f0;
             color: #0f172a;
+        }
+
+        .btn-outline.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        .btn-outline.active:hover {
+            background: #4338ca;
+            border-color: #4338ca;
         }
 
         /* table wrapper */
@@ -406,7 +422,6 @@
             }
         }
 
-        /* small extra: avoid horizontal overflow */
         .kpi-card .label {
             word-break: break-word;
         }
@@ -423,7 +438,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="reportContainer">
         <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
 
         <div class="header">
@@ -466,16 +481,31 @@
             <button class="btn btn-primary" onclick="updateAllLateFees()">
                 <i class="fas fa-sync"></i> Update All
             </button>
-            <button class="btn btn-amber" onclick="exportLateFees()">
-                <i class="fas fa-file-csv"></i> Export Report
+            <button class="btn btn-amber" onclick="exportCSV()">
+                <i class="fas fa-file-csv"></i> CSV
+            </button>
+            <button class="btn btn-red" onclick="exportPDF()">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+
+            <!-- Filter Buttons -->
+            <button class="btn btn-outline active" id="filterAll" onclick="setFilter('all')">
+                <i class="fas fa-list"></i> All
+            </button>
+            <button class="btn btn-outline" id="filterPending" onclick="setFilter('pending')">
+                <i class="fas fa-clock"></i> Pending Only
+            </button>
+            <button class="btn btn-outline" id="filterPaid" onclick="setFilter('paid')">
+                <i class="fas fa-check-circle"></i> Paid Only
             </button>
         </div>
 
         <!-- Table -->
         <div class="table-wrapper">
-            <table>
+            <table id="penaltiesTable">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Member</th>
                         <th>Voice</th>
                         <th>Type</th>
@@ -488,7 +518,7 @@
                 </thead>
                 <tbody id="penaltiesList">
                     <tr>
-                        <td colspan="8" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading penalties...</td>
+                        <td colspan="9" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading penalties...</td>
                     </tr>
                 </tbody>
             </table>
@@ -500,31 +530,51 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let currentFilter = 'all';
+        let allPenalties = [];
+
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
         }
 
-        // ── LOAD LATE FEES ──
-        async function loadLateFees() {
-            const tbody = document.getElementById('penaltiesList');
-            tbody.innerHTML =
-            '<tr><td colspan="8" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+        // ── SET FILTER ──
+        function setFilter(filter) {
+            currentFilter = filter;
 
-            const { data: penalties, error } = await supabaseClient
-                .from('penalties')
-                .select('*, members(name, voice_part)')
-                .order('created_at', { ascending: false });
+            document.querySelectorAll('.controls .btn-outline').forEach(btn => {
+                btn.classList.remove('active');
+            });
 
-            if (error) {
-                tbody.innerHTML =
-                    `<tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i> Error: ${escapeHtml(error.message)}</td></tr>`;
-                return;
+            if (filter === 'all') {
+                document.getElementById('filterAll').classList.add('active');
+            } else if (filter === 'pending') {
+                document.getElementById('filterPending').classList.add('active');
+            } else if (filter === 'paid') {
+                document.getElementById('filterPaid').classList.add('active');
             }
 
-            if (!penalties || penalties.length === 0) {
+            renderPenalties();
+        }
+
+        // ── RENDER PENALTIES ──
+        function renderPenalties() {
+            const tbody = document.getElementById('penaltiesList');
+
+            let filtered = allPenalties;
+
+            if (currentFilter === 'pending') {
+                filtered = allPenalties.filter(p => p.status === 'pending');
+            } else if (currentFilter === 'paid') {
+                filtered = allPenalties.filter(p => p.status === 'paid');
+            }
+
+            if (!filtered || filtered.length === 0) {
+                const msg = currentFilter === 'all' ? 'No penalties found!' :
+                    currentFilter === 'pending' ? 'No pending penalties!' :
+                    'No paid penalties!';
                 tbody.innerHTML =
-                '<tr><td colspan="8" class="empty-state"><i class="fas fa-check-circle"></i> No penalties found!</td></tr>';
+                    `<tr><td colspan="9" class="empty-state"><i class="fas fa-check-circle"></i> ${msg}</td></tr>`;
                 return;
             }
 
@@ -534,7 +584,7 @@
             let totalDaysLate = 0;
             let countWithLate = 0;
 
-            const html = penalties.map(p => {
+            const html = filtered.map((p, index) => {
                 const isPending = p.status === 'pending';
                 const originalAmount = p.original_amount || p.amount || 0;
                 const lateFee = p.late_fee_amount || 0;
@@ -562,6 +612,7 @@
 
                 return `
                         <tr>
+                            <td>${index + 1}</td>
                             <td><strong>${escapeHtml(p.members?.name || 'Unknown')}</strong></td>
                             <td>${escapeHtml(p.members?.voice_part || '—')}</td>
                             <td>${typeLabel}</td>
@@ -585,6 +636,27 @@
             document.getElementById('totalWithFees').textContent = `KSh ${totalWithFees.toFixed(2)}`;
             document.getElementById('avgLateDays').textContent = countWithLate > 0 ?
                 (totalDaysLate / countWithLate).toFixed(1) : 0;
+        }
+
+        // ── LOAD LATE FEES ──
+        async function loadLateFees() {
+            const tbody = document.getElementById('penaltiesList');
+            tbody.innerHTML =
+                '<tr><td colspan="9" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+
+            const { data: penalties, error } = await supabaseClient
+                .from('penalties')
+                .select('*, members(name, voice_part)')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                tbody.innerHTML =
+                    `<tr><td colspan="9" class="empty-state"><i class="fas fa-exclamation-triangle"></i> Error: ${escapeHtml(error.message)}</td></tr>`;
+                return;
+            }
+
+            allPenalties = penalties || [];
+            renderPenalties();
         }
 
         // ── CALCULATE LATE FEES ──
@@ -639,34 +711,160 @@
             }
         }
 
-        // ── EXPORT LATE FEES ──
-        async function exportLateFees() {
-            const { data: penalties } = await supabaseClient
-                .from('penalties')
-                .select('*, members(name, voice_part)')
-                .eq('status', 'pending')
-                .order('created_at', { ascending: false });
+        // ── EXPORT CSV ──
+        async function exportCSV() {
+            const filtered = currentFilter === 'all' ? allPenalties :
+                allPenalties.filter(p => p.status === currentFilter);
 
-            if (!penalties || penalties.length === 0) {
-                alert('No pending penalties to export.');
+            if (!filtered || filtered.length === 0) {
+                alert('No penalties to export with current filter.');
                 return;
             }
 
-            let csv = 'Member,Voice Part,Type,Original Amount,Days Late,Late Fee,Total Due\n';
-            penalties.forEach(p => {
+            let csv = '#,Member,Voice Part,Type,Original Amount,Days Late,Late Fee,Total Due,Status\n';
+            filtered.forEach((p, i) => {
                 const original = p.original_amount || p.amount || 0;
                 const lateFee = p.late_fee_amount || 0;
                 const total = p.total_with_late_fee || original + lateFee;
                 csv +=
-                    `${p.members?.name || 'Unknown'},${p.members?.voice_part || '—'},${p.penalty_type},${original},${p.late_fee_days || 0},${lateFee},${total}\n`;
+                    `${i+1},${p.members?.name || 'Unknown'},${p.members?.voice_part || '—'},${p.penalty_type},${original},${p.late_fee_days || 0},${lateFee},${total},${p.status}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `late_fees_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download =
+                `late_fees_${currentFilter}_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
             URL.revokeObjectURL(link.href);
+        }
+
+        // ── EXPORT PDF ──
+        async function exportPDF() {
+            const filtered = currentFilter === 'all' ? allPenalties :
+                allPenalties.filter(p => p.status === currentFilter);
+
+            if (!filtered || filtered.length === 0) {
+                alert('No penalties to export with current filter.');
+                return;
+            }
+
+            const btn = document.querySelector('[onclick="exportPDF()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            btn.disabled = true;
+
+            // Build table rows for PDF
+            let tableRows = '';
+            filtered.forEach((p, i) => {
+                const original = p.original_amount || p.amount || 0;
+                const lateFee = p.late_fee_amount || 0;
+                const total = p.total_with_late_fee || original + lateFee;
+                const isPending = p.status === 'pending';
+                const isLate = isPending && (p.late_fee_days || 0) > 0;
+                const statusLabel = p.status === 'paid' ? 'Paid' :
+                    isLate ? '⚠️ Late' : 'Pending';
+                const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent';
+
+                tableRows += `
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 8px 10px; text-align: center;">${i + 1}</td>
+                            <td style="padding: 8px 10px;">${p.members?.name || 'Unknown'}</td>
+                            <td style="padding: 8px 10px;">${p.members?.voice_part || '—'}</td>
+                            <td style="padding: 8px 10px;">${typeLabel}</td>
+                            <td style="padding: 8px 10px; text-align: right;">KSh ${original.toFixed(2)}</td>
+                            <td style="padding: 8px 10px; text-align: center;">${p.late_fee_days || 0}</td>
+                            <td style="padding: 8px 10px; text-align: right;">${lateFee > 0 ? `KSh ${lateFee.toFixed(2)}` : '—'}</td>
+                            <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: ${isPending ? '#dc2626' : '#10b981'};">KSh ${total.toFixed(2)}</td>
+                            <td style="padding: 8px 10px; text-align: center;">${statusLabel}</td>
+                        </tr>
+                    `;
+            });
+
+            const filterLabel = currentFilter === 'all' ? 'All' :
+                currentFilter === 'pending' ? 'Pending Only' : 'Paid Only';
+
+            // Calculate totals
+            const totalOriginal = filtered.reduce((s, p) => s + (p.original_amount || p.amount || 0), 0);
+            const totalLateFeesSum = filtered.reduce((s, p) => s + (p.late_fee_amount || 0), 0);
+            const totalDueSum = filtered.reduce((s, p) => s + (p.total_with_late_fee || p.amount || 0), 0);
+
+            const pdfContent = document.createElement('div');
+            pdfContent.style.padding = '30px';
+            pdfContent.style.fontFamily = 'Arial, sans-serif';
+            pdfContent.style.backgroundColor = 'white';
+            pdfContent.style.color = '#1a1a2e';
+
+            pdfContent.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 24px; border-bottom: 2px solid #4f46e5; padding-bottom: 16px;">
+                        <h1 style="color: #4f46e5; font-size: 24px; margin-bottom: 4px;">🎵 University of Embu Students' Choir</h1>
+                        <h2 style="color: #1a1f36; font-size: 20px;">Late Fee Report</h2>
+                        <p style="color: #64748b; font-size: 13px; margin-top: 4px;">
+                            ${filterLabel} · Generated on ${new Date().toLocaleString()}
+                        </p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+                        <div style="background: #eef2ff; padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Penalties</div>
+                            <div style="font-size: 22px; font-weight: 700; color: #4f46e5;">${filtered.length}</div>
+                        </div>
+                        <div style="background: #fee2e2; padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Late Fees</div>
+                            <div style="font-size: 22px; font-weight: 700; color: #dc2626;">KSh ${totalLateFeesSum.toFixed(2)}</div>
+                        </div>
+                        <div style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Due</div>
+                            <div style="font-size: 22px; font-weight: 700; color: #065f46;">KSh ${totalDueSum.toFixed(2)}</div>
+                        </div>
+                        <div style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Original Total</div>
+                            <div style="font-size: 22px; font-weight: 700; color: #92400e;">KSh ${totalOriginal.toFixed(2)}</div>
+                        </div>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <thead>
+                            <tr style="background: #1a1f36; color: white;">
+                                <th style="padding: 8px 10px; text-align: center;">#</th>
+                                <th style="padding: 8px 10px; text-align: left;">Member</th>
+                                <th style="padding: 8px 10px; text-align: left;">Voice</th>
+                                <th style="padding: 8px 10px; text-align: center;">Type</th>
+                                <th style="padding: 8px 10px; text-align: right;">Original</th>
+                                <th style="padding: 8px 10px; text-align: center;">Days Late</th>
+                                <th style="padding: 8px 10px; text-align: right;">Late Fee</th>
+                                <th style="padding: 8px 10px; text-align: right;">Total Due</th>
+                                <th style="padding: 8px 10px; text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+
+                    <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
+                        <p>University of Embu Students' Choir · 98th Music Festival 2026</p>
+                        <p>Report generated on ${new Date().toLocaleString()}</p>
+                    </div>
+                `;
+
+            try {
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: `late_fees_${currentFilter}_${new Date().toISOString().split('T')[0]}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+                };
+
+                await html2pdf().set(opt).from(pdfContent).save();
+
+            } catch (error) {
+                alert('❌ Error generating PDF: ' + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         // ── INIT ──
@@ -675,7 +873,9 @@
         window.loadLateFees = loadLateFees;
         window.calculateLateFees = calculateLateFees;
         window.updateAllLateFees = updateAllLateFees;
-        window.exportLateFees = exportLateFees;
+        window.exportCSV = exportCSV;
+        window.exportPDF = exportPDF;
+        window.setFilter = setFilter;
     </script>
 </body>
 </html>

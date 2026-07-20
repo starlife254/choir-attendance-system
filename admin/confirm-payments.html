@@ -711,16 +711,21 @@
         pendingAction = null;
     }
 
-    function openConfirmModal(paymentId, penaltyId) {
+  function openConfirmModal(paymentId, penaltyId) {
+    // ✅ FIX: If penaltyId is null/empty, fetch the payment to get notes
+    if (!penaltyId || penaltyId === 'null' || penaltyId === 'undefined') {
+        // We need to fetch the payment to check if it's a bulk payment
+        pendingAction = { type: 'confirm', paymentId, penaltyId: null, needsFetch: true };
+    } else {
         pendingAction = { type: 'confirm', paymentId, penaltyId };
-        document.getElementById('confirmModal').classList.add('open');
-        document.getElementById('confirmYesBtn').onclick = function() {
-            if (pendingAction) {
-                doConfirm(pendingAction.paymentId, pendingAction.penaltyId);
-            }
-        };
     }
-
+    document.getElementById('confirmModal').classList.add('open');
+    document.getElementById('confirmYesBtn').onclick = function() {
+        if (pendingAction) {
+            doConfirm(pendingAction.paymentId, pendingAction.penaltyId);
+        }
+    };
+}
     function openRejectModal(paymentId) {
         pendingAction = { type: 'reject', paymentId };
         document.getElementById('rejectModal').classList.add('open');
@@ -731,111 +736,160 @@
         };
     }
 
-    // ── CONFIRM ACTION (UPDATED FOR BULK PAYMENTS) ──
-    async function doConfirm(paymentId, penaltyId) {
-        showToast('Processing confirmation…', 'info');
+async function doConfirm(paymentId, penaltyId) {
+    showToast('Processing confirmation…', 'info');
+    
+    const confirmBtn = document.getElementById('confirmYesBtn');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Processing...';
+
+    const { data: { user } } = await sb.auth.getUser();
+
+    try {
+        // 1. ✅ FIX: Always get the payment details first
+        const { data: payment, error: fetchError } = await sb
+            .from('payments')
+            .select('*')
+            .eq('id', paymentId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        // 2. Update payment status to confirmed
+        const updateData = { 
+            status: 'confirmed', 
+            confirmed_at: new Date().toISOString(), 
+            confirmed_by: user?.email || 'admin'
+        };
         
-        const confirmBtn = document.getElementById('confirmYesBtn');
-        confirmBtn.disabled = true;
-        confirmBtn.textContent = 'Processing...';
+        const { error: pErr } = await sb
+            .from('payments')
+            .update(updateData)
+            .eq('id', paymentId);
 
-        const { data: { user } } = await sb.auth.getUser();
+        if (pErr) throw pErr;
 
-        try {
-            // 1. Get payment details to check if it's a bulk payment
-            const { data: payment, error: fetchError } = await sb
-                .from('payments')
-                .select('*')
-                .eq('id', paymentId)
-                .single();
+        // 3. ✅ FIX: Extract penalty IDs from payment
+        let penaltyIds = [];
+        const memberId = payment.member_id;
+        const now = new Date().toISOString();
 
-            if (fetchError) throw fetchError;
-
-            // 2. Update payment status to confirmed
-            const { error: pErr } = await sb.from('payments')
-                .update({ 
-                    status: 'confirmed', 
-                    confirmed_at: new Date().toISOString(), 
-                    confirmed_by: user?.email || 'admin'
-                })
-                .eq('id', paymentId);
-
-            if (pErr) throw pErr;
-
-            // 3. Extract penalty IDs from notes (for bulk payments)
-            let penaltyIds = [];
-            let isBulk = false;
-
-            if (payment.notes && payment.notes.includes('Penalty IDs:')) {
-                isBulk = true;
-                const match = payment.notes.match(/Penalty IDs:\s*(.+)/);
-                if (match) {
-                    penaltyIds = match[1].split(',').map(id => id.trim()).filter(id => id && id !== 'null');
-                }
+        // Check if this is a bulk payment (has notes with Penalty IDs)
+        if (payment.notes && payment.notes.includes('Penalty IDs:')) {
+            const match = payment.notes.match(/Penalty IDs:\s*([\d,\s]+)/i);
+            if (match) {
+                penaltyIds = match[1].split(',').map(id => id.trim()).filter(id => id && id !== 'null' && id !== 'undefined');
             }
-
-            // 4. Mark penalties as paid
-            if (penaltyIds.length > 0) {
-                // Bulk payment: mark all listed penalties as paid
-                for (const pid of penaltyIds) {
-                    if (pid) {
-                        await sb.from('penalties')
-                            .update({ 
-                                status: 'paid', 
-                                payment_id: paymentId,
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq('id', pid);
-                    }
-                }
-                
-                // Also mark any other pending penalties for this member as paid
-                await sb.from('penalties')
-                    .update({ 
-                        status: 'paid', 
-                        payment_id: paymentId,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('member_id', payment.member_id)
-                    .eq('status', 'pending')
-                    .is('payment_id', null);
-                    
-            } else if (penaltyId && penaltyId !== 'null' && penaltyId !== 'undefined') {
-                // Single penalty payment
-                await sb.from('penalties')
-                    .update({ 
-                        status: 'paid', 
-                        payment_id: paymentId,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', penaltyId);
-            } else {
-                // If no penalty ID, mark all pending penalties for this member as paid
-                await sb.from('penalties')
-                    .update({ 
-                        status: 'paid', 
-                        payment_id: paymentId,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('member_id', payment.member_id)
-                    .eq('status', 'pending');
-            }
-
-            closeModals();
-            showToast(isBulk ? 
-                `✅ Bulk payment confirmed! All ${penaltyIds.length} penalties marked paid!` : 
-                '✅ Payment confirmed and fine marked paid!', 
-                'success'
-            );
-            await loadPayments();
-
-        } catch (error) {
-            showToast('Error: ' + error.message, 'error');
-            confirmBtn.disabled = false;
-            confirmBtn.textContent = 'Yes, confirm';
         }
-    }
 
+        // Also check if penalty_id field has a value (single payment)
+        if (payment.penalty_id && payment.penalty_id !== 'null' && payment.penalty_id !== 'undefined') {
+            if (!penaltyIds.includes(payment.penalty_id)) {
+                penaltyIds.push(payment.penalty_id);
+            }
+        }
+
+        // 4. ✅ FIX: If we still have no penalty IDs and penaltyId was passed separately
+        if (penaltyIds.length === 0 && penaltyId && penaltyId !== 'null' && penaltyId !== 'undefined') {
+            penaltyIds.push(penaltyId);
+        }
+
+        let updatedCount = 0;
+
+        // 5. ✅ FIX: Mark penalties as paid
+        if (penaltyIds.length > 0) {
+            // Update specific penalties
+            for (const pid of penaltyIds) {
+                if (pid) {
+                    const { error: updateErr } = await sb
+                        .from('penalties')
+                        .update({ 
+                            status: 'paid', 
+                            payment_id: paymentId,
+                            paid_at: now,
+                            updated_at: now
+                        })
+                        .eq('id', pid);
+                    
+                    if (!updateErr) updatedCount++;
+                }
+            }
+            
+            // Also update any other pending penalties for this member that aren't linked to a payment
+            const { error: bulkUpdateErr } = await sb
+                .from('penalties')
+                .update({ 
+                    status: 'paid', 
+                    payment_id: paymentId,
+                    paid_at: now,
+                    updated_at: now
+                })
+                .eq('member_id', memberId)
+                .eq('status', 'pending')
+                .is('payment_id', null);
+            
+            if (!bulkUpdateErr) {
+                // Count how many were updated
+                const { count } = await sb
+                    .from('penalties')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('member_id', memberId)
+                    .eq('status', 'paid')
+                    .eq('payment_id', paymentId);
+                
+                updatedCount = Math.max(updatedCount, count || 0);
+            }
+            
+        } else if (memberId) {
+            // ✅ FALLBACK: Mark ALL pending penalties for this member as paid
+            const { error: fallbackUpdateErr } = await sb
+                .from('penalties')
+                .update({ 
+                    status: 'paid', 
+                    payment_id: paymentId,
+                    paid_at: now,
+                    updated_at: now
+                })
+                .eq('member_id', memberId)
+                .eq('status', 'pending');
+            
+            if (!fallbackUpdateErr) {
+                const { count } = await sb
+                    .from('penalties')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('member_id', memberId)
+                    .eq('status', 'paid')
+                    .eq('payment_id', paymentId);
+                
+                updatedCount = count || 0;
+            }
+        }
+
+        // 6. Verify the update worked
+        const { data: updatedPenalties } = await sb
+            .from('penalties')
+            .select('status, id')
+            .eq('payment_id', paymentId);
+
+        const actualUpdated = updatedPenalties?.length || 0;
+
+        closeModals();
+        
+        if (actualUpdated > 0) {
+            showToast(`✅ Payment confirmed! ${actualUpdated} penalty(ies) marked as paid.`, 'success');
+        } else {
+            showToast(`⚠️ Payment confirmed but no penalties were updated. Please check manually.`, 'error');
+        }
+        
+        await loadPayments();
+
+    } catch (error) {
+        console.error('Confirm error:', error);
+        showToast('Error: ' + error.message, 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Yes, confirm';
+    }
+}
     // ── REJECT ACTION ──
     async function doReject(paymentId) {
         showToast('Processing rejection…', 'info');
@@ -861,16 +915,19 @@
         }
     }
 
-    // ── LOAD PAYMENTS (UPDATED WITH BULK BADGE) ──
-    async function loadPayments() {
-        const statusFilter = document.getElementById('statusFilter').value;
+    // ── LOAD PAYMENTS (FIXED STATUS DISPLAY) ──
+async function loadPayments() {
+    const statusFilter = document.getElementById('statusFilter').value;
 
-        document.getElementById('emptyState').innerHTML = `
-            <i class="ti ti-loader" style="font-size:32px;color:var(--indigo-mid);display:block;margin-bottom:12px;animation:spin 1s linear infinite"></i>
-            <p>Loading payments…</p>`;
-        document.getElementById('emptyState').style.display = 'block';
-        document.getElementById('payTable').style.display = 'none';
+    // Show loading state
+    document.getElementById('emptyState').innerHTML = `
+        <i class="ti ti-loader" style="font-size:32px;color:var(--indigo-mid);display:block;margin-bottom:12px;animation:spin 1s linear infinite"></i>
+        <p>Loading payments…</p>`;
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('payTable').style.display = 'none';
 
+    try {
+        // ✅ FIX: Use a fresh query without caching
         let query = sb
             .from('payments')
             .select(`id, member_id, penalty_id, amount, payment_method, status, payment_date, reference, created_at, confirmed_at, confirmed_by, notes,
@@ -889,9 +946,12 @@
             return;
         }
 
-        // Update KPIs from ALL payments
-        const { data: allPayments } = await sb.from('payments').select('status, amount');
-        if (allPayments) {
+        // ✅ FIX: Update KPIs from ALL payments (use a separate query to avoid filter issues)
+        const { data: allPayments, error: allError } = await sb
+            .from('payments')
+            .select('status, amount');
+
+        if (!allError && allPayments) {
             const pCount = allPayments.filter(p => p.status === 'pending').length;
             const pAmt   = allPayments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
             const cAmt   = allPayments.filter(p => p.status === 'confirmed').reduce((s, p) => s + (p.amount || 0), 0);
@@ -905,7 +965,7 @@
         document.getElementById('lastRefreshed').textContent =
             `Last refreshed: ${new Date().toLocaleTimeString()}`;
 
-        if (!payments?.length) {
+        if (!payments || payments.length === 0) {
             document.getElementById('emptyState').innerHTML = `
                 <i class="ti ti-receipt" style="font-size:36px;color:var(--indigo-mid);display:block;margin-bottom:12px"></i>
                 <p>No ${statusFilter === 'all' ? '' : statusFilter + ' '}payments found</p>
@@ -924,27 +984,31 @@
             return 'ti-credit-card';
         };
 
+        // ✅ FIX: Build the table rows with correct status display
         document.getElementById('paymentsList').innerHTML = payments.map(p => {
-            const name  = p.members ? (Array.isArray(p.members) ? p.members[0]?.name : p.members.name) : 'Unknown';
+            const name = p.members ? (Array.isArray(p.members) ? p.members[0]?.name : p.members.name) : 'Unknown';
             const voice = p.members ? (Array.isArray(p.members) ? p.members[0]?.voice_part : p.members.voice_part) : '—';
             
-            // ✅ Check if it's a bulk payment
+            // Check if it's a bulk payment
             const isBulk = p.notes && p.notes.includes('Bulk payment');
             const penaltyCount = isBulk ? (p.notes.match(/clearing (\d+) penalties/)?.[1] || '?') : '1';
 
+            // ✅ FIX: Determine status and actions based on actual status from database
             let statusPill = '';
             let actions = '';
             
             if (p.status === 'confirmed') {
                 statusPill = `<span class="pill pill-green"><i class="ti ti-check"></i> Confirmed</span>`;
-                actions = `<span style="font-size:11px;color:var(--text-tertiary)">${p.confirmed_at ? new Date(p.confirmed_at).toLocaleDateString() : '—'}</span>`;
+                const confirmDate = p.confirmed_at ? new Date(p.confirmed_at).toLocaleDateString() : '—';
+                actions = `<span style="font-size:11px;color:var(--text-tertiary)">✅ ${confirmDate}</span>`;
             } else if (p.status === 'rejected') {
                 statusPill = `<span class="pill pill-red"><i class="ti ti-x"></i> Rejected</span>`;
                 actions = `<span style="font-size:11px;color:var(--text-tertiary)">—</span>`;
             } else {
+                // Pending status
                 statusPill = `<span class="pill pill-amber"><i class="ti ti-clock"></i> Pending</span>`;
                 actions = `<div style="display:flex;gap:6px;">
-                    <button class="row-btn confirm" onclick="openConfirmModal('${p.id}','${p.penalty_id}')">
+                    <button class="row-btn confirm" onclick="openConfirmModal('${p.id}','${p.penalty_id || ''}')">
                         <i class="ti ti-check"></i> Confirm
                     </button>
                     <button class="row-btn reject" onclick="openRejectModal('${p.id}')">
@@ -980,7 +1044,15 @@
                 <td>${actions}</td>
             </tr>`;
         }).join('');
+
+    } catch (error) {
+        console.error('Load payments error:', error);
+        document.getElementById('emptyState').innerHTML = `
+            <i class="ti ti-alert-circle" style="font-size:32px;color:var(--red);display:block;margin-bottom:12px"></i>
+            <p style="color:var(--red)">Error loading payments</p>
+            <p class="hint">${esc(error.message)}</p>`;
     }
+}
 
     // ── AUTH ──
     async function checkAuth() {

@@ -965,153 +965,151 @@
         }).join('');
     }
 
-    // ── CUSTOM PENALTY FUNCTIONS ──
+   // ── CUSTOM PENALTY FUNCTIONS ──
 
-    let selectedMemberForPenalty = null;
+let selectedMemberForPenalty = null;
 
-    function showAddCustomPenalty() {
-        if (!selectedMember) {
-            alert('Please select a member first from the list on the left.');
-            return;
-        }
-        
-        selectedMemberForPenalty = selectedMember;
-        
-        document.getElementById('penaltyMemberName').textContent = selectedMember.name;
-        document.getElementById('customPenaltyDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('customPenaltyAmount').value = '';
-        document.getElementById('customPenaltyReason').value = '';
-        document.getElementById('customPenaltyType').value = 'phone';
-        document.getElementById('customReasonGroup').style.display = 'none';
-        document.getElementById('customPenaltyReason').removeAttribute('required');
-        
-        document.getElementById('customPenaltyModal').classList.add('open');
+function showAddCustomPenalty() {
+    if (!selectedMember) {
+        alert('Please select a member first from the list on the left.');
+        return;
     }
+    
+    selectedMemberForPenalty = selectedMember;
+    
+    document.getElementById('penaltyMemberName').textContent = selectedMember.name;
+    document.getElementById('customPenaltyDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('customPenaltyAmount').value = '';
+    document.getElementById('customPenaltyReason').value = '';
+    document.getElementById('customPenaltyType').value = 'phone';
+    document.getElementById('customReasonGroup').style.display = 'none';
+    document.getElementById('customPenaltyReason').removeAttribute('required');
+    
+    document.getElementById('customPenaltyModal').classList.add('open');
+}
 
-    function closeCustomPenaltyModal() {
-        document.getElementById('customPenaltyModal').classList.remove('open');
-        document.getElementById('customPenaltyReason').removeAttribute('required');
-        document.getElementById('customReasonGroup').style.display = 'none';
+function closeCustomPenaltyModal() {
+    document.getElementById('customPenaltyModal').classList.remove('open');
+    document.getElementById('customPenaltyReason').removeAttribute('required');
+    document.getElementById('customReasonGroup').style.display = 'none';
+}
+
+document.getElementById('customPenaltyType').addEventListener('change', function() {
+    const reasonGroup = document.getElementById('customReasonGroup');
+    const reasonInput = document.getElementById('customPenaltyReason');
+    
+    if (this.value === 'other') {
+        reasonGroup.style.display = 'block';
+        reasonInput.setAttribute('required', 'required');
+    } else {
+        reasonGroup.style.display = 'none';
+        reasonInput.removeAttribute('required');
+        reasonInput.value = '';
     }
-
-    document.getElementById('customPenaltyType').addEventListener('change', function() {
-        const reasonGroup = document.getElementById('customReasonGroup');
-        const reasonInput = document.getElementById('customPenaltyReason');
+});
+async function submitCustomPenalty() {
+    const memberForPenalty = selectedMemberForPenalty;
+    
+    if (!memberForPenalty) {
+        alert('No member selected. Please select a member first.');
+        return;
+    }
+    
+    const penaltyType = document.getElementById('customPenaltyType').value;
+    const customReason = document.getElementById('customPenaltyReason').value.trim();
+    const date = document.getElementById('customPenaltyDate').value;
+    const amount = parseInt(document.getElementById('customPenaltyAmount').value);
+    
+    if (penaltyType === 'other' && !customReason) {
+        alert('Please enter a custom reason for the penalty.');
+        document.getElementById('customPenaltyReason').focus();
+        return;
+    }
+    
+    const typeLabels = {
+        'phone': 'Using phone during practice',
+        'disruptive': 'Disruptive behavior during practice',
+        'uniform': 'Incorrect uniform',
+        'tardy': 'Excessive tardiness',
+        'unprepared': 'Unprepared for practice',
+        'other': customReason || 'Custom penalty'
+    };
+    const reason = penaltyType === 'other' ? customReason : typeLabels[penaltyType];
+    
+    if (!date) {
+        alert('Please select a date.');
+        document.getElementById('customPenaltyDate').focus();
+        return;
+    }
+    if (!amount || amount <= 0) {
+        alert('Please enter a valid amount (KSh).');
+        document.getElementById('customPenaltyAmount').focus();
+        return;
+    }
+    
+    const submitBtn = document.querySelector('#customPenaltyModal .btn-amber');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="ti ti-loader"></i> Adding...';
+    submitBtn.disabled = true;
+    
+    try {
+        const memberId = memberForPenalty.member_id;
         
-        if (this.value === 'other') {
-            reasonGroup.style.display = 'block';
-            reasonInput.setAttribute('required', 'required');
-        } else {
-            reasonGroup.style.display = 'none';
-            reasonInput.removeAttribute('required');
-            reasonInput.value = '';
-        }
-    });
-
-    async function submitCustomPenalty() {
-        const memberForPenalty = selectedMemberForPenalty;
+        // ✅ FIX: Use unique session to avoid constraint violation
+        const uniqueSession = `Custom_${Date.now()}`;
         
-        if (!memberForPenalty) {
-            alert('No member selected. Please select a member first.');
-            return;
-        }
+        const { error: insertError } = await supabaseClient
+            .from('penalties')
+            .insert({
+                member_id: memberId,
+                date: date,
+                session: uniqueSession,
+                penalty_type: 'custom',
+                amount: amount,
+                status: 'pending',
+                reason: reason,
+                is_custom: true,
+                custom_reason: reason,
+                created_at: new Date().toISOString()
+            });
         
-        const penaltyType = document.getElementById('customPenaltyType').value;
-        const customReason = document.getElementById('customPenaltyReason').value.trim();
-        const date = document.getElementById('customPenaltyDate').value;
-        const amount = parseInt(document.getElementById('customPenaltyAmount').value);
-        
-        if (penaltyType === 'other' && !customReason) {
-            alert('Please enter a custom reason for the penalty.');
-            document.getElementById('customPenaltyReason').focus();
-            return;
-        }
-        
-        const typeLabels = {
-            'phone': 'Using phone during practice',
-            'disruptive': 'Disruptive behavior during practice',
-            'uniform': 'Incorrect uniform',
-            'tardy': 'Excessive tardiness',
-            'unprepared': 'Unprepared for practice',
-            'other': customReason || 'Custom penalty'
-        };
-        const reason = penaltyType === 'other' ? customReason : typeLabels[penaltyType];
-        
-        if (!date) {
-            alert('Please select a date.');
-            document.getElementById('customPenaltyDate').focus();
-            return;
-        }
-        if (!amount || amount <= 0) {
-            alert('Please enter a valid amount (KSh).');
-            document.getElementById('customPenaltyAmount').focus();
-            return;
-        }
-        
-        const submitBtn = document.querySelector('#customPenaltyModal .btn-amber');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="ti ti-loader"></i> Adding...';
-        submitBtn.disabled = true;
-        
-        try {
-            const memberId = memberForPenalty.member_id;
-            
-            const { data: existing, error: checkError } = await supabaseClient
-                .from('penalties')
-                .select('id, amount, status')
-                .eq('member_id', memberId)
-                .eq('date', date)
-                .eq('session', 'Custom');
-            
-            if (checkError) throw checkError;
-            
-            if (existing && existing.length > 0) {
-                const { error: updateError } = await supabaseClient
-                    .from('penalties')
-                    .update({
-                        amount: amount,
-                        status: 'pending',
-                        reason: reason,
-                        is_custom: true,
-                        custom_reason: reason,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', existing[0].id);
-                
-                if (updateError) throw updateError;
-                
-                alert(`✅ Penalty updated for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
-            } else {
-                const { error: insertError } = await supabaseClient
+        if (insertError) {
+            // If still fails, try with an even more unique identifier
+            if (insertError.code === '23505') { // Unique violation
+                const fallbackSession = `Custom_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+                const { error: retryError } = await supabaseClient
                     .from('penalties')
                     .insert({
                         member_id: memberId,
                         date: date,
-                        session: 'Custom',
+                        session: fallbackSession,
                         penalty_type: 'custom',
                         amount: amount,
                         status: 'pending',
                         reason: reason,
                         is_custom: true,
-                        custom_reason: reason
+                        custom_reason: reason,
+                        created_at: new Date().toISOString()
                     });
-                
-                if (insertError) throw insertError;
-                
-                alert(`✅ Custom penalty added for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
+                if (retryError) throw retryError;
+            } else {
+                throw insertError;
             }
-            
-            closeCustomPenaltyModal();
-            await loadPenalties(memberId);
-            
-        } catch (error) {
-            console.error('Penalty error:', error);
-            alert('❌ Error adding penalty: ' + error.message);
-        } finally {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
         }
+        
+        alert(`✅ Custom penalty added for ${memberForPenalty.name}!\n\nReason: ${reason}\nAmount: KSh ${amount}`);
+        
+        closeCustomPenaltyModal();
+        await loadPenalties(memberId);
+        
+    } catch (error) {
+        console.error('Penalty error:', error);
+        alert('❌ Error adding penalty: ' + error.message);
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
+}
 
     document.getElementById('customPenaltyModal').addEventListener('click', function(e) {
         if (e.target === this) closeCustomPenaltyModal();

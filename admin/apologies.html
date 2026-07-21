@@ -57,26 +57,23 @@
 
         .content { padding: 24px 28px 40px; flex: 1; }
 
+        /* ── KPI CARDS ── */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; position: relative; overflow: hidden; }
-        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
-        .kpi-card.amber::before { background: var(--amber); }
-        .kpi-card.green::before { background: var(--green); }
-        .kpi-card.red::before   { background: var(--red); }
-        .kpi-card.indigo::before{ background: var(--indigo); }
-        .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
-        .kpi-label i { font-size: 14px; }
-        .kpi-value { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
-        .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; position: relative; overflow: hidden; border-left: 4px solid var(--indigo); }
+        .kpi-card.amber { border-left-color: var(--amber); }
+        .kpi-card.green { border-left-color: var(--green); }
+        .kpi-card.red { border-left-color: var(--red); }
+        .kpi-card .number { font-size: 28px; font-weight: 700; }
+        .kpi-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
 
+        /* ── FILTERS ── */
         .filters-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-        .filter-select { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 13px; color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer; }
+        .filter-select { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 13px; font-family: inherit; outline: none; cursor: pointer; }
         .filter-select:focus { border-color: var(--indigo); }
         .filter-select option { padding: 4px; }
         .refresh-btn { padding: 8px 16px; border: none; border-radius: 10px; background: var(--indigo); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .refresh-btn:hover { opacity: .88; }
 
-        /* Fixed: Action button styles */
         .action-btn {
             padding: 8px 18px;
             border: none;
@@ -93,18 +90,52 @@
         .action-btn:hover { opacity: .85; }
         .btn-amber { background: var(--amber); color: #fff; }
 
-        .apologies-list { display: flex; flex-direction: column; gap: 12px; }
-        .apology-card { background: var(--surface); border: 0.5px solid var(--border); border-left: 4px solid var(--amber); border-radius: 14px; padding: 18px 20px; transition: box-shadow .15s; }
+        /* ── APOLOGY LIST ── */
+        .apologies-list { display: flex; flex-direction: column; gap: 16px; }
+        
+        .apology-card { 
+            background: var(--surface); 
+            border: 0.5px solid var(--border); 
+            border-left: 4px solid var(--amber); 
+            border-radius: 14px; 
+            padding: 18px 20px; 
+            transition: box-shadow .15s;
+            position: relative;
+        }
         .apology-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
         .apology-card.approved { border-left-color: var(--green); }
         .apology-card.rejected { border-left-color: var(--red); }
+        .apology-card.pending { border-left-color: var(--amber); }
 
-        .apology-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+        /* Card Header */
+        .apology-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 12px; 
+        }
+        .apology-member { display: flex; align-items: center; gap: 12px; }
+        .apology-avatar { 
+            width: 42px; height: 42px; 
+            border-radius: 50%; 
+            background: var(--indigo-light); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 700; 
+            color: var(--indigo);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .apology-member-info { display: flex; flex-direction: column; }
         .apology-member-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
-        .apology-member-meta { font-size: 12px; color: var(--text-secondary); margin-top: 3px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .apology-member-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 12px; flex-wrap: wrap; }
         .apology-member-meta span { display: flex; align-items: center; gap: 4px; }
         .apology-member-meta i { font-size: 13px; }
 
+        .apology-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .type-badge { 
             display: inline-flex; 
             align-items: center; 
@@ -116,33 +147,77 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
-        .type-badge.late { 
-            background: #fef3c7; 
-            color: #92400e; 
-            border: 1px solid #f59e0b;
-        }
-        .type-badge.absent { 
-            background: #fee2e2; 
-            color: #991b1b; 
-            border: 1px solid #ef4444;
-        }
+        .type-badge.late { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+        .type-badge.absent { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
 
         .status-badge { padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; }
         .status-pending  { background: var(--amber-light); color: #d97706; }
         .status-approved { background: var(--green-light);  color: #059669; }
         .status-rejected { background: var(--red-light);    color: #dc2626; }
 
+        /* Card Body */
+        .apody-body { margin-top: 10px; }
         .apology-details { background: var(--bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
         .apology-details p { margin: 5px 0; font-size: 13px; color: var(--text-primary); display: flex; gap: 6px; flex-wrap: wrap; }
         .apology-details p strong { color: var(--text-secondary); min-width: 90px; }
+        .apology-reason { 
+            background: var(--bg); 
+            padding: 10px 14px; 
+            border-radius: 10px; 
+            margin-bottom: 10px;
+            border-left: 3px solid var(--indigo);
+        }
+        .apology-reason .label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .apology-reason .text { font-size: 14px; color: var(--text-primary); margin-top: 3px; }
 
-        .admin-note { width: 100%; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: 10px; margin-top: 10px; font-family: inherit; font-size: 13px; resize: vertical; outline: none; background: var(--bg); }
+        /* Admin Actions */
+        .admin-actions { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+        .admin-note { 
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 0.5px solid var(--border); 
+            border-radius: 10px; 
+            margin-top: 10px; 
+            font-family: inherit; 
+            font-size: 13px; 
+            resize: vertical; 
+            outline: none; 
+            background: var(--bg); 
+            transition: border-color .15s;
+        }
         .admin-note:focus { border-color: var(--indigo); }
 
         .action-btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-        .approve-btn { padding: 8px 20px; background: var(--green); color: #fff; border: none; border-radius: 40px; cursor: pointer; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: opacity .15s; }
-        .reject-btn  { padding: 8px 20px; background: var(--red);   color: #fff; border: none; border-radius: 40px; cursor: pointer; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: opacity .15s; }
-        .approve-btn:hover, .reject-btn:hover { opacity: .88; }
+        .approve-btn { 
+            padding: 8px 24px; 
+            background: var(--green); 
+            color: #fff; 
+            border: none; 
+            border-radius: 40px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 13px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+            transition: opacity .15s, transform .1s;
+        }
+        .reject-btn { 
+            padding: 8px 24px; 
+            background: var(--red);   
+            color: #fff; 
+            border: none; 
+            border-radius: 40px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 13px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+            transition: opacity .15s, transform .1s;
+        }
+        .approve-btn:hover, .reject-btn:hover { opacity: .88; transform: scale(1.02); }
+        .approve-btn:active, .reject-btn:active { transform: scale(0.97); }
 
         .empty-state { text-align: center; padding: 48px 20px; font-size: 13px; color: var(--text-tertiary); }
         .empty-state i { font-size: 32px; display: block; margin-bottom: 10px; }
@@ -151,6 +226,17 @@
         .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
         .bottom-nav-item i { font-size: 22px; }
         .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* ── PENDING COUNT BADGE ── */
+        .pending-count-badge {
+            background: var(--amber);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 40px;
+            margin-left: 8px;
+        }
 
         @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) {
@@ -166,6 +252,14 @@
             .filters-panel { flex-direction: column; align-items: stretch; }
             .refresh-btn { justify-content: center; }
             .apology-header { flex-direction: column; }
+            .apology-member { width: 100%; }
+            .apology-badges { width: 100%; justify-content: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .kpi-grid { grid-template-columns: 1fr 1fr; }
+            .apology-card { padding: 14px 14px; }
+            .action-btns { flex-direction: column; }
+            .action-btns button { width: 100%; justify-content: center; }
         }
         button { cursor: pointer; touch-action: manipulation; }
     </style>
@@ -215,7 +309,7 @@
             <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="ti ti-menu-2"></i></button>
             <div class="topbar-left">
                 <h2>Manage Apologies</h2>
-                <p>Review and approve absence requests</p>
+                <p>Review and approve member absence requests</p>
             </div>
         </div>
         <div class="topbar-right"><div class="topbar-chip" id="topTime">--:--</div></div>
@@ -223,28 +317,40 @@
 
     <main class="content">
         <div class="kpi-grid" id="summaryStats">
-            <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i>Pending</div><div class="kpi-value">—</div></div>
-            <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i>Approved</div><div class="kpi-value">—</div></div>
-            <div class="kpi-card red"><div class="kpi-label"><i class="ti ti-x" style="color:var(--red)"></i>Rejected</div><div class="kpi-value">—</div></div>
-            <div class="kpi-card indigo"><div class="kpi-label"><i class="ti ti-file-text" style="color:var(--indigo)"></i>Total</div><div class="kpi-value">—</div></div>
+            <div class="kpi-card amber">
+                <div class="number" id="pendingCount">—</div>
+                <div class="label">⏳ Pending</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="number" id="approvedCount">—</div>
+                <div class="label">✅ Approved</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="number" id="rejectedCount">—</div>
+                <div class="label">❌ Rejected</div>
+            </div>
+            <div class="kpi-card">
+                <div class="number" id="totalCount">—</div>
+                <div class="label">📋 Total</div>
+            </div>
         </div>
 
         <div class="filters-panel">
             <select id="statusFilter" class="filter-select">
-                <option value="all">All requests</option>
-                <option value="pending">Pending only</option>
-                <option value="approved">Approved only</option>
-                <option value="rejected">Rejected only</option>
+                <option value="all">📋 All requests</option>
+                <option value="pending">⏳ Pending only</option>
+                <option value="approved">✅ Approved only</option>
+                <option value="rejected">❌ Rejected only</option>
             </select>
             <select id="typeFilter" class="filter-select">
-                <option value="all">All types</option>
+                <option value="all">🎭 All types</option>
                 <option value="late">⏰ Late only</option>
                 <option value="absent">❌ Absent only</option>
             </select>
             <button class="refresh-btn" onclick="loadApologies()">
                 <i class="ti ti-refresh"></i> Refresh
             </button>
-           
+            <span style="margin-left:auto; font-size:12px; color:var(--text-tertiary);" id="pendingBadge"></span>
         </div>
 
         <div id="apologiesList" class="apologies-list">
@@ -282,107 +388,6 @@
             if (p) { if (p.full_name) { const f=p.full_name.split(' ')[0]; document.getElementById('userName').textContent=f; document.getElementById('userAvatar').textContent=f.charAt(0).toUpperCase(); } if (p.role) document.getElementById('userRole').textContent=p.role; }
         } catch(e) { console.warn(e); }
     }
-      
-    // ── SYNC ALL PENALTIES ──
-    async function syncAllPenalties() {
-        if (!confirm('This will recalculate ALL penalties based on attendance and apology status.\n\nContinue?')) return;
-        
-        const btn = document.querySelector('[onclick="syncAllPenalties()"]');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
-        
-        try {
-            const { data: attendance } = await supabaseClient
-                .from('attendance')
-                .select('member_id, date, session, status');
-            
-            let created = 0, updated = 0, deleted = 0;
-            
-            for (const a of attendance || []) {
-                const { data: apology } = await supabaseClient
-                    .from('apology_requests')
-                    .select('id')
-                    .eq('member_id', a.member_id)
-                    .eq('date', a.date)
-                    .eq('session', a.session)
-                    .eq('status', 'approved')
-                    .maybeSingle();
-                
-                const hasApprovedApology = !!apology;
-                
-                let penaltyAmount = 0;
-                let shouldExist = false;
-                
-                if (a.status === 'Present') {
-                    shouldExist = false;
-                } else if (a.status === 'Late') {
-                    if (!hasApprovedApology) {
-                        shouldExist = true;
-                        penaltyAmount = 20;
-                    }
-                } else if (a.status === 'Absent') {
-                    if (!hasApprovedApology) {
-                        shouldExist = true;
-                        penaltyAmount = 50;
-                    }
-                }
-                
-                const { data: existing } = await supabaseClient
-                    .from('penalties')
-                    .select('id')
-                    .eq('member_id', a.member_id)
-                    .eq('date', a.date)
-                    .eq('session', a.session)
-                    .maybeSingle();
-                
-                if (shouldExist) {
-                    if (existing) {
-                        await supabaseClient
-                            .from('penalties')
-                            .update({
-                                amount: penaltyAmount,
-                                status: 'pending',
-                                is_calculated: true,
-                                last_synced_at: new Date().toISOString()
-                            })
-                            .eq('id', existing.id);
-                        updated++;
-                    } else {
-                        await supabaseClient
-                            .from('penalties')
-                            .insert({
-                                member_id: a.member_id,
-                                date: a.date,
-                                session: a.session,
-                                penalty_type: a.status === 'Late' ? 'late' : 'absent',
-                                amount: penaltyAmount,
-                                status: 'pending',
-                                is_calculated: true,
-                                last_synced_at: new Date().toISOString()
-                            });
-                        created++;
-                    }
-                } else {
-                    if (existing) {
-                        await supabaseClient
-                            .from('penalties')
-                            .delete()
-                            .eq('id', existing.id);
-                        deleted++;
-                    }
-                }
-            }
-            
-            alert(`✅ Sync Complete!\n\n✅ Created: ${created}\n✅ Updated: ${updated}\n✅ Deleted: ${deleted}`);
-            
-        } catch (error) {
-            alert('❌ Error: ' + error.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-sync"></i> Sync All Penalties';
-            loadApologies();
-        }
-    }  
 
     async function loadApologies() {
         const statusFilter = document.getElementById('statusFilter').value;
@@ -402,23 +407,42 @@
             return; 
         }
 
+        // ── UPDATE KPIs ──
         const pending  = apologies?.filter(a => a.status === 'pending').length  || 0;
         const approved = apologies?.filter(a => a.status === 'approved').length || 0;
         const rejected = apologies?.filter(a => a.status === 'rejected').length || 0;
+        const total    = apologies?.length || 0;
 
-        document.getElementById('summaryStats').innerHTML = `
-            <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i>Pending</div><div class="kpi-value">${pending}</div><div class="kpi-meta">Awaiting review</div></div>
-            <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i>Approved</div><div class="kpi-value">${approved}</div><div class="kpi-meta">Excused absences</div></div>
-            <div class="kpi-card red"><div class="kpi-label"><i class="ti ti-x" style="color:var(--red)"></i>Rejected</div><div class="kpi-value">${rejected}</div><div class="kpi-meta">Not approved</div></div>
-            <div class="kpi-card indigo"><div class="kpi-label"><i class="ti ti-file-text" style="color:var(--indigo)"></i>Total</div><div class="kpi-value">${apologies?.length||0}</div><div class="kpi-meta">All requests</div></div>
-        `;
+        document.getElementById('pendingCount').textContent  = pending;
+        document.getElementById('approvedCount').textContent = approved;
+        document.getElementById('rejectedCount').textContent = rejected;
+        document.getElementById('totalCount').textContent    = total;
+
+        // ── PENDING BADGE ──
+        const badgeEl = document.getElementById('pendingBadge');
+        if (pending > 0) {
+            badgeEl.innerHTML = `⏳ <strong>${pending}</strong> pending review`;
+            badgeEl.style.color = 'var(--amber)';
+        } else {
+            badgeEl.innerHTML = '✅ All clear! No pending apologies';
+            badgeEl.style.color = 'var(--green)';
+        }
 
         if (!apologies?.length) { 
-            document.getElementById('apologiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i>No apology requests found.</div>'; 
+            document.getElementById('apologiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i> No apology requests found.</div>'; 
             return; 
         }
 
-        document.getElementById('apologiesList').innerHTML = apologies.map(a => {
+        // ── SORT: Pending first, then by date (newest first) ──
+        const sorted = [...apologies].sort((a, b) => {
+            // Pending first
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (b.status === 'pending' && a.status !== 'pending') return 1;
+            // Then by date (newest first)
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
+
+        document.getElementById('apologiesList').innerHTML = sorted.map(a => {
             const isLate = a.apology_type === 'late';
             const typeIcon = isLate ? '⏰' : '❌';
             const typeLabel = isLate ? 'Late Arrival' : 'Absent';
@@ -426,142 +450,172 @@
             
             const statusClass = a.status === 'pending' ? 'status-pending' : 
                                a.status === 'approved' ? 'status-approved' : 'status-rejected';
+            const cardClass = a.status === 'pending' ? 'pending' : 
+                             a.status === 'approved' ? 'approved' : 'rejected';
             
+            const memberName = a.members?.name || 'Unknown';
+            const voicePart = a.members?.voice_part || '—';
+            const initial = memberName.charAt(0).toUpperCase();
+
+            // Format date
+            const dateObj = new Date(a.created_at);
+            const submittedDate = dateObj.toLocaleDateString('en-US', { 
+                month: 'short', day: 'numeric', year: 'numeric' 
+            });
+            const submittedTime = dateObj.toLocaleTimeString('en-US', { 
+                hour: '2-digit', minute: '2-digit' 
+            });
+
             return `
-                <div class="apology-card ${a.status}" id="apology-${a.id}">
+                <div class="apology-card ${cardClass}" id="apology-${a.id}">
                     <div class="apology-header">
-                        <div>
-                            <div class="apology-member-name">${escapeHtml(a.members?.name || 'Unknown')}</div>
-                            <div class="apology-member-meta">
-                                <span><i class="ti ti-microphone"></i>${escapeHtml(a.members?.voice_part || '—')}</span>
-                                <span><i class="ti ti-id"></i>${escapeHtml(a.member_id)}</span>
+                        <div class="apology-member">
+                            <div class="apology-avatar">${initial}</div>
+                            <div class="apology-member-info">
+                                <div class="apology-member-name">${escapeHtml(memberName)}</div>
+                                <div class="apology-member-meta">
+                                    <span><i class="ti ti-microphone"></i> ${escapeHtml(voicePart)}</span>
+                                    <span><i class="ti ti-id"></i> ${escapeHtml(a.member_id)}</span>
+                                    <span><i class="ti ti-calendar"></i> ${escapeHtml(a.date)}</span>
+                                    <span><i class="ti ti-clock"></i> ${escapeHtml(a.session)}</span>
+                                </div>
                             </div>
                         </div>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-                            <span class="type-badge ${typeClass}">
-                                ${typeIcon} ${typeLabel}
+                        <div class="apology-badges">
+                            <span class="type-badge ${typeClass}">${typeIcon} ${typeLabel}</span>
+                            <span class="status-badge ${statusClass}">
+                                ${a.status === 'pending' ? '⏳ PENDING' : a.status === 'approved' ? '✅ APPROVED' : '❌ REJECTED'}
                             </span>
-                            <span class="status-badge ${statusClass}">${a.status.toUpperCase()}</span>
                         </div>
                     </div>
-                    <div class="apology-details">
-                        <p>
-                            <strong><i class="ti ti-calendar"></i> Date:</strong> 
-                            ${a.date} · ${a.session}
-                        </p>
-                        <p>
-                            <strong><i class="ti ti-file-description"></i> Reason:</strong> 
-                            ${escapeHtml(a.reason)}
-                        </p>
-                        <p>
-                            <strong><i class="ti ti-clock"></i> Submitted:</strong> 
-                            ${new Date(a.created_at).toLocaleString()}
-                        </p>
-                        ${a.admin_notes ? `<p><strong><i class="ti ti-note"></i> Admin note:</strong> ${escapeHtml(a.admin_notes)}</p>` : ''}
-                    </div>
-                    ${a.status === 'pending' ? `
-                        <textarea id="note-${a.id}" class="admin-note" placeholder="Add optional admin note (visible to member)…"></textarea>
-                        <div class="action-btns">
-                            <button class="approve-btn" onclick="updateApology('${a.id}', 'approved')">
-                                <i class="ti ti-check"></i> Approve
-                            </button>
-                            <button class="reject-btn" onclick="updateApology('${a.id}', 'rejected')">
-                                <i class="ti ti-x"></i> Reject
-                            </button>
+
+                    <div class="apody-body">
+                        <div class="apology-reason">
+                            <div class="label"><i class="ti ti-file-description"></i> Reason</div>
+                            <div class="text">${escapeHtml(a.reason) || 'No reason provided'}</div>
                         </div>
-                    ` : ''}
+
+                        <div class="apology-details">
+                            <p>
+                                <strong><i class="ti ti-clock"></i> Submitted:</strong> 
+                                ${submittedDate} at ${submittedTime}
+                            </p>
+                            ${a.admin_notes ? `<p><strong><i class="ti ti-note"></i> Admin note:</strong> ${escapeHtml(a.admin_notes)}</p>` : ''}
+                        </div>
+
+                        ${a.status === 'pending' ? `
+                            <div class="admin-actions">
+                                <textarea id="note-${a.id}" class="admin-note" placeholder="Add optional admin note (visible to member)…"></textarea>
+                                <div class="action-btns">
+                                    <button class="approve-btn" onclick="updateApology('${a.id}', 'approved')">
+                                        <i class="ti ti-check"></i> Approve
+                                    </button>
+                                    <button class="reject-btn" onclick="updateApology('${a.id}', 'rejected')">
+                                        <i class="ti ti-x"></i> Reject
+                                    </button>
+                                </div>
+                            </div>
+                        ` : `
+                            <div style="margin-top:10px; font-size:12px; color:var(--text-tertiary); display:flex; gap:12px; flex-wrap:wrap;">
+                                ${a.status === 'approved' ? `<span><i class="ti ti-check" style="color:var(--green)"></i> Approved on ${a.updated_at ? new Date(a.updated_at).toLocaleDateString() : '—'}</span>` : ''}
+                                ${a.status === 'rejected' ? `<span><i class="ti ti-x" style="color:var(--red)"></i> Rejected on ${a.updated_at ? new Date(a.updated_at).toLocaleDateString() : '—'}</span>` : ''}
+                            </div>
+                        `}
+                    </div>
                 </div>
             `;
         }).join('');
     }
 
-  async function updateApology(id, status) {
-    const apologyId = String(id).trim();
-    const note = document.getElementById(`note-${apologyId}`)?.value || '';
-    
-    try {
-        // Fetch the apology
-        const { data: apology, error: fetchError } = await supabaseClient
-            .from('apology_requests')
-            .select('*')
-            .eq('id', apologyId)
-            .single();
-            
-        if (fetchError) { 
-            alert('❌ Error fetching apology: ' + fetchError.message); 
-            return; 
-        }
+    async function updateApology(id, status) {
+        const apologyId = String(id).trim();
+        const note = document.getElementById(`note-${apologyId}`)?.value || '';
         
-        // Update the apology status - removed updated_at
-        const { error: updateError } = await supabaseClient
-            .from('apology_requests')
-            .update({ 
-                status: status, 
-                admin_notes: note
-            })
-            .eq('id', apology.id);
-            
-        if (updateError) { 
-            console.error('Update error:', updateError);
-            alert('❌ Error updating apology: ' + updateError.message); 
-            return; 
-        }
-        
-        if (status === 'approved') {
-            const attendanceStatus = apology.apology_type === 'late' ? 'Late' : 'Present';
-            
-            // Check if attendance record exists
-            const { data: existingAttendance } = await supabaseClient
-                .from('attendance')
+        try {
+            // Fetch the apology
+            const { data: apology, error: fetchError } = await supabaseClient
+                .from('apology_requests')
                 .select('*')
-                .eq('member_id', apology.member_id)
-                .eq('date', apology.date)
-                .eq('session', apology.session)
-                .maybeSingle();
+                .eq('id', apologyId)
+                .single();
                 
-            if (existingAttendance) {
-                await supabaseClient
-                    .from('attendance')
-                    .update({ 
-                        status: attendanceStatus, 
-                        has_apology: true, 
-                        apology_approved: true
-                    })
-                    .eq('id', existingAttendance.id);
-            } else {
-                await supabaseClient
-                    .from('attendance')
-                    .insert({ 
-                        member_id: apology.member_id, 
-                        date: apology.date, 
-                        session: apology.session, 
-                        status: attendanceStatus, 
-                        has_apology: true, 
-                        apology_approved: true, 
-                        marked_at: new Date().toISOString() 
-                    });
+            if (fetchError) { 
+                alert('❌ Error fetching apology: ' + fetchError.message); 
+                return; 
             }
             
-            // ✅ Delete any existing penalty for this date (JavaScript handles it)
-            await supabaseClient
-                .from('penalties')
-                .delete()
-                .eq('member_id', apology.member_id)
-                .eq('date', apology.date)
-                .eq('session', apology.session);
+            // Update the apology status
+            const { error: updateError } = await supabaseClient
+                .from('apology_requests')
+                .update({ 
+                    status: status, 
+                    admin_notes: note,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', apology.id);
+                
+            if (updateError) { 
+                console.error('Update error:', updateError);
+                alert('❌ Error updating apology: ' + updateError.message); 
+                return; 
+            }
             
-            alert(`✅ Apology approved! ${apology.apology_type === 'late' ? 'Late marked with apology.' : 'Absence excused and penalty removed.'}`);
-        } else {
-            alert(`❌ Apology rejected.`);
+            if (status === 'approved') {
+                const attendanceStatus = apology.apology_type === 'late' ? 'Late' : 'Present';
+                
+                // Check if attendance record exists
+                const { data: existingAttendance } = await supabaseClient
+                    .from('attendance')
+                    .select('*')
+                    .eq('member_id', apology.member_id)
+                    .eq('date', apology.date)
+                    .eq('session', apology.session)
+                    .maybeSingle();
+                    
+                if (existingAttendance) {
+                    await supabaseClient
+                        .from('attendance')
+                        .update({ 
+                            status: attendanceStatus, 
+                            has_apology: true, 
+                            apology_approved: true
+                        })
+                        .eq('id', existingAttendance.id);
+                } else {
+                    await supabaseClient
+                        .from('attendance')
+                        .insert({ 
+                            member_id: apology.member_id, 
+                            date: apology.date, 
+                            session: apology.session, 
+                            status: attendanceStatus, 
+                            has_apology: true, 
+                            apology_approved: true, 
+                            marked_at: new Date().toISOString() 
+                        });
+                }
+                
+                // ✅ Delete any existing penalty for this date
+                await supabaseClient
+                    .from('penalties')
+                    .delete()
+                    .eq('member_id', apology.member_id)
+                    .eq('date', apology.date)
+                    .eq('session', apology.session);
+                
+                alert(`✅ Apology approved! ${apology.apology_type === 'late' ? 'Late marked with apology.' : 'Absence excused and penalty removed.'}`);
+            } else {
+                alert(`❌ Apology rejected.`);
+            }
+            
+            loadApologies();
+            
+        } catch (error) {
+            console.error('Error in updateApology:', error);
+            alert('❌ Error: ' + error.message);
         }
-        
-        loadApologies();
-        
-    } catch (error) {
-        console.error('Error in updateApology:', error);
-        alert('❌ Error: ' + error.message);
     }
-}
+
     document.getElementById('statusFilter').addEventListener('change', loadApologies);
     document.getElementById('typeFilter').addEventListener('change', loadApologies);
 

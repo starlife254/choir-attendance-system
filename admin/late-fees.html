@@ -159,7 +159,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px;
+            min-width: 800px;
             font-size: 13px;
         }
 
@@ -173,6 +173,9 @@
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
             white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         td {
@@ -184,6 +187,49 @@
 
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f8fafc; }
+
+        /* Member group row - expandable */
+        .member-group {
+            background: #f1f5f9 !important;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .member-group:hover {
+            background: #e2e8f0 !important;
+        }
+        .member-group td {
+            padding: 14px 12px;
+            font-weight: 700;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .member-group .toggle-icon {
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        .member-group .toggle-icon.expanded {
+            transform: rotate(90deg);
+        }
+
+        .penalty-detail-row {
+            display: none;
+        }
+        .penalty-detail-row.visible {
+            display: table-row;
+        }
+        .penalty-detail-row td {
+            padding: 8px 12px 8px 40px;
+            background: #fafbfc;
+            border-bottom: 1px solid #eef2f6;
+        }
+        .penalty-detail-row:last-child td {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .penalty-detail-row .detail-indent {
+            padding-left: 32px;
+            font-size: 12px;
+            color: #475569;
+        }
 
         .status-badge {
             padding: 3px 12px;
@@ -223,6 +269,77 @@
 
         .back-link:hover { text-decoration: underline; }
 
+        .voice-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .penalty-count-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #dbeafe;
+            color: #1e40af;
+            margin-left: 8px;
+        }
+
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4f46e5;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Child penalty styles */
+        .child-penalty {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 4px 0;
+        }
+        .child-penalty .date {
+            font-size: 12px;
+            color: #64748b;
+            min-width: 85px;
+        }
+        .child-penalty .type {
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 70px;
+        }
+        .child-penalty .amount {
+            font-size: 13px;
+            font-weight: 700;
+            min-width: 80px;
+        }
+        .child-penalty .status {
+            font-size: 11px;
+        }
+        .child-penalty .late-fee {
+            font-size: 11px;
+            color: #dc2626;
+        }
+
         @media (max-width: 900px) {
             .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             .container { padding: 18px 14px; }
@@ -249,6 +366,9 @@
             .btn-amber, .btn-primary { width: 100%; justify-content: center; }
             .header-actions .btn { width: 100%; justify-content: center; }
             .kpi-card .badge { font-size: 10px; padding: 1px 8px; }
+            .member-avatar { width: 28px; height: 28px; font-size: 12px; }
+            .penalty-detail-row td { padding: 6px 8px 6px 20px; }
+            .child-penalty { flex-wrap: wrap; gap: 4px; }
         }
 
         @media (max-width: 420px) {
@@ -266,18 +386,6 @@
 
         @media (max-width: 480px) {
             .btn i { font-size: 12px; }
-        }
-
-        /* Loading shimmer effect */
-        .loading-shimmer {
-            animation: shimmer 1.5s ease-in-out infinite;
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
         }
     </style>
 </head>
@@ -345,20 +453,19 @@
             <table id="penaltiesTable">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th style="width:30px;"></th>
                         <th>Member</th>
                         <th>Voice</th>
-                        <th>Type</th>
-                        <th>Original</th>
-                        <th>Days Late</th>
-                        <th>Late Fee</th>
+                        <th>Total Penalties</th>
+                        <th>Total Original</th>
+                        <th>Total Late Fees</th>
                         <th>Total Due</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="penaltiesList">
                     <tr>
-                        <td colspan="9" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading penalties...</td>
+                        <td colspan="8" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading penalties...</td>
                     </tr>
                 </tbody>
             </table>
@@ -372,10 +479,16 @@
 
         let currentFilter = 'all';
         let allPenalties = [];
+        let expandedGroups = new Set();
 
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
         }
 
         // ── SET FILTER ──
@@ -397,7 +510,27 @@
             renderPenalties();
         }
 
-        // ── RENDER PENALTIES ──
+        // ── TOGGLE GROUP ──
+        function toggleGroup(memberId) {
+            if (expandedGroups.has(memberId)) {
+                expandedGroups.delete(memberId);
+            } else {
+                expandedGroups.add(memberId);
+            }
+            
+            // Update all rows for this member
+            document.querySelectorAll(`.penalty-detail-row[data-member="${memberId}"]`).forEach(row => {
+                row.classList.toggle('visible');
+            });
+            
+            // Update toggle icon
+            const icon = document.querySelector(`.toggle-icon[data-member="${memberId}"]`);
+            if (icon) {
+                icon.classList.toggle('expanded');
+            }
+        }
+
+        // ── RENDER PENALTIES (GROUPED BY MEMBER) ──
         function renderPenalties() {
             const tbody = document.getElementById('penaltiesList');
 
@@ -414,88 +547,168 @@
                     currentFilter === 'pending' ? 'No pending penalties!' :
                     'No paid penalties!';
                 tbody.innerHTML =
-                    `<tr><td colspan="9" class="empty-state"><i class="fas fa-check-circle"></i> ${msg}</td></tr>`;
+                    `<tr><td colspan="8" class="empty-state"><i class="fas fa-check-circle"></i> ${msg}</td></tr>`;
                 return;
             }
 
+            // ── GROUP BY MEMBER ──
+            const grouped = {};
+            filtered.forEach(p => {
+                const key = p.member_id || 'unknown';
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        member_id: key,
+                        member_name: p.members?.name || p.member_name || 'Unknown Member',
+                        voice_part: p.members?.voice_part || p.voice_part || '—',
+                        penalties: [],
+                        totalOriginal: 0,
+                        totalLateFees: 0,
+                        totalDue: 0,
+                        pendingCount: 0,
+                        paidCount: 0
+                    };
+                }
+                grouped[key].penalties.push(p);
+                
+                const original = p.original_amount || p.amount || 0;
+                const lateFee = p.late_fee_amount || 0;
+                const total = p.total_with_late_fee || original + lateFee;
+                
+                grouped[key].totalOriginal += original;
+                grouped[key].totalLateFees += lateFee;
+                grouped[key].totalDue += total;
+                
+                if (p.status === 'pending') grouped[key].pendingCount++;
+                if (p.status === 'paid') grouped[key].paidCount++;
+            });
+
+            // ── CALCULATE TOTALS ──
             let totalPending = 0;
-            let totalLateFees = 0;
-            let totalWithFees = 0;
+            let totalLateFeesSum = 0;
+            let totalDueSum = 0;
             let totalDaysLate = 0;
             let countWithLate = 0;
 
-            const html = filtered.map((p, index) => {
-                const isPending = p.status === 'pending';
-                const originalAmount = p.original_amount || p.amount || 0;
-                const lateFee = p.late_fee_amount || 0;
-                const totalAmount = p.total_with_late_fee || originalAmount + lateFee;
-                const daysLate = p.late_fee_days || 0;
-
-                if (isPending) {
-                    totalPending++;
-                    totalLateFees += lateFee;
-                    totalWithFees += totalAmount;
-                    if (daysLate > 0) {
-                        totalDaysLate += daysLate;
-                        countWithLate++;
-                    }
+            Object.values(grouped).forEach(g => {
+                if (g.pendingCount > 0) {
+                    totalPending += g.pendingCount;
+                    totalLateFeesSum += g.totalLateFees;
+                    totalDueSum += g.totalDue;
+                    
+                    g.penalties.forEach(p => {
+                        if (p.late_fee_days > 0) {
+                            totalDaysLate += p.late_fee_days;
+                            countWithLate++;
+                        }
+                    });
                 }
+            });
 
-                const isLate = isPending && daysLate > 0;
+            document.getElementById('totalPending').textContent = totalPending;
+            document.getElementById('totalLateFees').textContent = `KSh ${totalLateFeesSum.toFixed(2)}`;
+            document.getElementById('totalWithFees').textContent = `KSh ${totalDueSum.toFixed(2)}`;
+            document.getElementById('avgLateDays').textContent = countWithLate > 0 ?
+                (totalDaysLate / countWithLate).toFixed(1) : 0;
 
-                const statusClass = p.status === 'paid' ? 'status-paid' :
-                    isLate ? 'status-late' : 'status-pending';
-                const statusLabel = p.status === 'paid' ? 'Paid' :
-                    isLate ? '⚠️ Late' : 'Pending';
+            // ── BUILD HTML ──
+            let html = '';
+            let index = 0;
 
-                const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : 
-                                  p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
+            // Sort groups by member name
+            const sortedGroups = Object.values(grouped).sort((a, b) => 
+                a.member_name.localeCompare(b.member_name)
+            );
 
-                // Show custom reason if available
-                let customReason = '';
-                if (p.is_custom && p.custom_reason) {
-                    customReason = `<div style="font-size:10px; color:#92400e; margin-top:2px;">📝 ${escapeHtml(p.custom_reason)}</div>`;
-                }
+            sortedGroups.forEach((group, groupIndex) => {
+                const isExpanded = expandedGroups.has(group.member_id);
+                const totalCount = group.penalties.length;
+                const hasPending = group.pendingCount > 0;
+                const statusLabel = hasPending ? '⚠️ Has Pending' : '✅ All Paid';
+                const statusClass = hasPending ? 'status-pending' : 'status-paid';
+                const initials = getInitials(group.member_name);
 
-                return `
-                    <tr>
-                        <td>${index + 1}</td>
+                html += `
+                    <tr class="member-group" onclick="toggleGroup('${group.member_id}')">
                         <td>
-                            <strong>${escapeHtml(p.members?.name || p.member_name || 'Unknown Member')}</strong>
-                            ${customReason}
+                            <span class="toggle-icon ${isExpanded ? 'expanded' : ''}" data-member="${group.member_id}">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
                         </td>
-                        <td>${escapeHtml(p.members?.voice_part || p.voice_part || '—')}</td>
-                        <td>${typeLabel}</td>
-                        <td>KSh ${originalAmount.toFixed(2)}</td>
-                        <td>${daysLate > 0 ? `${daysLate} days` : '—'}</td>
-                        <td style="color:${lateFee > 0 ? '#dc2626' : '#64748b'}; font-weight:${lateFee > 0 ? '700' : '400'};">
-                            ${lateFee > 0 ? `+KSh ${lateFee.toFixed(2)}` : '—'}
+                        <td>
+                            <div class="member-info">
+                                <span class="member-avatar">${initials}</span>
+                                <span>${escapeHtml(group.member_name)}</span>
+                                <span class="penalty-count-badge">${totalCount} penalty${totalCount !== 1 ? 's' : ''}</span>
+                            </div>
                         </td>
-                        <td style="font-weight:700; color:${isPending ? '#dc2626' : '#10b981'};">
-                            KSh ${totalAmount.toFixed(2)}
+                        <td><span class="voice-tag">${escapeHtml(group.voice_part)}</span></td>
+                        <td>${totalCount}</td>
+                        <td>KSh ${group.totalOriginal.toFixed(2)}</td>
+                        <td style="color:${group.totalLateFees > 0 ? '#dc2626' : '#64748b'};">
+                            ${group.totalLateFees > 0 ? `KSh ${group.totalLateFees.toFixed(2)}` : '—'}
+                        </td>
+                        <td style="font-weight:700; color:${hasPending ? '#dc2626' : '#10b981'};">
+                            KSh ${group.totalDue.toFixed(2)}
                         </td>
                         <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
                     </tr>
                 `;
-            }).join('');
+
+                // ── DETAIL ROWS (individual penalties) ──
+                group.penalties.forEach((p, idx) => {
+                    const isPending = p.status === 'pending';
+                    const original = p.original_amount || p.amount || 0;
+                    const lateFee = p.late_fee_amount || 0;
+                    const total = p.total_with_late_fee || original + lateFee;
+                    const daysLate = p.late_fee_days || 0;
+                    const isLate = isPending && daysLate > 0;
+
+                    const statusClass = p.status === 'paid' ? 'status-paid' :
+                        isLate ? 'status-late' : 'status-pending';
+                    const statusLabel = p.status === 'paid' ? 'Paid' :
+                        isLate ? '⚠️ Late' : 'Pending';
+
+                    const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : 
+                                      p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
+                    
+                    let customReason = '';
+                    if (p.is_custom && p.custom_reason) {
+                        customReason = `<span style="color:#92400e; font-size:11px;">📝 ${escapeHtml(p.custom_reason)}</span>`;
+                    }
+
+                    html += `
+                        <tr class="penalty-detail-row ${isExpanded ? 'visible' : ''}" data-member="${group.member_id}">
+                            <td></td>
+                            <td colspan="7">
+                                <div class="child-penalty">
+                                    <span class="date">${p.date || '—'}</span>
+                                    <span class="type">${typeLabel}</span>
+                                    <span style="font-size:11px; color:#64748b;">${p.session || '—'}</span>
+                                    ${customReason}
+                                    <span class="amount" style="color:${isPending ? '#dc2626' : '#10b981'};">
+                                        KSh ${total.toFixed(2)}
+                                    </span>
+                                    ${lateFee > 0 ? `<span class="late-fee">+${lateFee.toFixed(2)} fee (${daysLate}d late)</span>` : ''}
+                                    <span class="status"><span class="status-badge ${statusClass}">${statusLabel}</span></span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                index++;
+            });
 
             tbody.innerHTML = html;
-
-            document.getElementById('totalPending').textContent = totalPending;
-            document.getElementById('totalLateFees').textContent = `KSh ${totalLateFees.toFixed(2)}`;
-            document.getElementById('totalWithFees').textContent = `KSh ${totalWithFees.toFixed(2)}`;
-            document.getElementById('avgLateDays').textContent = countWithLate > 0 ?
-                (totalDaysLate / countWithLate).toFixed(1) : 0;
         }
 
-        // ── LOAD LATE FEES (FIXED - HANDLES MISSING MEMBERS) ──
+        // ── LOAD LATE FEES ──
         async function loadLateFees() {
             const tbody = document.getElementById('penaltiesList');
             tbody.innerHTML =
-                '<tr><td colspan="9" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading penalties...</td></tr>';
+                '<tr><td colspan="8" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading penalties...</td></tr>';
 
             try {
-                // ✅ Step 1: Get ALL penalties first (no join)
                 const { data: penalties, error } = await supabaseClient
                     .from('penalties')
                     .select('*')
@@ -504,15 +717,13 @@
                 if (error) throw error;
 
                 if (!penalties || penalties.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><i class="fas fa-inbox"></i> No penalties found in the database.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><i class="fas fa-inbox"></i> No penalties found in the database.</td></tr>`;
                     allPenalties = [];
                     renderPenalties();
                     return;
                 }
 
-                console.log(`✅ Loaded ${penalties.length} penalties from database`);
-
-                // ✅ Step 2: Get member names for all unique member_ids
+                // Get member names
                 const memberIds = [...new Set(penalties.map(p => p.member_id).filter(id => id))];
                 let memberMap = {};
 
@@ -527,13 +738,9 @@
                             acc[m.member_id] = m;
                             return acc;
                         }, {});
-                        console.log(`✅ Found ${Object.keys(memberMap).length} members`);
-                    } else {
-                        console.warn('⚠️ Could not fetch members:', memberError);
                     }
                 }
 
-                // ✅ Step 3: Build penalties with member info
                 allPenalties = penalties.map(p => {
                     const member = memberMap[p.member_id];
                     return {
@@ -544,35 +751,12 @@
                     };
                 });
 
-                console.log(`✅ Processed ${allPenalties.length} penalties with member info`);
-
-                // ✅ Step 4: Update KPI cards with totals
-                const pendingPenalties = allPenalties.filter(p => p.status === 'pending');
-                const totalPending = pendingPenalties.length;
-                const totalLateFeesSum = pendingPenalties.reduce((s, p) => s + (p.late_fee_amount || 0), 0);
-                const totalDueSum = pendingPenalties.reduce((s, p) => s + (p.total_with_late_fee || p.amount || 0), 0);
-                
-                let totalDaysLate = 0;
-                let countWithLate = 0;
-                pendingPenalties.forEach(p => {
-                    if (p.late_fee_days > 0) {
-                        totalDaysLate += p.late_fee_days;
-                        countWithLate++;
-                    }
-                });
-
-                document.getElementById('totalPending').textContent = totalPending;
-                document.getElementById('totalLateFees').textContent = `KSh ${totalLateFeesSum.toFixed(2)}`;
-                document.getElementById('totalWithFees').textContent = `KSh ${totalDueSum.toFixed(2)}`;
-                document.getElementById('avgLateDays').textContent = countWithLate > 0 ?
-                    (totalDaysLate / countWithLate).toFixed(1) : 0;
-
                 renderPenalties();
 
             } catch (error) {
                 console.error('❌ Error loading penalties:', error);
                 tbody.innerHTML =
-                    `<tr><td colspan="9" class="empty-state"><i class="fas fa-exclamation-triangle"></i> Error: ${escapeHtml(error.message)}</td></tr>`;
+                    `<tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i> Error: ${escapeHtml(error.message)}</td></tr>`;
             }
         }
 
@@ -638,15 +822,15 @@
                 return;
             }
 
-            let csv = '#,Member,Voice Part,Type,Original Amount,Days Late,Late Fee,Total Due,Status\n';
-            filtered.forEach((p, i) => {
+            let csv = 'Member,Voice Part,Date,Session,Type,Reason,Original Amount,Late Fee,Total Due,Status\n';
+            filtered.forEach((p) => {
+                const memberName = p.members?.name || p.member_name || 'Unknown';
+                const voicePart = p.members?.voice_part || p.voice_part || '—';
                 const original = p.original_amount || p.amount || 0;
                 const lateFee = p.late_fee_amount || 0;
                 const total = p.total_with_late_fee || original + lateFee;
-                const memberName = p.members?.name || p.member_name || 'Unknown';
-                const voicePart = p.members?.voice_part || p.voice_part || '—';
-                csv +=
-                    `${i+1},"${memberName}","${voicePart}",${p.penalty_type},${original},${p.late_fee_days || 0},${lateFee},${total},${p.status}\n`;
+                const reason = p.is_custom ? (p.custom_reason || p.reason || '') : (p.reason || '');
+                csv += `"${memberName}","${voicePart}",${p.date || ''},${p.session || ''},${p.penalty_type || ''},"${reason}",${original},${lateFee},${total},${p.status}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -673,41 +857,58 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
             btn.disabled = true;
 
-            let tableRows = '';
-            filtered.forEach((p, i) => {
-                const original = p.original_amount || p.amount || 0;
-                const lateFee = p.late_fee_amount || 0;
-                const total = p.total_with_late_fee || original + lateFee;
-                const isPending = p.status === 'pending';
-                const isLate = isPending && (p.late_fee_days || 0) > 0;
-                const statusLabel = p.status === 'paid' ? 'Paid' :
-                    isLate ? '⚠️ Late' : 'Pending';
-                const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : 
-                                  p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
-                const memberName = p.members?.name || p.member_name || 'Unknown';
-                const voicePart = p.members?.voice_part || p.voice_part || '—';
+            // Group for PDF
+            const grouped = {};
+            filtered.forEach(p => {
+                const key = p.member_id || 'unknown';
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        member_name: p.members?.name || p.member_name || 'Unknown',
+                        voice_part: p.members?.voice_part || p.voice_part || '—',
+                        penalties: []
+                    };
+                }
+                grouped[key].penalties.push(p);
+            });
 
+            let tableRows = '';
+            Object.values(grouped).forEach((g, gi) => {
                 tableRows += `
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 8px 10px; text-align: center;">${i + 1}</td>
-                        <td style="padding: 8px 10px;">${memberName}</td>
-                        <td style="padding: 8px 10px;">${voicePart}</td>
-                        <td style="padding: 8px 10px;">${typeLabel}</td>
-                        <td style="padding: 8px 10px; text-align: right;">KSh ${original.toFixed(2)}</td>
-                        <td style="padding: 8px 10px; text-align: center;">${p.late_fee_days || 0}</td>
-                        <td style="padding: 8px 10px; text-align: right;">${lateFee > 0 ? `KSh ${lateFee.toFixed(2)}` : '—'}</td>
-                        <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: ${isPending ? '#dc2626' : '#10b981'};">KSh ${total.toFixed(2)}</td>
-                        <td style="padding: 8px 10px; text-align: center;">${statusLabel}</td>
+                    <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                        <td colspan="9" style="padding: 10px 12px; font-weight: 700; font-size: 14px;">
+                            ${escapeHtml(g.member_name)} · ${escapeHtml(g.voice_part)} 
+                            (${g.penalties.length} penalty${g.penalties.length !== 1 ? 's' : ''})
+                        </td>
                     </tr>
                 `;
+                g.penalties.forEach((p, idx) => {
+                    const original = p.original_amount || p.amount || 0;
+                    const lateFee = p.late_fee_amount || 0;
+                    const total = p.total_with_late_fee || original + lateFee;
+                    const isPending = p.status === 'pending';
+                    const statusLabel = p.status === 'paid' ? 'Paid' : 'Pending';
+                    const typeLabel = p.penalty_type === 'late' ? 'Late' : 
+                                      p.penalty_type === 'custom' ? 'Custom' : 'Absent';
+                    
+                    tableRows += `
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 8px 10px; text-align: center;">${idx + 1}</td>
+                            <td style="padding: 8px 10px;">${escapeHtml(g.member_name)}</td>
+                            <td style="padding: 8px 10px;">${escapeHtml(g.voice_part)}</td>
+                            <td style="padding: 8px 10px;">${typeLabel}</td>
+                            <td style="padding: 8px 10px;">${p.date || '—'}</td>
+                            <td style="padding: 8px 10px;">${p.session || '—'}</td>
+                            <td style="padding: 8px 10px; text-align: right;">KSh ${original.toFixed(2)}</td>
+                            <td style="padding: 8px 10px; text-align: right;">${lateFee > 0 ? `KSh ${lateFee.toFixed(2)}` : '—'}</td>
+                            <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: ${isPending ? '#dc2626' : '#10b981'};">KSh ${total.toFixed(2)}</td>
+                            <td style="padding: 8px 10px; text-align: center;">${statusLabel}</td>
+                        </tr>
+                    `;
+                });
             });
 
             const filterLabel = currentFilter === 'all' ? 'All' :
                 currentFilter === 'pending' ? 'Pending Only' : 'Paid Only';
-
-            const totalOriginal = filtered.reduce((s, p) => s + (p.original_amount || p.amount || 0), 0);
-            const totalLateFeesSum = filtered.reduce((s, p) => s + (p.late_fee_amount || 0), 0);
-            const totalDueSum = filtered.reduce((s, p) => s + (p.total_with_late_fee || p.amount || 0), 0);
 
             const pdfContent = document.createElement('div');
             pdfContent.style.padding = '30px';
@@ -724,25 +925,6 @@
                     </p>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
-                    <div style="background: #eef2ff; padding: 12px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Penalties</div>
-                        <div style="font-size: 22px; font-weight: 700; color: #4f46e5;">${filtered.length}</div>
-                    </div>
-                    <div style="background: #fee2e2; padding: 12px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Late Fees</div>
-                        <div style="font-size: 22px; font-weight: 700; color: #dc2626;">KSh ${totalLateFeesSum.toFixed(2)}</div>
-                    </div>
-                    <div style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Due</div>
-                        <div style="font-size: 22px; font-weight: 700; color: #065f46;">KSh ${totalDueSum.toFixed(2)}</div>
-                    </div>
-                    <div style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Original Total</div>
-                        <div style="font-size: 22px; font-weight: 700; color: #92400e;">KSh ${totalOriginal.toFixed(2)}</div>
-                    </div>
-                </div>
-
                 <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                     <thead>
                         <tr style="background: #1a1f36; color: white;">
@@ -750,8 +932,9 @@
                             <th style="padding: 8px 10px; text-align: left;">Member</th>
                             <th style="padding: 8px 10px; text-align: left;">Voice</th>
                             <th style="padding: 8px 10px; text-align: center;">Type</th>
+                            <th style="padding: 8px 10px; text-align: center;">Date</th>
+                            <th style="padding: 8px 10px; text-align: center;">Session</th>
                             <th style="padding: 8px 10px; text-align: right;">Original</th>
-                            <th style="padding: 8px 10px; text-align: center;">Days Late</th>
                             <th style="padding: 8px 10px; text-align: right;">Late Fee</th>
                             <th style="padding: 8px 10px; text-align: right;">Total Due</th>
                             <th style="padding: 8px 10px; text-align: center;">Status</th>
@@ -796,6 +979,7 @@
         window.exportCSV = exportCSV;
         window.exportPDF = exportPDF;
         window.setFilter = setFilter;
+        window.toggleGroup = toggleGroup;
     </script>
 </body>
 </html>

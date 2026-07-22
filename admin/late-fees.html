@@ -34,7 +34,6 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
         }
 
-        /* header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -63,7 +62,6 @@
             gap: 8px;
         }
 
-        /* KPI grid */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -102,22 +100,10 @@
             margin-top: 6px;
         }
 
-        .badge-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-success { background: #d1fae5; color: #065f46; }
 
-        .badge-danger {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        /* controls */
         .controls {
             display: flex;
             gap: 10px;
@@ -139,34 +125,13 @@
             white-space: nowrap;
         }
 
-        .btn:hover {
-            opacity: .85;
-        }
-
-        .btn:active {
-            transform: scale(0.96);
-        }
-
-        .btn-primary {
-            background: #4f46e5;
-            color: white;
-        }
-
-        .btn-amber {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .btn-green {
-            background: #10b981;
-            color: white;
-        }
-
-        .btn-red {
-            background: #dc2626;
-            color: white;
-        }
-
+        .btn:hover { opacity: .85; }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: #4f46e5; color: white; }
+        .btn-amber { background: #f59e0b; color: white; }
+        .btn-green { background: #10b981; color: white; }
+        .btn-red { background: #dc2626; color: white; }
+        
         .btn-outline {
             background: transparent;
             border: 1px solid #e2e8f0;
@@ -184,7 +149,6 @@
             border-color: #4338ca;
         }
 
-        /* table wrapper */
         .table-wrapper {
             overflow-x: auto;
             border-radius: 16px;
@@ -218,13 +182,8 @@
             vertical-align: middle;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background: #f8fafc;
-        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8fafc; }
 
         .status-badge {
             padding: 3px 12px;
@@ -235,20 +194,9 @@
             white-space: nowrap;
         }
 
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-paid {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-late {
-            background: #fee2e2;
-            color: #991b1b;
-        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-paid { background: #d1fae5; color: #065f46; }
+        .status-late { background: #fee2e2; color: #991b1b; }
 
         .empty-state {
             text-align: center;
@@ -273,167 +221,63 @@
             font-size: 14px;
         }
 
-        .back-link:hover {
-            text-decoration: underline;
-        }
+        .back-link:hover { text-decoration: underline; }
 
-        /* ── responsive tweaks ── */
         @media (max-width: 900px) {
-            .kpi-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-
-            .container {
-                padding: 18px 14px;
-            }
-
-            .header h1 {
-                font-size: 20px;
-            }
-
-            .btn {
-                font-size: 12px;
-                padding: 8px 14px;
-            }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .container { padding: 18px 14px; }
+            .header h1 { font-size: 20px; }
+            .btn { font-size: 12px; padding: 8px 14px; }
         }
 
         @media (max-width: 600px) {
-            body {
-                padding: 8px;
-            }
-
-            .container {
-                padding: 14px 10px;
-                border-radius: 20px;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-            }
-
-            .header h1 {
-                font-size: 18px;
-                justify-content: center;
-            }
-
-            .header-actions {
-                justify-content: center;
-            }
-
-            .kpi-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-
-            .kpi-card {
-                padding: 12px 10px;
-            }
-
-            .kpi-card .number {
-                font-size: 22px;
-            }
-
-            .controls {
-                justify-content: center;
-            }
-
-            .controls .btn {
-                flex: 1 1 auto;
-                justify-content: center;
-                font-size: 12px;
-                padding: 8px 12px;
-            }
-
-            .table-wrapper {
-                border-radius: 12px;
-            }
-
-            table {
-                min-width: 600px;
-                font-size: 12px;
-            }
-
-            th,
-            td {
-                padding: 10px 8px;
-            }
-
-            .status-badge {
-                font-size: 10px;
-                padding: 2px 10px;
-            }
-
-            .back-link {
-                font-size: 13px;
-                margin-bottom: 10px;
-            }
-
-            .btn-amber,
-            .btn-primary {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .header-actions .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .kpi-card .badge {
-                font-size: 10px;
-                padding: 1px 8px;
-            }
+            body { padding: 8px; }
+            .container { padding: 14px 10px; border-radius: 20px; }
+            .header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .header h1 { font-size: 18px; justify-content: center; }
+            .header-actions { justify-content: center; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .kpi-card { padding: 12px 10px; }
+            .kpi-card .number { font-size: 22px; }
+            .controls { justify-content: center; }
+            .controls .btn { flex: 1 1 auto; justify-content: center; font-size: 12px; padding: 8px 12px; }
+            .table-wrapper { border-radius: 12px; }
+            table { min-width: 600px; font-size: 12px; }
+            th, td { padding: 10px 8px; }
+            .status-badge { font-size: 10px; padding: 2px 10px; }
+            .back-link { font-size: 13px; margin-bottom: 10px; }
+            .btn-amber, .btn-primary { width: 100%; justify-content: center; }
+            .header-actions .btn { width: 100%; justify-content: center; }
+            .kpi-card .badge { font-size: 10px; padding: 1px 8px; }
         }
 
         @media (max-width: 420px) {
-            .kpi-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-
-            .kpi-card {
-                padding: 10px 8px;
-            }
-
-            .kpi-card .number {
-                font-size: 20px;
-            }
-
-            .container {
-                padding: 10px 6px;
-            }
-
-            .btn {
-                font-size: 11px;
-                padding: 6px 10px;
-            }
-
-            th,
-            td {
-                padding: 8px 6px;
-                font-size: 11px;
-            }
-
-            table {
-                min-width: 480px;
-            }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .kpi-card { padding: 10px 8px; }
+            .kpi-card .number { font-size: 20px; }
+            .container { padding: 10px 6px; }
+            .btn { font-size: 11px; padding: 6px 10px; }
+            th, td { padding: 8px 6px; font-size: 11px; }
+            table { min-width: 480px; }
         }
 
-        .kpi-card .label {
-            word-break: break-word;
-        }
-
-        .btn i {
-            font-size: 13px;
-        }
+        .kpi-card .label { word-break: break-word; }
+        .btn i { font-size: 13px; }
 
         @media (max-width: 480px) {
-            .btn i {
-                font-size: 12px;
-            }
+            .btn i { font-size: 12px; }
+        }
+
+        /* Loading shimmer effect */
+        .loading-shimmer {
+            animation: shimmer 1.5s ease-in-out infinite;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
     </style>
 </head>
@@ -453,7 +297,6 @@
             </div>
         </div>
 
-        <!-- KPI Cards -->
         <div class="kpi-grid" id="kpiGrid">
             <div class="kpi-card">
                 <div class="number" id="totalPending">0</div>
@@ -476,7 +319,6 @@
             </div>
         </div>
 
-        <!-- Controls -->
         <div class="controls">
             <button class="btn btn-primary" onclick="updateAllLateFees()">
                 <i class="fas fa-sync"></i> Update All
@@ -488,7 +330,6 @@
                 <i class="fas fa-file-pdf"></i> PDF
             </button>
 
-            <!-- Filter Buttons -->
             <button class="btn btn-outline active" id="filterAll" onclick="setFilter('all')">
                 <i class="fas fa-list"></i> All
             </button>
@@ -500,7 +341,6 @@
             </button>
         </div>
 
-        <!-- Table -->
         <div class="table-wrapper">
             <table id="penaltiesTable">
                 <thead>
@@ -608,25 +448,35 @@
                 const statusLabel = p.status === 'paid' ? 'Paid' :
                     isLate ? '⚠️ Late' : 'Pending';
 
-                const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent';
+                const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : 
+                                  p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
+
+                // Show custom reason if available
+                let customReason = '';
+                if (p.is_custom && p.custom_reason) {
+                    customReason = `<div style="font-size:10px; color:#92400e; margin-top:2px;">📝 ${escapeHtml(p.custom_reason)}</div>`;
+                }
 
                 return `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td><strong>${escapeHtml(p.members?.name || 'Unknown')}</strong></td>
-                            <td>${escapeHtml(p.members?.voice_part || '—')}</td>
-                            <td>${typeLabel}</td>
-                            <td>KSh ${originalAmount.toFixed(2)}</td>
-                            <td>${daysLate > 0 ? `${daysLate} days` : '—'}</td>
-                            <td style="color:${lateFee > 0 ? '#dc2626' : '#64748b'}; font-weight:${lateFee > 0 ? '700' : '400'};">
-                                ${lateFee > 0 ? `+KSh ${lateFee.toFixed(2)}` : '—'}
-                            </td>
-                            <td style="font-weight:700; color:${isPending ? '#dc2626' : '#10b981'};">
-                                KSh ${totalAmount.toFixed(2)}
-                            </td>
-                            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-                        </tr>
-                    `;
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>
+                            <strong>${escapeHtml(p.members?.name || p.member_name || 'Unknown Member')}</strong>
+                            ${customReason}
+                        </td>
+                        <td>${escapeHtml(p.members?.voice_part || p.voice_part || '—')}</td>
+                        <td>${typeLabel}</td>
+                        <td>KSh ${originalAmount.toFixed(2)}</td>
+                        <td>${daysLate > 0 ? `${daysLate} days` : '—'}</td>
+                        <td style="color:${lateFee > 0 ? '#dc2626' : '#64748b'}; font-weight:${lateFee > 0 ? '700' : '400'};">
+                            ${lateFee > 0 ? `+KSh ${lateFee.toFixed(2)}` : '—'}
+                        </td>
+                        <td style="font-weight:700; color:${isPending ? '#dc2626' : '#10b981'};">
+                            KSh ${totalAmount.toFixed(2)}
+                        </td>
+                        <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                    </tr>
+                `;
             }).join('');
 
             tbody.innerHTML = html;
@@ -638,25 +488,92 @@
                 (totalDaysLate / countWithLate).toFixed(1) : 0;
         }
 
-        // ── LOAD LATE FEES ──
+        // ── LOAD LATE FEES (FIXED - HANDLES MISSING MEMBERS) ──
         async function loadLateFees() {
             const tbody = document.getElementById('penaltiesList');
             tbody.innerHTML =
-                '<tr><td colspan="9" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+                '<tr><td colspan="9" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading penalties...</td></tr>';
 
-            const { data: penalties, error } = await supabaseClient
-                .from('penalties')
-                .select('*, members(name, voice_part)')
-                .order('created_at', { ascending: false });
+            try {
+                // ✅ Step 1: Get ALL penalties first (no join)
+                const { data: penalties, error } = await supabaseClient
+                    .from('penalties')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            if (error) {
+                if (error) throw error;
+
+                if (!penalties || penalties.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><i class="fas fa-inbox"></i> No penalties found in the database.</td></tr>`;
+                    allPenalties = [];
+                    renderPenalties();
+                    return;
+                }
+
+                console.log(`✅ Loaded ${penalties.length} penalties from database`);
+
+                // ✅ Step 2: Get member names for all unique member_ids
+                const memberIds = [...new Set(penalties.map(p => p.member_id).filter(id => id))];
+                let memberMap = {};
+
+                if (memberIds.length > 0) {
+                    const { data: members, error: memberError } = await supabaseClient
+                        .from('members')
+                        .select('member_id, name, voice_part')
+                        .in('member_id', memberIds);
+
+                    if (!memberError && members) {
+                        memberMap = members.reduce((acc, m) => {
+                            acc[m.member_id] = m;
+                            return acc;
+                        }, {});
+                        console.log(`✅ Found ${Object.keys(memberMap).length} members`);
+                    } else {
+                        console.warn('⚠️ Could not fetch members:', memberError);
+                    }
+                }
+
+                // ✅ Step 3: Build penalties with member info
+                allPenalties = penalties.map(p => {
+                    const member = memberMap[p.member_id];
+                    return {
+                        ...p,
+                        members: member || null,
+                        member_name: member ? member.name : `Member (${p.member_id || 'Unknown'})`,
+                        voice_part: member ? member.voice_part : '—'
+                    };
+                });
+
+                console.log(`✅ Processed ${allPenalties.length} penalties with member info`);
+
+                // ✅ Step 4: Update KPI cards with totals
+                const pendingPenalties = allPenalties.filter(p => p.status === 'pending');
+                const totalPending = pendingPenalties.length;
+                const totalLateFeesSum = pendingPenalties.reduce((s, p) => s + (p.late_fee_amount || 0), 0);
+                const totalDueSum = pendingPenalties.reduce((s, p) => s + (p.total_with_late_fee || p.amount || 0), 0);
+                
+                let totalDaysLate = 0;
+                let countWithLate = 0;
+                pendingPenalties.forEach(p => {
+                    if (p.late_fee_days > 0) {
+                        totalDaysLate += p.late_fee_days;
+                        countWithLate++;
+                    }
+                });
+
+                document.getElementById('totalPending').textContent = totalPending;
+                document.getElementById('totalLateFees').textContent = `KSh ${totalLateFeesSum.toFixed(2)}`;
+                document.getElementById('totalWithFees').textContent = `KSh ${totalDueSum.toFixed(2)}`;
+                document.getElementById('avgLateDays').textContent = countWithLate > 0 ?
+                    (totalDaysLate / countWithLate).toFixed(1) : 0;
+
+                renderPenalties();
+
+            } catch (error) {
+                console.error('❌ Error loading penalties:', error);
                 tbody.innerHTML =
                     `<tr><td colspan="9" class="empty-state"><i class="fas fa-exclamation-triangle"></i> Error: ${escapeHtml(error.message)}</td></tr>`;
-                return;
             }
-
-            allPenalties = penalties || [];
-            renderPenalties();
         }
 
         // ── CALCULATE LATE FEES ──
@@ -676,7 +593,7 @@
                 const result = data || { updated_count: 0, total_late_fee_collected: 0 };
                 alert(
                     `✅ Late fees updated!\n\n✅ Updated: ${result.updated_count || 0} penalties\n💰 Total late fees: KSh ${(result.total_late_fee_collected || 0).toFixed(2)}`);
-                loadLateFees();
+                await loadLateFees();
 
             } catch (error) {
                 alert('❌ Error: ' + error.message);
@@ -686,7 +603,7 @@
             }
         }
 
-        // ── UPDATE ALL LATE FEES (RPC) ──
+        // ── UPDATE ALL LATE FEES ──
         async function updateAllLateFees() {
             if (!confirm('This will update all pending penalties with late fees based on current date.\n\nContinue?')) return;
 
@@ -700,7 +617,7 @@
 
                 if (error) throw error;
 
-                loadLateFees();
+                await loadLateFees();
                 alert('✅ Late fees updated!');
 
             } catch (error) {
@@ -726,8 +643,10 @@
                 const original = p.original_amount || p.amount || 0;
                 const lateFee = p.late_fee_amount || 0;
                 const total = p.total_with_late_fee || original + lateFee;
+                const memberName = p.members?.name || p.member_name || 'Unknown';
+                const voicePart = p.members?.voice_part || p.voice_part || '—';
                 csv +=
-                    `${i+1},${p.members?.name || 'Unknown'},${p.members?.voice_part || '—'},${p.penalty_type},${original},${p.late_fee_days || 0},${lateFee},${total},${p.status}\n`;
+                    `${i+1},"${memberName}","${voicePart}",${p.penalty_type},${original},${p.late_fee_days || 0},${lateFee},${total},${p.status}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -754,7 +673,6 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
             btn.disabled = true;
 
-            // Build table rows for PDF
             let tableRows = '';
             filtered.forEach((p, i) => {
                 const original = p.original_amount || p.amount || 0;
@@ -764,27 +682,29 @@
                 const isLate = isPending && (p.late_fee_days || 0) > 0;
                 const statusLabel = p.status === 'paid' ? 'Paid' :
                     isLate ? '⚠️ Late' : 'Pending';
-                const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent';
+                const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : 
+                                  p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
+                const memberName = p.members?.name || p.member_name || 'Unknown';
+                const voicePart = p.members?.voice_part || p.voice_part || '—';
 
                 tableRows += `
-                        <tr style="border-bottom: 1px solid #e2e8f0;">
-                            <td style="padding: 8px 10px; text-align: center;">${i + 1}</td>
-                            <td style="padding: 8px 10px;">${p.members?.name || 'Unknown'}</td>
-                            <td style="padding: 8px 10px;">${p.members?.voice_part || '—'}</td>
-                            <td style="padding: 8px 10px;">${typeLabel}</td>
-                            <td style="padding: 8px 10px; text-align: right;">KSh ${original.toFixed(2)}</td>
-                            <td style="padding: 8px 10px; text-align: center;">${p.late_fee_days || 0}</td>
-                            <td style="padding: 8px 10px; text-align: right;">${lateFee > 0 ? `KSh ${lateFee.toFixed(2)}` : '—'}</td>
-                            <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: ${isPending ? '#dc2626' : '#10b981'};">KSh ${total.toFixed(2)}</td>
-                            <td style="padding: 8px 10px; text-align: center;">${statusLabel}</td>
-                        </tr>
-                    `;
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 8px 10px; text-align: center;">${i + 1}</td>
+                        <td style="padding: 8px 10px;">${memberName}</td>
+                        <td style="padding: 8px 10px;">${voicePart}</td>
+                        <td style="padding: 8px 10px;">${typeLabel}</td>
+                        <td style="padding: 8px 10px; text-align: right;">KSh ${original.toFixed(2)}</td>
+                        <td style="padding: 8px 10px; text-align: center;">${p.late_fee_days || 0}</td>
+                        <td style="padding: 8px 10px; text-align: right;">${lateFee > 0 ? `KSh ${lateFee.toFixed(2)}` : '—'}</td>
+                        <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: ${isPending ? '#dc2626' : '#10b981'};">KSh ${total.toFixed(2)}</td>
+                        <td style="padding: 8px 10px; text-align: center;">${statusLabel}</td>
+                    </tr>
+                `;
             });
 
             const filterLabel = currentFilter === 'all' ? 'All' :
                 currentFilter === 'pending' ? 'Pending Only' : 'Paid Only';
 
-            // Calculate totals
             const totalOriginal = filtered.reduce((s, p) => s + (p.original_amount || p.amount || 0), 0);
             const totalLateFeesSum = filtered.reduce((s, p) => s + (p.late_fee_amount || 0), 0);
             const totalDueSum = filtered.reduce((s, p) => s + (p.total_with_late_fee || p.amount || 0), 0);
@@ -796,57 +716,57 @@
             pdfContent.style.color = '#1a1a2e';
 
             pdfContent.innerHTML = `
-                    <div style="text-align: center; margin-bottom: 24px; border-bottom: 2px solid #4f46e5; padding-bottom: 16px;">
-                        <h1 style="color: #4f46e5; font-size: 24px; margin-bottom: 4px;">🎵 University of Embu Students' Choir</h1>
-                        <h2 style="color: #1a1f36; font-size: 20px;">Late Fee Report</h2>
-                        <p style="color: #64748b; font-size: 13px; margin-top: 4px;">
-                            ${filterLabel} · Generated on ${new Date().toLocaleString()}
-                        </p>
-                    </div>
+                <div style="text-align: center; margin-bottom: 24px; border-bottom: 2px solid #4f46e5; padding-bottom: 16px;">
+                    <h1 style="color: #4f46e5; font-size: 24px; margin-bottom: 4px;">🎵 University of Embu Students' Choir</h1>
+                    <h2 style="color: #1a1f36; font-size: 20px;">Late Fee Report</h2>
+                    <p style="color: #64748b; font-size: 13px; margin-top: 4px;">
+                        ${filterLabel} · Generated on ${new Date().toLocaleString()}
+                    </p>
+                </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
-                        <div style="background: #eef2ff; padding: 12px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Penalties</div>
-                            <div style="font-size: 22px; font-weight: 700; color: #4f46e5;">${filtered.length}</div>
-                        </div>
-                        <div style="background: #fee2e2; padding: 12px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Late Fees</div>
-                            <div style="font-size: 22px; font-weight: 700; color: #dc2626;">KSh ${totalLateFeesSum.toFixed(2)}</div>
-                        </div>
-                        <div style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Due</div>
-                            <div style="font-size: 22px; font-weight: 700; color: #065f46;">KSh ${totalDueSum.toFixed(2)}</div>
-                        </div>
-                        <div style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Original Total</div>
-                            <div style="font-size: 22px; font-weight: 700; color: #92400e;">KSh ${totalOriginal.toFixed(2)}</div>
-                        </div>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <div style="background: #eef2ff; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Penalties</div>
+                        <div style="font-size: 22px; font-weight: 700; color: #4f46e5;">${filtered.length}</div>
                     </div>
-
-                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                        <thead>
-                            <tr style="background: #1a1f36; color: white;">
-                                <th style="padding: 8px 10px; text-align: center;">#</th>
-                                <th style="padding: 8px 10px; text-align: left;">Member</th>
-                                <th style="padding: 8px 10px; text-align: left;">Voice</th>
-                                <th style="padding: 8px 10px; text-align: center;">Type</th>
-                                <th style="padding: 8px 10px; text-align: right;">Original</th>
-                                <th style="padding: 8px 10px; text-align: center;">Days Late</th>
-                                <th style="padding: 8px 10px; text-align: right;">Late Fee</th>
-                                <th style="padding: 8px 10px; text-align: right;">Total Due</th>
-                                <th style="padding: 8px 10px; text-align: center;">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                        </tbody>
-                    </table>
-
-                    <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
-                        <p>University of Embu Students' Choir · 98th Music Festival 2026</p>
-                        <p>Report generated on ${new Date().toLocaleString()}</p>
+                    <div style="background: #fee2e2; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Late Fees</div>
+                        <div style="font-size: 22px; font-weight: 700; color: #dc2626;">KSh ${totalLateFeesSum.toFixed(2)}</div>
                     </div>
-                `;
+                    <div style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Due</div>
+                        <div style="font-size: 22px; font-weight: 700; color: #065f46;">KSh ${totalDueSum.toFixed(2)}</div>
+                    </div>
+                    <div style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Original Total</div>
+                        <div style="font-size: 22px; font-weight: 700; color: #92400e;">KSh ${totalOriginal.toFixed(2)}</div>
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                    <thead>
+                        <tr style="background: #1a1f36; color: white;">
+                            <th style="padding: 8px 10px; text-align: center;">#</th>
+                            <th style="padding: 8px 10px; text-align: left;">Member</th>
+                            <th style="padding: 8px 10px; text-align: left;">Voice</th>
+                            <th style="padding: 8px 10px; text-align: center;">Type</th>
+                            <th style="padding: 8px 10px; text-align: right;">Original</th>
+                            <th style="padding: 8px 10px; text-align: center;">Days Late</th>
+                            <th style="padding: 8px 10px; text-align: right;">Late Fee</th>
+                            <th style="padding: 8px 10px; text-align: right;">Total Due</th>
+                            <th style="padding: 8px 10px; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+
+                <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
+                    <p>University of Embu Students' Choir · 98th Music Festival 2026</p>
+                    <p>Report generated on ${new Date().toLocaleString()}</p>
+                </div>
+            `;
 
             try {
                 const opt = {

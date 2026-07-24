@@ -8,8 +8,7 @@
     <title>Penalties Report | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- In ALL HTML files, use this -->
-<script src="/cache-helper.js"></script>
+    <script src="/cache-helper.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
         *, *::before, *::after {
@@ -141,7 +140,6 @@
             background: rgba(0,0,0,0.35); z-index: 40;
         }
 
-        /* ── MAIN ── */
         .main {
             margin-left: var(--sidebar-w);
             flex: 1;
@@ -150,7 +148,6 @@
             flex-direction: column;
         }
 
-        /* ── TOPBAR ── */
         .topbar {
             background: var(--surface);
             border-bottom: 0.5px solid var(--border);
@@ -180,13 +177,11 @@
             cursor: pointer; padding: 4px;
         }
 
-        /* ── CONTENT ── */
         .content {
             padding: 24px 28px 40px;
             flex: 1;
         }
 
-        /* ── FILTER GROUP ── */
         .filter-group {
             display: flex;
             gap: 12px;
@@ -239,7 +234,6 @@
         .pdf-btn { background: var(--red); color: #fff; }
         .refresh-btn { background: var(--indigo); color: #fff; }
 
-        /* ── SUMMARY STATS ── */
         .summary-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -258,11 +252,11 @@
         .summary-card.amber { background: var(--amber); color: #333; }
         .summary-card.green { background: var(--green); }
         .summary-card.indigo { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .summary-card.red { background: var(--red); }
 
         .summary-number { font-size: 32px; font-weight: bold; }
         .summary-label { font-size: 13px; opacity: 0.9; margin-top: 5px; }
 
-        /* ── TABLE ── */
         .penalties-table-container {
             overflow-x: auto;
             border-radius: 16px;
@@ -273,7 +267,8 @@
         .penalties-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 900px;
+            font-size: 13px;
         }
 
         .penalties-table th {
@@ -286,12 +281,16 @@
             text-transform: uppercase;
             letter-spacing: .5px;
             border-bottom: 0.5px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .penalties-table td {
             padding: 12px 16px;
             border-bottom: 0.5px solid var(--border);
             font-size: 13px;
+            vertical-align: middle;
         }
 
         .penalties-table tr:last-child td { border-bottom: none; }
@@ -307,6 +306,7 @@
 
         .status-pending { background: var(--amber-light); color: #d97706; }
         .status-paid { background: var(--green-light); color: #059669; }
+        .status-late { background: var(--red-light); color: #991b1b; }
 
         .penalty-amount { font-weight: 700; color: var(--red); }
         .member-link {
@@ -315,6 +315,66 @@
             font-weight: 600;
         }
         .member-link:hover { text-decoration: underline; }
+
+        .late-fee-badge {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 2px 8px;
+            border-radius: 40px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 6px;
+        }
+
+        .voice-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .penalty-count-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #dbeafe;
+            color: #1e40af;
+            margin-left: 8px;
+        }
+
+        .child-penalty {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 3px 0;
+        }
+
+        .child-penalty .date {
+            font-size: 12px;
+            color: #64748b;
+            min-width: 85px;
+        }
+        .child-penalty .type {
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 70px;
+        }
+        .child-penalty .amount {
+            font-size: 13px;
+            font-weight: 700;
+            min-width: 80px;
+        }
+        .child-penalty .late-fee-text {
+            font-size: 11px;
+            color: #dc2626;
+        }
 
         .no-data {
             text-align: center;
@@ -325,7 +385,6 @@
 
         .no-data i { font-size: 40px; display: block; margin-bottom: 12px; }
 
-        /* ── BOTTOM NAV ── */
         .bottom-nav {
             display: none; position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(255,255,255,0.96);
@@ -345,7 +404,18 @@
         .bottom-nav-item i { font-size: 22px; }
         .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
 
-        /* ── RESPONSIVE ── */
+        /* Member group header row */
+        .member-group {
+            background: #f1f5f9 !important;
+        }
+        .member-group td {
+            padding: 14px 16px;
+            font-weight: 700;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 14px;
+        }
+
         @media (max-width: 1024px) {
             .summary-stats { grid-template-columns: repeat(2, 1fr); }
         }
@@ -361,6 +431,15 @@
             .bottom-nav { display: flex; }
             .filter-group { flex-direction: column; align-items: stretch; }
             .summary-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .penalties-table { min-width: 700px; font-size: 12px; }
+            .child-penalty { gap: 8px; }
+            .child-penalty .date { min-width: 70px; font-size: 11px; }
+        }
+
+        @media (max-width: 480px) {
+            .penalties-table { min-width: 600px; font-size: 11px; }
+            th, td { padding: 8px 10px; }
+            .child-penalty .date { min-width: 60px; }
         }
     </style>
 </head>
@@ -379,46 +458,23 @@
     
  <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
-    <a href="index.html" class="nav-item active">
-        <i class="ti ti-layout-dashboard"></i> Dashboard
-    </a>
-    <a href="mark-attendance.html" class="nav-item">
-        <i class="ti ti-circle-check"></i> Mark attendance
-        <span class="nav-badge">Today</span>
-    </a>
-    <a href="reports.html" class="nav-item">
-        <i class="ti ti-chart-bar"></i> Reports
-    </a>
-    <a href="analytics.html" class="nav-item">
-        <i class="ti ti-trending-up"></i> Analytics
-    </a>
+    <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+    <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+    <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+    <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
 
     <div class="nav-section-label">Management</div>
-    <a href="apologies.html" class="nav-item">
-        <i class="ti ti-file-text"></i> Apologies
-        <span class="nav-badge amber" id="apologiesBadge" style="display:none">0</span>
-    </a>
-    <a href="members.html" class="nav-item">
-        <i class="ti ti-users"></i> Members view
-    </a>
-    <a href="manage-members.html" class="nav-item">
-        <i class="ti ti-user-edit"></i> Manage members
-    </a>
-    <a href="confirm-payments.html" class="nav-item">
-        <i class="ti ti-cash"></i> Confirm penalties
-    </a>
-    <a href="finance.html" class="nav-item">
-        <i class="ti ti-currency-dollar"></i> Finance Management
-    </a>
- <div class="nav-section-label">Committee</div>
-        <a href="executive.html" class="nav-item active"><i class="fas fa-users-cog"></i> Executive Committee</a>
-        
-
+    <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+    <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+    <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+    <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+    <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance Management</a>
+    <div class="nav-section-label">Committee</div>
+    <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
     <div class="nav-section-label">Recognition</div>
-    <a href="hall-of-fame.html" class="nav-item">
-        <i class="ti ti-trophy"></i> Hall of Fame
-    </a>
+    <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
 </nav>
+
     <div class="sidebar-bottom">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar">A</div>
@@ -442,7 +498,7 @@
             </button>
             <div class="topbar-left">
                 <h2>Penalties Report</h2>
-                <p>View and export penalty records</p>
+                <p>View and export penalty records with late fees</p>
             </div>
         </div>
         <div class="topbar-right">
@@ -462,6 +518,7 @@
                 <option value="all">All Types</option>
                 <option value="late">Late Only</option>
                 <option value="absent">Absent Only</option>
+                <option value="custom">Custom Only</option>
             </select>
             <input type="text" id="searchFilter" class="filter-input" placeholder="🔍 Search by member name...">
             <button onclick="exportToPDF()" class="action-btn pdf-btn">
@@ -498,7 +555,6 @@
 
     let allPenalties = [];
 
-    // ── HELPERS ──
     function esc(s) {
         if (!s) return '';
         return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -510,7 +566,6 @@
         document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // ── AUTH ──
     async function checkAuth() {
         const { data: { session } } = await sb.auth.getSession();
         if (!session) { window.location.href = '../login.html'; return null; }
@@ -522,7 +577,6 @@
         window.location.href = '../login.html';
     }
 
-    // ── USER INFO ──
     async function loadUserInfo() {
         try {
             const { data: { user } } = await sb.auth.getUser();
@@ -542,7 +596,6 @@
         } catch (e) { console.warn(e); }
     }
 
-    // ── SIDEBAR ──
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('sidebarOverlay').classList.toggle('open');
@@ -553,7 +606,7 @@
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
 
-    // ── LOAD PENALTIES REPORT ──
+    // ── LOAD PENALTIES REPORT WITH LATE FEES ──
     async function loadPenaltiesReport() {
         const statusFilter = document.getElementById('statusFilter').value;
         const typeFilter = document.getElementById('typeFilter').value;
@@ -561,23 +614,256 @@
         
         document.getElementById('penaltiesTableContainer').innerHTML = '<div class="no-data"><i class="ti ti-loader"></i> Loading penalties...</div>';
         
-        let query = sb
-            .from('penalties')
-            .select('*, members(name, voice_part, member_id)')
-            .order('date', { ascending: false });
-        
-        const { data: penalties, error } = await query;
-        
-        if (error) {
+        try {
+            // Get ALL penalties first
+            const { data: penalties, error } = await sb
+                .from('penalties')
+                .select('*')
+                .order('date', { ascending: false });
+
+            if (error) throw error;
+
+            if (!penalties || penalties.length === 0) {
+                document.getElementById('penaltiesTableContainer').innerHTML = `
+                    <div class="no-data"><i class="ti ti-inbox"></i> No penalties found in the database.</div>`;
+                allPenalties = [];
+                updateSummary([]);
+                return;
+            }
+
+            // Get member names
+            const memberIds = [...new Set(penalties.map(p => p.member_id).filter(id => id))];
+            let memberMap = {};
+
+            if (memberIds.length > 0) {
+                const { data: members, error: memberError } = await sb
+                    .from('members')
+                    .select('member_id, name, voice_part')
+                    .in('member_id', memberIds);
+
+                if (!memberError && members) {
+                    memberMap = members.reduce((acc, m) => {
+                        acc[m.member_id] = m;
+                        return acc;
+                    }, {});
+                }
+            }
+
+            // Build penalties with member info
+            allPenalties = penalties.map(p => {
+                const member = memberMap[p.member_id];
+                return {
+                    ...p,
+                    members: member || null,
+                    member_name: member ? member.name : `Member (${p.member_id || 'Unknown'})`,
+                    voice_part: member ? member.voice_part : '—'
+                };
+            });
+
+            // Apply filters
+            let filtered = [...allPenalties];
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(p => p.status === statusFilter);
+            }
+            if (typeFilter !== 'all') {
+                filtered = filtered.filter(p => p.penalty_type === typeFilter);
+            }
+            if (searchFilter) {
+                filtered = filtered.filter(p => p.member_name?.toLowerCase().includes(searchFilter));
+            }
+
+            updateSummary(filtered);
+            renderTable(filtered);
+
+        } catch (error) {
             console.error('Error loading penalties:', error);
-            document.getElementById('penaltiesTableContainer').innerHTML = '<div class="no-data"><i class="ti ti-alert-circle"></i> Error loading penalties</div>';
+            document.getElementById('penaltiesTableContainer').innerHTML = `
+                <div class="no-data"><i class="ti ti-alert-circle"></i> Error: ${esc(error.message)}</div>`;
+        }
+    }
+
+    function updateSummary(filtered) {
+        // Calculate totals with late fees
+        let totalOriginal = 0;
+        let totalLateFees = 0;
+        let totalDue = 0;
+        let pendingCount = 0;
+        let paidCount = 0;
+
+        filtered.forEach(p => {
+            const original = p.original_amount || p.amount || 0;
+            const lateFee = p.late_fee_amount || 0;
+            const total = p.total_with_late_fee || original + lateFee;
+            
+            totalOriginal += original;
+            totalLateFees += lateFee;
+            totalDue += total;
+            
+            if (p.status === 'pending') pendingCount++;
+            if (p.status === 'paid') paidCount++;
+        });
+
+        const uniqueMembers = new Set(filtered.map(p => p.member_id)).size;
+
+        document.getElementById('summaryStats').innerHTML = `
+            <div class="summary-card indigo">
+                <div class="summary-number">${fmt(totalDue)}</div>
+                <div class="summary-label">Total Due (with late fees)</div>
+            </div>
+            <div class="summary-card amber">
+                <div class="summary-number">${fmt(totalLateFees)}</div>
+                <div class="summary-label">Total Late Fees</div>
+            </div>
+            <div class="summary-card red">
+                <div class="summary-number">${pendingCount}</div>
+                <div class="summary-label">Pending Penalties</div>
+            </div>
+            <div class="summary-card green">
+                <div class="summary-number">${paidCount}</div>
+                <div class="summary-label">Paid Penalties</div>
+            </div>
+            <div class="summary-card indigo">
+                <div class="summary-number">${uniqueMembers}</div>
+                <div class="summary-label">Members with Penalties</div>
+            </div>
+        `;
+    }
+
+    function renderTable(filtered) {
+        const container = document.getElementById('penaltiesTableContainer');
+
+        if (!filtered.length) {
+            container.innerHTML = `
+                <div class="no-data">
+                    <i class="ti ti-mood-happy"></i>
+                    No penalties found matching your filters!
+                </div>`;
             return;
         }
-        
-        allPenalties = penalties || [];
-        
-        // Apply filters
-        let filtered = [...allPenalties];
+
+        // Group by member
+        const grouped = {};
+        filtered.forEach(p => {
+            const key = p.member_id || 'unknown';
+            if (!grouped[key]) {
+                grouped[key] = {
+                    member_id: key,
+                    member_name: p.member_name || 'Unknown Member',
+                    voice_part: p.voice_part || '—',
+                    penalties: [],
+                    totalOriginal: 0,
+                    totalLateFees: 0,
+                    totalDue: 0,
+                    pendingCount: 0,
+                    paidCount: 0
+                };
+            }
+            grouped[key].penalties.push(p);
+            
+            const original = p.original_amount || p.amount || 0;
+            const lateFee = p.late_fee_amount || 0;
+            const total = p.total_with_late_fee || original + lateFee;
+            
+            grouped[key].totalOriginal += original;
+            grouped[key].totalLateFees += lateFee;
+            grouped[key].totalDue += total;
+            
+            if (p.status === 'pending') grouped[key].pendingCount++;
+            if (p.status === 'paid') grouped[key].paidCount++;
+        });
+
+        const sortedGroups = Object.values(grouped).sort((a, b) => 
+            a.member_name.localeCompare(b.member_name)
+        );
+
+        let html = `
+            <table class="penalties-table" id="pdfTable">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Voice</th>
+                        <th>Penalties</th>
+                        <th>Original</th>
+                        <th>Late Fees</th>
+                        <th>Total Due</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        sortedGroups.forEach(group => {
+            const hasPending = group.pendingCount > 0;
+            const totalCount = group.penalties.length;
+            const statusLabel = hasPending ? '⚠️ Has Pending' : '✅ All Paid';
+            const statusClass = hasPending ? 'status-pending' : 'status-paid';
+            const initials = group.member_name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
+
+            html += `
+                <tr class="member-group">
+                    <td>
+                        <span style="display:flex;align-items:center;gap:8px;">
+                            <span style="width:28px;height:28px;border-radius:50%;background:#4f46e5;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${initials}</span>
+                            ${esc(group.member_name)}
+                            <span class="penalty-count-badge">${totalCount}</span>
+                        </span>
+                    </td>
+                    <td><span class="voice-tag">${esc(group.voice_part)}</span></td>
+                    <td>${totalCount}</td>
+                    <td>${fmt(group.totalOriginal)}</td>
+                    <td style="color:${group.totalLateFees > 0 ? '#dc2626' : '#64748b'};">${group.totalLateFees > 0 ? fmt(group.totalLateFees) : '—'}</td>
+                    <td style="font-weight:700;color:${hasPending ? '#dc2626' : '#10b981'};">${fmt(group.totalDue)}</td>
+                    <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                    <td>
+                        ${group.penalties.map(p => {
+                            const isPending = p.status === 'pending';
+                            const original = p.original_amount || p.amount || 0;
+                            const lateFee = p.late_fee_amount || 0;
+                            const total = p.total_with_late_fee || original + lateFee;
+                            const daysLate = p.late_fee_days || 0;
+                            
+                            const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : 
+                                              p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
+                            
+                            const statusClass = p.status === 'paid' ? 'status-paid' : 
+                                               (isPending && daysLate > 0) ? 'status-late' : 'status-pending';
+                            const statusLabel = p.status === 'paid' ? 'Paid' : 
+                                               (isPending && daysLate > 0) ? '⚠️ Late' : 'Pending';
+                            
+                            let customReason = '';
+                            if (p.is_custom && p.custom_reason) {
+                                customReason = `📝 ${esc(p.custom_reason)}`;
+                            }
+                            
+                            return `
+                                <div class="child-penalty" style="border-bottom:1px solid #f1f5f9; padding:4px 0;">
+                                    <span class="date">${p.date || '—'}</span>
+                                    <span class="type">${typeLabel}</span>
+                                    <span style="font-size:11px;color:#64748b;">${p.session || '—'}</span>
+                                    ${customReason ? `<span style="font-size:11px;color:#92400e;">${customReason}</span>` : ''}
+                                    <span class="amount" style="color:${isPending ? '#dc2626' : '#10b981'};">${fmt(total)}</span>
+                                    ${lateFee > 0 ? `<span class="late-fee-text">+${fmt(lateFee)} (${daysLate}d late)</span>` : ''}
+                                    <span class="status-badge ${statusClass}" style="font-size:10px;padding:2px 10px;">${statusLabel}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+
+    // ── EXPORT PDF ──
+    async function exportToPDF() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const typeFilter = document.getElementById('typeFilter').value;
+        const searchFilter = document.getElementById('searchFilter').value;
+
+        const filtered = [...allPenalties];
         if (statusFilter !== 'all') {
             filtered = filtered.filter(p => p.status === statusFilter);
         }
@@ -585,168 +871,203 @@
             filtered = filtered.filter(p => p.penalty_type === typeFilter);
         }
         if (searchFilter) {
-            filtered = filtered.filter(p => p.members?.name?.toLowerCase().includes(searchFilter));
+            filtered = filtered.filter(p => p.member_name?.toLowerCase().includes(searchFilter.toLowerCase()));
         }
-        
-        // Calculate summary
-        const totalPenalties = filtered.reduce((sum, p) => sum + (p.amount || 0), 0);
-        const totalPending = filtered.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount || 0), 0);
-        const totalPaid = filtered.filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0);
-        const uniqueMembers = new Set(filtered.map(p => p.member_id)).size;
-        
-        document.getElementById('summaryStats').innerHTML = `
-            <div class="summary-card indigo">
-                <div class="summary-number">${fmt(totalPenalties)}</div>
-                <div class="summary-label">Total Fines</div>
-            </div>
-            <div class="summary-card amber">
-                <div class="summary-number">${fmt(totalPending)}</div>
-                <div class="summary-label">Pending</div>
-            </div>
-            <div class="summary-card green">
-                <div class="summary-number">${fmt(totalPaid)}</div>
-                <div class="summary-label">Paid</div>
-            </div>
-            <div class="summary-card indigo">
-                <div class="summary-number">${uniqueMembers}</div>
-                <div class="summary-label">Members with Penalties</div>
-            </div>
-        `;
-        
-        if (!filtered.length) {
-            document.getElementById('penaltiesTableContainer').innerHTML = `
-                <div class="no-data">
-                    <i class="ti ti-mood-happy"></i>
-                    No penalties found matching your filters!
-                </div>`;
+
+        if (!filtered || filtered.length === 0) {
+            alert('No penalties to export with current filter.');
             return;
         }
-        
-        // Group by member for better display
-        const groupedByMember = {};
-        filtered.forEach(penalty => {
-            const memberId = penalty.member_id;
-            if (!groupedByMember[memberId]) {
-                groupedByMember[memberId] = {
-                    member: penalty.members,
+
+        // Group for PDF
+        const grouped = {};
+        filtered.forEach(p => {
+            const key = p.member_id || 'unknown';
+            if (!grouped[key]) {
+                grouped[key] = {
+                    member_name: p.member_name || 'Unknown',
+                    voice_part: p.voice_part || '—',
                     penalties: [],
-                    totalAmount: 0,
-                    pendingAmount: 0,
-                    paidAmount: 0
+                    totalOriginal: 0,
+                    totalLateFees: 0,
+                    totalDue: 0
                 };
             }
-            groupedByMember[memberId].penalties.push(penalty);
-            groupedByMember[memberId].totalAmount += penalty.amount;
-            if (penalty.status === 'pending') {
-                groupedByMember[memberId].pendingAmount += penalty.amount;
-            } else {
-                groupedByMember[memberId].paidAmount += penalty.amount;
-            }
+            grouped[key].penalties.push(p);
+            const original = p.original_amount || p.amount || 0;
+            const lateFee = p.late_fee_amount || 0;
+            const total = p.total_with_late_fee || original + lateFee;
+            grouped[key].totalOriginal += original;
+            grouped[key].totalLateFees += lateFee;
+            grouped[key].totalDue += total;
         });
-        
-        let html = `
-            <table class="penalties-table" id="pdfTable">
+
+        let tableRows = '';
+        let grandTotalOriginal = 0;
+        let grandTotalLateFees = 0;
+        let grandTotalDue = 0;
+
+        Object.values(grouped).forEach(g => {
+            const hasPending = g.penalties.some(p => p.status === 'pending');
+            tableRows += `
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                    <td colspan="9" style="padding: 10px 12px; font-weight: 700; font-size: 13px;">
+                        ${esc(g.member_name)} · ${esc(g.voice_part)} 
+                        (${g.penalties.length} penalty${g.penalties.length !== 1 ? 's' : ''})
+                        <span style="margin-left: 20px; color: ${hasPending ? '#dc2626' : '#10b981'};">
+                            Total Due: ${fmt(g.totalDue)}
+                        </span>
+                        <span style="margin-left: 20px; color: #64748b; font-size: 11px;">
+                            (Original: ${fmt(g.totalOriginal)} | Late Fees: ${fmt(g.totalLateFees)})
+                        </span>
+                    </td>
+                </tr>
+            `;
+
+            g.penalties.forEach((p, idx) => {
+                const original = p.original_amount || p.amount || 0;
+                const lateFee = p.late_fee_amount || 0;
+                const total = p.total_with_late_fee || original + lateFee;
+                const isPending = p.status === 'pending';
+                const daysLate = p.late_fee_days || 0;
+                const statusLabel = p.status === 'paid' ? 'Paid' : (isPending && daysLate > 0 ? '⚠️ Late' : 'Pending');
+                const typeLabel = p.penalty_type === 'late' ? 'Late' : p.penalty_type === 'custom' ? 'Custom' : 'Absent';
+                const reason = p.is_custom ? (p.custom_reason || p.reason || '') : (p.reason || '');
+
+                grandTotalOriginal += original;
+                grandTotalLateFees += lateFee;
+                grandTotalDue += total;
+
+                tableRows += `
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 6px 10px; text-align: center;">${idx + 1}</td>
+                        <td style="padding: 6px 10px;">${esc(g.member_name)}</td>
+                        <td style="padding: 6px 10px;">${esc(g.voice_part)}</td>
+                        <td style="padding: 6px 10px; text-align: center;">${typeLabel}</td>
+                        <td style="padding: 6px 10px; text-align: center;">${p.date || '—'}</td>
+                        <td style="padding: 6px 10px; text-align: center;">${p.session || '—'}</td>
+                        <td style="padding: 6px 10px;">${reason ? esc(reason) : '—'}</td>
+                        <td style="padding: 6px 10px; text-align: right;">${fmt(original)}</td>
+                        <td style="padding: 6px 10px; text-align: right; color: ${lateFee > 0 ? '#dc2626' : '#64748b'};">
+                            ${lateFee > 0 ? `${fmt(lateFee)} (${daysLate}d late)` : '—'}
+                        </td>
+                        <td style="padding: 6px 10px; text-align: right; font-weight: 700; color: ${isPending ? '#dc2626' : '#10b981'};">
+                            ${fmt(total)}
+                        </td>
+                        <td style="padding: 6px 10px; text-align: center;">
+                            <span style="background: ${isPending ? '#fef3c7' : '#d1fae5'}; padding: 2px 10px; border-radius: 12px; color: ${isPending ? '#92400e' : '#065f46'};">
+                                ${statusLabel}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+
+        const filterLabel = statusFilter === 'all' ? 'All' : statusFilter === 'pending' ? 'Pending Only' : 'Paid Only';
+
+        const pdfContent = document.createElement('div');
+        pdfContent.style.padding = '30px';
+        pdfContent.style.fontFamily = 'Arial, sans-serif';
+        pdfContent.style.backgroundColor = 'white';
+        pdfContent.style.color = '#1a1a2e';
+
+        pdfContent.innerHTML = `
+            <div style="text-align: center; margin-bottom: 24px; border-bottom: 2px solid #4f46e5; padding-bottom: 16px;">
+                <h1 style="color: #4f46e5; font-size: 24px; margin-bottom: 4px;">🎵 University of Embu Students' Choir</h1>
+                <h2 style="color: #1a1f36; font-size: 20px;">Penalties Report (with Late Fees)</h2>
+                <p style="color: #64748b; font-size: 13px; margin-top: 4px;">
+                    ${filterLabel} · Generated on ${new Date().toLocaleString()}
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;">
+                <div style="background: #eef2ff; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Due</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #4f46e5;">${fmt(grandTotalDue)}</div>
+                </div>
+                <div style="background: #fee2e2; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Late Fees</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #dc2626;">${fmt(grandTotalLateFees)}</div>
+                </div>
+                <div style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Original</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #92400e;">${fmt(grandTotalOriginal)}</div>
+                </div>
+                <div style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Penalties</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #065f46;">${filtered.length}</div>
+                </div>
+                <div style="background: #ede9fe; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Members</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #7c3aed;">${Object.keys(grouped).length}</div>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                 <thead>
-                    <tr>
-                        <th>Member Name</th>
-                        <th>Voice Part</th>
-                        <th>Member ID</th>
-                        <th>Total Fines</th>
-                        <th>Pending</th>
-                        <th>Paid</th>
-                        <th>Details</th>
+                    <tr style="background: #1a1f36; color: white;">
+                        <th style="padding: 6px 10px; text-align: center;">#</th>
+                        <th style="padding: 6px 10px; text-align: left;">Member</th>
+                        <th style="padding: 6px 10px; text-align: left;">Voice</th>
+                        <th style="padding: 6px 10px; text-align: center;">Type</th>
+                        <th style="padding: 6px 10px; text-align: center;">Date</th>
+                        <th style="padding: 6px 10px; text-align: center;">Session</th>
+                        <th style="padding: 6px 10px;">Reason</th>
+                        <th style="padding: 6px 10px; text-align: right;">Original</th>
+                        <th style="padding: 6px 10px; text-align: right;">Late Fee</th>
+                        <th style="padding: 6px 10px; text-align: right;">Total Due</th>
+                        <th style="padding: 6px 10px; text-align: center;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
-        `;
-        
-        for (const [memberId, data] of Object.entries(groupedByMember)) {
-            const member = data.member;
-            const detailsHtml = data.penalties.map(p => `
-                <div style="font-size:11px; padding:4px 0; border-bottom:1px solid #e2e8f0;">
-                    ${p.date} - ${p.penalty_type === 'late' ? '⏰ Late' : '❌ Absent'} 
-                    (${p.session || ''}) - ${fmt(p.amount)}
-                    <span class="status-badge ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status}</span>
-                </div>
-            `).join('');
-            
-            html += `
-                <tr>
-                    <td><a href="member-detail.html?id=${memberId}" class="member-link">${esc(member?.name || 'Unknown')}</a></td>
-                    <td>${esc(member?.voice_part || '—')}</td>
-                    <td style="font-family:monospace; font-size:11px;">${memberId}</td>
-                    <td class="penalty-amount">${fmt(data.totalAmount)}</td>
-                    <td class="penalty-amount">${fmt(data.pendingAmount)}</td>
-                    <td style="color:var(--green); font-weight:600;">${fmt(data.paidAmount)}</td>
-                    <td style="min-width:220px;">${detailsHtml}</td>
-                </tr>
-            `;
-        }
-        
-        html += `</tbody></table>`;
-        document.getElementById('penaltiesTableContainer').innerHTML = html;
-    }
-    
-    // ── EXPORT PDF ──
-    async function exportToPDF() {
-        const statusFilter = document.getElementById('statusFilter').value;
-        const typeFilter = document.getElementById('typeFilter').value;
-        const searchFilter = document.getElementById('searchFilter').value;
-        
-        const pdfContent = document.createElement('div');
-        pdfContent.style.padding = '20px';
-        pdfContent.style.fontFamily = 'Arial, sans-serif';
-        pdfContent.style.backgroundColor = 'white';
-        
-        const currentDate = new Date().toLocaleDateString();
-        const filterText = [];
-        if (statusFilter !== 'all') filterText.push(`Status: ${statusFilter}`);
-        if (typeFilter !== 'all') filterText.push(`Type: ${typeFilter}`);
-        if (searchFilter) filterText.push(`Search: ${searchFilter}`);
-        
-        pdfContent.innerHTML = `
-            <div style="text-align:center; margin-bottom:30px;">
-                <h1 style="color:#667eea;">🎵 University of Embu Students' Choir</h1>
-                <h2>Penalties Report</h2>
-                <p>98th Music Festival 2026</p>
-                <p>Generated on: ${currentDate}</p>
-                ${filterText.length ? `<p>Filters: ${filterText.join(' | ')}</p>` : ''}
-            </div>
-            <div style="margin-bottom:20px;">
-                ${document.getElementById('summaryStats').innerHTML}
-            </div>
-            <div>
-                ${document.getElementById('penaltiesTableContainer').innerHTML}
-            </div>
-            <div style="text-align:center; margin-top:30px; font-size:12px; color:#999;">
-                <p>University of Embu | Choir Attendance System</p>
+                    ${tableRows}
+                </tbody>
+                <tfoot>
+                    <tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #4f46e5;">
+                        <td colspan="7" style="padding: 8px 10px; text-align: right; font-size: 12px;">GRAND TOTALS:</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 12px;">${fmt(grandTotalOriginal)}</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 12px; color: #dc2626;">${fmt(grandTotalLateFees)}</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 700; color: #4f46e5;">${fmt(grandTotalDue)}</td>
+                        <td style="padding: 8px 10px; text-align: center;"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
+                <p>University of Embu Students' Choir · 98th Music Festival 2026</p>
+                <p>Report generated on ${new Date().toLocaleString()}</p>
             </div>
         `;
-        
+
         const opt = {
             margin: [0.5, 0.5, 0.5, 0.5],
-            filename: `penalties_report_${currentDate.replace(/\//g, '-')}.pdf`,
+            filename: `penalties_report_${new Date().toISOString().split('T')[0]}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
         };
-        
+
         const exportBtn = document.querySelector('.pdf-btn');
         const originalText = exportBtn.innerHTML;
         exportBtn.innerHTML = '<i class="ti ti-loader"></i> Generating...';
         exportBtn.disabled = true;
-        
-        await html2pdf().set(opt).from(pdfContent).save();
-        
-        exportBtn.innerHTML = originalText;
-        exportBtn.disabled = false;
+
+        try {
+            await html2pdf().set(opt).from(pdfContent).save();
+        } catch (error) {
+            console.error('PDF Error:', error);
+            alert('❌ Error generating PDF: ' + error.message);
+        } finally {
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        }
     }
-    
-    // ── INIT ──
+
     document.getElementById('statusFilter').addEventListener('change', loadPenaltiesReport);
     document.getElementById('typeFilter').addEventListener('change', loadPenaltiesReport);
     document.getElementById('searchFilter').addEventListener('input', loadPenaltiesReport);
-    
+
     async function init() {
         await checkAuth();
         tick();
@@ -754,10 +1075,9 @@
         await loadUserInfo();
         await loadPenaltiesReport();
     }
-    
+
     init();
-    
-    // Expose global functions
+
     window.logout = logout;
     window.toggleSidebar = toggleSidebar;
     window.closeSidebar = closeSidebar;

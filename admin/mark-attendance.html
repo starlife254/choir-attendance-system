@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
     <meta charset="UTF-8">
     <meta name="google-site-verification" content="9B0aEWHLVVsKurOwYXzYI-2kswRtSRcJPDlWQ4sm6Cg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Mark Attendance | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- In ALL HTML files, use this -->
-<script src="/cache-helper.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
+        /* ... keep all your existing styles ... */
+        /* (Copy the styles from your original file) */
         *, *::before, *::after {
             margin: 0; padding: 0;
             box-sizing: border-box;
@@ -148,10 +148,13 @@
         .logout-link:hover { background: var(--red-light); }
         .logout-link i { font-size: 17px; }
 
-        /* ── MAIN ── */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35); z-index: 40;
+        }
+
         .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* ── TOPBAR ── */
         .topbar {
             background: var(--surface);
             border-bottom: 0.5px solid var(--border);
@@ -180,10 +183,8 @@
             cursor: pointer; padding: 4px;
         }
 
-        /* ── CONTENT ── */
         .content { padding: 24px 28px 40px; flex: 1; }
 
-        /* ── CONTROLS PANEL ── */
         .controls-panel {
             background: var(--surface);
             border: 0.5px solid var(--border);
@@ -243,7 +244,6 @@
             color: var(--text-primary);
         }
 
-        /* ── PENDING APOLOGIES WARNING ── */
         .apology-warning {
             background: var(--amber-light);
             border: 1px solid var(--amber);
@@ -256,38 +256,12 @@
             flex-wrap: wrap;
         }
 
-        .apology-warning.show {
-            display: flex;
-        }
-
-        .apology-warning .icon {
-            font-size: 32px;
-            color: var(--amber);
-            flex-shrink: 0;
-        }
-
-        .apology-warning .text {
-            flex: 1;
-        }
-
-        .apology-warning .text h3 {
-            font-size: 15px;
-            font-weight: 700;
-            color: #854d0e;
-            margin-bottom: 4px;
-        }
-
-        .apology-warning .text p {
-            font-size: 13px;
-            color: #92400e;
-            margin-bottom: 2px;
-        }
-
-        .apology-warning .text .count {
-            font-weight: 700;
-            color: var(--red);
-        }
-
+        .apology-warning.show { display: flex; }
+        .apology-warning .icon { font-size: 32px; color: var(--amber); flex-shrink: 0; }
+        .apology-warning .text { flex: 1; }
+        .apology-warning .text h3 { font-size: 15px; font-weight: 700; color: #854d0e; margin-bottom: 4px; }
+        .apology-warning .text p { font-size: 13px; color: #92400e; margin-bottom: 2px; }
+        .apology-warning .text .count { font-weight: 700; color: var(--red); }
         .apology-warning .action-btn {
             background: var(--indigo);
             color: #fff;
@@ -303,12 +277,8 @@
             gap: 6px;
             white-space: nowrap;
         }
+        .apology-warning .action-btn:hover { opacity: .88; }
 
-        .apology-warning .action-btn:hover {
-            opacity: .88;
-        }
-
-        /* ── STATS BAR ── */
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -337,7 +307,6 @@
         .stat-mini-val { font-size: 20px; font-weight: 700; color: var(--text-primary); line-height: 1; }
         .stat-mini-lbl { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
 
-        /* ── TABLE PANEL ── */
         .table-panel {
             background: var(--surface);
             border: 0.5px solid var(--border);
@@ -370,8 +339,7 @@
             font-size: 12px; font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
-            display: inline-flex;
-            align-items: center; gap: 6px;
+            display: inline-flex; align-items: center; gap: 6px;
             transition: background .12s, color .12s;
         }
 
@@ -434,11 +402,9 @@
         }
 
         .att-table tr:last-child td { border-bottom: none; }
-
         .att-table tr:hover td { background: #fafbff; }
         .att-table tr:hover td:first-child { background: #fafbff; }
 
-        /* Voice part group header */
         .voice-group td {
             background: var(--bg) !important;
             font-size: 11px; font-weight: 700;
@@ -452,7 +418,6 @@
             z-index: 5;
         }
 
-        /* ── STATUS SELECT ── */
         .status-select {
             padding: 7px 10px;
             border: 0.5px solid var(--border);
@@ -473,7 +438,6 @@
         .status-select.is-late    { background: var(--amber-light);  color: #854d0e; border-color: #fcd34d; }
         .status-select.is-absent  { background: var(--red-light);    color: #991b1b; border-color: #fca5a5; }
 
-        /* ── PILLS ── */
         .pill {
             display: inline-flex; align-items: center; gap: 4px;
             padding: 3px 10px; border-radius: 40px;
@@ -489,7 +453,6 @@
         .pill-purple { background: var(--purple-light); color: #5b21b6; }
         .pill-gray   { background: var(--bg); color: var(--text-secondary); border: 0.5px solid var(--border); }
 
-        /* ── SAVE BAR ── */
         .save-bar {
             background: var(--surface);
             border: 0.5px solid var(--border);
@@ -505,7 +468,6 @@
 
         .save-bar-btns { display: flex; gap: 10px; }
 
-        /* ── TOAST ── */
         .toast {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
             background: var(--text-primary);
@@ -527,7 +489,6 @@
         .toast.error   { background: #991b1b; }
         .toast.info    { background: var(--indigo); }
 
-        /* ── EMPTY STATE ── */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -542,7 +503,6 @@
         .empty-state p { font-size: 14px; color: var(--text-secondary); }
         .empty-state .hint { font-size: 12px; color: var(--text-tertiary); margin-top: 6px; }
 
-        /* ── FOOTER ── */
         .footer {
             padding: 16px 28px;
             border-top: 0.5px solid var(--border);
@@ -550,7 +510,6 @@
             font-size: 12px; color: var(--text-tertiary);
         }
 
-        /* ── MOBILE BOTTOM NAV ── */
         .bottom-nav {
             display: none; position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(255,255,255,0.96);
@@ -569,13 +528,6 @@
         .bottom-nav-item i { font-size: 22px; }
         .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
 
-        /* ── SIDEBAR OVERLAY (mobile) ── */
-        .sidebar-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.35); z-index: 40;
-        }
-
-        /* ── RESPONSIVE ── */
         @media (max-width: 1024px) {
             .stats-bar { grid-template-columns: repeat(2, 1fr); }
         }
@@ -608,7 +560,6 @@
     
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
         <div class="logo-icon"><i class="ti ti-music"></i></div>
@@ -616,48 +567,25 @@
         <div class="logo-sub">Attendance System · 98th Festival</div>
     </div>
        
- <nav class="sidebar-nav">
-    <div class="nav-section-label">Main</div>
-    <a href="index.html" class="nav-item active">
-        <i class="ti ti-layout-dashboard"></i> Dashboard
-    </a>
-    <a href="mark-attendance.html" class="nav-item">
-        <i class="ti ti-circle-check"></i> Mark attendance
-        <span class="nav-badge">Today</span>
-    </a>
-    <a href="reports.html" class="nav-item">
-        <i class="ti ti-chart-bar"></i> Reports
-    </a>
-    <a href="analytics.html" class="nav-item">
-        <i class="ti ti-trending-up"></i> Analytics
-    </a>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item active"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
 
-    <div class="nav-section-label">Management</div>
-    <a href="apologies.html" class="nav-item">
-        <i class="ti ti-file-text"></i> Apologies
-        <span class="nav-badge amber" id="apologiesBadge" style="display:none">0</span>
-    </a>
-    <a href="members.html" class="nav-item">
-        <i class="ti ti-users"></i> Members view
-    </a>
-    <a href="manage-members.html" class="nav-item">
-        <i class="ti ti-user-edit"></i> Manage members
-    </a>
-    <a href="confirm-payments.html" class="nav-item">
-        <i class="ti ti-cash"></i> Confirm penalties
-    </a>
-    <a href="finance.html" class="nav-item">
-        <i class="ti ti-currency-dollar"></i> Finance Management
-    </a>
- <div class="nav-section-label">Committee</div>
-        <a href="executive.html" class="nav-item active"><i class="fas fa-users-cog"></i> Executive Committee</a>
-        
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance Management</a>
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
+    </nav>
 
-    <div class="nav-section-label">Recognition</div>
-    <a href="hall-of-fame.html" class="nav-item">
-        <i class="ti ti-trophy"></i> Hall of Fame
-    </a>
-</nav>
     <div class="sidebar-bottom">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar">A</div>
@@ -672,7 +600,6 @@
     </div>
 </aside>
 
-<!-- MAIN -->
 <div class="main">
     <header class="topbar">
         <div style="display:flex;align-items:center;gap:14px;">
@@ -694,7 +621,6 @@
 
     <main class="content">
 
-        <!-- Controls -->
         <div class="controls-panel">
             <div class="form-group">
                 <label><i class="ti ti-calendar"></i> Date</label>
@@ -713,7 +639,6 @@
             </button>
         </div>
 
-        <!-- ⚠️ PENDING APOLOGIES WARNING -->
         <div class="apology-warning" id="apologyWarning">
             <div class="icon">⚠️</div>
             <div class="text">
@@ -733,7 +658,6 @@
             </a>
         </div>
 
-        <!-- Stats Bar -->
         <div class="stats-bar" id="statsBar" style="display:none">
             <div class="stat-mini">
                 <div class="stat-mini-icon" style="background:var(--indigo-light)">
@@ -773,7 +697,6 @@
             </div>
         </div>
 
-        <!-- Attendance Table -->
         <div class="table-panel" id="tablePanel">
             <div class="table-panel-header">
                 <div class="table-panel-title">
@@ -801,7 +724,6 @@
             </div>
         </div>
 
-        <!-- Save Bar -->
         <div class="save-bar" id="saveBar" style="display:none">
             <div class="save-bar-info">
                 <i class="ti ti-info-circle" style="font-size:16px;color:var(--indigo)"></i>
@@ -809,7 +731,7 @@
                 <span class="pill pill-green" id="savePct">0%</span>
             </div>
             <div class="save-bar-btns">
-                <button id="saveAttendanceBtn" class="action-btn btn-green" disabled>
+                <button id="saveAttendanceBtn" class="action-btn btn-green">
                     <i class="ti ti-device-floppy"></i> Save records
                 </button>
                 <span id="saveDisabledReason" style="font-size:12px; color:var(--red); display:none;">
@@ -826,7 +748,6 @@
     </footer>
 </div>
 
-<!-- Mobile Bottom Nav -->
 <nav class="bottom-nav">
     <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
     <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
@@ -834,7 +755,6 @@
     <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
 </nav>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -848,7 +768,6 @@
     let pendingApologiesCount = 0;
     let savedScrollTop = 0;
 
-    // ── HELPERS ──
     function esc(s) {
         if (!s) return '';
         return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -869,7 +788,6 @@
         });
     }
 
-    // ── TOAST ──
     let toastTimer;
     function showToast(msg, type = 'info') {
         const t = document.getElementById('toast');
@@ -880,7 +798,6 @@
         toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
     }
 
-    // ── PENALTY HELPERS ──
     function getPenaltyAmount(status, hasApproved) {
         if (status === 'Present') return 0;
         if (status === 'Late' && !hasApproved) return 20;
@@ -896,7 +813,6 @@
         return `<span class="pill pill-red"><i class="ti ti-cash"></i> KSh ${amt}</span>`;
     }
 
-    // ── AUTH ──
     async function checkAuth() {
         const { data: { session } } = await sb.auth.getSession();
         if (!session) { window.location.href = '../login.html'; return null; }
@@ -904,13 +820,10 @@
     }
 
     async function logout() {
-        try {
-            await sb.auth.signOut();
-            window.location.href = '../login.html';
-        } catch { window.location.href = '../login.html'; }
+        try { await sb.auth.signOut(); } catch { }
+        window.location.href = '../login.html';
     }
 
-    // ── USER INFO ──
     async function loadUserInfo() {
         try {
             const { data: { user } } = await sb.auth.getUser();
@@ -930,7 +843,6 @@
         } catch (e) { console.warn(e); }
     }
 
-    // ── CHECK PENDING APOLOGIES ──
     async function checkPendingApologies(date, session) {
         if (!date || !session) return;
 
@@ -966,11 +878,9 @@
             disabledReason.style.display = 'none';
         }
 
-        // Store pending member IDs for reference
         window._pendingApologyMembers = pending?.map(p => p.member_id) || [];
     }
 
-    // ── STATS UPDATE ──
     function updateStats() {
         const total = currentMembers.length;
         let present = 0, late = 0, marked = 0;
@@ -993,7 +903,6 @@
         document.getElementById('footerStatus').textContent = `${marked}/${total} marked`;
     }
 
-    // ── SINGLE ROW UPDATE ──
     function updateSingleRow(memberId) {
         const status = currentAttendance[memberId] || '';
         const hasApproved = approvedApologies[memberId] || false;
@@ -1016,7 +925,6 @@
         updateStats();
     }
 
-    // ── RENDER TABLE ──
     function renderTable() {
         const scroll = document.getElementById('tableScroll');
         if (!currentMembers.length) {
@@ -1129,7 +1037,6 @@
         updateStats();
     }
 
-    // ── LOAD MEMBERS ──
     async function loadMembers() {
         const date = document.getElementById('attendanceDate').value;
         const session = document.getElementById('sessionSelect').value;
@@ -1141,7 +1048,6 @@
         showToast('Fetching members…', 'info');
 
         try {
-            // ✅ First, check for pending apologies
             await checkPendingApologies(date, session);
 
             const { data: members, error: mErr } = await sb
@@ -1155,7 +1061,6 @@
 
             currentMembers = members;
 
-            // Load approved apologies
             const { data: apologies } = await sb
                 .from('apology_requests')
                 .select('member_id')
@@ -1166,7 +1071,6 @@
             approvedApologies = {};
             (apologies || []).forEach(a => { approvedApologies[a.member_id] = true; });
 
-            // Load existing attendance
             const { data: existing } = await sb
                 .from('attendance')
                 .select('member_id, status')
@@ -1197,16 +1101,12 @@
         }
     }
 
-    // ── MARK ALL ──
     function markAll(status) {
         if (!currentMembers.length) { showToast('Load members first', 'error'); return; }
-        
-        // ✅ Check if there are pending apologies - prevent marking if there are
         if (pendingApologiesCount > 0) {
             showToast(`⚠️ Cannot mark all. ${pendingApologiesCount} pending apology(s) need review first.`, 'error');
             return;
         }
-        
         const container = document.getElementById('tableScroll');
         savedScrollTop = container.scrollTop;
         currentMembers.forEach(m => { currentAttendance[m.member_id] = status; });
@@ -1225,13 +1125,12 @@
         showToast('All selections cleared', 'info');
     }
 
-    // ── SAVE ──
+    // ── FIXED SAVE ──
     async function saveAttendance() {
         const date = document.getElementById('attendanceDate').value;
         const session = document.getElementById('sessionSelect').value;
         if (!date) { showToast('Select a date first', 'error'); return; }
 
-        // ✅ Check for pending apologies before saving
         if (pendingApologiesCount > 0) {
             showToast(`⚠️ Cannot save. ${pendingApologiesCount} pending apology(s) need review first.`, 'error');
             return;
@@ -1244,10 +1143,23 @@
             if (!status) continue;
             const hasApproved = approvedApologies[mid] || false;
             const penaltyAmt = getPenaltyAmount(status, hasApproved);
-            records.push({ date, session, member_id: mid, status });
+            const memberId = String(mid);
+            
+            records.push({ 
+                member_id: memberId, 
+                date: date, 
+                session: session, 
+                status: status,
+                has_apology: hasApproved,
+                apology_approved: hasApproved,
+                marked_at: new Date().toISOString()
+            });
+            
             if (penaltyAmt > 0) {
                 penaltyRecords.push({
-                    member_id: mid, date, session,
+                    member_id: memberId, 
+                    date: date, 
+                    session: session,
                     penalty_type: status === 'Late' ? 'late' : 'absent',
                     amount: penaltyAmt,
                     status: 'pending',
@@ -1262,42 +1174,60 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
 
-        const { error } = await sb
-            .from('attendance')
-            .upsert(records, { onConflict: 'date,session,member_id' });
+        try {
+            // ✅ Delete existing attendance first
+            const { error: delErr } = await sb
+                .from('attendance')
+                .delete()
+                .eq('date', date)
+                .eq('session', session);
+            
+            if (delErr) throw delErr;
 
-        if (error) {
-            showToast(`Save failed: ${error.message}`, 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save records';
-            return;
-        }
+            // ✅ Insert new attendance records
+            const { error: insErr } = await sb
+                .from('attendance')
+                .insert(records);
+            
+            if (insErr) throw insErr;
 
-        for (const pen of penaltyRecords) {
-            const { error: pErr } = await sb
-                .from('penalties')
-                .upsert(pen, { onConflict: 'member_id,date,session' });
-            if (pErr) console.warn('Penalty save warning:', pErr);
-        }
+            // ✅ Handle penalties
+            await sb.from('penalties').delete().eq('date', date).eq('session', session);
 
-        for (const [mid, hasApology] of Object.entries(approvedApologies)) {
-            if (hasApology && currentAttendance[mid]) {
-                const s = currentAttendance[mid];
-                if (s === 'Late' || s === 'Absent') {
-                    await sb.from('penalties')
-                        .update({ status: 'waived', admin_notes: 'Apology approved - fine waived' })
-                        .eq('member_id', mid).eq('date', date).eq('session', session);
+            if (penaltyRecords.length > 0) {
+                const { error: insPenErr } = await sb.from('penalties').insert(penaltyRecords);
+                if (insPenErr) console.warn('Penalty insert warning:', insPenErr);
+            }
+
+            // ✅ Clear penalties for approved apologies
+            for (const [mid, hasApology] of Object.entries(approvedApologies)) {
+                if (hasApology && currentAttendance[mid]) {
+                    const s = currentAttendance[mid];
+                    if (s === 'Late' || s === 'Absent') {
+                        await sb.from('penalties')
+                            .delete()
+                            .eq('member_id', String(mid))
+                            .eq('date', date)
+                            .eq('session', session);
+                    }
                 }
             }
-        }
 
-        showToast(`${records.length} records saved for ${session}!`, 'success');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save records';
-        document.getElementById('footerStatus').textContent = `Saved at ${new Date().toLocaleTimeString()}`;
+            // ✅ Reload data
+            await loadMembers();
+
+            showToast(`${records.length} records saved for ${session}!`, 'success');
+            document.getElementById('footerStatus').textContent = `Saved at ${new Date().toLocaleTimeString()}`;
+
+        } catch (error) {
+            console.error('Save error:', error);
+            showToast(`Save failed: ${error.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save records';
+        }
     }
 
-    // ── SIDEBAR ──
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('sidebarOverlay').classList.toggle('open');
@@ -1308,10 +1238,8 @@
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
 
-    // ── INIT ──
     document.getElementById('attendanceDate').value = todayStr();
 
-    // ✅ Also check for pending apologies when date/session changes
     document.getElementById('attendanceDate').addEventListener('change', async function() {
         const date = this.value;
         const session = document.getElementById('sessionSelect').value;
@@ -1334,7 +1262,6 @@
         setInterval(tick, 1000);
         await loadUserInfo();
         
-        // Initial check for pending apologies on today's date with default session
         const date = document.getElementById('attendanceDate').value;
         const session = document.getElementById('sessionSelect').value;
         if (date && session) {

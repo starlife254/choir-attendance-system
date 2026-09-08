@@ -10,8 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
-        /* ... keep all your existing styles ... */
-        /* (Copy the styles from your original file) */
         *, *::before, *::after {
             margin: 0; padding: 0;
             box-sizing: border-box;
@@ -49,7 +47,6 @@
             color: var(--text-primary);
         }
 
-        /* ── SIDEBAR ── */
         .sidebar {
             width: var(--sidebar-w);
             min-height: 100vh;
@@ -564,7 +561,7 @@
     <div class="sidebar-logo">
         <div class="logo-icon"><i class="ti ti-music"></i></div>
         <div class="logo-title">University of Embu Choir</div>
-        <div class="logo-sub">Attendance System · 98th Festival</div>
+        <div class="logo-sub">Attendance System ·</div>
     </div>
        
     <nav class="sidebar-nav">
@@ -608,7 +605,7 @@
             </button>
             <div class="topbar-left">
                 <h2>Mark Attendance</h2>
-                <p id="topDateLabel">Record today's sessions</p>
+                <p id="topDateLabel">Record today's session</p>
             </div>
         </div>
         <div class="topbar-right">
@@ -628,11 +625,11 @@
             </div>
             <div class="form-group">
                 <label><i class="ti ti-clock"></i> Session</label>
-                <select id="sessionSelect" class="form-select">
-                    <option value="Morning">Morning  ·  9:00 AM – 1:00 PM</option>
-                    <option value="Afternoon">Afternoon  ·  2:00 PM – 4:00 PM</option>
-                    <option value="Evening">Evening  ·  7:00 PM – 10:30 PM</option>
-                </select>
+                <div style="padding:9px 14px; background:var(--bg); border-radius:10px; border:0.5px solid var(--border); font-size:13px; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+                    <i class="ti ti-sunset" style="color:var(--amber);"></i>
+                    Evening  ·  4:00 PM – 7:00 PM
+                    <input type="hidden" id="sessionSelect" value="Evening">
+                </div>
             </div>
             <button id="loadMembersBtn" class="action-btn btn-primary">
                 <i class="ti ti-refresh"></i> Load members
@@ -650,7 +647,6 @@
                 </p>
                 <p style="font-size:12px; opacity:0.8;">
                     You must review and approve/reject all pending apologies before marking attendance.
-                    Otherwise, penalties may be incorrectly applied to members who have submitted apologies.
                 </p>
             </div>
             <a href="apologies.html" class="action-btn" style="background:var(--indigo); color:#fff; text-decoration:none;">
@@ -719,7 +715,7 @@
                 <div class="empty-state">
                     <i class="ti ti-music"></i>
                     <p>No members loaded yet</p>
-                    <p class="hint">Select a date and session, then click Load members</p>
+                    <p class="hint">Select a date and click Load members</p>
                 </div>
             </div>
         </div>
@@ -727,7 +723,7 @@
         <div class="save-bar" id="saveBar" style="display:none">
             <div class="save-bar-info">
                 <i class="ti ti-info-circle" style="font-size:16px;color:var(--indigo)"></i>
-                Marking <strong id="saveCount">0</strong> records for <strong id="saveSession">—</strong>
+                Marking <strong id="saveCount">0</strong> records for <strong id="saveSession">Evening</strong>
                 <span class="pill pill-green" id="savePct">0%</span>
             </div>
             <div class="save-bar-btns">
@@ -743,7 +739,7 @@
     </main>
 
     <footer class="footer">
-        <span>🎶 University of Embu Students' Choir · 98th Music Festival 2026</span>
+        <span>🎶 University of Embu Students' Choir ·</span>
         <span id="footerStatus">Ready</span>
     </footer>
 </div>
@@ -767,6 +763,23 @@
     let approvedApologies = {};
     let pendingApologiesCount = 0;
     let savedScrollTop = 0;
+
+    // ── NEW: Rehearsal Days Configuration ──
+    const VALID_DAYS = ['Monday', 'Tuesday', 'Thursday'];
+    const SESSION = 'Evening';
+    const SESSION_LABEL = 'Evening (4:00 PM – 7:00 PM)';
+
+    function isValidAttendanceDay(date) {
+        if (!date) return false;
+        const d = new Date(date);
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+        return VALID_DAYS.includes(dayName);
+    }
+
+    function getDayName(date) {
+        if (!date) return '';
+        return new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+    }
 
     function esc(s) {
         if (!s) return '';
@@ -843,14 +856,28 @@
         } catch (e) { console.warn(e); }
     }
 
-    async function checkPendingApologies(date, session) {
-        if (!date || !session) return;
+    async function checkPendingApologies(date) {
+        if (!date) return;
+
+        if (!isValidAttendanceDay(date)) {
+            const dayName = getDayName(date);
+            const warningEl = document.getElementById('apologyWarning');
+            warningEl.classList.add('show');
+            document.getElementById('apologyCount').textContent = '0';
+            document.getElementById('apologyCountText').textContent = 'are';
+            document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
+            document.querySelector('#apologyWarning .text p').innerHTML = 
+                `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong>. ${dayName} is not a rehearsal day.`;
+            document.getElementById('saveAttendanceBtn').disabled = true;
+            document.getElementById('saveDisabledReason').style.display = 'inline';
+            return;
+        }
 
         const { data: pending, error } = await sb
             .from('apology_requests')
             .select('id, member_id, apology_type, reason')
             .eq('date', date)
-            .eq('session', session)
+            .eq('session', SESSION)
             .eq('status', 'pending');
 
         if (error) {
@@ -865,12 +892,17 @@
         const saveBtn = document.getElementById('saveAttendanceBtn');
         const disabledReason = document.getElementById('saveDisabledReason');
 
+        document.querySelector('#apologyWarning .text h3').textContent = 'Pending Apologies Detected!';
+
         if (pendingApologiesCount > 0) {
             warningEl.classList.add('show');
             countEl.textContent = pendingApologiesCount;
             countTextEl.textContent = pendingApologiesCount === 1 ? 'is' : 'are';
             saveBtn.disabled = true;
             disabledReason.style.display = 'inline';
+            document.querySelector('#apologyWarning .text p').innerHTML = 
+                `There <span id="apologyCountText">are</span> <span class="count" id="apologyCount">${pendingApologiesCount}</span> pending apology request(s) for this session.<br>
+                <span style="font-size:12px; opacity:0.8;">You must review and approve/reject all pending apologies before marking attendance.</span>`;
             showToast(`⚠️ ${pendingApologiesCount} pending apology(s) - review them first!`, 'error');
         } else {
             warningEl.classList.remove('show');
@@ -898,7 +930,7 @@
 
         const pct = total > 0 ? Math.round(((present + late) / total) * 100) : 0;
         document.getElementById('saveCount').textContent  = marked;
-        document.getElementById('saveSession').textContent = document.getElementById('sessionSelect').value;
+        document.getElementById('saveSession').textContent = 'Evening';
         document.getElementById('savePct').textContent   = pct + '%';
         document.getElementById('footerStatus').textContent = `${marked}/${total} marked`;
     }
@@ -1039,8 +1071,13 @@
 
     async function loadMembers() {
         const date = document.getElementById('attendanceDate').value;
-        const session = document.getElementById('sessionSelect').value;
         if (!date) { showToast('Please select a date', 'error'); return; }
+
+        if (!isValidAttendanceDay(date)) {
+            const dayName = getDayName(date);
+            showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Mondays, Tuesdays, and Thursdays.`, 'error');
+            return;
+        }
 
         const btn = document.getElementById('loadMembersBtn');
         btn.disabled = true;
@@ -1048,7 +1085,7 @@
         showToast('Fetching members…', 'info');
 
         try {
-            await checkPendingApologies(date, session);
+            await checkPendingApologies(date);
 
             const { data: members, error: mErr } = await sb
                 .from('members')
@@ -1065,7 +1102,7 @@
                 .from('apology_requests')
                 .select('member_id')
                 .eq('date', date)
-                .eq('session', session)
+                .eq('session', SESSION)
                 .eq('status', 'approved');
 
             approvedApologies = {};
@@ -1075,7 +1112,7 @@
                 .from('attendance')
                 .select('member_id, status')
                 .eq('date', date)
-                .eq('session', session);
+                .eq('session', SESSION);
 
             currentAttendance = {};
             (existing || []).forEach(r => {
@@ -1090,7 +1127,7 @@
             if (apCount > 0) msg += ` · ${apCount} approved apologies`;
             if (pendingCount > 0) msg += ` · ⚠️ ${pendingCount} pending apologies`;
             showToast(msg, pendingCount > 0 ? 'error' : 'success');
-            document.getElementById('topDateLabel').textContent = `${session} session · ${date}`;
+            document.getElementById('topDateLabel').textContent = `Evening session · ${date} (${getDayName(date)})`;
 
         } catch (err) {
             console.error(err);
@@ -1125,10 +1162,8 @@
         showToast('All selections cleared', 'info');
     }
 
-    // ── FIXED SAVE ──
     async function saveAttendance() {
         const date = document.getElementById('attendanceDate').value;
-        const session = document.getElementById('sessionSelect').value;
         if (!date) { showToast('Select a date first', 'error'); return; }
 
         if (pendingApologiesCount > 0) {
@@ -1148,7 +1183,7 @@
             records.push({ 
                 member_id: memberId, 
                 date: date, 
-                session: session, 
+                session: SESSION, 
                 status: status,
                 has_apology: hasApproved,
                 apology_approved: hasApproved,
@@ -1159,7 +1194,7 @@
                 penaltyRecords.push({
                     member_id: memberId, 
                     date: date, 
-                    session: session,
+                    session: SESSION,
                     penalty_type: status === 'Late' ? 'late' : 'absent',
                     amount: penaltyAmt,
                     status: 'pending',
@@ -1175,31 +1210,27 @@
         btn.innerHTML = '<i class="ti ti-loader"></i> Saving…';
 
         try {
-            // ✅ Delete existing attendance first
             const { error: delErr } = await sb
                 .from('attendance')
                 .delete()
                 .eq('date', date)
-                .eq('session', session);
+                .eq('session', SESSION);
             
             if (delErr) throw delErr;
 
-            // ✅ Insert new attendance records
             const { error: insErr } = await sb
                 .from('attendance')
                 .insert(records);
             
             if (insErr) throw insErr;
 
-            // ✅ Handle penalties
-            await sb.from('penalties').delete().eq('date', date).eq('session', session);
+            await sb.from('penalties').delete().eq('date', date).eq('session', SESSION);
 
             if (penaltyRecords.length > 0) {
                 const { error: insPenErr } = await sb.from('penalties').insert(penaltyRecords);
                 if (insPenErr) console.warn('Penalty insert warning:', insPenErr);
             }
 
-            // ✅ Clear penalties for approved apologies
             for (const [mid, hasApology] of Object.entries(approvedApologies)) {
                 if (hasApology && currentAttendance[mid]) {
                     const s = currentAttendance[mid];
@@ -1208,15 +1239,13 @@
                             .delete()
                             .eq('member_id', String(mid))
                             .eq('date', date)
-                            .eq('session', session);
+                            .eq('session', SESSION);
                     }
                 }
             }
 
-            // ✅ Reload data
             await loadMembers();
-
-            showToast(`${records.length} records saved for ${session}!`, 'success');
+            showToast(`${records.length} records saved for Evening!`, 'success');
             document.getElementById('footerStatus').textContent = `Saved at ${new Date().toLocaleTimeString()}`;
 
         } catch (error) {
@@ -1242,17 +1271,20 @@
 
     document.getElementById('attendanceDate').addEventListener('change', async function() {
         const date = this.value;
-        const session = document.getElementById('sessionSelect').value;
-        if (date && session) {
-            await checkPendingApologies(date, session);
-        }
-    });
-
-    document.getElementById('sessionSelect').addEventListener('change', async function() {
-        const date = document.getElementById('attendanceDate').value;
-        const session = this.value;
-        if (date && session) {
-            await checkPendingApologies(date, session);
+        if (date) {
+            if (!isValidAttendanceDay(date)) {
+                const dayName = getDayName(date);
+                showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Mondays, Tuesdays, and Thursdays.`, 'error');
+                const warningEl = document.getElementById('apologyWarning');
+                warningEl.classList.add('show');
+                document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
+                document.querySelector('#apologyWarning .text p').innerHTML = 
+                    `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong>. ${dayName} is not a rehearsal day.`;
+                document.getElementById('saveAttendanceBtn').disabled = true;
+                document.getElementById('saveDisabledReason').style.display = 'inline';
+            } else {
+                await checkPendingApologies(date);
+            }
         }
     });
 
@@ -1263,9 +1295,19 @@
         await loadUserInfo();
         
         const date = document.getElementById('attendanceDate').value;
-        const session = document.getElementById('sessionSelect').value;
-        if (date && session) {
-            await checkPendingApologies(date, session);
+        if (date) {
+            if (!isValidAttendanceDay(date)) {
+                const dayName = getDayName(date);
+                const warningEl = document.getElementById('apologyWarning');
+                warningEl.classList.add('show');
+                document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
+                document.querySelector('#apologyWarning .text p').innerHTML = 
+                    `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong>. ${dayName} is not a rehearsal day.`;
+                document.getElementById('saveAttendanceBtn').disabled = true;
+                document.getElementById('saveDisabledReason').style.display = 'inline';
+            } else {
+                await checkPendingApologies(date);
+            }
         }
     }
 

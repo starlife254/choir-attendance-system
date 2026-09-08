@@ -10,11 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
-        
     </script>
-    <!-- In ALL HTML files, use this -->
-<script src="/cache-helper.js"></script>
-   
+    <script src="/cache-helper.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -73,17 +70,10 @@
         }
 
         @keyframes fadeSlide {
-            from {
-                opacity: 0;
-                transform: translateY(18px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -138,9 +128,7 @@
             color: var(--primary);
         }
 
-        .btn-outline i {
-            font-size: 14px;
-        }
+        .btn-outline i { font-size: 14px; }
 
         .btn-danger {
             background: #fee2e2;
@@ -158,9 +146,7 @@
             gap: 8px;
         }
 
-        .btn-danger:hover {
-            background: #fecaca;
-        }
+        .btn-danger:hover { background: #fecaca; }
 
         .btn-gold {
             background: linear-gradient(135deg, var(--gold), var(--gold-dark));
@@ -184,7 +170,6 @@
             box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
         }
 
-        /* tabs */
         .tabs {
             display: flex;
             gap: 6px;
@@ -210,9 +195,7 @@
             gap: 8px;
         }
 
-        .tab-btn i {
-            font-size: 14px;
-        }
+        .tab-btn i { font-size: 14px; }
 
         .tab-btn:hover:not(.active) {
             background: var(--primary-light);
@@ -230,49 +213,40 @@
             animation: fadeIn 0.25s ease both;
         }
 
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Size selection buttons */
-.size-btn {
-    padding: 16px 0;
-    border: 2px solid var(--slate-300);
-    border-radius: 12px;
-    background: var(--white);
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--slate-600);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-}
-.size-btn:hover {
-    border-color: var(--primary);
-    background: var(--primary-light);
-}
-.size-btn.selected {
-    border-color: var(--gold);
-    background: var(--gold-light);
-    color: var(--gold-dark);
-    box-shadow: 0 0 0 3px rgba(212,175,55,0.2);
-}
-.size-btn:active {
-    transform: scale(0.95);
-}
+        .tab-content.active { display: block; }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(6px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* profile card */
+        .size-btn {
+            padding: 16px 0;
+            border: 2px solid var(--slate-300);
+            border-radius: 12px;
+            background: var(--white);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--slate-600);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .size-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .size-btn.selected {
+            border-color: var(--gold);
+            background: var(--gold-light);
+            color: var(--gold-dark);
+            box-shadow: 0 0 0 3px rgba(212,175,55,0.2);
+        }
+
+        .size-btn:active { transform: scale(0.95); }
+
         .profile-card {
             background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
             color: white;
@@ -353,7 +327,6 @@
             opacity: 0.8;
         }
 
-        /* stats */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -410,20 +383,11 @@
             margin-top: 6px;
         }
 
-        .stat-card.present .stat-number {
-            color: var(--green);
-        }
-        .stat-card.late .stat-number {
-            color: var(--amber);
-        }
-        .stat-card.absent .stat-number {
-            color: var(--red);
-        }
-        .stat-card.percentage .stat-number {
-            color: var(--primary);
-        }
+        .stat-card.present .stat-number { color: var(--green); }
+        .stat-card.late .stat-number { color: var(--amber); }
+        .stat-card.absent .stat-number { color: var(--red); }
+        .stat-card.percentage .stat-number { color: var(--primary); }
 
-        /* cards */
         .chart-container {
             background: var(--white);
             padding: 20px 18px;
@@ -557,9 +521,7 @@
             box-shadow: 0 6px 20px rgba(91, 79, 207, 0.35);
         }
 
-        .btn-primary:active {
-            transform: translateY(0);
-        }
+        .btn-primary:active { transform: translateY(0); }
 
         .btn-success {
             background: linear-gradient(135deg, var(--green), #059669);
@@ -630,9 +592,7 @@
             transition: box-shadow 0.18s;
         }
 
-        .apology-item:hover {
-            box-shadow: var(--shadow-card);
-        }
+        .apology-item:hover { box-shadow: var(--shadow-card); }
 
         .status-badge {
             padding: 3px 14px;
@@ -703,14 +663,8 @@
         }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .message.success {
@@ -748,9 +702,7 @@
             color: var(--primary);
         }
 
-        input[type="file"] {
-            display: none;
-        }
+        input[type="file"] { display: none; }
 
         .saved-checkmark {
             display: inline-block;
@@ -760,16 +712,10 @@
         }
 
         @keyframes pop {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.25);
-            }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.25); }
         }
 
-        /* payment reminder */
         .reminder-banner {
             background: linear-gradient(135deg, #fef3c7, #fde68a);
             border-radius: 20px;
@@ -784,50 +730,27 @@
             gap: 12px;
         }
 
-        .reminder-banner .icon {
-            font-size: 28px;
-        }
-
+        .reminder-banner .icon { font-size: 28px; }
         .reminder-banner .text {
             font-weight: 600;
             color: #92400e;
             font-size: 14px;
         }
-
-        .reminder-banner .text strong {
-            display: block;
-            font-size: 16px;
-        }
+        .reminder-banner .text strong { display: block; font-size: 16px; }
 
         @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-            }
-            50% {
-                opacity: 0.93;
-                box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
-            }
+            0%, 100% { opacity: 1; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+            50% { opacity: 0.93; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5); }
         }
 
-        .highlight {
-            animation: flash 0.5s ease;
-        }
+        .highlight { animation: flash 0.5s ease; }
 
         @keyframes flash {
-            0% {
-                background-color: var(--slate-50);
-            }
-            50% {
-                background-color: #d1fae5;
-            }
-            100% {
-                background-color: var(--slate-50);
-            }
+            0% { background-color: var(--slate-50); }
+            50% { background-color: #d1fae5; }
+            100% { background-color: var(--slate-50); }
         }
 
-        /* modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -840,9 +763,7 @@
             backdrop-filter: blur(4px);
         }
 
-        .modal-overlay.open {
-            display: flex;
-        }
+        .modal-overlay.open { display: flex; }
 
         .modal-box {
             background: white;
@@ -857,14 +778,8 @@
         }
 
         @keyframes modalIn {
-            from {
-                opacity: 0;
-                transform: scale(0.96) translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            from { opacity: 0; transform: scale(0.96) translateY(12px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .modal-header {
@@ -896,11 +811,8 @@
             justify-content: center;
         }
 
-        .modal-close:hover {
-            background: var(--slate-300);
-        }
+        .modal-close:hover { background: var(--slate-300); }
 
-        /* hof */
         .hof-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -922,9 +834,7 @@
             box-shadow: var(--shadow-hover);
         }
 
-        .hof-card.featured {
-            border: 2px solid var(--gold);
-        }
+        .hof-card.featured { border: 2px solid var(--gold); }
 
         .hof-card .hof-image {
             width: 100%;
@@ -999,9 +909,7 @@
             padding: 8px 0;
         }
 
-        .hof-detail.active {
-            display: block;
-        }
+        .hof-detail.active { display: block; }
 
         .hof-detail-header {
             display: flex;
@@ -1105,15 +1013,10 @@
             gap: 6px;
         }
 
-        .hof-back-btn:hover {
-            background: var(--slate-200);
-        }
+        .hof-back-btn:hover { background: var(--slate-200); }
 
-        .hof-grid-view.hidden {
-            display: none;
-        }
+        .hof-grid-view.hidden { display: none; }
 
-        /* bottom nav */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -1146,9 +1049,7 @@
             transition: all 0.18s;
         }
 
-        .bottom-nav-item i {
-            font-size: 20px;
-        }
+        .bottom-nav-item i { font-size: 20px; }
 
         .bottom-nav-item.active {
             color: var(--primary);
@@ -1161,89 +1062,38 @@
         }
 
         @media (min-width: 768px) {
-            .bottom-nav {
-                display: none;
-            }
-            .container {
-                margin-bottom: 0;
-            }
+            .bottom-nav { display: none; }
+            .container { margin-bottom: 0; }
         }
 
         @media (max-width: 640px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                padding: 16px;
-                border-radius: 24px;
-            }
-            .profile-card {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px;
-            }
-            .profile-avatar {
-                width: 72px;
-                height: 72px;
-                font-size: 32px;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            .tabs {
-                justify-content: center;
-            }
-            .tab-btn {
-                padding: 6px 14px;
-                font-size: 12px;
-            }
-            .tab-btn i {
-                font-size: 12px;
-            }
-            .header h1 {
-                font-size: 1.2rem;
-            }
-            .header-actions .btn-gold span {
-                display: none;
-            }
-            .modal-box {
-                padding: 20px;
-            }
-            .hof-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-            .hof-detail-header {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
+            body { padding: 10px; }
+            .container { padding: 16px; border-radius: 24px; }
+            .profile-card { flex-direction: column; text-align: center; padding: 20px; }
+            .profile-avatar { width: 72px; height: 72px; font-size: 32px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .tabs { justify-content: center; }
+            .tab-btn { padding: 6px 14px; font-size: 12px; }
+            .tab-btn i { font-size: 12px; }
+            .header h1 { font-size: 1.2rem; }
+            .header-actions .btn-gold span { display: none; }
+            .modal-box { padding: 20px; }
+            .hof-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .hof-detail-header { flex-direction: column; align-items: center; text-align: center; }
         }
 
         @media (max-width: 480px) {
-            .hof-grid {
-                grid-template-columns: 1fr;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .header-actions .btn-gold {
-                padding: 6px 14px;
-            }
-            .header-actions .btn-gold i {
-                margin-right: 0;
-            }
-            .header-actions .btn-gold span {
-                display: none;
-            }
+            .hof-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .header-actions .btn-gold { padding: 6px 14px; }
+            .header-actions .btn-gold i { margin-right: 0; }
+            .header-actions .btn-gold span { display: none; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1><i class="fas fa-music"></i> My Dashboard</h1>
             <div class="header-actions">
@@ -1257,7 +1107,6 @@
             </div>
         </div>
 
-        <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('stats')"><i class="fas fa-chart-pie"></i> Stats</button>
             <button class="tab-btn" onclick="switchTab('profile')"><i class="fas fa-user"></i> Profile</button>
@@ -1267,7 +1116,6 @@
             <button class="tab-btn" onclick="switchTab('committee')"><i class="fas fa-users-cog"></i> Committee</button>
         </div>
 
-        <!-- Committee Tab -->
         <div id="committeeTab" class="tab-content">
             <div class="chart-container">
                 <div class="section-title"><i class="fas fa-users-cog"></i> Executive Committee</div>
@@ -1280,7 +1128,6 @@
             </div>
         </div>
 
-        <!-- Stats Tab -->
         <div id="statsTab" class="tab-content active">
             <div class="profile-card" id="welcomeCard">
                 <div class="profile-avatar" id="avatarPreview"><i class="fas fa-user"></i></div>
@@ -1290,8 +1137,6 @@
                     <p><i class="fas fa-id-card"></i> <span id="memberId">Loading...</span></p>
                 </div>
             </div>
-
-         
 
             <div id="paymentReminder" style="display:none; margin-bottom:24px;">
                 <div class="reminder-banner">
@@ -1322,7 +1167,6 @@
             </div>
         </div>
 
-        <!-- Profile Tab -->
         <div id="profileTab" class="tab-content">
             <div id="profileMessage" class="message"></div>
             <div class="form-card" id="contactFormCard">
@@ -1375,7 +1219,6 @@
             <button onclick="saveProfile()" class="btn-success" id="saveProfileBtn"><i class="fas fa-save"></i> Save Profile</button>
         </div>
 
-        <!-- Apology Tab -->
         <div id="apologyTab" class="tab-content">
             <div id="apologyMessage" class="message"></div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px;">
@@ -1443,7 +1286,6 @@
             </div>
         </div>
 
-        <!-- Finance Tab -->
         <div id="financeTab" class="tab-content">
             <div class="chart-container">
                 <div class="section-title"><i class="fas fa-wallet"></i> Choir Financial Health</div>
@@ -1473,7 +1315,6 @@
             </div>
         </div>
 
-        <!-- History Tab -->
         <div id="historyTab" class="tab-content">
             <div class="form-card">
                 <h3><i class="fas fa-file-export"></i> Export Attendance History</h3>
@@ -1507,8 +1348,6 @@
         </div>
     </div>
 
-  
-   
     <!-- Payment Modal -->
     <div class="modal-overlay" id="paymentModal">
         <div class="modal-box">
@@ -1552,7 +1391,6 @@
         </div>
     </div>
 
-    <!-- Bottom Nav -->
     <div class="bottom-nav">
         <button class="bottom-nav-item" onclick="switchTab('stats')"><i class="fas fa-chart-pie"></i><span>Stats</span></button>
         <button class="bottom-nav-item" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
@@ -1578,26 +1416,38 @@
         let currentPenaltyDescription = '';
         let honorees = [];
 
+        // ── NEW: Rehearsal Days & Session Configuration ──
+        const VALID_DAYS = ['Monday', 'Tuesday', 'Thursday'];
+        const SESSION = 'Evening';
+
+        function isValidAttendanceDay(date) {
+            if (!date) return false;
+            const d = new Date(date);
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+            return VALID_DAYS.includes(dayName);
+        }
+
+        function getDayName(date) {
+            if (!date) return '';
+            return new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+        }
+
         const SESSION_CONFIG = {
-            Morning: { startTime: "9:00 AM", endTime: "1:00 PM", lateCutoff: "8:30 AM", absentCutoff: "8:00 AM",
-                lateCutoffMinutes: 8 * 60 + 30, absentCutoffMinutes: 8 * 60 },
-            Afternoon: { startTime: "2:00 PM", endTime: "4:00 PM", lateCutoff: "1:30 PM", absentCutoff: "1:00 PM",
-                lateCutoffMinutes: 13 * 60 + 30, absentCutoffMinutes: 13 * 60 },
-            Evening: { startTime: "7:00 PM", endTime: "10:30 PM", lateCutoff: "6:30 PM", absentCutoff: "6:00 PM",
-                lateCutoffMinutes: 18 * 60 + 30, absentCutoffMinutes: 18 * 60 }
+            Evening: { startTime: "4:00 PM", endTime: "7:00 PM", lateCutoff: "3:30 PM", absentCutoff: "3:00 PM",
+                lateCutoffMinutes: 15 * 60 + 30, absentCutoffMinutes: 15 * 60 }
         };
+
+        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m ===
+                '<' ? '&lt;' : '&gt;'); }
 
         // ── TAB SWITCHING ──
         function switchTab(tab) {
-            // Remove active class from all tabs
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            // Define all tabs
             const tabs = ['stats', 'profile', 'apology', 'history', 'finance', 'committee'];
             const idx = tabs.indexOf(tab);
 
-            // Activate the selected tab
             if (idx !== -1) {
                 const tabBtns = document.querySelectorAll('.tab-btn');
                 if (tabBtns[idx]) tabBtns[idx].classList.add('active');
@@ -1606,14 +1456,12 @@
                 if (tabContent) tabContent.classList.add('active');
             }
 
-            // Update bottom nav - only for tab buttons (first 7 items)
             document.querySelectorAll('.bottom-nav-item').forEach((item, i) => {
                 if (i < 7) {
                     item.classList.toggle('active', i === idx);
                 }
             });
 
-            // Load data for specific tabs
             if (tab === 'profile') loadProfileData();
             if (tab === 'apology') { loadMyApologies(); initApologyTab(); }
             if (tab === 'history') loadAttendanceHistory();
@@ -1626,109 +1474,104 @@
             if (tab === 'committee') loadCommitteeDisplay();
         }
 
-
-        // ── LOAD COMMITTEE (MEMBER VIEW) ──
-        // ── LOAD COMMITTEE (MEMBER VIEW - SORTED BY ROLE ORDER) ──
-async function loadCommitteeDisplay() {
-    const container = document.getElementById('committeeDisplay');
-    if (!container) return;
-    
-    container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading committee...</div>';
-
-    // Define the correct role order
-    const ROLE_ORDER = ['Chairman', 'Vice Chair', 'Secretary', 'Treasurer', 'Disciplinarian', 'Welfare Secretary'];
-    
-    const roleColors = {
-        'Chairman': '#4f46e5',
-        'Vice Chair': '#7c3aed',
-        'Secretary': '#059669',
-        'Treasurer': '#d97706',
-        'Disciplinarian': '#dc2626',
-        'Welfare Secretary': '#0891b2'
-    };
-
-    const roleIcons = {
-        'Chairman': 'fa-gavel',
-        'Vice Chair': 'fa-handshake',
-        'Secretary': 'fa-pen-fancy',
-        'Treasurer': 'fa-coins',
-        'Disciplinarian': 'fa-gavel',
-        'Welfare Secretary': 'fa-heart'
-    };
-
-    const { data, error } = await supabaseClient
-        .from('executive_committee')
-        .select('*')
-        .eq('is_active', true)
-        .order('academic_year', { ascending: false });
-
-    if (error) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Could not load committee</div>`;
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-users"></i> No committee members listed yet.</div>`;
-        return;
-    }
-
-    // Group by academic year
-    const grouped = {};
-    data.forEach(m => {
-        if (!grouped[m.academic_year]) grouped[m.academic_year] = [];
-        grouped[m.academic_year].push(m);
-    });
-
-    let html = '';
-    const sortedYears = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
-
-    sortedYears.forEach(year => {
-        // ✅ Sort members by role order within each year
-        const sortedMembers = grouped[year].sort((a, b) => {
-            const indexA = ROLE_ORDER.indexOf(a.role);
-            const indexB = ROLE_ORDER.indexOf(b.role);
-            // If role not in order list, push to end
-            if (indexA === -1 && indexB === -1) return a.role.localeCompare(b.role);
-            if (indexA === -1) return 1;
-            if (indexB === -1) return -1;
-            return indexA - indexB;
-        });
-
-        html += `
-            <div style="grid-column: 1 / -1; margin-top:8px;">
-                <h4 style="font-size:14px; font-weight:700; color:var(--slate-700); display:flex; align-items:center; gap:8px; padding-bottom:6px; border-bottom:2px solid var(--primary-light);">
-                    <i class="fas fa-calendar" style="color:var(--primary);"></i> ${escapeHtml(year)}
-                    <span style="font-size:12px; color:var(--slate-400); font-weight:400;">(${sortedMembers.length} member${sortedMembers.length !== 1 ? 's' : ''})</span>
-                </h4>
-            </div>
-        `;
-
-        sortedMembers.forEach(m => {
-            const color = roleColors[m.role] || '#4f46e5';
-            const icon = roleIcons[m.role] || 'fa-user';
+        // ── LOAD COMMITTEE ──
+        async function loadCommitteeDisplay() {
+            const container = document.getElementById('committeeDisplay');
+            if (!container) return;
             
-            const photoHtml = m.photo_url ? 
-                `<img src="${m.photo_url}?t=${Date.now()}" alt="${escapeHtml(m.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\\'fas fa-user\\' style=\\'font-size:32px; color:#94a3b8;\\'></i>';">` :
-                `<i class="fas fa-user" style="font-size:32px; color:#94a3b8;"></i>`;
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading committee...</div>';
 
-            html += `
-                <div style="background:var(--slate-50); border-radius:14px; padding:14px; text-align:center; border:1px solid var(--slate-100); transition:transform .15s, box-shadow .15s; cursor:default;">
-                    <div style="width:80px; height:80px; border-radius:50%; overflow:hidden; margin:0 auto 10px; border:3px solid ${color}; background:var(--slate-100); display:flex; align-items:center; justify-content:center;">
-                        ${photoHtml}
-                    </div>
-                    <div style="font-size:14px; font-weight:700; color:var(--slate-900);">${escapeHtml(m.name)}</div>
-                    <div style="font-size:12px; font-weight:600; color:${color}; margin-top:3px;">
-                        <i class="fas ${icon}" style="font-size:11px;"></i> ${escapeHtml(m.role)}
-                    </div>
-                    ${m.bio ? `<div style="font-size:11px; color:var(--slate-500); margin-top:6px; line-height:1.4;">${escapeHtml(m.bio)}</div>` : ''}
-                    ${m.phone ? `<div style="font-size:11px; color:var(--slate-400); margin-top:4px;"><i class="fas fa-phone"></i> ${escapeHtml(m.phone)}</div>` : ''}
-                </div>
-            `;
-        });
-    });
+            const ROLE_ORDER = ['Chairman', 'Vice Chair', 'Secretary', 'Treasurer', 'Disciplinarian', 'Welfare Secretary'];
+            
+            const roleColors = {
+                'Chairman': '#4f46e5',
+                'Vice Chair': '#7c3aed',
+                'Secretary': '#059669',
+                'Treasurer': '#d97706',
+                'Disciplinarian': '#dc2626',
+                'Welfare Secretary': '#0891b2'
+            };
 
-    container.innerHTML = html;
-}
+            const roleIcons = {
+                'Chairman': 'fa-gavel',
+                'Vice Chair': 'fa-handshake',
+                'Secretary': 'fa-pen-fancy',
+                'Treasurer': 'fa-coins',
+                'Disciplinarian': 'fa-gavel',
+                'Welfare Secretary': 'fa-heart'
+            };
+
+            const { data, error } = await supabaseClient
+                .from('executive_committee')
+                .select('*')
+                .eq('is_active', true)
+                .order('academic_year', { ascending: false });
+
+            if (error) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Could not load committee</div>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-users"></i> No committee members listed yet.</div>`;
+                return;
+            }
+
+            const grouped = {};
+            data.forEach(m => {
+                if (!grouped[m.academic_year]) grouped[m.academic_year] = [];
+                grouped[m.academic_year].push(m);
+            });
+
+            let html = '';
+            const sortedYears = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+            sortedYears.forEach(year => {
+                const sortedMembers = grouped[year].sort((a, b) => {
+                    const indexA = ROLE_ORDER.indexOf(a.role);
+                    const indexB = ROLE_ORDER.indexOf(b.role);
+                    if (indexA === -1 && indexB === -1) return a.role.localeCompare(b.role);
+                    if (indexA === -1) return 1;
+                    if (indexB === -1) return -1;
+                    return indexA - indexB;
+                });
+
+                html += `
+                    <div style="grid-column: 1 / -1; margin-top:8px;">
+                        <h4 style="font-size:14px; font-weight:700; color:var(--slate-700); display:flex; align-items:center; gap:8px; padding-bottom:6px; border-bottom:2px solid var(--primary-light);">
+                            <i class="fas fa-calendar" style="color:var(--primary);"></i> ${escapeHtml(year)}
+                            <span style="font-size:12px; color:var(--slate-400); font-weight:400;">(${sortedMembers.length} member${sortedMembers.length !== 1 ? 's' : ''})</span>
+                        </h4>
+                    </div>
+                `;
+
+                sortedMembers.forEach(m => {
+                    const color = roleColors[m.role] || '#4f46e5';
+                    const icon = roleIcons[m.role] || 'fa-user';
+                    
+                    const photoHtml = m.photo_url ? 
+                        `<img src="${m.photo_url}?t=${Date.now()}" alt="${escapeHtml(m.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\\'fas fa-user\\' style=\\'font-size:32px; color:#94a3b8;\\'></i>';">` :
+                        `<i class="fas fa-user" style="font-size:32px; color:#94a3b8;"></i>`;
+
+                    html += `
+                        <div style="background:var(--slate-50); border-radius:14px; padding:14px; text-align:center; border:1px solid var(--slate-100); transition:transform .15s, box-shadow .15s; cursor:default;">
+                            <div style="width:80px; height:80px; border-radius:50%; overflow:hidden; margin:0 auto 10px; border:3px solid ${color}; background:var(--slate-100); display:flex; align-items:center; justify-content:center;">
+                                ${photoHtml}
+                            </div>
+                            <div style="font-size:14px; font-weight:700; color:var(--slate-900);">${escapeHtml(m.name)}</div>
+                            <div style="font-size:12px; font-weight:600; color:${color}; margin-top:3px;">
+                                <i class="fas ${icon}" style="font-size:11px;"></i> ${escapeHtml(m.role)}
+                            </div>
+                            ${m.bio ? `<div style="font-size:11px; color:var(--slate-500); margin-top:6px; line-height:1.4;">${escapeHtml(m.bio)}</div>` : ''}
+                            ${m.phone ? `<div style="font-size:11px; color:var(--slate-400); margin-top:4px;"><i class="fas fa-phone"></i> ${escapeHtml(m.phone)}</div>` : ''}
+                        </div>
+                    `;
+                });
+            });
+
+            container.innerHTML = html;
+        }
+
         // ── AUTH ──
         async function logout() {
             await supabaseClient.auth.signOut();
@@ -1776,10 +1619,10 @@ async function loadCommitteeDisplay() {
         // ── LOAD ATTENDANCE STATS ──
         async function loadAttendanceStats() {
             if (!currentMember) return;
-           const { data: attendance } = await supabaseClient
-    .from('attendance')
-    .select('date, session, status') // ✅ Only needed columns
-    .eq('member_id', currentMember.member_id);
+            const { data: attendance } = await supabaseClient
+                .from('attendance')
+                .select('date, session, status')
+                .eq('member_id', currentMember.member_id);
             const present = attendance?.filter(a => a.status === 'Present').length || 0;
             const late = attendance?.filter(a => a.status === 'Late').length || 0;
             const absent = attendance?.filter(a => a.status === 'Absent').length || 0;
@@ -1791,9 +1634,7 @@ async function loadCommitteeDisplay() {
                 <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label"><i class="fas fa-times-circle"></i> Absent</div></div>
                 <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label"><i class="fas fa-percent"></i> Attendance Rate</div></div>
             `;
-            const last30Days = [],
-                presentData = [],
-                lateData = [];
+            const last30Days = [], presentData = [], lateData = [];
             for (let i = 29; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
@@ -1821,203 +1662,194 @@ async function loadCommitteeDisplay() {
             });
         }
 
-// ── LOAD PENALTIES WITH LATE FEES ──
-async function loadPenalties() {
-    if (!currentMember) return;
-    
-    // First, calculate late fees for all pending penalties
-    await calculateLateFeesForMember(currentMember.member_id);
-    
-    const { data: penalties, error } = await supabaseClient
-        .from('penalties')
-        .select('*')
-        .eq('member_id', currentMember.member_id)
-        .order('date', { ascending: false });
+        // ── LOAD PENALTIES ──
+        async function loadPenalties() {
+            if (!currentMember) return;
+            
+            await calculateLateFeesForMember(currentMember.member_id);
+            
+            const { data: penalties, error } = await supabaseClient
+                .from('penalties')
+                .select('*')
+                .eq('member_id', currentMember.member_id)
+                .order('date', { ascending: false });
 
-    if (error) {
-        console.error('Error loading penalties:', error);
-        return;
-    }
-
-    // Calculate totals with late fees
-    let pendingTotal = 0;
-    let paidTotal = 0;
-    let pendingCount = 0;
-    let hasLateFees = false;
-
-    penalties?.forEach(p => {
-        if (p.status === 'pending') {
-            const totalAmount = p.total_with_late_fee || p.amount || 0;
-            pendingTotal += totalAmount;
-            pendingCount++;
-            if (p.late_fee_amount > 0) hasLateFees = true;
-        } else if (p.status === 'paid') {
-            paidTotal += p.amount || 0;
-        }
-    });
-
-    // Use dynamic settings from window variables
-    const phone = window.paymentPhone || '0117085859';
-    const name = window.paymentName || 'Peter Manundu';
-
-    // Build the summary HTML with Pay All button
-    let summaryHTML = `
-        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
-            <span><strong>💰 Total:</strong> KSh ${(pendingTotal + paidTotal).toFixed(2)}</span>
-            <span><strong>⏳ Pending:</strong> KSh ${pendingTotal.toFixed(2)}</span>
-            <span><strong>✅ Paid:</strong> KSh ${paidTotal.toFixed(2)}</span>
-            ${hasLateFees ? `<span style="color:var(--red);"><strong>⚠️ Late Fees:</strong> Included in pending</span>` : ''}
-        </div>
-        <div style="margin-top:8px; font-size:12px; color:var(--slate-500);">
-            <i class="fas fa-phone"></i> Payment: POCHI ${phone} | ${name}
-        </div>
-        ${hasLateFees ? `<div style="margin-top:6px; font-size:11px; color:var(--red); background:#fee2e2; padding:6px 12px; border-radius:8px; display:inline-block;">
-            <i class="fas fa-clock"></i> Late fees (10%/day after 48hrs) applied to overdue penalties
-        </div>` : ''}
-    `;
-
-    // Add Pay All button if there are pending penalties
-    if (pendingCount > 0) {
-        summaryHTML += `
-            <div style="margin-top:12px;">
-                <button onclick="payAllPenalties()" class="btn-success" style="padding:12px 24px; font-size:15px; width:auto;">
-                    <i class="fas fa-hand-holding-dollar"></i> Pay All (KSh ${pendingTotal.toFixed(2)})
-                </button>
-                <span style="font-size:12px; color:var(--slate-500); margin-left:10px;">
-                    ${pendingCount} pending fine${pendingCount > 1 ? 's' : ''}
-                </span>
-            </div>
-        `;
-    }
-
-    document.getElementById('penaltySummary').innerHTML = summaryHTML;
-
-    if (!penalties?.length) {
-        document.getElementById('penaltiesList').innerHTML =
-            '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
-        return;
-    }
-
-    document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
-        const isCustom = p.is_custom || p.penalty_type === 'custom';
-        const isPending = p.status === 'pending';
-        const totalAmount = p.total_with_late_fee || p.amount || 0;
-        const lateFee = p.late_fee_amount || 0;
-        const daysLate = p.late_fee_days || 0;
-        
-        let displayReason = '';
-        let displayIcon = '';
-        let displayType = '';
-
-        if (isCustom) {
-            displayReason = p.custom_reason || p.reason || 'Custom penalty';
-            displayIcon = '📌';
-            displayType = 'Custom';
-        } else if (p.penalty_type === 'late') {
-            displayReason = 'Late arrival';
-            displayIcon = '⏰';
-            displayType = 'Late';
-        } else {
-            displayReason = 'Absent without apology';
-            displayIcon = '❌';
-            displayType = 'Absent';
-        }
-
-        const lateFeeBadge = (isPending && lateFee > 0) ? 
-            `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:40px; font-size:9px; font-weight:600; margin-left:6px;">
-                +${lateFee.toFixed(2)} fee (${daysLate}d late)
-            </span>` : '';
-
-        return `
-            <div class="apology-item">
-                <div>
-                    <div>
-                        <strong>
-                            ${displayIcon} ${displayType}
-                            ${isCustom ? '<span style="background:var(--amber-light);color:#854d0e;padding:2px 8px;border-radius:40px;font-size:10px;margin-left:6px;">Custom</span>' : ''}
-                            ${lateFeeBadge}
-                        </strong>
-                        ${p.reason && !isCustom ? `<div style="font-size:12px;color:var(--slate-500);margin-top:2px;">${p.reason}</div>` : ''}
-                    </div>
-                    <div style="font-size:13px; color:var(--slate-500);">
-                        ${p.date} • ${p.session || 'Custom'}
-                        ${isCustom ? ` • <span style="color:var(--amber);font-weight:500;">${escapeHtml(displayReason)}</span>` : ''}
-                        ${isPending && lateFee > 0 ? ` • <span style="color:var(--red);font-weight:500;">+${lateFee.toFixed(2)} late fee</span>` : ''}
-                    </div>
-                    ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;">📝 ${escapeHtml(displayReason)}</div>` : ''}
-                    ${isPending && daysLate > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px;">⏰ ${daysLate} day${daysLate > 1 ? 's' : ''} overdue (10% per day)</div>` : ''}
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-size:18px; font-weight:700; color:${isPending ? 'var(--red)' : 'var(--green)'};">
-                        KSh ${totalAmount.toFixed(2)}
-                    </div>
-                    <span class="status-badge ${isPending ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
-                    ${isPending ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${totalAmount}, '${p.penalty_type === 'late' ? 'Late Fine' : p.is_custom ? p.custom_reason || p.reason || 'Custom Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    await checkPendingPenalties();
-    await updateFloatingReminder();
-}
-      // ── CALCULATE LATE FEES FOR MEMBER ──
-async function calculateLateFeesForMember(memberId) {
-    try {
-        // Get all pending penalties for this member
-        const { data: penalties, error } = await supabaseClient
-            .from('penalties')
-            .select('id, created_at, original_amount, amount')
-            .eq('member_id', memberId)
-            .eq('status', 'pending');
-
-        if (error) throw error;
-        if (!penalties || penalties.length === 0) return;
-
-        let updated = 0;
-
-        for (const p of penalties) {
-            const originalAmount = p.original_amount || p.amount || 0;
-            const createdDate = new Date(p.created_at);
-            const now = new Date();
-            const hoursLate = (now - createdDate) / (1000 * 60 * 60);
-
-            let daysLate = 0;
-            let lateFee = 0;
-            let totalAmount = originalAmount;
-
-            // If more than 48 hours, calculate late fees
-            if (hoursLate > 48) {
-                daysLate = Math.floor((hoursLate - 48) / 24) + 1;
-                lateFee = originalAmount * 0.10 * daysLate;
-                // Optional: Cap at 100% of original
-                // if (lateFee > originalAmount) lateFee = originalAmount;
-                totalAmount = originalAmount + lateFee;
+            if (error) {
+                console.error('Error loading penalties:', error);
+                return;
             }
 
-            // Update the penalty with late fee calculation
-            const { error: updateError } = await supabaseClient
-                .from('penalties')
-                .update({
-                    original_amount: originalAmount,
-                    late_fee_amount: lateFee,
-                    total_with_late_fee: totalAmount,
-                    late_fee_days: daysLate,
-                    last_late_fee_calculated: new Date().toISOString()
-                })
-                .eq('id', p.id);
+            let pendingTotal = 0;
+            let paidTotal = 0;
+            let pendingCount = 0;
+            let hasLateFees = false;
 
-            if (!updateError) updated++;
+            penalties?.forEach(p => {
+                if (p.status === 'pending') {
+                    const totalAmount = p.total_with_late_fee || p.amount || 0;
+                    pendingTotal += totalAmount;
+                    pendingCount++;
+                    if (p.late_fee_amount > 0) hasLateFees = true;
+                } else if (p.status === 'paid') {
+                    paidTotal += p.amount || 0;
+                }
+            });
+
+            const phone = window.paymentPhone || '0117085859';
+            const name = window.paymentName || 'Peter Manundu';
+
+            let summaryHTML = `
+                <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:14px;">
+                    <span><strong>💰 Total:</strong> KSh ${(pendingTotal + paidTotal).toFixed(2)}</span>
+                    <span><strong>⏳ Pending:</strong> KSh ${pendingTotal.toFixed(2)}</span>
+                    <span><strong>✅ Paid:</strong> KSh ${paidTotal.toFixed(2)}</span>
+                    ${hasLateFees ? `<span style="color:var(--red);"><strong>⚠️ Late Fees:</strong> Included in pending</span>` : ''}
+                </div>
+                <div style="margin-top:8px; font-size:12px; color:var(--slate-500);">
+                    <i class="fas fa-phone"></i> Payment: POCHI ${phone} | ${name}
+                </div>
+                ${hasLateFees ? `<div style="margin-top:6px; font-size:11px; color:var(--red); background:#fee2e2; padding:6px 12px; border-radius:8px; display:inline-block;">
+                    <i class="fas fa-clock"></i> Late fees (10%/day after 48hrs) applied to overdue penalties
+                </div>` : ''}
+            `;
+
+            if (pendingCount > 0) {
+                summaryHTML += `
+                    <div style="margin-top:12px;">
+                        <button onclick="payAllPenalties()" class="btn-success" style="padding:12px 24px; font-size:15px; width:auto;">
+                            <i class="fas fa-hand-holding-dollar"></i> Pay All (KSh ${pendingTotal.toFixed(2)})
+                        </button>
+                        <span style="font-size:12px; color:var(--slate-500); margin-left:10px;">
+                            ${pendingCount} pending fine${pendingCount > 1 ? 's' : ''}
+                        </span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('penaltySummary').innerHTML = summaryHTML;
+
+            if (!penalties?.length) {
+                document.getElementById('penaltiesList').innerHTML =
+                    '<div class="empty-state"><i class="fas fa-check-circle"></i> No penalties recorded!</div>';
+                return;
+            }
+
+            document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
+                const isCustom = p.is_custom || p.penalty_type === 'custom';
+                const isPending = p.status === 'pending';
+                const totalAmount = p.total_with_late_fee || p.amount || 0;
+                const lateFee = p.late_fee_amount || 0;
+                const daysLate = p.late_fee_days || 0;
+                
+                let displayReason = '';
+                let displayIcon = '';
+                let displayType = '';
+
+                if (isCustom) {
+                    displayReason = p.custom_reason || p.reason || 'Custom penalty';
+                    displayIcon = '📌';
+                    displayType = 'Custom';
+                } else if (p.penalty_type === 'late') {
+                    displayReason = 'Late arrival';
+                    displayIcon = '⏰';
+                    displayType = 'Late';
+                } else {
+                    displayReason = 'Absent without apology';
+                    displayIcon = '❌';
+                    displayType = 'Absent';
+                }
+
+                const lateFeeBadge = (isPending && lateFee > 0) ? 
+                    `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:40px; font-size:9px; font-weight:600; margin-left:6px;">
+                        +${lateFee.toFixed(2)} fee (${daysLate}d late)
+                    </span>` : '';
+
+                return `
+                    <div class="apology-item">
+                        <div>
+                            <div>
+                                <strong>
+                                    ${displayIcon} ${displayType}
+                                    ${isCustom ? '<span style="background:var(--amber-light);color:#854d0e;padding:2px 8px;border-radius:40px;font-size:10px;margin-left:6px;">Custom</span>' : ''}
+                                    ${lateFeeBadge}
+                                </strong>
+                                ${p.reason && !isCustom ? `<div style="font-size:12px;color:var(--slate-500);margin-top:2px;">${p.reason}</div>` : ''}
+                            </div>
+                            <div style="font-size:13px; color:var(--slate-500);">
+                                ${p.date} • ${p.session || 'Custom'}
+                                ${isCustom ? ` • <span style="color:var(--amber);font-weight:500;">${escapeHtml(displayReason)}</span>` : ''}
+                                ${isPending && lateFee > 0 ? ` • <span style="color:var(--red);font-weight:500;">+${lateFee.toFixed(2)} late fee</span>` : ''}
+                            </div>
+                            ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;">📝 ${escapeHtml(displayReason)}</div>` : ''}
+                            ${isPending && daysLate > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px;">⏰ ${daysLate} day${daysLate > 1 ? 's' : ''} overdue (10% per day)</div>` : ''}
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:18px; font-weight:700; color:${isPending ? 'var(--red)' : 'var(--green)'};">
+                                KSh ${totalAmount.toFixed(2)}
+                            </div>
+                            <span class="status-badge ${isPending ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
+                            ${isPending ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${totalAmount}, '${p.penalty_type === 'late' ? 'Late Fine' : p.is_custom ? p.custom_reason || p.reason || 'Custom Fine' : 'Absent Fine'} - ${p.date}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            await checkPendingPenalties();
+            await updateFloatingReminder();
         }
 
-        console.log(`✅ Updated late fees for ${updated} penalties`);
+        // ── CALCULATE LATE FEES FOR MEMBER ──
+        async function calculateLateFeesForMember(memberId) {
+            try {
+                const { data: penalties, error } = await supabaseClient
+                    .from('penalties')
+                    .select('id, created_at, original_amount, amount')
+                    .eq('member_id', memberId)
+                    .eq('status', 'pending');
 
-    } catch (error) {
-        console.error('Error calculating late fees:', error);
-    }
-}
+                if (error) throw error;
+                if (!penalties || penalties.length === 0) return;
 
-        // ── PAYMENT SETTINGS FUNCTIONS ──
+                let updated = 0;
+
+                for (const p of penalties) {
+                    const originalAmount = p.original_amount || p.amount || 0;
+                    const createdDate = new Date(p.created_at);
+                    const now = new Date();
+                    const hoursLate = (now - createdDate) / (1000 * 60 * 60);
+
+                    let daysLate = 0;
+                    let lateFee = 0;
+                    let totalAmount = originalAmount;
+
+                    if (hoursLate > 48) {
+                        daysLate = Math.floor((hoursLate - 48) / 24) + 1;
+                        lateFee = originalAmount * 0.10 * daysLate;
+                        totalAmount = originalAmount + lateFee;
+                    }
+
+                    const { error: updateError } = await supabaseClient
+                        .from('penalties')
+                        .update({
+                            original_amount: originalAmount,
+                            late_fee_amount: lateFee,
+                            total_with_late_fee: totalAmount,
+                            late_fee_days: daysLate,
+                            last_late_fee_calculated: new Date().toISOString()
+                        })
+                        .eq('id', p.id);
+
+                    if (!updateError) updated++;
+                }
+
+                console.log(`✅ Updated late fees for ${updated} penalties`);
+
+            } catch (error) {
+                console.error('Error calculating late fees:', error);
+            }
+        }
+
+        // ── PAYMENT SETTINGS ──
         async function loadPaymentSettings() {
             try {
                 const { data, error } = await supabaseClient
@@ -2065,158 +1897,146 @@ async function calculateLateFeesForMember(memberId) {
             document.getElementById('instructionPhone').innerHTML = `2. Enter Phone: <strong>${phone}</strong>`;
         }
 
-// ── PAY ALL PENALTIES (BULK PAYMENT) ──
-async function payAllPenalties() {
-    // Get all pending penalties
-    const { data: penalties, error } = await supabaseClient
-        .from('penalties')
-        .select('id, amount, total_with_late_fee, penalty_type, date, reason, is_custom, custom_reason')
-        .eq('member_id', currentMember.member_id)
-        .eq('status', 'pending');
+        // ── PAY ALL PENALTIES ──
+        async function payAllPenalties() {
+            const { data: penalties, error } = await supabaseClient
+                .from('penalties')
+                .select('id, amount, total_with_late_fee, penalty_type, date, reason, is_custom, custom_reason')
+                .eq('member_id', currentMember.member_id)
+                .eq('status', 'pending');
 
-    if (error) {
-        alert('❌ Error fetching penalties: ' + error.message);
-        return;
-    }
+            if (error) {
+                alert('❌ Error fetching penalties: ' + error.message);
+                return;
+            }
 
-    if (!penalties || penalties.length === 0) {
-        alert('✅ You have no pending penalties!');
-        return;
-    }
+            if (!penalties || penalties.length === 0) {
+                alert('✅ You have no pending penalties!');
+                return;
+            }
 
-    // Calculate total amount
-    let totalAmount = 0;
-    let penaltyDescriptions = [];
-    
-    penalties.forEach(p => {
-        const amount = p.total_with_late_fee || p.amount || 0;
-        totalAmount += amount;
-        
-        let desc = '';
-        if (p.is_custom || p.penalty_type === 'custom') {
-            desc = p.custom_reason || p.reason || 'Custom penalty';
-        } else if (p.penalty_type === 'late') {
-            desc = 'Late arrival';
-        } else {
-            desc = 'Absent';
+            let totalAmount = 0;
+            let penaltyDescriptions = [];
+            
+            penalties.forEach(p => {
+                const amount = p.total_with_late_fee || p.amount || 0;
+                totalAmount += amount;
+                
+                let desc = '';
+                if (p.is_custom || p.penalty_type === 'custom') {
+                    desc = p.custom_reason || p.reason || 'Custom penalty';
+                } else if (p.penalty_type === 'late') {
+                    desc = 'Late arrival';
+                } else {
+                    desc = 'Absent';
+                }
+                penaltyDescriptions.push(`${desc} (${p.date}) - KSh ${amount.toFixed(2)}`);
+            });
+
+            const confirmMessage = `You have ${penalties.length} pending fine(s) totaling KSh ${totalAmount.toFixed(2)}.\n\n` +
+                penaltyDescriptions.join('\n') + 
+                `\n\n⚠️ This will record ONE payment for ALL pending fines.\n\nProceed?`;
+
+            if (!confirm(confirmMessage)) return;
+
+            const transactionCode = prompt('Enter your M-Pesa name (as displayed in your M-Pesa statement):');
+            if (!transactionCode || transactionCode.trim() === '') {
+                alert('❌ Payment cancelled. M-Pesa name is required.');
+                return;
+            }
+
+            const btn = document.querySelector('.btn-success[onclick="payAllPenalties()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                const { data: payment, error: paymentError } = await supabaseClient
+                    .from('payments')
+                    .insert({
+                        member_id: currentMember.member_id,
+                        penalty_id: null,
+                        amount: totalAmount,
+                        payment_method: 'mpesa',
+                        status: 'pending',
+                        payment_date: new Date().toISOString().split('T')[0],
+                        reference: transactionCode.trim(),
+                        notes: `Bulk payment - clearing ${penalties.length} penalties. Penalty IDs: ${penalties.map(p => p.id).join(', ')}`
+                    })
+                    .select()
+                    .single();
+
+                if (paymentError) throw paymentError;
+
+                const penaltyIds = penalties.map(p => p.id).join(',');
+                
+                await supabaseClient
+                    .from('payments')
+                    .update({
+                        notes: `Bulk payment - clearing ${penalties.length} penalties. Penalty IDs: ${penaltyIds}`
+                    })
+                    .eq('id', payment.id);
+
+                alert(`✅ Bulk payment recorded!\n\n💰 Total: KSh ${totalAmount.toFixed(2)}\n📝 ${penalties.length} penalties\n\n✅ Admin will confirm within 24 hours.\n⏳ All penalties will be cleared upon approval.`);
+
+                loadPenalties();
+
+            } catch (error) {
+                alert('❌ Error recording payment: ' + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
-        penaltyDescriptions.push(`${desc} (${p.date}) - KSh ${amount.toFixed(2)}`);
-    });
 
-    // Confirm with user
-    const confirmMessage = `You have ${penalties.length} pending fine(s) totaling KSh ${totalAmount.toFixed(2)}.\n\n` +
-        penaltyDescriptions.join('\n') + 
-        `\n\n⚠️ This will record ONE payment for ALL pending fines.\n\nProceed?`;
-
-    if (!confirm(confirmMessage)) return;
-
-    // Get M-Pesa name
-    const transactionCode = prompt('Enter your M-Pesa name (as displayed in your M-Pesa statement):');
-    if (!transactionCode || transactionCode.trim() === '') {
-        alert('❌ Payment cancelled. M-Pesa name is required.');
-        return;
-    }
-
-    const btn = document.querySelector('.btn-success[onclick="payAllPenalties()"]');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    btn.disabled = true;
-
-    try {
-        // ✅ CREATE ONE SINGLE PAYMENT RECORD for the total amount
-        const { data: payment, error: paymentError } = await supabaseClient
-            .from('payments')
-            .insert({
-                member_id: currentMember.member_id,
-                penalty_id: null, // No single penalty - it's a bulk payment
-                amount: totalAmount,
-                payment_method: 'mpesa',
-                status: 'pending',
-                payment_date: new Date().toISOString().split('T')[0],
-                reference: transactionCode.trim(),
-                notes: `Bulk payment - clearing ${penalties.length} penalties. Penalty IDs: ${penalties.map(p => p.id).join(', ')}`
-            })
-            .select()
-            .single();
-
-        if (paymentError) throw paymentError;
-
-        // ✅ Store the list of penalty IDs in the payment record for admin approval
-        // We'll store them in the notes field as a comma-separated list
-        const penaltyIds = penalties.map(p => p.id).join(',');
-        
-        // ✅ Update the payment record with penalty IDs (for admin to reference)
-        await supabaseClient
-            .from('payments')
-            .update({
-                notes: `Bulk payment - clearing ${penalties.length} penalties. Penalty IDs: ${penaltyIds}`
-            })
-            .eq('id', payment.id);
-
-        alert(`✅ Bulk payment recorded!\n\n💰 Total: KSh ${totalAmount.toFixed(2)}\n📝 ${penalties.length} penalties\n\n✅ Admin will confirm within 24 hours.\n⏳ All penalties will be cleared upon approval.`);
-
-        // Refresh penalties
-        loadPenalties();
-
-    } catch (error) {
-        alert('❌ Error recording payment: ' + error.message);
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-}
-     
-
-      async function showPaymentModal(penaltyId, amount, description) {
-    const { data: penalty, error } = await supabaseClient
-        .from('penalties')
-        .select('status, is_custom, custom_reason, reason, late_fee_amount, total_with_late_fee')
-        .eq('id', penaltyId)
-        .single();
-        
-    if (error || !penalty || penalty.status !== 'pending') {
-        alert('This fine has already been paid or does not exist.');
-        return;
-    }
-    
-    currentPenaltyId = penaltyId;
-    
-    // Use total_with_late_fee if available, otherwise use the passed amount
-    const totalAmount = penalty.total_with_late_fee || amount;
-    currentPenaltyAmount = totalAmount;
-    
-    let displayDescription = description;
-    if (penalty.is_custom) {
-        const customText = penalty.custom_reason || penalty.reason || 'Custom penalty';
-        displayDescription = `📌 Custom Penalty: ${customText}`;
-    }
-    
-    // Add late fee info to description
-    if (penalty.late_fee_amount > 0) {
-        displayDescription += ` (includes KSh ${penalty.late_fee_amount.toFixed(2)} late fee)`;
-    }
-    
-    currentPenaltyDescription = displayDescription;
-    
-    const { data: penalties } = await supabaseClient
-        .from('penalties')
-        .select('total_with_late_fee, amount')
-        .eq('member_id', currentMember.member_id)
-        .eq('status', 'pending');
-        
-    const pendingTotal = penalties?.reduce((sum, p) => sum + (p.total_with_late_fee || p.amount || 0), 0) || 0;
-    
-    document.getElementById('modalAmount').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
-    document.getElementById('modalDescription').innerHTML = displayDescription;
-    document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
-    document.getElementById('modalAmount2').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
-    document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal.toFixed(2)}`;
-    document.getElementById('instructionAmount').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
-    document.getElementById('transactionCode').value = '';
-    
-    updatePaymentModalWithSettings();
-    document.getElementById('paymentModal').classList.add('open');
-}
+        async function showPaymentModal(penaltyId, amount, description) {
+            const { data: penalty, error } = await supabaseClient
+                .from('penalties')
+                .select('status, is_custom, custom_reason, reason, late_fee_amount, total_with_late_fee')
+                .eq('id', penaltyId)
+                .single();
+                
+            if (error || !penalty || penalty.status !== 'pending') {
+                alert('This fine has already been paid or does not exist.');
+                return;
+            }
+            
+            currentPenaltyId = penaltyId;
+            
+            const totalAmount = penalty.total_with_late_fee || amount;
+            currentPenaltyAmount = totalAmount;
+            
+            let displayDescription = description;
+            if (penalty.is_custom) {
+                const customText = penalty.custom_reason || penalty.reason || 'Custom penalty';
+                displayDescription = `📌 Custom Penalty: ${customText}`;
+            }
+            
+            if (penalty.late_fee_amount > 0) {
+                displayDescription += ` (includes KSh ${penalty.late_fee_amount.toFixed(2)} late fee)`;
+            }
+            
+            currentPenaltyDescription = displayDescription;
+            
+            const { data: penalties } = await supabaseClient
+                .from('penalties')
+                .select('total_with_late_fee, amount')
+                .eq('member_id', currentMember.member_id)
+                .eq('status', 'pending');
+                
+            const pendingTotal = penalties?.reduce((sum, p) => sum + (p.total_with_late_fee || p.amount || 0), 0) || 0;
+            
+            document.getElementById('modalAmount').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+            document.getElementById('modalDescription').innerHTML = displayDescription;
+            document.getElementById('modalAccountNumber').innerHTML = currentMember.member_id;
+            document.getElementById('modalAmount2').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+            document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal.toFixed(2)}`;
+            document.getElementById('instructionAmount').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+            document.getElementById('transactionCode').value = '';
+            
+            updatePaymentModalWithSettings();
+            document.getElementById('paymentModal').classList.add('open');
+        }
 
         window.addEventListener('storage', function(e) {
             if (e.key === 'payment_phone' || e.key === 'payment_name') {
@@ -2227,7 +2047,6 @@ async function payAllPenalties() {
             }
         });
 
-        // ── PAYMENT MODAL FUNCTIONS ──
         function closePaymentModal() {
             document.getElementById('paymentModal').classList.remove('open');
             currentPenaltyId = null;
@@ -2328,68 +2147,64 @@ async function payAllPenalties() {
         }
 
         // ── UPLOAD PHOTO ──
-// ── CLOUDINARY UPLOAD ──
-const CLOUD_NAME = 'surgtbdr';
-const UPLOAD_PRESET = 'uoem_choir_uploads';
+        const CLOUD_NAME = 'surgtbdr';
+        const UPLOAD_PRESET = 'uoem_choir_uploads';
 
-async function uploadPhoto() {
-    const fileInput = document.getElementById('photoInput');
-    const file = fileInput.files[0];
-    if (!file) return;
+        async function uploadPhoto() {
+            const fileInput = document.getElementById('photoInput');
+            const file = fileInput.files[0];
+            if (!file) return;
 
-    const uploadBtn = document.querySelector('#photoFormCard .btn-primary');
-    const originalText = uploadBtn.innerHTML;
-    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-    uploadBtn.disabled = true;
+            const uploadBtn = document.querySelector('#photoFormCard .btn-primary');
+            const originalText = uploadBtn.innerHTML;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            uploadBtn.disabled = true;
 
-    try {
-        // Upload to Cloudinary using fetch API
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', UPLOAD_PRESET);
-        formData.append('folder', `choir/profile_photos/${currentUserId}`);
-        formData.append('public_id', `profile_${currentUserId}`);
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLOAD_PRESET);
+                formData.append('folder', `choir/profile_photos/${currentUserId}`);
+                formData.append('public_id', `profile_${currentUserId}`);
 
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-            { method: 'POST', body: formData }
-        );
+                const response = await fetch(
+                    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+                    { method: 'POST', body: formData }
+                );
 
-        const result = await response.json();
-        if (!result.secure_url) throw new Error('Upload failed');
+                const result = await response.json();
+                if (!result.secure_url) throw new Error('Upload failed');
 
-        // Save URL to Supabase database (not storage)
-        const { error } = await supabaseClient
-            .from('user_profiles')
-            .upsert({
-                user_id: currentUserId,
-                member_id: currentMember.member_id,
-                profile_photo_url: result.secure_url,
-                updated_at: new Date()
-            });
+                const { error } = await supabaseClient
+                    .from('user_profiles')
+                    .upsert({
+                        user_id: currentUserId,
+                        member_id: currentMember.member_id,
+                        profile_photo_url: result.secure_url,
+                        updated_at: new Date()
+                    });
 
-        if (error) throw error;
+                if (error) throw error;
 
-        // Update preview
-        document.getElementById('photoPreview').innerHTML = 
-            `<img src="${result.secure_url}" style="width:100%;height:100%;object-fit:cover;">`;
-        document.getElementById('avatarPreview').innerHTML = 
-            `<img src="${result.secure_url}" style="width:100%;height:100%;object-fit:cover;">`;
+                document.getElementById('photoPreview').innerHTML = 
+                    `<img src="${result.secure_url}" style="width:100%;height:100%;object-fit:cover;">`;
+                document.getElementById('avatarPreview').innerHTML = 
+                    `<img src="${result.secure_url}" style="width:100%;height:100%;object-fit:cover;">`;
 
-        // Show success message
-        const msgDiv = document.getElementById('profileMessage');
-        msgDiv.className = 'message success';
-        msgDiv.innerHTML = '✅ Photo uploaded to Cloudinary! 📸';
-        setTimeout(() => msgDiv.className = 'message', 3000);
+                const msgDiv = document.getElementById('profileMessage');
+                msgDiv.className = 'message success';
+                msgDiv.innerHTML = '✅ Photo uploaded to Cloudinary! 📸';
+                setTimeout(() => msgDiv.className = 'message', 3000);
 
-    } catch (error) {
-        alert('❌ Upload failed: ' + error.message);
-    } finally {
-        uploadBtn.innerHTML = originalText;
-        uploadBtn.disabled = false;
-        fileInput.value = '';
-    }
-}
+            } catch (error) {
+                alert('❌ Upload failed: ' + error.message);
+            } finally {
+                uploadBtn.innerHTML = originalText;
+                uploadBtn.disabled = false;
+                fileInput.value = '';
+            }
+        }
+
         // ── CHECK PENDING PENALTIES ──
         async function checkPendingPenalties() {
             if (!currentMember) return;
@@ -2412,7 +2227,6 @@ async function uploadPhoto() {
             if (section) section.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        // ── FLOATING REMINDER ──
         function addFloatingReminderButton() {
             if (document.getElementById('floatingReminderBtn')) return;
             const floatingBtn = document.createElement('div');
@@ -2431,9 +2245,9 @@ async function uploadPhoto() {
         async function updateFloatingReminder() {
             if (!currentMember) return;
             const { data: penalties } = await supabaseClient
-    .from('penalties')
-    .select('id, date, session, penalty_type, amount, status, late_fee_amount, total_with_late_fee')
-    .eq('member_id', currentMember.member_id);
+                .from('penalties')
+                .select('id, date, session, penalty_type, amount, status, late_fee_amount, total_with_late_fee')
+                .eq('member_id', currentMember.member_id);
 
             const pendingCount = penalties?.length || 0;
             const floatingBtn = document.getElementById('floatingReminderBtn');
@@ -2453,62 +2267,146 @@ async function uploadPhoto() {
                 updateFloatingReminder(); }, 5 * 60 * 1000);
         }
 
-        // ── APOLOGY FUNCTIONS ──
+        // ── APOLOGY FUNCTIONS (Updated for Evening only) ──
         function getCurrentMinutes() { const now = new Date(); return now.getHours() * 60 + now.getMinutes(); }
 
-        function isLateSessionAvailable(session) { return getCurrentMinutes() <= SESSION_CONFIG[session].lateCutoffMinutes; }
+        function isLateSessionAvailable() { return getCurrentMinutes() <= SESSION_CONFIG.Evening.lateCutoffMinutes; }
 
-        function isAbsentSessionAvailable(session, date) {
+        function isAbsentSessionAvailable(date) {
             const selectedDate = new Date(date);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             if (selectedDate > today) return true;
-            if (selectedDate.getTime() === today.getTime()) return getCurrentMinutes() <= SESSION_CONFIG[session]
-                .absentCutoffMinutes;
+            if (selectedDate.getTime() === today.getTime()) return getCurrentMinutes() <= SESSION_CONFIG.Evening.absentCutoffMinutes;
             return false;
         }
 
-        function getAvailableLateSessions() { const available = []; for (const [session] of Object.entries(SESSION_CONFIG))
-            if (isLateSessionAvailable(session)) available.push(session); return available; }
+        function getAvailableLateSessions() { 
+            const available = [];
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            
+            if (!isValidAttendanceDay(dateStr)) {
+                return available;
+            }
+            
+            if (isLateSessionAvailable()) available.push('Evening');
+            return available; 
+        }
+
+        function getAvailableAbsentSessions(date) {
+            const available = [];
+            
+            if (!isValidAttendanceDay(date)) {
+                return available;
+            }
+            
+            if (isAbsentSessionAvailable(date)) available.push('Evening');
+            return available;
+        }
 
         function populateLateSessions() {
             const select = document.getElementById('lateSessionSelect');
             const available = getAvailableLateSessions();
             const warningDiv = document.getElementById('lateTimeWarning');
-            if (available.length === 0) { select.innerHTML = '<option disabled>No sessions available</option>';
-                warningDiv.style.display = 'block'; } else { warningDiv.style.display = 'none';
+            const today = new Date();
+            const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+            
+            if (!isValidAttendanceDay(today.toISOString().split('T')[0])) {
+                select.innerHTML = '<option disabled>No sessions available</option>';
+                warningDiv.style.display = 'block';
+                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays.`;
+                return;
+            }
+            
+            if (available.length === 0) { 
+                select.innerHTML = '<option disabled>No sessions available</option>';
+                warningDiv.style.display = 'block';
+                warningDiv.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Evening session has passed. Late apologies can only be submitted before 3:30 PM.';
+            } else { 
+                warningDiv.style.display = 'none';
                 select.innerHTML = available.map(s =>
-                    `<option value="${s}">${s} (${SESSION_CONFIG[s].startTime} - ${SESSION_CONFIG[s].endTime})</option>`
-                    ).join(''); }
+                    `<option value="${s}">Evening (4:00 PM – 7:00 PM)</option>`
+                ).join(''); 
+            }
         }
 
         function populateAbsentSessions() {
             const date = document.getElementById('absentDateInput').value;
             const select = document.getElementById('absentSessionSelect');
             const warningDiv = document.getElementById('absentTimeWarning');
+            
             if (!date) return;
+            
+            const dayName = getDayName(date);
+            
+            if (!isValidAttendanceDay(date)) {
+                select.innerHTML = '<option disabled>No sessions available</option>';
+                warningDiv.style.display = 'block';
+                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Mondays, Tuesdays, and Thursdays.`;
+                return;
+            }
+            
             const available = [];
-            for (const [session] of Object.entries(SESSION_CONFIG))
-                if (isAbsentSessionAvailable(session, date)) available.push(session);
-            if (available.length === 0) { select.innerHTML = '<option disabled>No sessions available</option>';
-                warningDiv.style.display = 'block'; } else { warningDiv.style.display = 'none';
+            if (isAbsentSessionAvailable(date)) available.push('Evening');
+            
+            if (available.length === 0) { 
+                select.innerHTML = '<option disabled>No sessions available</option>';
+                warningDiv.style.display = 'block';
+                warningDiv.innerHTML = '<i class="fas fa-triangle-exclamation"></i> No sessions available for this date.';
+            } else { 
+                warningDiv.style.display = 'none';
                 select.innerHTML = available.map(s =>
-                    `<option value="${s}">${s} (${SESSION_CONFIG[s].startTime} - ${SESSION_CONFIG[s].endTime})</option>`
-                    ).join(''); }
+                    `<option value="${s}">Evening (4:00 PM – 7:00 PM)</option>`
+                ).join(''); 
+            }
         }
 
-        function showLateForm() { document.getElementById('lateFormContainer').style.display = 'block';
+        function showLateForm() { 
+            const today = new Date();
+            const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+            const dateStr = today.toISOString().split('T')[0];
+            
+            if (!isValidAttendanceDay(dateStr)) {
+                showApologyMessage(`⚠️ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays.`, 'error');
+                return;
+            }
+            
+            document.getElementById('lateFormContainer').style.display = 'block';
             document.getElementById('absentFormContainer').style.display = 'none';
-            populateLateSessions(); }
+            populateLateSessions(); 
+        }
 
-        function showAbsentForm() { document.getElementById('absentFormContainer').style.display = 'block';
-            document.getElementById('lateFormContainer').style.display = 'none'; const tomorrow = new Date();
+        function showAbsentForm() { 
+            const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
-            document.getElementById('absentDateInput').value = tomorrow.toISOString().split('T')[0];
-            populateAbsentSessions(); }
+            
+            let validDate = tomorrow;
+            let found = false;
+            for (let i = 0; i < 7; i++) {
+                const checkDate = new Date(tomorrow);
+                checkDate.setDate(checkDate.getDate() + i);
+                const checkStr = checkDate.toISOString().split('T')[0];
+                if (isValidAttendanceDay(checkStr)) {
+                    validDate = checkDate;
+                    found = true;
+                    break;
+                }
+            }
+            
+            document.getElementById('absentFormContainer').style.display = 'block';
+            document.getElementById('lateFormContainer').style.display = 'none';
+            document.getElementById('absentDateInput').value = validDate.toISOString().split('T')[0];
+            
+            if (!found) {
+                showApologyMessage('⚠️ No upcoming rehearsal days found. Please contact the choir administrator.', 'error');
+                return;
+            }
+            
+            populateAbsentSessions(); 
+        }
 
         function closeLateForm() { document.getElementById('lateFormContainer').style.display = 'none'; }
-
         function closeAbsentForm() { document.getElementById('absentFormContainer').style.display = 'none'; }
 
         async function submitLateApology() {
@@ -2516,6 +2414,13 @@ async function uploadPhoto() {
             const reason = document.getElementById('lateReasonInput').value;
             if (!session || !reason) { showApologyMessage('Please fill all fields', 'error'); return; }
             const date = new Date().toISOString().split('T')[0];
+            
+            if (!isValidAttendanceDay(date)) {
+                const dayName = getDayName(date);
+                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays.`, 'error');
+                return;
+            }
+            
             const { error } = await supabaseClient.from('apology_requests').insert({
                 member_id: currentMember.member_id,
                 apology_type: 'late',
@@ -2535,6 +2440,13 @@ async function uploadPhoto() {
             const date = document.getElementById('absentDateInput').value;
             const reason = document.getElementById('absentReasonInput').value;
             if (!session || !date || !reason) { showApologyMessage('Please fill all fields', 'error'); return; }
+            
+            if (!isValidAttendanceDay(date)) {
+                const dayName = getDayName(date);
+                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Mondays, Tuesdays, and Thursdays.`, 'error');
+                return;
+            }
+            
             const { error } = await supabaseClient.from('apology_requests').insert({
                 member_id: currentMember.member_id,
                 apology_type: 'absent',
@@ -2645,16 +2557,11 @@ async function uploadPhoto() {
             URL.revokeObjectURL(link.href);
         }
 
-        // ── ESCAPE HTML ──
-        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m ===
-                '<' ? '&lt;' : '&gt;'); }
-
         // ── LOAD MEMBER FINANCE ──
         async function loadMemberFinance() {
             if (!currentMember) return;
 
             try {
-                // Get balance
                 const { data: balance, error: balanceError } = await supabaseClient.from('choir_balance').select('*');
                 if (balanceError) {
                     console.warn('Balance table not found:', balanceError);
@@ -2666,7 +2573,6 @@ async function uploadPhoto() {
                     document.getElementById('memberTotalExpenses').textContent = `KSh ${(b.total_expenses || 0).toLocaleString()}`;
                 }
 
-                // Get income by category
                 const { data: income, error: incomeError } = await supabaseClient
                     .from('financial_transactions')
                     .select('category, amount')
@@ -2692,7 +2598,6 @@ async function uploadPhoto() {
                     `).join('') || '<div class="empty-state"><i class="fas fa-inbox"></i> No income recorded</div>';
                 document.getElementById('memberIncomeSources').innerHTML = incomeHtml;
 
-                // Get expenses by category
                 const { data: expenses, error: expError } = await supabaseClient
                     .from('financial_transactions')
                     .select('category, amount')
@@ -2718,7 +2623,6 @@ async function uploadPhoto() {
                     `).join('') || '<div class="empty-state"><i class="fas fa-inbox"></i> No expenses recorded</div>';
                 document.getElementById('memberExpenseCategories').innerHTML = expHtml;
 
-                // Recent transactions
                 const { data: recent, error: recentError } = await supabaseClient
                     .from('financial_transactions')
                     .select('*')

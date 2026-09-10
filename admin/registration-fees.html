@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Registration Fees | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/cache-helper.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5; --indigo-light: #eef2ff;
+            --green: #10b981; --green-light: #d1fae5;
+            --amber: #f59e0b; --amber-light: #fef9c3;
+            --red: #ef4444; --red-light: #fee2e2;
+            --blue: #3b82f6; --blue-light: #dbeafe;
+            --purple: #7c3aed; --purple-light: #ede9fe;
+            --bg: #f8fafc; --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .logout-link i { font-size: 17px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        .controls-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .form-select, .form-input { padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; background: var(--bg); font-family: inherit; color: var(--text-primary); outline: none; cursor: pointer; }
+        .form-input { flex: 1; min-width: 200px; cursor: text; }
+        .form-select:focus, .form-input:focus { border-color: var(--indigo); }
+
+        .action-btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; white-space: nowrap; }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-amber { background: var(--amber); color: #fff; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-outline { background: transparent; border: 0.5px solid var(--border); color: var(--text-primary); }
+        .btn-sm { padding: 5px 12px; font-size: 11px; border-radius: 8px; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 20px; }
+        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 16px 18px; border-left: 4px solid var(--indigo); }
+        .kpi-card.green { border-left-color: var(--green); }
+        .kpi-card.amber { border-left-color: var(--amber); }
+        .kpi-card.blue { border-left-color: var(--blue); }
+        .kpi-card.red { border-left-color: var(--red); }
+        .kpi-card .number { font-size: 24px; font-weight: 700; }
+        .kpi-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+        .table-wrapper { overflow-x: auto; border-radius: 16px; border: 0.5px solid var(--border); background: var(--surface); }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 13px; }
+        th { background: var(--bg); padding: 12px 14px; font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: left; text-transform: uppercase; letter-spacing: .5px; border-bottom: 0.5px solid var(--border); white-space: nowrap; position: sticky; top: 0; }
+        td { padding: 12px 14px; border-bottom: 0.5px solid var(--border); font-size: 13px; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg); }
+
+        .badge { padding: 3px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-paid { background: var(--green-light); color: #065f46; }
+        .badge-submitted { background: var(--blue-light); color: #1e40af; }
+        .badge-pending { background: var(--amber-light); color: #854d0e; }
+        .badge-none { background: #f1f5f9; color: var(--text-secondary); }
+
+        .member-info { display: flex; align-items: center; gap: 10px; }
+        .member-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
+        .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text-primary); color: #fff; padding: 11px 20px; border-radius: 40px; font-size: 13px; font-weight: 500; z-index: 300; opacity: 0; transition: opacity .22s, transform .22s; pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 90vw; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error { background: #991b1b; }
+        .toast.info { background: var(--indigo); }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--surface); border-radius: 20px; padding: 24px; max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-header h3 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .modal-close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-tertiary); }
+
+        .member-name-display { padding: 14px 16px; background: var(--indigo-light); border-radius: 12px; font-weight: 700; color: var(--indigo); font-size: 15px; text-align: center; margin-bottom: 16px; }
+
+        .fee-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .fee-type-card { padding: 20px 12px; border: 2px solid var(--border); border-radius: 14px; background: var(--surface); cursor: pointer; text-align: center; transition: all 0.2s; font-family: inherit; }
+        .fee-type-card:hover { border-color: var(--indigo); background: var(--indigo-light); }
+        .fee-type-card.selected { border-color: var(--indigo); background: var(--indigo-light); box-shadow: 0 0 0 3px rgba(79,70,229,0.15); }
+        .fee-type-card .icon { font-size: 32px; margin-bottom: 8px; }
+        .fee-type-card .title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .fee-type-card .amount { font-size: 20px; font-weight: 800; color: var(--indigo); }
+
+        .confirm-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s; color: white; }
+        .confirm-btn:hover:not(:disabled) { opacity: 0.88; }
+        .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .confirm-btn.green { background: var(--green); }
+        .confirm-btn.indigo { background: var(--indigo); }
+        .confirm-btn.red { background: var(--red); }
+
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 16px 90px; }
+            .topbar { padding: 0 16px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .controls-panel { flex-direction: column; align-items: stretch; }
+            .action-btn { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System · 98th Festival</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="registration-fees.html" class="nav-item active"><i class="ti ti-id-badge"></i> Registration Fees</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance Management</a>
+        
+
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="logout()"><i class="ti ti-logout"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+            <div class="topbar-left">
+                <h2>💰 Registration Fees</h2>
+                <p>Send invoices and confirm payments</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-chip" id="topTime">--:--</div>
+        </div>
+    </header>
+
+    <main class="content">
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="number" id="kpiTotalMembers">—</div>
+                <div class="label">Total Members</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="number" id="kpiCollected">KSh 0</div>
+                <div class="label">Collected</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="number" id="kpiInvoiced">0</div>
+                <div class="label">Invoices Sent</div>
+            </div>
+            <div class="kpi-card blue">
+                <div class="number" id="kpiSubmitted">0</div>
+                <div class="label">Awaiting Confirmation</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="number" id="kpiNotInvoiced">0</div>
+                <div class="label">Not Invoiced</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-panel">
+            <select id="yearFilter" class="form-select">
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+            </select>
+            <select id="statusFilter" class="form-select">
+                <option value="all">All Status</option>
+                <option value="not_invoiced">Not Invoiced</option>
+                <option value="pending">Invoice Sent (Pending)</option>
+                <option value="submitted">Awaiting Confirmation</option>
+                <option value="paid">Paid</option>
+            </select>
+            <input type="text" id="searchInput" class="form-input" placeholder="🔍 Search member name...">
+            <button class="action-btn btn-outline" onclick="loadData()"><i class="ti ti-refresh"></i> Refresh</button>
+            <button class="action-btn btn-outline" onclick="exportCSV()"><i class="ti ti-file-csv"></i> Export</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Member</th>
+                        <th>Voice Part</th>
+                        <th>Fee Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Ref / M-Pesa</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="membersList">
+                    <tr><td colspan="8" class="empty-state"><i class="ti ti-loader"></i> Loading members...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+</div>
+
+<!-- MODAL: Send Invoice -->
+<div class="modal-overlay" id="invoiceModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="ti ti-send" style="color:var(--indigo);"></i> Send Invoice</h3>
+            <button class="modal-close-btn" onclick="closeModal()">&times;</button>
+        </div>
+
+        <div class="member-name-display" id="modalMemberName">—</div>
+
+        <p style="font-size:13px; color:var(--text-secondary); text-align:center; margin-bottom:12px;">Select the fee type:</p>
+
+        <div class="fee-type-grid">
+            <button class="fee-type-card" data-type="new" onclick="selectFeeType('new')">
+                <div class="icon">🆕</div>
+                <div class="title">New Member</div>
+                <div class="amount">KSh 100</div>
+            </button>
+            <button class="fee-type-card" data-type="renewal" onclick="selectFeeType('renewal')">
+                <div class="icon">🔄</div>
+                <div class="title">Existing Member</div>
+                <div class="amount">KSh 50</div>
+            </button>
+        </div>
+
+        <button class="confirm-btn indigo" id="sendInvoiceBtn" disabled onclick="sendInvoice()">
+            <i class="ti ti-send"></i> Send Invoice to Member
+        </button>
+    </div>
+</div>
+
+<!-- MODAL: Confirm Payment -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="ti ti-check" style="color:var(--green);"></i> Confirm Payment</h3>
+            <button class="modal-close-btn" onclick="closeConfirmModal()">&times;</button>
+        </div>
+
+        <div class="member-name-display" id="confirmMemberName">—</div>
+
+        <div style="background:var(--bg); border-radius:12px; padding:14px; margin-bottom:16px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:var(--text-secondary);">Fee Type:</span>
+                <span id="confirmFeeType" style="font-weight:600;">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:var(--text-secondary);">Amount:</span>
+                <span id="confirmAmount" style="font-weight:700; color:var(--indigo);">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--text-secondary);">Reference:</span>
+                <span id="confirmReference" style="font-weight:600; font-family:monospace;">—</span>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button type="button" onclick="rejectPayment()" class="confirm-btn red" style="flex:1;">
+                <i class="ti ti-x"></i> Reject
+            </button>
+            <button type="button" onclick="approvePayment()" class="confirm-btn green" style="flex:1;">
+                <i class="ti ti-check"></i> Approve
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const NEW_MEMBER_FEE = 100;
+    const RENEWAL_FEE = 50;
+
+    let allMembers = [];
+    let feeMap = {};
+    let currentMember = null;
+    let currentFeeType = null;
+    let currentFeeForConfirm = null;
+
+    function esc(s) { if (!s) return ''; return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function fmt(n) { return 'KSh ' + Number(n || 0).toLocaleString(); }
+    function getInitials(name) { if (!name) return '?'; return name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2); }
+
+    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
+    setInterval(tick, 1000); tick();
+
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        const icons = { success: 'ti-circle-check', error: 'ti-circle-x', info: 'ti-info-circle' };
+        t.innerHTML = `<i class="ti ${icons[type] || icons.info}" style="font-size:16px"></i> ${msg}`;
+        t.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    async function logout() {
+        try { await sb.auth.signOut(); } catch {}
+        window.location.href = '../login.html';
+    }
+
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const emailName = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = emailName;
+            document.getElementById('userAvatar').textContent = (emailName.charAt(0) || 'A').toUpperCase();
+            const { data: p } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (p) {
+                if (p.full_name) {
+                    const f = p.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = f;
+                    document.getElementById('userAvatar').textContent = f.charAt(0).toUpperCase();
+                }
+                if (p.role) document.getElementById('userRole').textContent = p.role;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ── LOAD DATA ──
+    async function loadData() {
+        const year = document.getElementById('yearFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const search = document.getElementById('searchInput').value.toLowerCase();
+
+        document.getElementById('membersList').innerHTML = '<tr><td colspan="8" class="empty-state"><i class="ti ti-loader"></i> Loading...</td></tr>';
+
+        try {
+            const { data: members, error: mErr } = await sb
+                .from('members')
+                .select('member_id, name, voice_part, status')
+                .eq('status', 'active')
+                .order('name');
+
+            if (mErr) throw mErr;
+            allMembers = members || [];
+
+            const { data: fees, error: fErr } = await sb
+                .from('registration_fees')
+                .select('*')
+                .eq('academic_year', year);
+
+            if (fErr) throw fErr;
+
+            feeMap = {};
+            (fees || []).forEach(f => { feeMap[f.member_id] = f; });
+
+            renderTable(statusFilter, search);
+        } catch (err) {
+            console.error(err);
+            document.getElementById('membersList').innerHTML = `<tr><td colspan="8" class="empty-state"><i class="ti ti-alert-circle"></i> Error: ${esc(err.message)}</td></tr>`;
+        }
+    }
+
+    function renderTable(statusFilter, search) {
+        let list = allMembers.map(m => {
+            const fee = feeMap[m.member_id];
+            return {
+                member_id: m.member_id,
+                name: m.name,
+                voice_part: m.voice_part,
+                fee: fee || null,
+                status: fee?.status || 'not_invoiced'
+            };
+        });
+
+        // Calculate KPIs
+        const totalMembers = list.length;
+        const collected = list.filter(x => x.status === 'paid').reduce((s, x) => s + (x.fee?.amount || 0), 0);
+        const invoiced = list.filter(x => x.status === 'pending').length;
+        const submitted = list.filter(x => x.status === 'submitted').length;
+        const notInvoiced = list.filter(x => x.status === 'not_invoiced').length;
+
+        document.getElementById('kpiTotalMembers').textContent = totalMembers;
+        document.getElementById('kpiCollected').textContent = fmt(collected);
+        document.getElementById('kpiInvoiced').textContent = invoiced;
+        document.getElementById('kpiSubmitted').textContent = submitted;
+        document.getElementById('kpiNotInvoiced').textContent = notInvoiced;
+
+        // Apply filters
+        if (statusFilter !== 'all') list = list.filter(x => x.status === statusFilter);
+        if (search) list = list.filter(x => x.name.toLowerCase().includes(search));
+
+        if (!list.length) {
+            document.getElementById('membersList').innerHTML = `<tr><td colspan="8" class="empty-state"><i class="ti ti-users"></i> No members match the filter</td></tr>`;
+            return;
+        }
+
+        document.getElementById('membersList').innerHTML = list.map((m, idx) => {
+            const initials = getInitials(m.name);
+            const fee = m.fee;
+            const status = m.status;
+
+            const statusBadge = {
+                'not_invoiced': '<span class="badge badge-none">⚪ Not Invoiced</span>',
+                'pending': '<span class="badge badge-pending">📩 Invoice Sent</span>',
+                'submitted': '<span class="badge badge-submitted">⏳ Awaiting Confirmation</span>',
+                'paid': '<span class="badge badge-paid">✅ Paid</span>',
+                'cancelled': '<span class="badge badge-none">❌ Cancelled</span>'
+            }[status] || '';
+
+            let feeTypeLabel = '—';
+            if (fee?.fee_type === 'new') feeTypeLabel = '<span class="badge badge-submitted">🆕 New</span>';
+            if (fee?.fee_type === 'renewal') feeTypeLabel = '<span class="badge badge-pending">🔄 Renewal</span>';
+
+            let actions = '';
+            if (status === 'not_invoiced' || status === 'cancelled') {
+                actions = `<button class="action-btn btn-primary btn-sm" onclick="openInvoiceModal('${m.member_id}', '${esc(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-send"></i> Send Invoice</button>`;
+            } else if (status === 'pending') {
+                actions = `<button class="action-btn btn-outline btn-sm" onclick="cancelInvoice('${m.member_id}')"><i class="ti ti-x"></i> Cancel</button>`;
+            } else if (status === 'submitted') {
+                actions = `<button class="action-btn btn-green btn-sm" onclick="openConfirmModal('${m.member_id}')"><i class="ti ti-check"></i> Confirm Payment</button>`;
+            } else if (status === 'paid') {
+                actions = `<button class="action-btn btn-outline btn-sm" onclick="undoPayment('${m.member_id}')"><i class="ti ti-rotate-left"></i> Undo</button>`;
+            }
+
+            return `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>
+                        <div class="member-info">
+                            <div class="member-avatar">${initials}</div>
+                            <div>
+                                <div style="font-weight:600;">${esc(m.name)}</div>
+                                <div style="font-size:11px; color:var(--text-tertiary);">ID: ${esc(m.member_id)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge" style="background:var(--indigo-light); color:var(--indigo);">${esc(m.voice_part || '—')}</span></td>
+                    <td>${feeTypeLabel}</td>
+                    <td style="font-weight:700; color:${fee?.amount ? 'var(--indigo)' : 'var(--text-tertiary)'};">${fee?.amount ? fmt(fee.amount) : '—'}</td>
+                    <td>${statusBadge}</td>
+                    <td style="font-family:monospace; font-size:12px;">${fee?.reference ? esc(fee.reference) : '—'}</td>
+                    <td>${actions}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // ── SEND INVOICE ──
+    function openInvoiceModal(memberId, memberName) {
+        const member = allMembers.find(m => m.member_id === memberId);
+        currentMember = member;
+        currentFeeType = null;
+
+        document.getElementById('modalMemberName').textContent = memberName;
+        document.querySelectorAll('.fee-type-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('sendInvoiceBtn').disabled = true;
+
+        document.getElementById('invoiceModal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('invoiceModal').classList.remove('open');
+        currentMember = null;
+        currentFeeType = null;
+    }
+
+    function selectFeeType(type) {
+        currentFeeType = type;
+        document.querySelectorAll('.fee-type-card').forEach(c => {
+            c.classList.toggle('selected', c.dataset.type === type);
+        });
+        document.getElementById('sendInvoiceBtn').disabled = false;
+    }
+
+    async function sendInvoice() {
+        if (!currentMember || !currentFeeType) { showToast('Please select a fee type', 'error'); return; }
+
+        const year = document.getElementById('yearFilter').value;
+        const amount = currentFeeType === 'new' ? NEW_MEMBER_FEE : RENEWAL_FEE;
+
+        const btn = document.getElementById('sendInvoiceBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ti ti-loader"></i> Sending...';
+
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+
+            // Check existing record
+            const { data: existing } = await sb
+                .from('registration_fees')
+                .select('id, status')
+                .eq('member_id', currentMember.member_id)
+                .eq('academic_year', year)
+                .maybeSingle();
+
+            const feeData = {
+                member_id: currentMember.member_id,
+                academic_year: year,
+                fee_type: currentFeeType,
+                amount: amount,
+                status: 'pending',
+                invoice_sent_at: new Date().toISOString(),
+                invoice_sent_by: user?.email || 'admin',
+                updated_at: new Date().toISOString()
+            };
+
+            if (existing) {
+                // Don't overwrite if already paid
+                if (existing.status === 'paid') {
+                    showToast('This member has already paid for this year', 'error');
+                    return;
+                }
+                await sb.from('registration_fees').update(feeData).eq('id', existing.id);
+            } else {
+                await sb.from('registration_fees').insert(feeData);
+            }
+
+            showToast(`📩 Invoice sent to ${currentMember.name} for KSh ${amount}`, 'success');
+            closeModal();
+            await loadData();
+
+        } catch (err) {
+            console.error(err);
+            showToast(`Error: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    // ── CANCEL INVOICE ──
+    async function cancelInvoice(memberId) {
+        if (!confirm('Cancel this invoice? The member will no longer see it.')) return;
+        const year = document.getElementById('yearFilter').value;
+        const fee = feeMap[memberId];
+        if (!fee) return;
+
+        try {
+            await sb.from('registration_fees').update({
+                status: 'cancelled',
+                updated_at: new Date().toISOString()
+            }).eq('id', fee.id);
+
+            showToast('Invoice cancelled', 'info');
+            await loadData();
+        } catch (err) {
+            showToast(`Error: ${err.message}`, 'error');
+        }
+    }
+
+    // ── CONFIRM PAYMENT ──
+    function openConfirmModal(memberId) {
+        const fee = feeMap[memberId];
+        if (!fee) return;
+        currentFeeForConfirm = { memberId, fee };
+
+        document.getElementById('confirmMemberName').textContent = feeMap[memberId] ? 
+            allMembers.find(m => m.member_id === memberId)?.name : '—';
+        document.getElementById('confirmFeeType').textContent = fee.fee_type === 'new' ? '🆕 New Member' : '🔄 Renewal';
+        document.getElementById('confirmAmount').textContent = fmt(fee.amount);
+        document.getElementById('confirmReference').textContent = fee.reference || 'N/A';
+
+        document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('open');
+        currentFeeForConfirm = null;
+    }
+
+    async function approvePayment() {
+        if (!currentFeeForConfirm) return;
+        const { memberId, fee } = currentFeeForConfirm;
+
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ti ti-loader"></i> Confirming...';
+
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+
+            // Update fee status
+            await sb.from('registration_fees').update({
+                status: 'paid',
+                confirmed_at: new Date().toISOString(),
+                confirmed_by: user?.email || 'admin',
+                updated_at: new Date().toISOString()
+            }).eq('id', fee.id);
+
+            // Add to financial transactions
+            await sb.from('financial_transactions').insert({
+                transaction_id: `REG-${Date.now()}`,
+                transaction_type: 'income',
+                category: 'Registration Fees',
+                amount: fee.amount,
+                date: new Date().toISOString().split('T')[0],
+                member_id: memberId,
+                description: `${fee.fee_type === 'new' ? 'New member' : 'Renewal'} registration fee - ${feeMap[memberId] ? allMembers.find(m => m.member_id === memberId)?.name : 'Member'} (${fee.academic_year})`,
+                status: 'confirmed',
+                reference: fee.reference || null
+            });
+
+            // Update member record
+            await sb.from('members').update({
+                registration_fee_paid: true,
+                last_fee_payment_year: fee.academic_year,
+                last_fee_payment_date: new Date().toISOString().split('T')[0]
+            }).eq('member_id', memberId);
+
+            showToast(`✅ Payment confirmed! ${fmt(fee.amount)} added to choir balance.`, 'success');
+            closeConfirmModal();
+            await loadData();
+        } catch (err) {
+            console.error(err);
+            showToast(`Error: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    async function rejectPayment() {
+        if (!currentFeeForConfirm) return;
+        if (!confirm('Reject this payment? The member will need to resubmit.')) return;
+        const { fee } = currentFeeForConfirm;
+
+        try {
+            await sb.from('registration_fees').update({
+                status: 'pending',
+                reference: null,
+                payment_date: null,
+                payment_method: null,
+                submitted_at: null,
+                updated_at: new Date().toISOString()
+            }).eq('id', fee.id);
+
+            showToast('Payment rejected. Member needs to resubmit.', 'info');
+            closeConfirmModal();
+            await loadData();
+        } catch (err) {
+            showToast(`Error: ${err.message}`, 'error');
+        }
+    }
+
+    // ── UNDO PAYMENT ──
+    async function undoPayment(memberId) {
+        if (!confirm('Undo this payment?\n\nThe fee record will be reset and the income removed from choir balance.')) return;
+        const year = document.getElementById('yearFilter').value;
+        const fee = feeMap[memberId];
+        if (!fee) return;
+
+        try {
+            await sb.from('registration_fees').update({
+                status: 'pending',
+                confirmed_at: null,
+                confirmed_by: null,
+                payment_date: null,
+                reference: null,
+                updated_at: new Date().toISOString()
+            }).eq('id', fee.id);
+
+            await sb.from('financial_transactions')
+                .delete()
+                .eq('member_id', memberId)
+                .eq('category', 'Registration Fees')
+                .eq('amount', fee.amount);
+
+            await sb.from('members').update({
+                registration_fee_paid: false,
+                last_fee_payment_year: null,
+                last_fee_payment_date: null
+            }).eq('member_id', memberId);
+
+            showToast('Payment undone', 'info');
+            await loadData();
+        } catch (err) {
+            showToast(`Error: ${err.message}`, 'error');
+        }
+    }
+
+    // ── EXPORT ──
+    function exportCSV() {
+        const year = document.getElementById('yearFilter').value;
+        let csv = 'Member,Member ID,Voice Part,Fee Type,Amount,Status,Reference,Payment Date\n';
+        allMembers.forEach(m => {
+            const fee = feeMap[m.member_id];
+            csv += `"${m.name}","${m.member_id}","${m.voice_part || ''}","${fee?.fee_type || ''}",${fee?.amount || 0},"${fee?.status || 'not invoiced'}","${fee?.reference || ''}","${fee?.payment_date || ''}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `registration_fees_${year}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    // ── EVENTS ──
+    document.getElementById('yearFilter').addEventListener('change', loadData);
+    document.getElementById('statusFilter').addEventListener('change', loadData);
+    document.getElementById('searchInput').addEventListener('input', () => {
+        clearTimeout(window._searchTimer);
+        window._searchTimer = setTimeout(loadData, 300);
+    });
+
+    document.getElementById('invoiceModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+        if (e.target === this) closeConfirmModal();
+    });
+
+    // ── INIT ──
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await loadUserInfo();
+        await loadData();
+    }
+
+    init();
+
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.logout = logout;
+    window.loadData = loadData;
+    window.openInvoiceModal = openInvoiceModal;
+    window.closeModal = closeModal;
+    window.selectFeeType = selectFeeType;
+    window.sendInvoice = sendInvoice;
+    window.cancelInvoice = cancelInvoice;
+    window.openConfirmModal = openConfirmModal;
+    window.closeConfirmModal = closeConfirmModal;
+    window.approvePayment = approvePayment;
+    window.rejectPayment = rejectPayment;
+    window.undoPayment = undoPayment;
+    window.exportCSV = exportCSV;
+</script>
+</body>
+</html>

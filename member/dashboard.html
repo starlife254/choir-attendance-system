@@ -1419,15 +1419,40 @@
         let currentPenaltyDescription = '';
         let honorees = [];
 
-        // ── Rehearsal Days & Session Configuration ──
-        const VALID_DAYS = ['Monday', 'Tuesday', 'Thursday'];
+        // ── Regular rehearsal days ──
+        const REGULAR_DAYS = ['Monday', 'Tuesday', 'Thursday'];
         const SESSION = 'Evening';
+
+        // Cache for special meetings
+        let specialMeetingsCache = new Set();
+
+        async function loadSpecialMeetingsCache() {
+            try {
+                const today = new Date();
+                const past = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                
+                const { data } = await supabaseClient
+                    .from('special_meetings')
+                    .select('meeting_date')
+                    .gte('meeting_date', past.toISOString().split('T')[0]);
+                
+                specialMeetingsCache = new Set((data || []).map(s => s.meeting_date));
+                console.log('📅 Member loaded special meetings:', [...specialMeetingsCache]);
+            } catch (e) {
+                console.warn('Failed to load special meetings:', e);
+            }
+        }
 
         function isValidAttendanceDay(date) {
             if (!date) return false;
+            if (specialMeetingsCache.has(date)) return true;
             const d = new Date(date);
             const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
-            return VALID_DAYS.includes(dayName);
+            return REGULAR_DAYS.includes(dayName);
+        }
+
+        function isSpecialMeeting(date) {
+            return specialMeetingsCache.has(date);
         }
 
         function getDayName(date) {
@@ -2502,7 +2527,7 @@
             if (!isValidAttendanceDay(today.toISOString().split('T')[0])) {
                 select.innerHTML = '<option disabled>No sessions available</option>';
                 warningDiv.style.display = 'block';
-                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays.`;
+                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays (or special meetings).`;
                 return;
             }
             
@@ -2530,7 +2555,7 @@
             if (!isValidAttendanceDay(date)) {
                 select.innerHTML = '<option disabled>No sessions available</option>';
                 warningDiv.style.display = 'block';
-                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Mondays, Tuesdays, and Thursdays.`;
+                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Mondays, Tuesdays, and Thursdays (or special meetings).`;
                 return;
             }
             
@@ -2555,7 +2580,7 @@
             const dateStr = today.toISOString().split('T')[0];
             
             if (!isValidAttendanceDay(dateStr)) {
-                showApologyMessage(`⚠️ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays.`, 'error');
+                showApologyMessage(`⚠️ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
                 return;
             }
             
@@ -2604,7 +2629,7 @@
             
             if (!isValidAttendanceDay(date)) {
                 const dayName = getDayName(date);
-                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays.`, 'error');
+                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
                 return;
             }
             
@@ -2630,7 +2655,7 @@
             
             if (!isValidAttendanceDay(date)) {
                 const dayName = getDayName(date);
-                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Mondays, Tuesdays, and Thursdays.`, 'error');
+                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
                 return;
             }
             
@@ -2948,6 +2973,7 @@
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.href = '../login.html'; return; }
+            await loadSpecialMeetingsCache();
             await loadMemberData();
             await loadPaymentSettings();
             await checkRegistrationFee();

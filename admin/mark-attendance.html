@@ -241,6 +241,25 @@
             color: var(--text-primary);
         }
 
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+            z-index: 200; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--surface); border-radius: 20px;
+            padding: 24px; max-width: 520px; width: 100%;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-header h3 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .modal-close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-tertiary); }
+
         .apology-warning {
             background: var(--amber-light);
             border: 1px solid var(--amber);
@@ -637,6 +656,9 @@
             <button id="loadMembersBtn" class="action-btn btn-primary">
                 <i class="ti ti-refresh"></i> Load members
             </button>
+            <button id="specialMeetingsBtn" class="action-btn btn-outline" onclick="openSpecialMeetingsModal()">
+                <i class="ti ti-calendar-plus"></i> Special Meetings
+            </button>
         </div>
 
         <div class="apology-warning" id="apologyWarning">
@@ -754,6 +776,47 @@
     <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
 </nav>
 
+<!-- Special Meetings Modal -->
+<div class="modal-overlay" id="specialMeetingsModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="ti ti-calendar-plus" style="color:var(--indigo);"></i> Special Meetings</h3>
+            <button class="modal-close-btn" onclick="closeSpecialMeetingsModal()">&times;</button>
+        </div>
+
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+            Add impromptu meetings here. Attendance can be marked on these dates even if they're not Mondays, Tuesdays, or Thursdays.
+        </p>
+
+        <div style="background:var(--bg); border-radius:12px; padding:14px; margin-bottom:16px;">
+            <div class="form-group" style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:5px;">
+                    <i class="ti ti-calendar"></i> Meeting Date
+                </label>
+                <input type="date" id="specialMeetingDate" class="form-input">
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:5px;">
+                    <i class="ti ti-message"></i> Reason (Optional)
+                </label>
+                <input type="text" id="specialMeetingReason" class="form-input" placeholder="e.g., Festival prep rehearsal">
+            </div>
+            <button class="action-btn btn-primary" style="width:100%; justify-content:center;" onclick="addSpecialMeeting()">
+                <i class="ti ti-plus"></i> Add Special Meeting
+            </button>
+        </div>
+
+        <h4 style="font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:10px;">
+            Upcoming Special Meetings
+        </h4>
+        <div id="specialMeetingsList" style="max-height:200px; overflow-y:auto;">
+            <div class="empty-state" style="padding:20px; font-size:12px;">
+                <i class="ti ti-loader"></i> Loading...
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -767,21 +830,151 @@
     let pendingApologiesCount = 0;
     let savedScrollTop = 0;
 
-    // ── NEW: Rehearsal Days Configuration ──
-    const VALID_DAYS = ['Monday', 'Tuesday', 'Thursday'];
+    // ── NEW: Rehearsal Days + Special Meetings ──
+    const REGULAR_DAYS = ['Monday', 'Tuesday', 'Thursday'];
     const SESSION = 'Evening';
     const SESSION_LABEL = 'Evening (4:00 PM – 7:00 PM)';
 
+    // Cache for special meeting dates
+    let specialMeetingsCache = new Set();
+
+    async function loadSpecialMeetings() {
+        try {
+            const { data } = await sb
+                .from('special_meetings')
+                .select('meeting_date')
+                .gte('meeting_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+            
+            specialMeetingsCache = new Set((data || []).map(s => s.meeting_date));
+            console.log('📅 Special meetings loaded:', [...specialMeetingsCache]);
+        } catch (e) {
+            console.warn('Failed to load special meetings:', e);
+        }
+    }
+
     function isValidAttendanceDay(date) {
         if (!date) return false;
+        if (specialMeetingsCache.has(date)) return true;
         const d = new Date(date);
         const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
-        return VALID_DAYS.includes(dayName);
+        return REGULAR_DAYS.includes(dayName);
+    }
+
+    function isSpecialMeeting(date) {
+        return specialMeetingsCache.has(date);
     }
 
     function getDayName(date) {
         if (!date) return '';
         return new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+    }
+
+    // ── SPECIAL MEETINGS MANAGEMENT ──
+    function openSpecialMeetingsModal() {
+        document.getElementById('specialMeetingsModal').classList.add('open');
+        document.getElementById('specialMeetingDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('specialMeetingReason').value = '';
+        loadSpecialMeetingsList();
+    }
+
+    function closeSpecialMeetingsModal() {
+        document.getElementById('specialMeetingsModal').classList.remove('open');
+    }
+
+    async function loadSpecialMeetingsList() {
+        const container = document.getElementById('specialMeetingsList');
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const { data, error } = await sb
+                .from('special_meetings')
+                .select('*')
+                .gte('meeting_date', today)
+                .order('meeting_date', { ascending: true });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div class="empty-state" style="padding:20px; font-size:12px;">
+                    <i class="ti ti-calendar-off"></i> No special meetings scheduled
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = data.map(m => {
+                const dayName = getDayName(m.meeting_date);
+                return `
+                    <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--indigo-light); border-radius:10px; margin-bottom:6px;">
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:600; color:var(--indigo);">
+                                ⭐ ${m.meeting_date} (${dayName})
+                            </div>
+                            ${m.reason ? `<div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">${esc(m.reason)}</div>` : ''}
+                        </div>
+                        <button onclick="removeSpecialMeeting('${m.id}', '${m.meeting_date}')" 
+                                style="background:var(--red-light); color:var(--red); border:none; padding:5px 10px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer;">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        } catch (err) {
+            container.innerHTML = `<div class="empty-state" style="padding:20px; font-size:12px; color:var(--red);">
+                <i class="ti ti-alert-circle"></i> Error: ${esc(err.message)}
+            </div>`;
+        }
+    }
+
+    async function addSpecialMeeting() {
+        const date = document.getElementById('specialMeetingDate').value;
+        const reason = document.getElementById('specialMeetingReason').value.trim();
+
+        if (!date) { showToast('Please select a date', 'error'); return; }
+
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            const { data: existing } = await sb.from('special_meetings').select('id').eq('meeting_date', date).maybeSingle();
+
+            if (existing) {
+                showToast('⚠️ This date is already a special meeting', 'error');
+                return;
+            }
+
+            const { error } = await sb.from('special_meetings').insert({
+                meeting_date: date,
+                session: SESSION,
+                reason: reason || null,
+                created_by: user?.email || 'admin'
+            });
+
+            if (error) throw error;
+
+            showToast(`✅ Special meeting added: ${date}`, 'success');
+            await loadSpecialMeetings();
+            await loadSpecialMeetingsList();
+            document.getElementById('specialMeetingReason').value = '';
+
+            if (document.getElementById('attendanceDate').value === date) {
+                await checkPendingApologies(date);
+            }
+        } catch (err) {
+            showToast(`Error: ${err.message}`, 'error');
+        }
+    }
+
+    async function removeSpecialMeeting(id, date) {
+        if (!confirm(`Remove special meeting for ${date}?`)) return;
+        try {
+            const { error } = await sb.from('special_meetings').delete().eq('id', id);
+            if (error) throw error;
+            showToast('✅ Special meeting removed', 'info');
+            await loadSpecialMeetings();
+            await loadSpecialMeetingsList();
+            if (document.getElementById('attendanceDate').value === date) {
+                await checkPendingApologies(date);
+            }
+        } catch (err) {
+            showToast(`Error: ${err.message}`, 'error');
+        }
     }
 
     function esc(s) {
@@ -870,7 +1063,7 @@
             document.getElementById('apologyCountText').textContent = 'are';
             document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
             document.querySelector('#apologyWarning .text p').innerHTML = 
-                `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong>. ${dayName} is not a rehearsal day.`;
+                `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
             document.getElementById('saveAttendanceBtn').disabled = true;
             document.getElementById('saveDisabledReason').style.display = 'inline';
             return;
@@ -1078,7 +1271,7 @@
 
         if (!isValidAttendanceDay(date)) {
             const dayName = getDayName(date);
-            showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Mondays, Tuesdays, and Thursdays.`, 'error');
+            showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
             return;
         }
 
@@ -1277,12 +1470,12 @@
         if (date) {
             if (!isValidAttendanceDay(date)) {
                 const dayName = getDayName(date);
-                showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Mondays, Tuesdays, and Thursdays.`, 'error');
+                showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
                 const warningEl = document.getElementById('apologyWarning');
                 warningEl.classList.add('show');
                 document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
                 document.querySelector('#apologyWarning .text p').innerHTML = 
-                    `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong>. ${dayName} is not a rehearsal day.`;
+                    `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
                 document.getElementById('saveAttendanceBtn').disabled = true;
                 document.getElementById('saveDisabledReason').style.display = 'inline';
             } else {
@@ -1296,6 +1489,7 @@
         tick();
         setInterval(tick, 1000);
         await loadUserInfo();
+        await loadSpecialMeetings();
         
         const date = document.getElementById('attendanceDate').value;
         if (date) {
@@ -1305,7 +1499,7 @@
                 warningEl.classList.add('show');
                 document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
                 document.querySelector('#apologyWarning .text p').innerHTML = 
-                    `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong>. ${dayName} is not a rehearsal day.`;
+                    `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
                 document.getElementById('saveAttendanceBtn').disabled = true;
                 document.getElementById('saveDisabledReason').style.display = 'inline';
             } else {
@@ -1322,6 +1516,10 @@
     window.markAll = markAll;
     window.clearAllSelections = clearAllSelections;
     window.logout = logout;
+    window.openSpecialMeetingsModal = openSpecialMeetingsModal;
+    window.closeSpecialMeetingsModal = closeSpecialMeetingsModal;
+    window.addSpecialMeeting = addSpecialMeeting;
+    window.removeSpecialMeeting = removeSpecialMeeting;
 </script>
 </body>
 </html>

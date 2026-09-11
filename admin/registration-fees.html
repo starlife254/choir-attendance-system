@@ -288,11 +288,16 @@
             <button class="fee-type-card" data-type="new" onclick="selectFeeType('new')">
                 <div class="icon">🆕</div>
                 <div class="title">New Member</div>
+                <div class="amount">KSh 200</div>
+            </button>
+            <button class="fee-type-card" data-type="existing" onclick="selectFeeType('existing')">
+                <div class="icon">👤</div>
+                <div class="title">Existing Member</div>
                 <div class="amount">KSh 100</div>
             </button>
             <button class="fee-type-card" data-type="renewal" onclick="selectFeeType('renewal')">
                 <div class="icon">🔄</div>
-                <div class="title">Existing Member</div>
+                <div class="title">Renewal</div>
                 <div class="amount">KSh 50</div>
             </button>
         </div>
@@ -347,7 +352,8 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const NEW_MEMBER_FEE = 100;
+    const NEW_MEMBER_FEE = 200;
+    const EXISTING_MEMBER_FEE = 100;
     const RENEWAL_FEE = 50;
 
     let allMembers = [];
@@ -490,6 +496,7 @@
 
             let feeTypeLabel = '—';
             if (fee?.fee_type === 'new') feeTypeLabel = '<span class="badge badge-submitted">🆕 New</span>';
+            if (fee?.fee_type === 'existing') feeTypeLabel = '<span class="badge" style="background:#e0f2fe; color:#0369a1;">👤 Existing</span>';
             if (fee?.fee_type === 'renewal') feeTypeLabel = '<span class="badge badge-pending">🔄 Renewal</span>';
 
             let actions = '';
@@ -553,11 +560,25 @@
         document.getElementById('sendInvoiceBtn').disabled = false;
     }
 
+    function getFeeAmount(feeType) {
+        if (feeType === 'new') return NEW_MEMBER_FEE;
+        if (feeType === 'existing') return EXISTING_MEMBER_FEE;
+        if (feeType === 'renewal') return RENEWAL_FEE;
+        return 0;
+    }
+
+    function getFeeLabel(feeType) {
+        if (feeType === 'new') return 'New Member';
+        if (feeType === 'existing') return 'Existing Member';
+        if (feeType === 'renewal') return 'Renewal';
+        return '—';
+    }
+
     async function sendInvoice() {
         if (!currentMember || !currentFeeType) { showToast('Please select a fee type', 'error'); return; }
 
         const year = document.getElementById('yearFilter').value;
-        const amount = currentFeeType === 'new' ? NEW_MEMBER_FEE : RENEWAL_FEE;
+        const amount = getFeeAmount(currentFeeType);
 
         const btn = document.getElementById('sendInvoiceBtn');
         const originalText = btn.innerHTML;
@@ -638,7 +659,7 @@
 
         document.getElementById('confirmMemberName').textContent = feeMap[memberId] ? 
             allMembers.find(m => m.member_id === memberId)?.name : '—';
-        document.getElementById('confirmFeeType').textContent = fee.fee_type === 'new' ? '🆕 New Member' : '🔄 Renewal';
+        document.getElementById('confirmFeeType').textContent = getFeeLabel(fee.fee_type);
         document.getElementById('confirmAmount').textContent = fmt(fee.amount);
         document.getElementById('confirmReference').textContent = fee.reference || 'N/A';
 
@@ -678,7 +699,7 @@
                 amount: fee.amount,
                 date: new Date().toISOString().split('T')[0],
                 member_id: memberId,
-                description: `${fee.fee_type === 'new' ? 'New member' : 'Renewal'} registration fee - ${feeMap[memberId] ? allMembers.find(m => m.member_id === memberId)?.name : 'Member'} (${fee.academic_year})`,
+                description: `${getFeeLabel(fee.fee_type)} registration fee - ${feeMap[memberId] ? allMembers.find(m => m.member_id === memberId)?.name : 'Member'} (${fee.academic_year})`,
                 status: 'confirmed',
                 reference: fee.reference || null
             });

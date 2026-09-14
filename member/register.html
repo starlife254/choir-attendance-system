@@ -1,274 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Register | Choir Member Portal</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- In ALL HTML files, use this -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>𝄞</text></svg>">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Students' Choir — Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/cache-helper.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: white;
-            border-radius: 28px;
-            padding: 35px 30px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
-            animation: fadeIn 0.5s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo .emoji { font-size: 55px; margin-bottom: 10px; }
-        .logo h1 { color: #333; font-size: 24px; }
-        .logo p { color: #666; font-size: 13px; margin-top: 5px; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; color: #555; font-size: 14px; }
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 16px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        input:focus { outline: none; border-color: #667eea; }
-        .register-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 40px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .register-btn:active { transform: scale(0.98); }
-        .register-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-        .message {
-            padding: 12px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-            font-size: 14px;
-        }
-        .message.error { display: block; background: #fee2e2; color: #991b1b; }
-        .message.success { display: block; background: #d1fae5; color: #065f46; }
-        .message.info { display: block; background: #e0f2fe; color: #0369a1; }
-        .login-link { text-align: center; margin-top: 20px; font-size: 14px; }
-        .login-link a { color: #667eea; text-decoration: none; font-weight: bold; }
-        .info-box {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: #166534;
-        }
-        @media (max-width: 480px) { .container { padding: 25px 20px; } }
-    </style>
+<style>
+:root{
+  --primary:#2563eb;--primary-dark:#1d4ed8;--primary-light:#dbeafe;
+  --bg:#f8fafc;--surface:#fff;--text:#0f172a;--muted:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Inter,sans-serif;background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  flex-direction:column;
+}
+.card{
+  background:var(--surface);width:100%;max-width:420px;border-radius:20px;
+  padding:40px 32px 32px;box-shadow:0 25px 50px rgba(0,0,0,.25);
+}
+.logo{
+  width:64px;height:64px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+}
+.logo img{
+  width:300%;
+  height:190%;
+  object-fit:contain;
+  display:block;
+}
+h1{font-size:22px;text-align:center;color:var(--text);margin-bottom:6px}
+.sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:20px}
+.note{
+  background:var(--primary-light);color:var(--primary-dark);
+  border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;
+  margin-bottom:20px;
+}
+label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+input{
+  width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;
+  font-size:14px;font-family:inherit;transition:.2s;margin-bottom:16px;
+}
+input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+button{
+  width:100%;padding:13px;background:var(--primary);color:#fff;border:none;
+  border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;
+  font-family:inherit;
+}
+button:hover{background:var(--primary-dark)}
+button:disabled{opacity:.6;cursor:not-allowed}
+.msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+.msg.err{background:#fee2e2;color:#991b1b;display:block}
+.msg.ok{background:#d1fae5;color:#065f46;display:block}
+.msg.info{background:#e0f2fe;color:#0369a1;display:block}
+.foot{text-align:center;font-size:13px;color:var(--muted);margin-top:20px}
+.foot a{color:var(--primary);text-decoration:none;font-weight:600}
+.foot a:hover{text-decoration:underline}
+
+.page-credit{
+  margin-top:18px;
+  text-align:center;
+  font-size:12.5px;
+  color:rgba(255,255,255,.85);
+  font-weight:500;
+  letter-spacing:.2px;
+}
+.page-credit strong{color:#fff;font-weight:700}
+.page-credit i{font-size:14px;vertical-align:-2px;margin-right:3px}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <div class="emoji">🎵</div>
-            <h1>Create Account</h1>
-            <p>University of Embu Students' Choir</p>
-        </div>
+<form class="card" id="registerForm">
+  <div class="logo"><img src="https://embuni.ac.ke/wp-content/uploads/2026/02/logo2-1_increased-1.png" alt="University of Embu logo"></div>
+  <h1>Create Account</h1>
+  <p class="sub">University of Embu Students' Choir</p>
 
-        <div id="message" class="message"></div>
+  <div class="note">
+    <i class="ti ti-info-circle"></i> Use the email address provided by the choir administrator. If it isn't recognized, contact the choir secretary.
+  </div>
 
-        <div class="info-box">
-            💡 <strong>Note:</strong><br>
-            Use the email address provided by the choir administrator.<br>
-            If your email is not recognized, please contact the choir secretary.
-        </div>
+  <div class="msg" id="msg"></div>
 
-        <form id="registerForm">
-            <div class="form-group">
-                <label>📧 Email Address</label>
-                <input type="email" id="email" required placeholder="Enter your email address">
-            </div>
-            <div class="form-group">
-                <label>🔐 Password</label>
-                <input type="password" id="password" required placeholder="Minimum 6 characters">
-            </div>
-            <div class="form-group">
-                <label>✓ Confirm Password</label>
-                <input type="password" id="confirmPassword" required placeholder="Re-enter your password">
-            </div>
-            <button type="submit" class="register-btn">🎉 Create Account</button>
-        </form>
+  <label>Email</label>
+  <input type="email" id="email" required placeholder="Fname.Lname@choir.com" autocomplete="email">
+  <label>Password</label>
+  <input type="password" id="password" required placeholder="Minimum 6 characters" autocomplete="new-password">
+  <label>Confirm Password</label>
+  <input type="password" id="confirmPassword" required placeholder="Re-enter your password" autocomplete="new-password">
+  <button type="submit" id="btn">Create Account</button>
+  <p class="foot">Already have an account? <a href="../login.html">Login here</a></p>
+</form>
 
-        <div class="login-link">
-    Already have an account? <a href="../login.html">Login here</a>
-</div>
-    </div>
+<p class="page-credit">
+  <i class="ti ti-bolt"></i> Powered by <strong>UoEM StarLife</strong>
+</p>
 
-    <script>
-        const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script>
+const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const messageDiv = document.getElementById('message');
-            
-            messageDiv.style.display = 'none';
-            
-            // Validate
-            if (password !== confirmPassword) {
-                showMessage('Passwords do not match!', 'error');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showMessage('Password must be at least 6 characters', 'error');
-                return;
-            }
-            
-            const submitBtn = document.querySelector('.register-btn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = '⏳ Checking records...';
-            submitBtn.disabled = true;
-            
-            try {
-                // Step 1: Check if email exists in members table
-                showMessage('🔍 Verifying your email...', 'info');
-                
-                const { data: member, error: memberError } = await supabaseClient
-                    .from('members')
-                    .select('member_id, name, voice_part, email')
-                    .eq('email', email)
-                    .single();
-                
-                if (memberError || !member) {
-                    showMessage('❌ Email not found in choir records. Please contact the choir administrator to register your email.', 'error');
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                    return;
-                }
-                
-                showMessage(`✅ Welcome ${member.name}! Creating your account...`, 'info');
-                
-                // Step 2: Check if already linked
-                const { data: existingLink } = await supabaseClient
-                    .from('user_members')
-                    .select('user_id')
-                    .eq('member_id', member.member_id)
-                    .maybeSingle();
-                
-                if (existingLink) {
-                    // Check if the user exists in auth
-                    const { data: existingAuthUser } = await supabaseClient.auth.admin.getUserById(existingLink.user_id);
-                    if (existingAuthUser?.user) {
-                        showMessage('⚠️ An account already exists for this email. Please <a href="login.html" style="color:#667eea;">login instead</a>.', 'error');
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-                        return;
-                    }
-                }
-                
-                // Step 3: Create Supabase Auth user
-                showMessage('📧 Creating your account...', 'info');
-                
-                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: {
-                            full_name: member.name,
-                            voice_part: member.voice_part,
-                            member_id: member.member_id
-                        }
-                    }
-                });
-                
-                if (authError) throw authError;
-                
-                if (authData.user) {
-                    // Step 4: Link user to member in user_members table
-                    showMessage('🔗 Linking your account...', 'info');
-                    
-                    const { error: linkError } = await supabaseClient
-                        .from('user_members')
-                        .upsert({
-                            user_id: authData.user.id,
-                            member_id: member.member_id
-                        }, { onConflict: 'user_id,member_id' });
-                    
-                    if (linkError) {
-                        console.error('Link error:', linkError);
-                        showMessage('⚠️ Account created but link failed. Please contact admin.', 'error');
-                    } else {
-                        console.log('✅ User linked successfully');
-                    }
-                    
-                    // Step 5: Create user profile
-                    const { error: profileError } = await supabaseClient
-                        .from('user_profiles')
-                        .upsert({
-                            user_id: authData.user.id,
-                            member_id: member.member_id,
-                            updated_at: new Date()
-                        }, { onConflict: 'user_id' });
-                    
-                    if (profileError) {
-                        console.error('Profile error:', profileError);
-                    }
-                    
-                    showMessage(`✅ Account created successfully! Welcome ${member.name}! Redirecting to login...`, 'success');
-                    
-                    setTimeout(() => {
-                       window.location.href = '../login.html';
-                    }, 2000);
-                }
-                
-            } catch (error) {
-                console.error('Registration error:', error);
-                
-                if (error.message.includes('already registered')) {
-                    showMessage('⚠️ An account with this email already exists. Please <a href="login.html" style="color:#667eea;">login instead</a>.', 'error');
-                } else if (error.message.includes('Database error')) {
-                    showMessage('❌ Database error. Please contact the choir administrator.', 'error');
-                } else {
-                    showMessage('❌ Registration failed: ' + error.message, 'error');
-                }
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-        
-        function showMessage(msg, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.innerHTML = msg;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
+const $ = s => document.querySelector(s);
+const msg = $("#msg");
+function show(text, cls="err"){ msg.innerHTML = text; msg.className = "msg " + cls; }
+
+$("#registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = $("#email").value.trim().toLowerCase();
+  const password = $("#password").value;
+  const confirmPassword = $("#confirmPassword").value;
+  const btn = $("#btn");
+
+  msg.className = "msg";
+
+  if (password !== confirmPassword) {
+    show("Passwords do not match!");
+    return;
+  }
+  if (password.length < 6) {
+    show("Password must be at least 6 characters");
+    return;
+  }
+
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Checking records…";
+
+  try {
+    show("Verifying your email…", "info");
+
+    const { data: member, error: memberError } = await sb
+      .from('members')
+      .select('member_id, name, voice_part, email')
+      .eq('email', email)
+      .single();
+
+    if (memberError || !member) {
+      show("Email not found in choir records. Please contact the choir administrator.");
+      btn.disabled = false; btn.textContent = originalText;
+      return;
+    }
+
+    show(`Welcome ${member.name}! Creating your account…`, "info");
+
+    const { data: existingLink } = await sb
+      .from('user_members')
+      .select('user_id')
+      .eq('member_id', member.member_id)
+      .maybeSingle();
+
+    if (existingLink) {
+      const { data: existingAuthUser } = await sb.auth.admin.getUserById(existingLink.user_id);
+      if (existingAuthUser?.user) {
+        show('An account already exists for this email. Please <a href="../login.html" style="color:#2563eb;">login instead</a>.');
+        btn.disabled = false; btn.textContent = originalText;
+        return;
+      }
+    }
+
+    show("Creating your account…", "info");
+
+    const { data: authData, error: authError } = await sb.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          full_name: member.name,
+          voice_part: member.voice_part,
+          member_id: member.member_id
         }
-    </script>
+      }
+    });
+
+    if (authError) throw authError;
+
+    if (authData.user) {
+      show("Linking your account…", "info");
+
+      const { error: linkError } = await sb
+        .from('user_members')
+        .upsert({
+          user_id: authData.user.id,
+          member_id: member.member_id
+        }, { onConflict: 'user_id,member_id' });
+
+      if (linkError) {
+        console.error('Link error:', linkError);
+        show('Account created but link failed. Please contact admin.');
+      }
+
+      const { error: profileError } = await sb
+        .from('user_profiles')
+        .upsert({
+          user_id: authData.user.id,
+          member_id: member.member_id,
+          updated_at: new Date()
+        }, { onConflict: 'user_id' });
+
+      if (profileError) {
+        console.error('Profile error:', profileError);
+      }
+
+      show(`Account created successfully! Welcome ${member.name}! Redirecting to login…`, "ok");
+
+      setTimeout(() => {
+        window.location.href = '../login.html';
+      }, 2000);
+      return;
+    }
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    if (error.message?.includes('already registered')) {
+      show('An account with this email already exists. Please <a href="../login.html" style="color:#2563eb;">login instead</a>.');
+    } else if (error.message?.includes('Database error')) {
+      show('Database error. Please contact the choir administrator.');
+    } else {
+      show('Registration failed: ' + error.message);
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+});
+</script>
 </body>
 </html>

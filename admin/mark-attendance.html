@@ -785,7 +785,7 @@
         </div>
 
         <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
-            Add impromptu meetings here. Attendance can be marked on these dates even if they're not Mondays, Tuesdays, or Thursdays.
+            Add impromptu meetings here. Attendance can be marked on these dates even if they're not Tuesdays, Wednesdays, or Fridays.
         </p>
 
         <div style="background:var(--bg); border-radius:12px; padding:14px; margin-bottom:16px;">
@@ -831,7 +831,7 @@
     let savedScrollTop = 0;
 
     // ── NEW: Rehearsal Days + Special Meetings ──
-    const REGULAR_DAYS = ['Monday', 'Tuesday', 'Thursday'];
+    const REGULAR_DAYS = ['Tuesday', 'Wednesday', 'Friday'];
     const SESSION = 'Evening';
     const SESSION_LABEL = 'Evening (4:00 PM – 7:00 PM)';
 
@@ -1063,7 +1063,7 @@
             document.getElementById('apologyCountText').textContent = 'are';
             document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
             document.querySelector('#apologyWarning .text p').innerHTML = 
-                `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
+                `Attendance can only be marked on <strong>Tuesdays, Wednesdays, and Fridays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
             document.getElementById('saveAttendanceBtn').disabled = true;
             document.getElementById('saveDisabledReason').style.display = 'inline';
             return;
@@ -1271,7 +1271,7 @@
 
         if (!isValidAttendanceDay(date)) {
             const dayName = getDayName(date);
-            showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
+            showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Tuesdays, Wednesdays, and Fridays (or special meetings).`, 'error');
             return;
         }
 
@@ -1470,12 +1470,12 @@
         if (date) {
             if (!isValidAttendanceDay(date)) {
                 const dayName = getDayName(date);
-                showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
+                showToast(`⚠️ ${dayName} is not a rehearsal day. Attendance can only be marked on Tuesdays, Wednesdays, and Fridays (or special meetings).`, 'error');
                 const warningEl = document.getElementById('apologyWarning');
                 warningEl.classList.add('show');
                 document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
                 document.querySelector('#apologyWarning .text p').innerHTML = 
-                    `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
+                    `Attendance can only be marked on <strong>Tuesdays, Wednesdays, and Fridays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
                 document.getElementById('saveAttendanceBtn').disabled = true;
                 document.getElementById('saveDisabledReason').style.display = 'inline';
             } else {
@@ -1499,7 +1499,7 @@
                 warningEl.classList.add('show');
                 document.querySelector('#apologyWarning .text h3').textContent = '⚠️ Not a Rehearsal Day';
                 document.querySelector('#apologyWarning .text p').innerHTML = 
-                    `Attendance can only be marked on <strong>Mondays, Tuesdays, and Thursdays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
+                    `Attendance can only be marked on <strong>Tuesdays, Wednesdays, and Fridays</strong> (or special meetings). ${dayName} is not a rehearsal day.`;
                 document.getElementById('saveAttendanceBtn').disabled = true;
                 document.getElementById('saveDisabledReason').style.display = 'inline';
             } else {

@@ -1420,7 +1420,7 @@
         let honorees = [];
 
         // ── Regular rehearsal days ──
-        const REGULAR_DAYS = ['Monday', 'Tuesday', 'Thursday'];
+        const REGULAR_DAYS = ['Tuesday', 'Wednesday', 'Friday'];
         const SESSION = 'Evening';
 
         // Cache for special meetings
@@ -2527,7 +2527,7 @@
             if (!isValidAttendanceDay(today.toISOString().split('T')[0])) {
                 select.innerHTML = '<option disabled>No sessions available</option>';
                 warningDiv.style.display = 'block';
-                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays (or special meetings).`;
+                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Late apologies can only be submitted on Tuesdays, Wednesdays, and Fridays (or special meetings).`;
                 return;
             }
             
@@ -2555,7 +2555,7 @@
             if (!isValidAttendanceDay(date)) {
                 select.innerHTML = '<option disabled>No sessions available</option>';
                 warningDiv.style.display = 'block';
-                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Mondays, Tuesdays, and Thursdays (or special meetings).`;
+                warningDiv.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Tuesdays, Wednesdays, and Fridays (or special meetings).`;
                 return;
             }
             
@@ -2580,7 +2580,7 @@
             const dateStr = today.toISOString().split('T')[0];
             
             if (!isValidAttendanceDay(dateStr)) {
-                showApologyMessage(`⚠️ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
+                showApologyMessage(`⚠️ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Tuesdays, Wednesdays, and Fridays (or special meetings).`, 'error');
                 return;
             }
             
@@ -2629,7 +2629,7 @@
             
             if (!isValidAttendanceDay(date)) {
                 const dayName = getDayName(date);
-                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
+                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Late apologies can only be submitted on Tuesdays, Wednesdays, and Fridays (or special meetings).`, 'error');
                 return;
             }
             
@@ -2655,7 +2655,7 @@
             
             if (!isValidAttendanceDay(date)) {
                 const dayName = getDayName(date);
-                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Mondays, Tuesdays, and Thursdays (or special meetings).`, 'error');
+                showApologyMessage(`❌ ${dayName} is not a rehearsal day. Absence apologies can only be submitted for Tuesdays, Wednesdays, and Fridays (or special meetings).`, 'error');
                 return;
             }
             

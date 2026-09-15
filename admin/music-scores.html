@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Music Scores | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/cache-helper.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5; --indigo-light: #eef2ff;
+            --green: #10b981; --green-light: #d1fae5;
+            --amber: #f59e0b; --amber-light: #fef9c3;
+            --red: #ef4444; --red-light: #fee2e2;
+            --purple: #7c3aed; --purple-light: #ede9fe;
+            --cyan: #06b6d4; --cyan-light: #cffafe;
+            --bg: #f8fafc; --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; overflow: hidden; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        /* MAIN */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        /* CONTENT */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* HERO */
+        .hero-banner { background: linear-gradient(135deg, var(--indigo) 0%, var(--purple) 100%); border-radius: 20px; padding: 24px 28px; color: #fff; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; position: relative; overflow: hidden; }
+        .hero-banner::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+        .hero-banner h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .hero-banner p { font-size: 13px; opacity: 0.85; }
+
+        /* KPI */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+        .kpi-card.indigo::before { background: var(--indigo); }
+        .kpi-card.green::before  { background: var(--green); }
+        .kpi-card.amber::before  { background: var(--amber); }
+        .kpi-card.cyan::before   { background: var(--cyan); }
+        .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .kpi-label i { font-size: 14px; }
+        .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; }
+        .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+
+        /* CONTROLS */
+        .controls-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .filter-select, .search-input { padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; font-family: inherit; outline: none; transition: border-color .15s; color: var(--text-primary); }
+        .filter-select:focus, .search-input:focus { border-color: var(--indigo); }
+        .search-box { position: relative; flex: 1; min-width: 200px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text-tertiary); }
+        .search-input { width: 100%; padding-left: 38px; }
+
+        .action-btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; font-family: inherit; white-space: nowrap; }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-amber { background: var(--amber); color: #fff; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-outline { background: transparent; border: 0.5px solid var(--border); color: var(--text-primary); }
+
+        /* SCORES GRID */
+        .scores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+
+        .score-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform .18s, box-shadow .18s; position: relative; display: flex; flex-direction: column; }
+        .score-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+        .score-card.unpublished { opacity: 0.65; }
+
+        .score-thumb { width: 100%; height: 180px; background: linear-gradient(135deg, #e0e7ff, #c7d2fe); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .score-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .score-thumb .placeholder { font-size: 52px; color: var(--indigo); opacity: 0.4; }
+
+        .status-badge { position: absolute; top: 10px; right: 10px; padding: 4px 12px; border-radius: 40px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .status-published { background: var(--green); color: #fff; }
+        .status-draft { background: var(--amber); color: #fff; }
+        .status-new { background: var(--cyan); color: #fff; }
+
+        .score-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; }
+        .score-title { font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .score-composer { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+        .score-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+        .chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px; border-radius: 40px; font-size: 10px; font-weight: 600; }
+        .chip-indigo { background: var(--indigo-light); color: var(--indigo); }
+        .chip-purple { background: var(--purple-light); color: var(--purple); }
+        .chip-green { background: var(--green-light); color: #065f46; }
+        .chip-gray { background: var(--bg); color: var(--text-secondary); border: 0.5px solid var(--border); }
+        .chip-amber { background: var(--amber-light); color: #854d0e; }
+
+        .score-meta { font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 8px; border-top: 0.5px dashed var(--border); flex-wrap: wrap; }
+        .score-meta span { display: flex; align-items: center; gap: 4px; }
+
+        .score-actions { padding: 10px 16px 14px; display: flex; gap: 6px; border-top: 0.5px solid var(--border); }
+        .icon-btn { flex: 1; padding: 7px 10px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: opacity .15s; font-family: inherit; }
+        .icon-btn:hover { opacity: .85; }
+        .icon-btn.view { background: var(--indigo-light); color: var(--indigo); }
+        .icon-btn.edit { background: var(--amber-light); color: #854d0e; }
+        .icon-btn.delete { background: var(--red-light); color: #991b1b; }
+
+        /* EMPTY */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); font-size: 13px; grid-column: 1 / -1; background: var(--surface); border-radius: 16px; border: 1px dashed var(--border); }
+        .empty-state i { font-size: 44px; display: block; margin-bottom: 12px; color: var(--indigo); opacity: 0.4; }
+        .empty-state h3 { font-size: 16px; color: var(--text-primary); margin-bottom: 6px; }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--surface); border-radius: 20px; padding: 26px 24px; max-width: 560px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 72px rgba(0,0,0,0.25); animation: modalIn .25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .modal-header h3 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .modal-close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-tertiary); line-height: 1; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-secondary); font-size: 12px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; background: var(--bg); font-family: inherit; color: var(--text-primary); outline: none; transition: border-color .15s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--indigo); }
+        .form-textarea { resize: vertical; min-height: 70px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* UPLOAD ZONE */
+        .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 30px 20px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; background: var(--bg); position: relative; }
+        .upload-zone:hover, .upload-zone.dragging { border-color: var(--indigo); background: var(--indigo-light); }
+        .upload-zone.has-file { border-color: var(--green); background: var(--green-light); border-style: solid; }
+        .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .upload-zone .uz-icon { font-size: 40px; color: var(--indigo); margin-bottom: 10px; display: block; }
+        .upload-zone .uz-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .upload-zone .uz-hint { font-size: 12px; color: var(--text-secondary); }
+        .upload-zone .uz-file { font-size: 13px; color: #065f46; font-weight: 600; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; word-break: break-all; }
+
+        .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 10px; display: none; }
+        .progress-bar.show { display: block; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--indigo), var(--purple)); width: 0%; transition: width .3s ease; }
+
+        .upload-status { font-size: 12px; color: var(--text-secondary); margin-top: 6px; display: none; text-align: center; }
+        .upload-status.show { display: block; }
+
+        /* TOAST */
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text-primary); color: #fff; padding: 12px 22px; border-radius: 40px; font-size: 13px; font-weight: 500; z-index: 300; opacity: 0; transition: opacity .22s, transform .22s; pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 90vw; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error { background: #991b1b; }
+        .toast.info { background: var(--indigo); }
+
+        /* PREVIEW MODAL */
+        .preview-modal .modal-box { max-width: 900px; padding: 0; }
+        .preview-frame { width: 100%; height: 80vh; border: none; border-radius: 20px; }
+
+        /* ══════════════════════════════════════════
+           RESPONSIVE — MOBILE OPTIMIZED
+           ══════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 14px 12px 80px; }
+            .topbar { padding: 0 14px; height: 52px; }
+            .topbar-left h2 { font-size: 14px; }
+            .topbar-left p { font-size: 11px; }
+            .hero-banner { padding: 16px 18px; border-radius: 16px; margin-bottom: 16px; }
+            .hero-banner h3 { font-size: 16px; }
+            .hero-banner p { font-size: 11px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+            .kpi-card { padding: 12px 12px; border-radius: 12px; }
+            .kpi-value { font-size: 20px; }
+            .kpi-label { font-size: 11px; }
+            .kpi-meta { font-size: 10px; }
+            .controls-row { gap: 6px; margin-bottom: 14px; }
+            .search-input, .filter-select { font-size: 12px; padding: 7px 10px; }
+            .search-input { padding-left: 34px; }
+
+            /* 2-column grid on mobile */
+            .scores-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+            /* Compact cards */
+            .score-card { border-radius: 12px; }
+            .score-thumb { height: 110px; }
+            .score-thumb .placeholder { font-size: 36px; }
+            .status-badge { font-size: 8px; padding: 2px 8px; top: 6px; right: 6px; }
+            .score-body { padding: 8px 10px; }
+            .score-title { font-size: 12px; line-height: 1.25; margin-bottom: 3px; -webkit-line-clamp: 2; }
+            .score-composer { font-size: 9.5px; margin-bottom: 5px; }
+            .score-badges { gap: 3px; margin-bottom: 5px; }
+            .chip { font-size: 8.5px; padding: 1px 7px; gap: 2px; }
+            .chip i { font-size: 9px; }
+            .score-meta { font-size: 9px; gap: 6px; padding-top: 5px; }
+            .score-meta i { font-size: 10px; }
+
+            /* Compact actions */
+            .score-actions { padding: 6px 8px 8px; gap: 4px; }
+            .icon-btn { padding: 5px 6px; font-size: 10px; gap: 3px; border-radius: 6px; }
+            .icon-btn i { font-size: 11px; }
+            /* Hide "View" label text on mobile, keep icon */
+            .icon-btn.view { flex: 0 0 auto; padding: 5px 8px; }
+            .icon-btn.view span { display: none; }
+            /* Edit keeps text, Delete is icon only */
+            .icon-btn.delete { flex: 0 0 auto; padding: 5px 8px; }
+
+            .form-row { grid-template-columns: 1fr; }
+            .modal-box { padding: 18px 14px; border-radius: 16px; }
+        }
+
+        @media (max-width: 380px) {
+            .scores-grid { gap: 8px; }
+            .score-thumb { height: 100px; }
+            .score-body { padding: 7px 8px; }
+            .score-title { font-size: 11px; }
+            .chip { font-size: 8px; padding: 1px 6px; }
+            .score-meta { font-size: 8.5px; gap: 5px; }
+            .icon-btn { padding: 4px 5px; font-size: 9px; }
+        }
+
+        button { cursor: pointer; touch-action: manipulation; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="music-scores.html" class="nav-item active"><i class="ti ti-music"></i> Music Scores</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance</a>
+        <a href="registration-fees.html" class="nav-item"><i class="ti ti-id-badge"></i> Registration Fees</a>
+
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="logout()"><i class="ti ti-logout"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="ti ti-menu-2"></i></button>
+            <div class="topbar-left">
+                <h2>🎼 Music Scores</h2>
+                <p>Upload and manage sheet music for the choir</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-chip" id="topTime">--:--</div>
+        </div>
+    </header>
+
+    <main class="content">
+
+        <div class="hero-banner">
+            <div>
+                <h3>📚 Choir Music Library</h3>
+                <p>Upload PDF scores — members can download them instantly from their portal</p>
+            </div>
+            <button class="action-btn" style="background:#fff;color:var(--indigo);" onclick="openUploadModal()">
+                <i class="ti ti-cloud-upload"></i> Upload Score
+            </button>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card indigo">
+                <div class="kpi-label"><i class="ti ti-files" style="color:var(--indigo)"></i> Total Scores</div>
+                <div class="kpi-value" id="kpiTotal">—</div>
+                <div class="kpi-meta">In the library</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-label"><i class="ti ti-check" style="color:var(--green)"></i> Published</div>
+                <div class="kpi-value" id="kpiPublished">—</div>
+                <div class="kpi-meta">Visible to members</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="kpi-label"><i class="ti ti-eye-off" style="color:var(--amber)"></i> Drafts</div>
+                <div class="kpi-value" id="kpiDrafts">—</div>
+                <div class="kpi-meta">Not visible</div>
+            </div>
+            <div class="kpi-card cyan">
+                <div class="kpi-label"><i class="ti ti-download" style="color:var(--cyan)"></i> Downloads</div>
+                <div class="kpi-value" id="kpiDownloads">—</div>
+                <div class="kpi-meta">All time</div>
+            </div>
+        </div>
+
+        <div class="controls-row">
+            <div class="search-box">
+                <i class="ti ti-search"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by title, composer, or tag…" oninput="filterScores()">
+            </div>
+            <select id="voiceFilter" class="filter-select" onchange="filterScores()">
+                <option value="all">All voice parts</option>
+                <option value="All">All voices</option>
+                <option value="Soprano">Soprano</option>
+                <option value="Alto">Alto</option>
+                <option value="Tenor">Tenor</option>
+                <option value="Bass">Bass</option>
+                <option value="Director">Director</option>
+                <option value="Brass">Brass</option>
+            </select>
+            <select id="categoryFilter" class="filter-select" onchange="filterScores()">
+                <option value="all">All categories</option>
+                <option value="Warm-up">Warm-up</option>
+                <option value="Rehearsal">Rehearsal</option>
+                <option value="Performance">Performance</option>
+                <option value="Festival">Festival</option>
+                <option value="Worship">Worship</option>
+                <option value="Other">Other</option>
+            </select>
+            <select id="statusFilter" class="filter-select" onchange="filterScores()">
+                <option value="all">All status</option>
+                <option value="published">Published only</option>
+                <option value="draft">Drafts only</option>
+            </select>
+            <button class="action-btn btn-outline" onclick="loadScores()"><i class="ti ti-refresh"></i> Refresh</button>
+        </div>
+
+        <div class="scores-grid" id="scoresGrid">
+            <div class="empty-state" style="grid-column:1/-1;"><i class="ti ti-loader"></i> Loading scores…</div>
+        </div>
+
+    </main>
+</div>
+
+<!-- UPLOAD/EDIT MODAL -->
+<div class="modal-overlay" id="uploadModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="ti ti-cloud-upload" style="color:var(--indigo)"></i> <span id="modalTitle">Upload Music Score</span></h3>
+            <button class="modal-close-btn" onclick="closeUploadModal()" id="modalCloseBtn" type="button">&times;</button>
+        </div>
+
+        <form id="scoreForm" novalidate>
+            <input type="hidden" id="editId">
+
+            <div class="form-group">
+                <label>📄 PDF File *</label>
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="fileInput" accept="application/pdf,.pdf" onchange="handleFileSelect(event)">
+                    <i class="ti ti-file-type-pdf uz-icon"></i>
+                    <div class="uz-title">Drop PDF here or click to browse</div>
+                    <div class="uz-hint">Maximum 20 MB · PDF only</div>
+                    <div class="uz-file" id="fileInfo" style="display:none;"></div>
+                </div>
+                <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+                <div class="upload-status" id="uploadStatus"></div>
+                <p id="keepFileHint" style="font-size:11px;color:var(--text-tertiary);margin-top:6px;display:none;">
+                    <i class="ti ti-info-circle"></i> Leave empty to keep the existing file
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>🎵 Title *</label>
+                <input type="text" id="titleInput" class="form-input" placeholder="e.g., Mwathani Ni Mwega">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🎼 Composer / Arranger</label>
+                    <input type="text" id="composerInput" class="form-input" placeholder="e.g., Traditional">
+                </div>
+                <div class="form-group">
+                    <label>🎤 Voice Part</label>
+                    <select id="voiceInput" class="form-select">
+                        <option value="All">All voices</option>
+                        <option value="Soprano">Soprano</option>
+                        <option value="Alto">Alto</option>
+                        <option value="Tenor">Tenor</option>
+                        <option value="Bass">Bass</option>
+                        <option value="Director">Director</option>
+                        <option value="Brass">Brass</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📂 Category</label>
+                    <select id="categoryInput" class="form-select">
+                        <option value="Rehearsal">Rehearsal</option>
+                        <option value="Warm-up">Warm-up</option>
+                        <option value="Performance">Performance</option>
+                        <option value="Festival">Festival</option>
+                        <option value="Worship">Worship</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📅 Academic Year</label>
+                    <input type="text" id="yearInput" class="form-input" placeholder="e.g., 2025-2026">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>🏷️ Tags (comma-separated)</label>
+                <input type="text" id="tagsInput" class="form-input" placeholder="e.g., festival, swahili, 2026">
+            </div>
+
+            <div class="form-group">
+                <label>📝 Description / Notes for Members</label>
+                <textarea id="descInput" class="form-textarea" placeholder="Optional notes about this score…"></textarea>
+            </div>
+
+            <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+                <input type="checkbox" id="publishInput" checked style="width:auto;margin:0;transform:scale(1.2);">
+                <label for="publishInput" style="margin:0;font-weight:600;color:var(--text-secondary);">✅ Publish immediately (visible to members)</label>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button type="button" onclick="closeUploadModal()" class="action-btn btn-outline" id="cancelBtn" style="flex:1;justify-content:center;">Cancel</button>
+                <button type="submit" class="action-btn btn-primary" id="submitBtn" style="flex:2;justify-content:center;">
+                    <i class="ti ti-cloud-upload"></i> <span id="submitLabel">Upload Score</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="modal-overlay preview-modal" id="previewModal">
+    <div class="modal-box" style="max-width:900px;padding:0;background:transparent;box-shadow:none;">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+            <button class="modal-close-btn" onclick="closePreview()" style="background:rgba(0,0,0,0.5);color:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">&times;</button>
+        </div>
+        <iframe id="previewFrame" class="preview-frame" src=""></iframe>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const CLOUD_NAME = 'surgtbdr';
+    const UPLOAD_PRESET = 'uoem_choir_uploads';
+
+    let allScores = [];
+    let selectedFile = null;
+    let uploading = false;
+
+    // ── HELPERS ──
+    function esc(s) { if (!s) return ''; return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function fmtSize(bytes) {
+        if (!bytes) return '—';
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+        return (bytes/1048576).toFixed(2) + ' MB';
+    }
+    function fmtDate(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    function isNew(iso) {
+        if (!iso) return false;
+        return (Date.now() - new Date(iso).getTime()) < 7 * 24 * 60 * 60 * 1000;
+    }
+
+    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
+    setInterval(tick, 1000); tick();
+
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        const icons = { success: 'ti-circle-check', error: 'ti-circle-x', info: 'ti-info-circle' };
+        t.innerHTML = `<i class="ti ${icons[type] || icons.info}" style="font-size:16px"></i> ${msg}`;
+        t.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+    async function logout() { try { await sb.auth.signOut(); } catch {} window.location.href = '../login.html'; }
+
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            const { data: p } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (p) {
+                if (p.full_name) { const f = p.full_name.split(' ')[0]; document.getElementById('userName').textContent = f; document.getElementById('userAvatar').textContent = f.charAt(0).toUpperCase(); }
+                if (p.role) document.getElementById('userRole').textContent = p.role;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ── LOAD SCORES ──
+    async function loadScores() {
+        const grid = document.getElementById('scoresGrid');
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="ti ti-loader"></i> Loading scores…</div>';
+
+        const { data, error } = await sb.from('music_scores').select('*').order('uploaded_at', { ascending: false });
+        if (error) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="ti ti-alert-circle"></i> Error: ${esc(error.message)}</div>`;
+            return;
+        }
+        allScores = data || [];
+        updateKpis();
+        renderScores();
+    }
+
+    function updateKpis() {
+        const total = allScores.length;
+        const published = allScores.filter(s => s.is_published).length;
+        const drafts = total - published;
+        const downloads = allScores.reduce((sum, s) => sum + (s.download_count || 0), 0);
+        document.getElementById('kpiTotal').textContent = total;
+        document.getElementById('kpiPublished').textContent = published;
+        document.getElementById('kpiDrafts').textContent = drafts;
+        document.getElementById('kpiDownloads').textContent = downloads;
+    }
+
+    function filterScores() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const voice = document.getElementById('voiceFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+        const status = document.getElementById('statusFilter').value;
+
+        let filtered = allScores;
+        if (q) {
+            filtered = filtered.filter(s =>
+                (s.title || '').toLowerCase().includes(q) ||
+                (s.composer || '').toLowerCase().includes(q) ||
+                (s.tags || []).some(t => t.toLowerCase().includes(q))
+            );
+        }
+        if (voice !== 'all') filtered = filtered.filter(s => s.voice_part === voice);
+        if (category !== 'all') filtered = filtered.filter(s => s.category === category);
+        if (status === 'published') filtered = filtered.filter(s => s.is_published);
+        if (status === 'draft') filtered = filtered.filter(s => !s.is_published);
+
+        renderScores(filtered);
+    }
+
+    function renderScores(list) {
+        const grid = document.getElementById('scoresGrid');
+        const scores = list || allScores;
+
+        if (!scores.length) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+                <i class="ti ti-music-off"></i>
+                <h3>No music scores found</h3>
+                <p>Upload your first score to get started.</p>
+                <button class="action-btn btn-primary" style="margin-top:14px;" onclick="openUploadModal()"><i class="ti ti-cloud-upload"></i> Upload Score</button>
+            </div>`;
+            return;
+        }
+
+        grid.innerHTML = scores.map(s => {
+            const isNewScore = isNew(s.uploaded_at);
+            const statusClass = s.is_published ? 'status-published' : 'status-draft';
+            const statusText = s.is_published ? 'Published' : 'Draft';
+            const thumb = s.preview_url
+                ? `<img src="${s.preview_url}" alt="${esc(s.title)}" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\\'ti ti-file-type-pdf placeholder\\'></i>';">`
+                : `<i class="ti ti-file-type-pdf placeholder"></i>`;
+            const tags = (s.tags || []).slice(0, 2).map(t => `<span class="chip chip-gray">${esc(t)}</span>`).join('');
+
+            return `
+                <div class="score-card ${s.is_published ? '' : 'unpublished'}">
+                    ${isNewScore ? '<span class="status-badge status-new">🆕 New</span>' : `<span class="status-badge ${statusClass}">${statusText}</span>`}
+                    <div class="score-thumb">${thumb}</div>
+                    <div class="score-body">
+                        <div class="score-title">${esc(s.title)}</div>
+                        <div class="score-composer"><i class="ti ti-user"></i> ${esc(s.composer || 'Unknown')}</div>
+                        <div class="score-badges">
+                            <span class="chip chip-indigo"><i class="ti ti-microphone"></i> ${esc(s.voice_part || 'All')}</span>
+                            <span class="chip chip-purple"><i class="ti ti-tag"></i> ${esc(s.category || '—')}</span>
+                            ${tags}
+                        </div>
+                        <div class="score-meta">
+                            <span><i class="ti ti-download"></i> ${s.download_count || 0}</span>
+                            <span><i class="ti ti-calendar"></i> ${fmtDate(s.uploaded_at)}</span>
+                        </div>
+                    </div>
+                    <div class="score-actions">
+                        <button class="icon-btn view" onclick="previewScore('${s.id}')" title="Preview"><i class="ti ti-eye"></i> <span>View</span></button>
+                        <button class="icon-btn edit" onclick="openEditModal('${s.id}')" title="Edit"><i class="ti ti-pencil"></i> <span>Edit</span></button>
+                        <button class="icon-btn delete" onclick="deleteScore('${s.id}')" title="Delete"><i class="ti ti-trash"></i></button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ── UPLOAD MODAL ──
+    function openUploadModal() {
+        document.getElementById('modalTitle').textContent = 'Upload Music Score';
+        document.getElementById('submitLabel').textContent = 'Upload Score';
+        document.getElementById('scoreForm').reset();
+        document.getElementById('editId').value = '';
+        document.getElementById('publishInput').checked = true;
+        document.getElementById('fileInfo').style.display = 'none';
+        document.getElementById('keepFileHint').style.display = 'none';
+        document.getElementById('uploadZone').classList.remove('has-file', 'dragging');
+        document.getElementById('progressBar').classList.remove('show');
+        document.getElementById('uploadStatus').classList.remove('show');
+        selectedFile = null;
+        uploading = false;
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('cancelBtn').disabled = false;
+        document.getElementById('modalCloseBtn').disabled = false;
+        document.getElementById('uploadModal').classList.add('open');
+    }
+
+    function openEditModal(id) {
+        const s = allScores.find(x => x.id === id);
+        if (!s) return;
+
+        document.getElementById('modalTitle').textContent = 'Edit Music Score';
+        document.getElementById('submitLabel').textContent = 'Save Changes';
+        document.getElementById('editId').value = id;
+        document.getElementById('titleInput').value = s.title || '';
+        document.getElementById('composerInput').value = s.composer || '';
+        document.getElementById('voiceInput').value = s.voice_part || 'All';
+        document.getElementById('categoryInput').value = s.category || 'Rehearsal';
+        document.getElementById('yearInput').value = s.academic_year || '';
+        document.getElementById('tagsInput').value = (s.tags || []).join(', ');
+        document.getElementById('descInput').value = s.description || '';
+        document.getElementById('publishInput').checked = s.is_published !== false;
+
+        document.getElementById('fileInfo').style.display = 'none';
+        document.getElementById('keepFileHint').style.display = 'block';
+        document.getElementById('uploadZone').classList.remove('has-file');
+        document.getElementById('progressBar').classList.remove('show');
+        document.getElementById('uploadStatus').classList.remove('show');
+        selectedFile = null;
+        uploading = false;
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('cancelBtn').disabled = false;
+        document.getElementById('modalCloseBtn').disabled = false;
+
+        document.getElementById('uploadModal').classList.add('open');
+    }
+
+    function closeUploadModal() {
+        document.getElementById('uploadModal').classList.remove('open');
+        setTimeout(() => {
+            document.getElementById('progressBar').classList.remove('show');
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('uploadStatus').classList.remove('show');
+        }, 250);
+    }
+
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+            showToast('❌ Only PDF files are allowed', 'error');
+            e.target.value = '';
+            return;
+        }
+        if (file.size > 20 * 1024 * 1024) {
+            showToast('❌ File too large (max 20 MB)', 'error');
+            e.target.value = '';
+            return;
+        }
+
+        selectedFile = file;
+        const zone = document.getElementById('uploadZone');
+        const info = document.getElementById('fileInfo');
+        zone.classList.add('has-file');
+        info.style.display = 'flex';
+        info.innerHTML = `<i class="ti ti-file-check"></i> ${esc(file.name)} · ${fmtSize(file.size)}`;
+
+        if (!document.getElementById('titleInput').value) {
+            document.getElementById('titleInput').value = file.name.replace(/\.pdf$/i, '').replace(/[_-]/g, ' ');
+        }
+    }
+
+    // Drag & drop
+    const uz = document.getElementById('uploadZone');
+    ['dragenter', 'dragover'].forEach(ev => uz.addEventListener(ev, e => { e.preventDefault(); uz.classList.add('dragging'); }));
+    ['dragleave', 'drop'].forEach(ev => uz.addEventListener(ev, e => { e.preventDefault(); uz.classList.remove('dragging'); }));
+    uz.addEventListener('drop', e => {
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            document.getElementById('fileInput').files = e.dataTransfer.files;
+            handleFileSelect({ target: { files: [file], value: '' } });
+        }
+    });
+
+    // ── UPLOAD TO CLOUDINARY ──
+    async function uploadToCloudinary(file, onProgress) {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+            formData.append('folder', 'choir/music_scores');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`);
+            xhr.timeout = 300000;
+
+            xhr.upload.addEventListener('progress', e => {
+                if (e.lengthComputable && onProgress) {
+                    onProgress(Math.round((e.loaded / e.total) * 100));
+                }
+            });
+
+            xhr.onload = () => {
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if (xhr.status >= 200 && xhr.status < 300 && res.secure_url) {
+                        resolve(res);
+                    } else {
+                        reject(new Error(res.error?.message || 'Upload failed'));
+                    }
+                } catch (err) { reject(err); }
+            };
+            xhr.onerror = () => reject(new Error('Network error'));
+            xhr.ontimeout = () => reject(new Error('Upload timed out. Try a smaller file.'));
+            xhr.send(formData);
+        });
+    }
+
+    function buildPreviewUrl(publicId, resourceType) {
+        if (!publicId) return null;
+        return `https://res.cloudinary.com/${CLOUD_NAME}/${resourceType || 'image'}/upload/w_400,h_520,c_fill,q_auto:low,f_auto,pg_1/${publicId}.jpg`;
+    }
+
+    // ═══════════════════════════════════════════
+    // SUBMIT HANDLER — Works on desktop AND mobile
+    // ═══════════════════════════════════════════
+    async function handleSubmit(e) {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        if (uploading) return;
+
+        console.log('🚀 Submit triggered');
+
+        const editId = document.getElementById('editId').value;
+        const title = document.getElementById('titleInput').value.trim();
+
+        if (!title) {
+            showToast('⚠️ Please enter a title', 'error');
+            document.getElementById('titleInput').focus();
+            return;
+        }
+
+        if (!editId && !selectedFile) {
+            showToast('⚠️ Please select a PDF file', 'error');
+            return;
+        }
+
+        uploading = true;
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const originalLabel = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        cancelBtn.disabled = true;
+        modalCloseBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Uploading…';
+
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const uploadStatus = document.getElementById('uploadStatus');
+
+        if (selectedFile) {
+            progressBar.classList.add('show');
+            progressFill.style.width = '0%';
+            uploadStatus.classList.add('show');
+            uploadStatus.innerHTML = '<i class="ti ti-cloud-upload"></i> Uploading PDF to Cloudinary…';
+        }
+
+        try {
+            let fileUrl = null, previewUrl = null, fileSize = null;
+
+            if (selectedFile) {
+                const res = await uploadToCloudinary(selectedFile, pct => {
+                    progressFill.style.width = pct + '%';
+                    if (pct >= 100) {
+                        uploadStatus.innerHTML = '<i class="ti ti-loader ti-spin"></i> Processing PDF…';
+                    }
+                });
+                fileUrl = res.secure_url;
+                fileSize = res.bytes;
+                previewUrl = buildPreviewUrl(res.public_id, res.resource_type);
+                uploadStatus.innerHTML = '<i class="ti ti-check"></i> Saving to library…';
+            }
+
+            const tags = document.getElementById('tagsInput').value
+                .split(',').map(t => t.trim()).filter(Boolean);
+
+            const payload = {
+                title,
+                composer: document.getElementById('composerInput').value.trim() || null,
+                voice_part: document.getElementById('voiceInput').value,
+                category: document.getElementById('categoryInput').value,
+                academic_year: document.getElementById('yearInput').value.trim() || null,
+                tags: tags.length ? tags : null,
+                description: document.getElementById('descInput').value.trim() || null,
+                is_published: document.getElementById('publishInput').checked,
+                updated_at: new Date().toISOString()
+            };
+
+            if (selectedFile) {
+                payload.file_url = fileUrl;
+                payload.preview_url = previewUrl;
+                payload.file_size = fileSize;
+            }
+
+            if (editId) {
+                const { error } = await sb.from('music_scores').update(payload).eq('id', editId);
+                if (error) throw error;
+                showToast('✅ Score updated!', 'success');
+            } else {
+                const { data: { user } } = await sb.auth.getUser();
+                payload.uploaded_by = user?.email || 'admin';
+                payload.download_count = 0;
+                const { error } = await sb.from('music_scores').insert(payload);
+                if (error) throw error;
+                showToast('✅ Score uploaded successfully!', 'success');
+            }
+
+            uploading = false;
+            submitBtn.disabled = false;
+            cancelBtn.disabled = false;
+            modalCloseBtn.disabled = false;
+            submitBtn.innerHTML = originalLabel;
+            progressBar.classList.remove('show');
+            progressFill.style.width = '0%';
+            uploadStatus.classList.remove('show');
+
+            closeUploadModal();
+            loadScores();
+
+        } catch (err) {
+            console.error('Upload error:', err);
+            showToast('❌ ' + err.message, 'error');
+            uploading = false;
+            submitBtn.disabled = false;
+            cancelBtn.disabled = false;
+            modalCloseBtn.disabled = false;
+            submitBtn.innerHTML = originalLabel;
+            progressBar.classList.remove('show');
+            uploadStatus.classList.remove('show');
+        }
+    }
+
+    // Bind BOTH form submit AND button click
+    document.getElementById('scoreForm').addEventListener('submit', handleSubmit);
+    document.getElementById('submitBtn').addEventListener('click', function(e) {
+        // Only handle click if form submit doesn't fire (belt and suspenders)
+        if (e.target.type === 'submit') return; // let form handle it
+        handleSubmit(e);
+    });
+
+    // ── PREVIEW ──
+    function previewScore(id) {
+        const s = allScores.find(x => x.id === id);
+        if (!s || !s.file_url) return;
+        document.getElementById('previewFrame').src = s.file_url;
+        document.getElementById('previewModal').classList.add('open');
+    }
+    function closePreview() {
+        document.getElementById('previewFrame').src = '';
+        document.getElementById('previewModal').classList.remove('open');
+    }
+
+    // ── DELETE ──
+    async function deleteScore(id) {
+        const s = allScores.find(x => x.id === id);
+        if (!s) return;
+        if (!confirm(`Delete "${s.title}"?\n\nThis removes it from the library.`)) return;
+
+        const { error } = await sb.from('music_scores').delete().eq('id', id);
+        if (error) { showToast('❌ ' + error.message, 'error'); return; }
+        showToast('🗑️ Score deleted', 'success');
+        await loadScores();
+    }
+
+    // ── INIT ──
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await loadUserInfo();
+        await loadScores();
+    }
+    init();
+
+    // Expose globals
+    window.openUploadModal = openUploadModal;
+    window.openEditModal = openEditModal;
+    window.closeUploadModal = closeUploadModal;
+    window.handleFileSelect = handleFileSelect;
+    window.handleSubmit = handleSubmit;
+    window.filterScores = filterScores;
+    window.loadScores = loadScores;
+    window.previewScore = previewScore;
+    window.closePreview = closePreview;
+    window.deleteScore = deleteScore;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.logout = logout;
+</script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>My Events | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/cache-helper.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --primary: #5b4fcf;
+            --primary-dark: #3d35a8;
+            --primary-light: #ede9ff;
+            --gold: #d4af37;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --slate-900: #0f172a;
+            --slate-700: #334155;
+            --slate-500: #64748b;
+            --slate-300: #cbd5e1;
+            --slate-100: #f1f5f9;
+            --slate-50: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --bg: #f8fafc;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0eef9;
+            background-image: radial-gradient(ellipse at 20% 10%, rgba(91, 79, 207, 0.10) 0%, transparent 60%),
+                              radial-gradient(ellipse at 80% 90%, rgba(124, 58, 237, 0.08) 0%, transparent 50%);
+            min-height: 100vh;
+            padding: 16px;
+            color: var(--slate-900);
+            line-height: 1.5;
+        }
+        .container { max-width: 1024px; margin: 0 auto; background: var(--white); border-radius: 32px; padding: 24px 24px 32px; box-shadow: 0 32px 64px -16px rgba(91, 79, 207, 0.18), 0 0 0 1px rgba(91, 79, 207, 0.05); margin-bottom: 80px; animation: fadeSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
+        .header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.4px; display: flex; align-items: center; gap: 10px; }
+        .header h1 i { color: var(--primary); }
+        .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--slate-300); padding: 8px 18px; border-radius: 40px; font-weight: 600; font-size: 13px; font-family: inherit; color: var(--slate-700); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-outline:hover { background: var(--slate-50); border-color: var(--primary); color: var(--primary); }
+
+        /* HERO */
+        .hero { background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%); color: white; padding: 24px 28px; border-radius: 24px; margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; box-shadow: 0 8px 28px rgba(91, 79, 207, 0.3); position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+        .hero-icon { width: 68px; height: 68px; border-radius: 20px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+        .hero-text { flex: 1; min-width: 200px; position: relative; z-index: 1; }
+        .hero-text h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.3px; }
+        .hero-text p { font-size: 13px; opacity: 0.9; }
+
+        /* KPIs */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat-card { background: var(--slate-50); padding: 18px 12px; border-radius: 20px; text-align: center; border: 1px solid transparent; transition: transform .15s, box-shadow .2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(91, 79, 207, 0.1); }
+        .stat-card.present { border-color: rgba(16, 185, 129, 0.2); background: linear-gradient(160deg, #f0fdf4, #ecfdf5); }
+        .stat-card.gold { border-color: rgba(212, 175, 55, 0.25); background: linear-gradient(160deg, #fefce8, #fef9c3); }
+        .stat-card.primary { border-color: rgba(91, 79, 207, 0.2); background: linear-gradient(160deg, #ede9ff, #f5f3ff); }
+        .stat-number { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1.2; }
+        .stat-card.present .stat-number { color: var(--green); }
+        .stat-card.gold .stat-number { color: var(--gold); }
+        .stat-card.primary .stat-number { color: var(--primary); }
+        .stat-label { color: var(--slate-500); font-size: 12.5px; font-weight: 500; margin-top: 6px; }
+
+        /* FILTERS */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-wrap { position: relative; flex: 1; min-width: 220px; }
+        .search-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--slate-500); font-size: 14px; }
+        .search-input { width: 100%; padding: 11px 14px 11px 40px; border: 1.5px solid var(--slate-300); border-radius: 40px; font-size: 13px; font-family: inherit; background: white; outline: none; transition: border .15s, box-shadow .15s; }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,79,207,0.1); }
+        .filter-select { padding: 11px 16px; border: 1.5px solid var(--slate-300); border-radius: 40px; font-size: 13px; font-family: inherit; background: white; color: var(--slate-700); cursor: pointer; outline: none; transition: border .15s; }
+        .filter-select:focus { border-color: var(--primary); }
+
+        /* EVENTS LIST */
+        .events-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .event-item { background: white; border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; display: flex; gap: 16px; align-items: center; transition: all .2s; position: relative; overflow: hidden; }
+        .event-item:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(91, 79, 207, 0.1); border-color: var(--primary-light); }
+
+        .event-date-badge { width: 64px; height: 64px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), #7c3aed); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(91, 79, 207, 0.25); }
+        .event-date-badge .day { font-size: 22px; font-weight: 800; line-height: 1; }
+        .event-date-badge .month { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-top: 3px; }
+
+        .event-body { flex: 1; min-width: 0; }
+        .event-title { font-size: 15px; font-weight: 700; color: var(--slate-900); margin-bottom: 4px; }
+        .event-meta { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--slate-500); margin-bottom: 8px; }
+        .event-meta span { display: flex; align-items: center; gap: 4px; }
+        .event-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 40px; font-size: 10.5px; font-weight: 600; }
+        .chip-primary { background: var(--primary-light); color: var(--primary); }
+        .chip-gold { background: #fef3c7; color: #92400e; }
+        .chip-green { background: #d1fae5; color: #065f46; }
+        .chip-gray { background: var(--slate-100); color: var(--slate-500); }
+
+        /* EMPTY */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--slate-500); }
+        .empty-state i { font-size: 52px; color: var(--slate-300); display: block; margin-bottom: 14px; }
+        .empty-state h3 { font-size: 18px; font-weight: 700; color: var(--slate-900); margin-bottom: 6px; }
+        .empty-state p { font-size: 13px; }
+
+        /* BOTTOM NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); display: flex; justify-content: space-around; padding: 8px 12px 12px; box-shadow: 0 -1px 0 rgba(91, 79, 207, 0.08), 0 -8px 24px rgba(91, 79, 207, 0.06); z-index: 100; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--slate-500); font-size: 10px; font-weight: 600; gap: 2px; padding: 6px 10px; border-radius: 12px; cursor: pointer; background: none; border: none; font-family: inherit; transition: all 0.18s; }
+        .bottom-nav-item i { font-size: 20px; }
+        .bottom-nav-item.active { color: var(--primary); background: var(--primary-light); }
+        @media (min-width: 768px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
+
+        @media (max-width: 640px) {
+            body { padding: 10px; }
+            .container { padding: 16px; border-radius: 24px; }
+            .hero { padding: 18px 20px; }
+            .hero-text h2 { font-size: 18px; }
+            .hero-icon { width: 56px; height: 56px; font-size: 26px; }
+            .stats-grid { gap: 8px; }
+            .stat-card { padding: 14px 8px; }
+            .stat-number { font-size: 24px; }
+            .stat-label { font-size: 11px; }
+            .event-item { flex-direction: column; align-items: stretch; padding: 14px; gap: 12px; }
+            .event-date-badge { align-self: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-calendar-check"></i> My Events</h1>
+        <div class="header-actions">
+            <a href="dashboard.html" class="btn-outline"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        </div>
+    </div>
+
+    <div class="hero">
+        <div class="hero-icon">🎉</div>
+        <div class="hero-text">
+            <h2 id="greeting">Your Event Portfolio</h2>
+            <p>Events you've participated in as part of the choir</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card present">
+            <div class="stat-number" id="statAttended">0</div>
+            <div class="stat-label">✅ Events Attended</div>
+        </div>
+        <div class="stat-card gold">
+            <div class="stat-number" id="statFestivals">0</div>
+            <div class="stat-label">🏆 Festivals</div>
+        </div>
+        <div class="stat-card primary">
+            <div class="stat-number" id="statUpcoming">0</div>
+            <div class="stat-label">🕐 Upcoming Events</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search events…">
+        </div>
+        <select id="typeFilter" class="filter-select">
+            <option value="all">All types</option>
+            <option value="Festival">Festivals</option>
+            <option value="Concert">Concerts</option>
+            <option value="University event">University Event</option>
+            <option value="Trip">Trips</option>
+            <option value="Competition">Competitions</option>
+            <option value="Other">Other</option>
+        </select>
+        <select id="viewFilter" class="filter-select">
+            <option value="all">All events</option>
+            <option value="attended">✅ Attended</option>
+            <option value="upcoming">🕐 Upcoming</option>
+        </select>
+    </div>
+
+    <div class="events-list" id="eventsList">
+        <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading your events…</h3></div>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-chart-pie"></i><span>Stats</span></a>
+    <a href="music-library.html" class="bottom-nav-item"><i class="fas fa-music"></i><span>Music</span></a>
+    <a href="my-events.html" class="bottom-nav-item active"><i class="fas fa-calendar-check"></i><span>Events</span></a>
+    <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-wallet"></i><span>Finance</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentMemberId = null;
+    let currentMemberName = '';
+    let myEventIds = new Set();     // events I attended
+    let allEvents = [];
+
+    function esc(s) { if (!s) return ''; return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function fmtDate(d) { if (!d) return '—'; return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }); }
+    function dayNum(d) { return new Date(d + 'T00:00:00').getDate(); }
+    function monthShort(d) { return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' }).toUpperCase(); }
+    function getTypeIcon(t) { return { 'Festival': '🏆', 'Concert': '🎤', 'University Event': '🎓', 'Trip': '🚌', 'Competition': '🥇', 'Other': '📌' }[t] || '📌'; }
+
+    // ── GET CURRENT MEMBER ──
+    async function getCurrentMember() {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = '../login.html'; return null; }
+        const { data: um } = await sb.from('user_members').select('member_id').eq('user_id', user.id).single();
+        if (!um) return null;
+        currentMemberId = um.member_id;
+        const { data: m } = await sb.from('members').select('name').eq('member_id', um.member_id).single();
+        currentMemberName = m?.name || '';
+        return um.member_id;
+    }
+
+    // ── LOAD EVENTS ──
+    async function loadMyEvents() {
+        const list = document.getElementById('eventsList');
+        list.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading your events…</h3></div>';
+
+        // Load all events (published ones — everyone can see)
+        const { data: events, error } = await sb
+            .from('events')
+            .select('*')
+            .order('event_date', { ascending: false });
+
+        if (error) {
+            list.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>${esc(error.message)}</p></div>`;
+            return;
+        }
+        allEvents = events || [];
+
+        // Load my attendance records
+        const { data: myAtt } = await sb
+            .from('event_attendance')
+            .select('event_id, status')
+            .eq('member_id', currentMemberId)
+            .eq('status', 'present');
+
+        myEventIds = new Set((myAtt || []).map(a => a.event_id));
+
+        updateStats();
+        renderEvents();
+    }
+
+    function updateStats() {
+        const attended = allEvents.filter(e => myEventIds.has(e.id)).length;
+        const festivals = allEvents.filter(e => myEventIds.has(e.id) && e.event_type === 'Festival').length;
+        const today = new Date().toISOString().split('T')[0];
+        const upcoming = allEvents.filter(e => e.event_date >= today && e.status !== 'cancelled').length;
+
+        document.getElementById('statAttended').textContent = attended;
+        document.getElementById('statFestivals').textContent = festivals;
+        document.getElementById('statUpcoming').textContent = upcoming;
+
+        if (currentMemberName) {
+            document.getElementById('greeting').textContent = `${currentMemberName.split(' ')[0]}'s Event Portfolio`;
+        }
+    }
+
+    function renderEvents() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const type = document.getElementById('typeFilter').value;
+        const view = document.getElementById('viewFilter').value;
+        const today = new Date().toISOString().split('T')[0];
+
+        let filtered = [...allEvents];
+        if (q) filtered = filtered.filter(e => (e.title || '').toLowerCase().includes(q) || (e.location || '').toLowerCase().includes(q));
+        if (type !== 'all') filtered = filtered.filter(e => e.event_type === type);
+        if (view === 'attended') filtered = filtered.filter(e => myEventIds.has(e.id));
+        if (view === 'upcoming') filtered = filtered.filter(e => e.event_date >= today && e.status !== 'cancelled');
+
+        const container = document.getElementById('eventsList');
+        if (!filtered.length) {
+            container.innerHTML = `<div class="empty-state">
+                <i class="fas fa-calendar"></i>
+                <h3>No events found</h3>
+                <p>Events you attend will show up here</p>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = filtered.map(e => {
+            const attended = myEventIds.has(e.id);
+            const dateRange = e.end_date && e.end_date !== e.event_date
+                ? `${fmtDate(e.event_date)} → ${fmtDate(e.end_date)}`
+                : fmtDate(e.event_date);
+
+            return `
+                <div class="event-item">
+                    <div class="event-date-badge">
+                        <div class="day">${dayNum(e.event_date)}</div>
+                        <div class="month">${monthShort(e.event_date)}</div>
+                    </div>
+                    <div class="event-body">
+                        <div class="event-title">${esc(e.title)}</div>
+                        <div class="event-meta">
+                            <span><i class="fas fa-calendar"></i> ${dateRange}</span>
+                            ${e.location ? `<span><i class="fas fa-map-pin"></i> ${esc(e.location)}</span>` : ''}
+                        </div>
+                        <div class="event-chips">
+                            <span class="chip chip-primary">${getTypeIcon(e.event_type)} ${esc(e.event_type)}</span>
+                            ${attended ? `<span class="chip chip-green"><i class="fas fa-check"></i> You attended</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderEvents);
+    document.getElementById('typeFilter').addEventListener('change', renderEvents);
+    document.getElementById('viewFilter').addEventListener('change', renderEvents);
+
+    // ── INIT ──
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await getCurrentMember();
+        if (!currentMemberId) return;
+        await loadMyEvents();
+    }
+    init();
+</script>
+</body>
+</html>

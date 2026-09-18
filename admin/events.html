@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Events | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/cache-helper.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5; --indigo-light: #eef2ff;
+            --green: #10b981; --green-light: #d1fae5;
+            --amber: #f59e0b; --amber-light: #fef9c3;
+            --red: #ef4444; --red-light: #fee2e2;
+            --purple: #7c3aed; --purple-light: #ede9fe;
+            --cyan: #06b6d4; --cyan-light: #cffafe;
+            --gold: #d4af37; --gold-light: #f5e6b8;
+            --bg: #f8fafc; --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; overflow: hidden; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        /* MAIN */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        /* CONTENT */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* HERO */
+        .hero-banner { background: linear-gradient(135deg, var(--indigo) 0%, var(--purple) 100%); border-radius: 20px; padding: 24px 28px; color: #fff; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; position: relative; overflow: hidden; }
+        .hero-banner::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+        .hero-banner h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .hero-banner p { font-size: 13px; opacity: 0.85; }
+
+        /* KPI */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+        .kpi-card.indigo::before { background: var(--indigo); }
+        .kpi-card.green::before  { background: var(--green); }
+        .kpi-card.amber::before  { background: var(--amber); }
+        .kpi-card.cyan::before   { background: var(--cyan); }
+        .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .kpi-label i { font-size: 14px; }
+        .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; }
+        .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+
+        /* CONTROLS */
+        .controls-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .filter-select, .search-input { padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; font-family: inherit; outline: none; transition: border-color .15s; color: var(--text-primary); }
+        .filter-select:focus, .search-input:focus { border-color: var(--indigo); }
+        .search-box { position: relative; flex: 1; min-width: 200px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text-tertiary); }
+        .search-input { width: 100%; padding-left: 38px; }
+
+        .action-btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; font-family: inherit; white-space: nowrap; }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-amber { background: var(--amber); color: #fff; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-outline { background: transparent; border: 0.5px solid var(--border); color: var(--text-primary); }
+
+        /* EVENTS LIST */
+        .events-list { display: flex; flex-direction: column; gap: 14px; }
+
+        .event-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 18px 20px; display: flex; gap: 18px; transition: box-shadow .18s, transform .18s; position: relative; overflow: hidden; }
+        .event-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); transform: translateY(-2px); }
+
+        .event-date-badge { width: 70px; height: 70px; border-radius: 14px; background: linear-gradient(135deg, var(--indigo), var(--purple)); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(79,70,229,0.25); }
+        .event-date-badge .day { font-size: 24px; font-weight: 800; line-height: 1; }
+        .event-date-badge .month { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-top: 3px; }
+        .event-date-badge.completed { background: linear-gradient(135deg, var(--green), #059669); box-shadow: 0 4px 12px rgba(16,185,129,0.25); }
+        .event-date-badge.cancelled { background: linear-gradient(135deg, #94a3b8, #64748b); box-shadow: 0 4px 12px rgba(100,116,139,0.25); }
+
+        .event-body { flex: 1; min-width: 0; }
+        .event-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+        .event-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+        .event-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+        .event-meta span { display: flex; align-items: center; gap: 5px; }
+        .event-meta i { font-size: 13px; }
+
+        .event-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .event-stats { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        /* CHIPS */
+        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 40px; font-size: 10.5px; font-weight: 600; }
+        .chip-indigo { background: var(--indigo-light); color: var(--indigo); }
+        .chip-green { background: var(--green-light); color: #065f46; }
+        .chip-amber { background: var(--amber-light); color: #854d0e; }
+        .chip-gray { background: var(--bg); color: var(--text-secondary); border: 0.5px solid var(--border); }
+        .chip-purple { background: var(--purple-light); color: var(--purple); }
+        .chip-cyan { background: var(--cyan-light); color: #155e75; }
+        .chip-red { background: var(--red-light); color: #991b1b; }
+
+        .event-actions { display: flex; flex-direction: column; gap: 8px; justify-content: center; flex-shrink: 0; }
+        .event-actions .action-btn { padding: 8px 16px; font-size: 12px; white-space: nowrap; }
+
+        /* EMPTY */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); font-size: 13px; background: var(--surface); border-radius: 16px; border: 1px dashed var(--border); }
+        .empty-state i { font-size: 48px; display: block; margin-bottom: 12px; color: var(--indigo); opacity: 0.4; }
+        .empty-state h3 { font-size: 16px; color: var(--text-primary); margin-bottom: 6px; }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--surface); border-radius: 20px; padding: 26px 24px; max-width: 560px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 72px rgba(0,0,0,0.25); animation: modalIn .25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .modal-header h3 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .modal-close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-tertiary); line-height: 1; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-secondary); font-size: 12px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; background: var(--bg); font-family: inherit; color: var(--text-primary); outline: none; transition: border-color .15s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--indigo); }
+        .form-textarea { resize: vertical; min-height: 70px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* ATTENDANCE MODAL */
+        .attendance-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 14px 16px; background: var(--bg); border-radius: 12px; }
+        .attendance-header-info { flex: 1; min-width: 200px; }
+        .attendance-header-info h4 { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+        .attendance-header-info p { font-size: 12px; color: var(--text-secondary); }
+        .attendance-counter { display: flex; gap: 16px; }
+        .attendance-counter div { text-align: center; }
+        .attendance-counter .num { font-size: 20px; font-weight: 800; line-height: 1; }
+        .attendance-counter .lbl { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+        .attendance-counter .present .num { color: var(--green); }
+        .attendance-counter .absent .num { color: var(--red); }
+
+        .attendance-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+        .attendance-actions button { padding: 7px 14px; border: 0.5px solid var(--border); background: var(--surface); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; transition: background .15s; }
+        .attendance-actions button:hover { background: var(--indigo-light); color: var(--indigo); }
+
+        .voice-group-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-tertiary); padding: 10px 0 6px; margin-top: 8px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 6px; }
+        .voice-group-header i { font-size: 12px; }
+
+        .member-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background .12s; margin-bottom: 2px; }
+        .member-toggle-row:hover { background: var(--bg); }
+        .member-toggle-row.present { background: var(--green-light); }
+        .member-toggle-row.absent { background: #fef2f2; }
+        .member-toggle-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+        .member-avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: var(--indigo); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+        .member-name-sm { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .member-id-sm { font-size: 10px; color: var(--text-tertiary); }
+
+        .toggle-switch { position: relative; width: 46px; height: 26px; background: #e2e8f0; border-radius: 40px; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+        .toggle-switch.on { background: var(--green); }
+        .toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.15); transition: transform .2s; }
+        .toggle-switch.on::after { transform: translateX(20px); }
+
+        /* TOAST */
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text-primary); color: #fff; padding: 12px 22px; border-radius: 40px; font-size: 13px; font-weight: 500; z-index: 300; opacity: 0; transition: opacity .22s, transform .22s; pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 90vw; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error { background: #991b1b; }
+        .toast.info { background: var(--indigo); }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 14px 12px 80px; }
+            .topbar { padding: 0 14px; height: 52px; }
+            .topbar-left h2 { font-size: 14px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .kpi-card { padding: 12px; }
+            .kpi-value { font-size: 20px; }
+            .hero-banner { padding: 18px 20px; }
+            .hero-banner h3 { font-size: 17px; }
+            .event-card { flex-direction: column; padding: 14px; gap: 12px; }
+            .event-date-badge { width: 60px; height: 60px; }
+            .event-date-badge .day { font-size: 20px; }
+            .event-actions { flex-direction: row; }
+            .event-actions .action-btn { flex: 1; justify-content: center; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+        button { cursor: pointer; touch-action: manipulation; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="events.html" class="nav-item active"><i class="ti ti-calendar-event"></i> Events</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="music-scores.html" class="nav-item"><i class="ti ti-music"></i> Music Scores</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance</a>
+        <a href="registration-fees.html" class="nav-item"><i class="ti ti-id-badge"></i> Registration Fees</a>
+
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="logout()"><i class="ti ti-logout"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="ti ti-menu-2"></i></button>
+            <div class="topbar-left">
+                <h2>🎉 Events</h2>
+                <p>Track attendance for special events</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-chip" id="topTime">--:--</div>
+        </div>
+    </header>
+
+    <main class="content">
+
+        <div class="hero-banner">
+            <div>
+                <h3>🎭 Events & Performances</h3>
+                <p>Create events like festivals, concerts, and services — then mark who attended</p>
+            </div>
+            <button class="action-btn" style="background:#fff;color:var(--indigo);" onclick="openCreateModal()">
+                <i class="ti ti-plus"></i> Create Event
+            </button>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card indigo">
+                <div class="kpi-label"><i class="ti ti-calendar-event" style="color:var(--indigo)"></i> Total Events</div>
+                <div class="kpi-value" id="kpiTotal">—</div>
+                <div class="kpi-meta">All time</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Upcoming</div>
+                <div class="kpi-value" id="kpiUpcoming">—</div>
+                <div class="kpi-meta">Scheduled</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-label"><i class="ti ti-check" style="color:var(--green)"></i> Completed</div>
+                <div class="kpi-value" id="kpiCompleted">—</div>
+                <div class="kpi-meta">Past events</div>
+            </div>
+            <div class="kpi-card cyan">
+                <div class="kpi-label"><i class="ti ti-users" style="color:var(--cyan)"></i> Total Attendances</div>
+                <div class="kpi-value" id="kpiAttendances">—</div>
+                <div class="kpi-meta">Across all events</div>
+            </div>
+        </div>
+
+        <div class="controls-row">
+            <div class="search-box">
+                <i class="ti ti-search"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by title or location…" oninput="filterEvents()">
+            </div>
+            <select id="typeFilter" class="filter-select" onchange="filterEvents()">
+                <option value="all">All types</option>
+                <option value="Festival"> Festival</option>
+                <option value="Concert">Concert</option>
+                <option value="University event">University event</option>
+                <option value="Trip">Trip</option>
+                <option value="Competition">Competition</option>
+                <option value="Other">Other</option>
+            </select>
+            <select id="statusFilter" class="filter-select" onchange="filterEvents()">
+                <option value="all">All status</option>
+                <option value="upcoming">🕐 Upcoming</option>
+                <option value="ongoing">▶️ Ongoing</option>
+                <option value="completed">✅ Completed</option>
+                <option value="cancelled">❌ Cancelled</option>
+            </select>
+            <button class="action-btn btn-outline" onclick="loadEvents()"><i class="ti ti-refresh"></i> Refresh</button>
+        </div>
+
+        <div class="events-list" id="eventsList">
+            <div class="empty-state"><i class="ti ti-loader"></i> Loading events…</div>
+        </div>
+
+    </main>
+</div>
+
+<!-- CREATE/EDIT EVENT MODAL -->
+<div class="modal-overlay" id="eventModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="ti ti-calendar-plus" style="color:var(--indigo)"></i> <span id="modalTitle">Create Event</span></h3>
+            <button class="modal-close-btn" onclick="closeEventModal()">&times;</button>
+        </div>
+
+        <form id="eventForm" novalidate>
+            <input type="hidden" id="editId">
+
+            <div class="form-group">
+                <label>🎯 Event Title *</label>
+                <input type="text" id="titleInput" class="form-input" placeholder="e.g., Kenya Music Festival 2026" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🎭 Event Type</label>
+                    <select id="typeInput" class="form-select">
+                        <option value="Festival">Festival</option>
+                        <option value="Concert">Concert</option>
+                        <option value="University event">University event</option>
+                        <option value="Trip">Trip</option>
+                        <option value="Competition">Competition</option>
+                        <option value="Other">📌 Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📊 Status</label>
+                    <select id="statusInput" class="form-select">
+                        <option value="upcoming">🕐 Upcoming</option>
+                        <option value="ongoing">▶️ Ongoing</option>
+                        <option value="completed">✅ Completed</option>
+                        <option value="cancelled">❌ Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📅 Event Date *</label>
+                    <input type="date" id="dateInput" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>📅 End Date (optional)</label>
+                    <input type="date" id="endDateInput" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>📍 Location</label>
+                <input type="text" id="locationInput" class="form-input" placeholder="e.g., Embu County Hall">
+            </div>
+
+            <div class="form-group">
+                <label>📝 Description</label>
+                <textarea id="descInput" class="form-textarea" placeholder="Optional notes about this event…"></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button type="button" onclick="closeEventModal()" class="action-btn btn-outline" style="flex:1;justify-content:center;">Cancel</button>
+                <button type="submit" class="action-btn btn-primary" id="saveBtn" style="flex:2;justify-content:center;">
+                    <i class="ti ti-device-floppy"></i> <span id="saveLabel">Create Event</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MARK ATTENDANCE MODAL -->
+<div class="modal-overlay" id="attendanceModal">
+    <div class="modal-box" style="max-width:640px;">
+        <div class="modal-header">
+            <h3><i class="ti ti-user-check" style="color:var(--green)"></i> Mark Event Attendance</h3>
+            <button class="modal-close-btn" onclick="closeAttendanceModal()">&times;</button>
+        </div>
+
+        <div class="attendance-header">
+            <div class="attendance-header-info">
+                <h4 id="attEventTitle">—</h4>
+                <p id="attEventMeta">—</p>
+            </div>
+            <div class="attendance-counter">
+                <div class="present">
+                    <div class="num" id="attPresentCount">0</div>
+                    <div class="lbl">Present</div>
+                </div>
+                <div class="absent">
+                    <div class="num" id="attAbsentCount">0</div>
+                    <div class="lbl">Absent</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="attendance-actions">
+            <button type="button" onclick="markAllAttendance('present')"><i class="ti ti-check"></i> All Present</button>
+            <button type="button" onclick="markAllAttendance('absent')"><i class="ti ti-x"></i> All Absent</button>
+            <button type="button" onclick="clearAllAttendance()"><i class="ti ti-eraser"></i> Clear</button>
+        </div>
+
+        <div id="attendanceMembers" style="max-height:50vh;overflow-y:auto;padding-right:4px;">
+            <div class="empty-state"><i class="ti ti-loader"></i> Loading members…</div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <button type="button" onclick="closeAttendanceModal()" class="action-btn btn-outline" style="flex:1;justify-content:center;">Cancel</button>
+            <button type="button" onclick="saveAttendance()" class="action-btn btn-green" id="saveAttBtn" style="flex:2;justify-content:center;">
+                <i class="ti ti-device-floppy"></i> Save Attendance
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW EVENT MODAL -->
+<div class="modal-overlay" id="viewModal">
+    <div class="modal-box" style="max-width:700px;">
+        <div class="modal-header">
+            <h3><i class="ti ti-eye" style="color:var(--indigo)"></i> Event Details</h3>
+            <div style="display:flex;gap:8px;">
+                <button class="action-btn btn-red" onclick="exportEventPDF()" style="padding:6px 14px;font-size:12px;"><i class="ti ti-file-pdf"></i> PDF</button>
+                <button class="modal-close-btn" onclick="closeViewModal()">&times;</button>
+            </div>
+        </div>
+        <div id="viewContent"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let allEvents = [];
+    let allMembers = [];
+    let attendanceCache = {};      // { eventId: { memberId: 'present'|'absent' } }
+    let currentAttendance = {};    // working state during marking
+    let currentEventId = null;
+    let currentEventForView = null;
+
+    // ── HELPERS ──
+    function esc(s) { if (!s) return ''; return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function fmtDate(d) {
+        if (!d) return '—';
+        return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    function dayNum(d) { return new Date(d + 'T00:00:00').getDate(); }
+    function monthShort(d) { return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' }).toUpperCase(); }
+    function initials(name) { if (!name) return '?'; return name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2); }
+
+    function getTypeIcon(t) {
+        return { 'Festival': '🏆', 'Concert': '🎤', 'University event': '🎓', 'Trip': '🚌', 'Competition': '🥇', 'Other': '📌' }[t] || '📌';
+    }
+    function getTypeChip(t) {
+        const icons = getTypeIcon(t);
+        return `<span class="chip chip-purple">${icons} ${esc(t)}</span>`;
+    }
+    function getStatusChip(s) {
+        const map = {
+            'upcoming': ['chip-amber', '🕐 Upcoming'],
+            'ongoing': ['chip-cyan', '▶️ Ongoing'],
+            'completed': ['chip-green', '✅ Completed'],
+            'cancelled': ['chip-gray', '❌ Cancelled']
+        };
+        const [cls, label] = map[s] || ['chip-gray', s];
+        return `<span class="chip ${cls}">${label}</span>`;
+    }
+
+    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
+    setInterval(tick, 1000); tick();
+
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        const icons = { success: 'ti-circle-check', error: 'ti-circle-x', info: 'ti-info-circle' };
+        t.innerHTML = `<i class="ti ${icons[type] || icons.info}" style="font-size:16px"></i> ${msg}`;
+        t.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+    async function logout() { try { await sb.auth.signOut(); } catch {} window.location.href = '../login.html'; }
+
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            const { data: p } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (p) {
+                if (p.full_name) { const f = p.full_name.split(' ')[0]; document.getElementById('userName').textContent = f; document.getElementById('userAvatar').textContent = f.charAt(0).toUpperCase(); }
+                if (p.role) document.getElementById('userRole').textContent = p.role;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ── LOAD DATA ──
+    async function loadEvents() {
+        const list = document.getElementById('eventsList');
+        list.innerHTML = '<div class="empty-state"><i class="ti ti-loader"></i> Loading events…</div>';
+
+        const { data: events, error } = await sb.from('events').select('*').order('event_date', { ascending: false });
+        if (error) {
+            list.innerHTML = `<div class="empty-state"><i class="ti ti-alert-circle"></i> Error: ${esc(error.message)}</div>`;
+            return;
+        }
+        allEvents = events || [];
+
+        // Load attendance counts per event
+        const { data: att } = await sb.from('event_attendance').select('event_id, member_id, status');
+        attendanceCache = {};
+        (att || []).forEach(a => {
+            if (!attendanceCache[a.event_id]) attendanceCache[a.event_id] = {};
+            attendanceCache[a.event_id][a.member_id] = a.status;
+        });
+
+        updateKpis();
+        renderEvents();
+    }
+
+    async function loadMembers() {
+        const { data } = await sb.from('members').select('member_id, name, voice_part').eq('status', 'active').order('name');
+        allMembers = data || [];
+    }
+
+    function updateKpis() {
+        const total = allEvents.length;
+        const upcoming = allEvents.filter(e => e.status === 'upcoming').length;
+        const completed = allEvents.filter(e => e.status === 'completed').length;
+        const totalAtt = Object.values(attendanceCache).reduce((sum, ev) => sum + Object.values(ev).filter(s => s === 'present').length, 0);
+
+        document.getElementById('kpiTotal').textContent = total;
+        document.getElementById('kpiUpcoming').textContent = upcoming;
+        document.getElementById('kpiCompleted').textContent = completed;
+        document.getElementById('kpiAttendances').textContent = totalAtt;
+    }
+
+    function filterEvents() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const type = document.getElementById('typeFilter').value;
+        const status = document.getElementById('statusFilter').value;
+
+        let filtered = [...allEvents];
+        if (q) filtered = filtered.filter(e => (e.title || '').toLowerCase().includes(q) || (e.location || '').toLowerCase().includes(q));
+        if (type !== 'all') filtered = filtered.filter(e => e.event_type === type);
+        if (status !== 'all') filtered = filtered.filter(e => e.status === status);
+
+        renderEvents(filtered);
+    }
+
+    function renderEvents(list) {
+        const container = document.getElementById('eventsList');
+        const events = list || allEvents;
+
+        if (!events.length) {
+            container.innerHTML = `<div class="empty-state">
+                <i class="ti ti-calendar-off"></i>
+                <h3>No events found</h3>
+                <p>Create your first event to get started.</p>
+                <button class="action-btn btn-primary" style="margin-top:14px;" onclick="openCreateModal()"><i class="ti ti-plus"></i> Create Event</button>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = events.map(e => {
+            const evAtt = attendanceCache[e.id] || {};
+            const presentCount = Object.values(evAtt).filter(s => s === 'present').length;
+            const totalMembers = allMembers.length || 1;
+            const pct = Math.round((presentCount / totalMembers) * 100);
+            const dateClass = e.status === 'completed' ? 'completed' : e.status === 'cancelled' ? 'cancelled' : '';
+            const dateRange = e.end_date && e.end_date !== e.event_date
+                ? `${fmtDate(e.event_date)} → ${fmtDate(e.end_date)}`
+                : fmtDate(e.event_date);
+
+            return `
+                <div class="event-card">
+                    <div class="event-date-badge ${dateClass}">
+                        <div class="day">${dayNum(e.event_date)}</div>
+                        <div class="month">${monthShort(e.event_date)}</div>
+                    </div>
+                    <div class="event-body">
+                        <div class="event-title-row">
+                            <div class="event-title">${esc(e.title)}</div>
+                        </div>
+                        <div class="event-meta">
+                            <span><i class="ti ti-calendar"></i> ${dateRange}</span>
+                            ${e.location ? `<span><i class="ti ti-map-pin"></i> ${esc(e.location)}</span>` : ''}
+                        </div>
+                        ${e.description ? `<div class="event-desc">${esc(e.description)}</div>` : ''}
+                        <div class="event-stats">
+                            ${getTypeChip(e.event_type)}
+                            ${getStatusChip(e.status)}
+                            <span class="chip chip-indigo"><i class="ti ti-users"></i> ${presentCount}/${totalMembers} (${pct}%)</span>
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        <button class="action-btn btn-green" onclick="openAttendanceModal('${e.id}')">
+                            <i class="ti ti-user-check"></i> Mark
+                        </button>
+                        <button class="action-btn btn-outline" onclick="openViewModal('${e.id}')">
+                            <i class="ti ti-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-outline" onclick="openEditModal('${e.id}')">
+                            <i class="ti ti-pencil"></i> Edit
+                        </button>
+                        <button class="action-btn btn-red" onclick="deleteEvent('${e.id}')">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ── CREATE / EDIT EVENT ──
+    function openCreateModal() {
+        document.getElementById('modalTitle').textContent = 'Create Event';
+        document.getElementById('saveLabel').textContent = 'Create Event';
+        document.getElementById('eventForm').reset();
+        document.getElementById('editId').value = '';
+        document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+        document.getElementById('eventModal').classList.add('open');
+    }
+
+    function openEditModal(id) {
+        const e = allEvents.find(x => x.id === id);
+        if (!e) return;
+
+        document.getElementById('modalTitle').textContent = 'Edit Event';
+        document.getElementById('saveLabel').textContent = 'Save Changes';
+        document.getElementById('editId').value = id;
+        document.getElementById('titleInput').value = e.title || '';
+        document.getElementById('typeInput').value = e.event_type || 'Other';
+        document.getElementById('statusInput').value = e.status || 'upcoming';
+        document.getElementById('dateInput').value = e.event_date || '';
+        document.getElementById('endDateInput').value = e.end_date || '';
+        document.getElementById('locationInput').value = e.location || '';
+        document.getElementById('descInput').value = e.description || '';
+
+        document.getElementById('eventModal').classList.add('open');
+    }
+
+    function closeEventModal() {
+        document.getElementById('eventModal').classList.remove('open');
+    }
+
+    document.getElementById('eventForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const editId = document.getElementById('editId').value;
+        const title = document.getElementById('titleInput').value.trim();
+        const eventDate = document.getElementById('dateInput').value;
+
+        if (!title) { showToast('⚠️ Title is required', 'error'); return; }
+        if (!eventDate) { showToast('⚠️ Event date is required', 'error'); return; }
+
+        const saveBtn = document.getElementById('saveBtn');
+        const orig = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Saving…';
+
+        const payload = {
+            title,
+            event_type: document.getElementById('typeInput').value,
+            status: document.getElementById('statusInput').value,
+            event_date: eventDate,
+            end_date: document.getElementById('endDateInput').value || null,
+            location: document.getElementById('locationInput').value.trim() || null,
+            description: document.getElementById('descInput').value.trim() || null,
+            updated_at: new Date().toISOString()
+        };
+
+        try {
+            if (editId) {
+                const { error } = await sb.from('events').update(payload).eq('id', editId);
+                if (error) throw error;
+                showToast('✅ Event updated!', 'success');
+            } else {
+                const { data: { user } } = await sb.auth.getUser();
+                payload.created_by = user?.email || 'admin';
+                const { error } = await sb.from('events').insert(payload);
+                if (error) throw error;
+                showToast('✅ Event created!', 'success');
+            }
+
+            closeEventModal();
+            await loadEvents();
+        } catch (err) {
+            showToast('❌ ' + err.message, 'error');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = orig;
+        }
+    });
+
+    async function deleteEvent(id) {
+        const e = allEvents.find(x => x.id === id);
+        if (!e) return;
+        if (!confirm(`Delete "${e.title}"?\n\nThis will also remove all attendance records for this event.`)) return;
+
+        const { error } = await sb.from('events').delete().eq('id', id);
+        if (error) { showToast('❌ ' + error.message, 'error'); return; }
+        showToast('🗑️ Event deleted', 'success');
+        await loadEvents();
+    }
+
+    // ── ATTENDANCE MODAL ──
+    async function openAttendanceModal(eventId) {
+        const ev = allEvents.find(x => x.id === eventId);
+        if (!ev) return;
+
+        currentEventId = eventId;
+        currentAttendance = { ...(attendanceCache[eventId] || {}) };
+
+        document.getElementById('attEventTitle').textContent = ev.title;
+        document.getElementById('attEventMeta').textContent = `${fmtDate(ev.event_date)}${ev.location ? ' · ' + ev.location : ''}`;
+
+        if (!allMembers.length) await loadMembers();
+
+        renderAttendanceMembers();
+        document.getElementById('attendanceModal').classList.add('open');
+    }
+
+    function closeAttendanceModal() {
+        document.getElementById('attendanceModal').classList.remove('open');
+        currentEventId = null;
+        currentAttendance = {};
+    }
+
+    function renderAttendanceMembers() {
+        const container = document.getElementById('attendanceMembers');
+        if (!allMembers.length) {
+            container.innerHTML = '<div class="empty-state"><i class="ti ti-users"></i> No active members found.</div>';
+            return;
+        }
+
+        // Group by voice part
+        const voices = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
+        const grouped = {};
+        allMembers.forEach(m => {
+            const vp = voices.includes(m.voice_part) ? m.voice_part : 'Other';
+            if (!grouped[vp]) grouped[vp] = [];
+            grouped[vp].push(m);
+        });
+
+        let html = '';
+        const voiceIcons = { Director: '⭐', Soprano: '🎵', Alto: '🎵', Tenor: '🎵', Bass: '🎵', Brass: '🎺', Other: '🎤' };
+
+        voices.concat(['Other']).forEach(vp => {
+            if (!grouped[vp]?.length) return;
+            html += `<div class="voice-group-header"><span>${voiceIcons[vp] || '🎤'}</span> ${vp} <span style="opacity:0.6;font-weight:400;">(${grouped[vp].length})</span></div>`;
+
+            grouped[vp].forEach(m => {
+                const status = currentAttendance[m.member_id];
+                const isPresent = status === 'present';
+                const rowClass = status ? (isPresent ? 'present' : 'absent') : '';
+                html += `
+                    <div class="member-toggle-row ${rowClass}" onclick="toggleAttendance('${m.member_id}')">
+                        <div class="member-toggle-info">
+                            <div class="member-avatar-sm">${initials(m.name)}</div>
+                            <div>
+                                <div class="member-name-sm">${esc(m.name)}</div>
+                                <div class="member-id-sm">${esc(m.member_id)}</div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch ${isPresent ? 'on' : ''}"></div>
+                    </div>
+                `;
+            });
+        });
+
+        container.innerHTML = html;
+        updateAttendanceCounter();
+    }
+
+    function toggleAttendance(memberId) {
+        const current = currentAttendance[memberId];
+        if (current === 'present') currentAttendance[memberId] = 'absent';
+        else if (current === 'absent') delete currentAttendance[memberId];
+        else currentAttendance[memberId] = 'present';
+        renderAttendanceMembers();
+    }
+
+    function markAllAttendance(status) {
+        allMembers.forEach(m => { currentAttendance[m.member_id] = status; });
+        renderAttendanceMembers();
+    }
+
+    function clearAllAttendance() {
+        currentAttendance = {};
+        renderAttendanceMembers();
+    }
+
+    function updateAttendanceCounter() {
+        const present = Object.values(currentAttendance).filter(s => s === 'present').length;
+        const absent = Object.values(currentAttendance).filter(s => s === 'absent').length;
+        document.getElementById('attPresentCount').textContent = present;
+        document.getElementById('attAbsentCount').textContent = absent;
+    }
+
+    async function saveAttendance() {
+        if (!currentEventId) return;
+
+        const btn = document.getElementById('saveAttBtn');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Saving…';
+
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            const markedBy = user?.email || 'admin';
+
+            // Delete existing records for this event, then insert fresh
+            await sb.from('event_attendance').delete().eq('event_id', currentEventId);
+
+            const records = Object.entries(currentAttendance).map(([memberId, status]) => ({
+                event_id: currentEventId,
+                member_id: memberId,
+                status,
+                marked_by: markedBy
+            }));
+
+            if (records.length > 0) {
+                const { error } = await sb.from('event_attendance').insert(records);
+                if (error) throw error;
+            }
+
+            const presentCount = records.filter(r => r.status === 'present').length;
+            showToast(`✅ Saved! ${presentCount} present, ${records.length - presentCount} absent`, 'success');
+
+            closeAttendanceModal();
+            await loadEvents();
+        } catch (err) {
+            showToast('❌ ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    }
+
+    // ── VIEW EVENT ──
+    function openViewModal(id) {
+        const e = allEvents.find(x => x.id === id);
+        if (!e) return;
+        currentEventForView = e;
+
+        const evAtt = attendanceCache[id] || {};
+        const presentIds = Object.entries(evAtt).filter(([_, s]) => s === 'present').map(([m]) => m);
+        const absentIds = Object.entries(evAtt).filter(([_, s]) => s === 'absent').map(([m]) => m);
+        const presentMembers = allMembers.filter(m => presentIds.includes(m.member_id));
+        const absentMembers = allMembers.filter(m => absentIds.includes(m.member_id));
+        const unmarkedMembers = allMembers.filter(m => !evAtt[m.member_id]);
+
+        const dateRange = e.end_date && e.end_date !== e.event_date
+            ? `${fmtDate(e.event_date)} → ${fmtDate(e.end_date)}`
+            : fmtDate(e.event_date);
+
+        document.getElementById('viewContent').innerHTML = `
+            <div style="background:linear-gradient(135deg,var(--indigo),var(--purple));color:#fff;padding:20px;border-radius:16px;margin-bottom:16px;">
+                <div style="font-size:20px;font-weight:700;margin-bottom:6px;">${esc(e.title)}</div>
+                <div style="font-size:13px;opacity:0.9;display:flex;gap:14px;flex-wrap:wrap;">
+                    <span>📅 ${dateRange}</span>
+                    ${e.location ? `<span>📍 ${esc(e.location)}</span>` : ''}
+                </div>
+                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                    ${getTypeChip(e.event_type)}
+                    ${getStatusChip(e.status)}
+                </div>
+            </div>
+
+            ${e.description ? `<div style="background:var(--bg);padding:14px;border-radius:12px;margin-bottom:16px;font-size:13px;line-height:1.6;color:var(--text-secondary);">${esc(e.description)}</div>` : ''}
+
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+                <div style="background:var(--green-light);padding:14px;border-radius:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:800;color:#065f46;">${presentMembers.length}</div>
+                    <div style="font-size:11px;color:#065f46;font-weight:600;text-transform:uppercase;margin-top:2px;">Present</div>
+                </div>
+                <div style="background:var(--red-light);padding:14px;border-radius:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:800;color:#991b1b;">${absentMembers.length}</div>
+                    <div style="font-size:11px;color:#991b1b;font-weight:600;text-transform:uppercase;margin-top:2px;">Absent</div>
+                </div>
+                <div style="background:var(--bg);padding:14px;border-radius:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:800;color:var(--text-secondary);">${unmarkedMembers.length}</div>
+                    <div style="font-size:11px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;margin-top:2px;">Unmarked</div>
+                </div>
+            </div>
+
+            ${presentMembers.length ? `
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:8px;">✅ Present (${presentMembers.length})</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        ${presentMembers.map(m => `<span class="chip chip-green">${esc(m.name)}</span>`).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            ${absentMembers.length ? `
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:13px;font-weight:700;color:#991b1b;margin-bottom:8px;">❌ Absent (${absentMembers.length})</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        ${absentMembers.map(m => `<span class="chip chip-red">${esc(m.name)}</span>`).join('')}
+                    </div>
+                </div>
+            ` : ''}
+        `;
+
+        document.getElementById('viewModal').classList.add('open');
+    }
+
+    function closeViewModal() {
+        document.getElementById('viewModal').classList.remove('open');
+        currentEventForView = null;
+    }
+
+    async function exportEventPDF() {
+        if (!currentEventForView) return;
+        const e = currentEventForView;
+        const evAtt = attendanceCache[e.id] || {};
+        const presentIds = Object.entries(evAtt).filter(([_, s]) => s === 'present').map(([m]) => m);
+        const absentIds = Object.entries(evAtt).filter(([_, s]) => s === 'absent').map(([m]) => m);
+        const presentMembers = allMembers.filter(m => presentIds.includes(m.member_id));
+        const absentMembers = allMembers.filter(m => absentIds.includes(m.member_id));
+
+        const dateRange = e.end_date && e.end_date !== e.event_date
+            ? `${fmtDate(e.event_date)} to ${fmtDate(e.end_date)}`
+            : fmtDate(e.event_date);
+
+        const el = document.createElement('div');
+        el.style.padding = '30px';
+        el.style.fontFamily = 'Arial, sans-serif';
+        el.style.color = '#0f172a';
+        el.innerHTML = `
+            <div style="text-align:center;margin-bottom:24px;border-bottom:2px solid #4f46e5;padding-bottom:16px;">
+                <h1 style="color:#4f46e5;font-size:22px;">🎵 University of Embu Students' Choir</h1>
+                <h2 style="font-size:18px;color:#0f172a;margin-top:6px;">Event Attendance Report</h2>
+                <p style="color:#64748b;font-size:12px;margin-top:6px;">Generated on ${new Date().toLocaleString()}</p>
+            </div>
+            <div style="background:#eef2ff;padding:16px;border-radius:12px;margin-bottom:20px;">
+                <h3 style="font-size:18px;margin-bottom:6px;">${esc(e.title)}</h3>
+                <p style="font-size:13px;color:#475569;">📅 ${dateRange}</p>
+                ${e.location ? `<p style="font-size:13px;color:#475569;">📍 ${esc(e.location)}</p>` : ''}
+                <p style="font-size:13px;color:#475569;">🎭 ${esc(e.event_type)} · ${esc(e.status)}</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+                <div style="background:#d1fae5;padding:14px;border-radius:10px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#065f46;">${presentMembers.length}</div>
+                    <div style="font-size:11px;color:#065f46;text-transform:uppercase;">Present</div>
+                </div>
+                <div style="background:#fee2e2;padding:14px;border-radius:10px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#991b1b;">${absentMembers.length}</div>
+                    <div style="font-size:11px;color:#991b1b;text-transform:uppercase;">Absent</div>
+                </div>
+                <div style="background:#f1f5f9;padding:14px;border-radius:10px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#475569;">${presentMembers.length + absentMembers.length}</div>
+                    <div style="font-size:11px;color:#475569;text-transform:uppercase;">Total Marked</div>
+                </div>
+            </div>
+            ${presentMembers.length ? `
+                <h4 style="font-size:14px;color:#065f46;margin-bottom:8px;">✅ Present (${presentMembers.length})</h4>
+                <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">
+                    <thead><tr style="background:#065f46;color:#fff;"><th style="padding:6px 10px;text-align:left;">#</th><th style="padding:6px 10px;text-align:left;">Name</th><th style="padding:6px 10px;text-align:left;">Member ID</th><th style="padding:6px 10px;text-align:left;">Voice Part</th></tr></thead>
+                    <tbody>${presentMembers.map((m, i) => `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:5px 10px;">${i + 1}</td><td style="padding:5px 10px;">${esc(m.name)}</td><td style="padding:5px 10px;">${esc(m.member_id)}</td><td style="padding:5px 10px;">${esc(m.voice_part)}</td></tr>`).join('')}</tbody>
+                </table>
+            ` : ''}
+            ${absentMembers.length ? `
+                <h4 style="font-size:14px;color:#991b1b;margin-bottom:8px;">❌ Absent (${absentMembers.length})</h4>
+                <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">
+                    <thead><tr style="background:#991b1b;color:#fff;"><th style="padding:6px 10px;text-align:left;">#</th><th style="padding:6px 10px;text-align:left;">Name</th><th style="padding:6px 10px;text-align:left;">Member ID</th><th style="padding:6px 10px;text-align:left;">Voice Part</th></tr></thead>
+                    <tbody>${absentMembers.map((m, i) => `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:5px 10px;">${i + 1}</td><td style="padding:5px 10px;">${esc(m.name)}</td><td style="padding:5px 10px;">${esc(m.member_id)}</td><td style="padding:5px 10px;">${esc(m.voice_part)}</td></tr>`).join('')}</tbody>
+                </table>
+            ` : ''}
+            <div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;">
+                University of Embu Students' Choir · Event Attendance Report
+            </div>
+        `;
+
+        await html2pdf().set({
+            margin: 0.5,
+            filename: `event_${e.title.replace(/[^a-z0-9]/gi, '_')}_${e.event_date}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        }).from(el).save();
+    }
+
+    // ── INIT ──
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await loadUserInfo();
+        await loadMembers();
+        await loadEvents();
+    }
+    init();
+
+    // Expose globals
+    window.openCreateModal = openCreateModal;
+    window.openEditModal = openEditModal;
+    window.closeEventModal = closeEventModal;
+    window.openAttendanceModal = openAttendanceModal;
+    window.closeAttendanceModal = closeAttendanceModal;
+    window.openViewModal = openViewModal;
+    window.closeViewModal = closeViewModal;
+    window.toggleAttendance = toggleAttendance;
+    window.markAllAttendance = markAllAttendance;
+    window.clearAllAttendance = clearAllAttendance;
+    window.saveAttendance = saveAttendance;
+    window.deleteEvent = deleteEvent;
+    window.filterEvents = filterEvents;
+    window.loadEvents = loadEvents;
+    window.exportEventPDF = exportEventPDF;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.logout = logout;
+</script>
+</body>
+</html>

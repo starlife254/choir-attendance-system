@@ -30,7 +30,7 @@ body{
   margin:0 auto 20px;
 }
 .logo img{
-  width:300%;
+  width:350%;
   height:200%;
   object-fit:contain;
   display:block;
@@ -53,6 +53,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
 .msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
 .msg.err{background:#fee2e2;color:#991b1b;display:block}
 .msg.ok{background:#d1fae5;color:#065f46;display:block}
+.msg.info{background:#e0f2fe;color:#0369a1;display:block}
 .foot{text-align:center;font-size:13px;color:var(--muted);margin-top:20px}
 .foot a{color:var(--primary);text-decoration:none;font-weight:600}
 .foot a:hover{text-decoration:underline}
@@ -80,7 +81,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
   <label>Password</label>
   <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
   <button type="submit" id="btn">Sign In</button>
-  <p class="foot">New member? <a href="member/register.html">Register</a> · <a href="member/reset-password.html">Reset password</a></p>
+  <p class="foot">New member? <a href="member/register.html">Register</a> · <a href="member/reset-password.html">Forgot password?</a></p>
 </form>
 
 <p class="page-credit">
@@ -101,11 +102,39 @@ async function getRole(email) {
   return data?.role || "member";
 }
 
+/**
+ * Route the user to the correct destination based on:
+ * 1. must_change_password flag → force change-password page
+ * 2. role → admin or member dashboard
+ */
+async function routeUser(user) {
+  // 1. Check for forced password change
+  const { data: profile } = await sb
+    .from('user_profiles')
+    .select('must_change_password')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (profile?.must_change_password) {
+    show("Please set a new password before continuing…", "info");
+    setTimeout(() => {
+      window.location.href = "member/change-password.html";
+    }, 1200);
+    return;
+  }
+
+  // 2. Route by role
+  const role = await getRole(user.email);
+  show("Success! Redirecting…", "ok");
+  setTimeout(() => {
+    window.location.href = role === "admin" ? "admin/index.html" : "member/dashboard.html";
+  }, 500);
+}
+
 async function checkSession() {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
-    const role = await getRole(session.user.email);
-    location.href = role === "admin" ? "admin/index.html" : "member/dashboard.html";
+    await routeUser(session.user);
   }
 }
 
@@ -116,15 +145,14 @@ $("#loginForm").addEventListener("submit", async (e) => {
   const btn = $("#btn");
   btn.disabled = true; btn.textContent = "Signing in…";
   msg.className = "msg";
+
   try {
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
-    const role = await getRole(email);
-    show("Success! Redirecting…", "ok");
-    setTimeout(() => {
-      location.href = role === "admin" ? "admin/index.html" : "member/dashboard.html";
-    }, 500);
+    // Route based on password-change flag + role
+    await routeUser(data.user);
+
   } catch (err) {
     let errorMsg = err.message || "Login failed";
     if (errorMsg === 'Invalid login credentials') {

@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>My Section | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/cache-helper.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --primary: #5b4fcf;
+            --primary-dark: #3d35a8;
+            --primary-light: #ede9ff;
+            --gold: #d4af37;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --slate-900: #0f172a;
+            --slate-700: #334155;
+            --slate-500: #64748b;
+            --slate-300: #cbd5e1;
+            --slate-100: #f1f5f9;
+            --slate-50: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --bg: #f8fafc;
+            --shadow-card: 0 8px 24px rgba(91, 79, 207, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0eef9;
+            background-image: radial-gradient(ellipse at 20% 10%, rgba(91, 79, 207, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 90%, rgba(124, 58, 237, 0.08) 0%, transparent 50%);
+            min-height: 100vh;
+            padding: 16px;
+            color: var(--slate-900);
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 32px;
+            padding: 24px 24px 32px;
+            box-shadow: 0 32px 64px -16px rgba(91, 79, 207, 0.18), 0 0 0 1px rgba(91, 79, 207, 0.05);
+            margin-bottom: 80px;
+            animation: fadeSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
+        .header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.4px; display: flex; align-items: center; gap: 10px; }
+        .header h1 i { color: var(--primary); }
+        .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--slate-300); padding: 8px 18px; border-radius: 40px; font-weight: 600; font-size: 13px; font-family: inherit; color: var(--slate-700); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-outline:hover { background: var(--slate-50); border-color: var(--primary); color: var(--primary); }
+
+        /* HERO */
+        .hero { background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%); color: white; padding: 24px 28px; border-radius: 24px; margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; box-shadow: 0 8px 28px rgba(91, 79, 207, 0.3); position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+        .hero-icon { width: 68px; height: 68px; border-radius: 20px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+        .hero-text { flex: 1; min-width: 200px; position: relative; z-index: 1; }
+        .hero-text h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .hero-text p { font-size: 13px; opacity: 0.9; }
+        .hero-badge { background: rgba(255,255,255,0.22); padding: 6px 14px; border-radius: 40px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; }
+
+        /* TABS */
+        .tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid var(--slate-100); padding-bottom: 14px; margin-bottom: 24px; }
+        .tab-btn { padding: 8px 18px; background: var(--slate-100); border: none; border-radius: 40px; font-weight: 600; font-size: 13px; font-family: inherit; color: var(--slate-500); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .tab-btn i { font-size: 14px; }
+        .tab-btn:hover:not(.active) { background: var(--primary-light); color: var(--primary); }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(91, 79, 207, 0.3); }
+        .tab-content { display: none; animation: fadeIn 0.25s ease both; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* KPI */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-card { background: var(--slate-50); border: 1px solid transparent; border-radius: 20px; padding: 18px 16px; text-align: center; transition: transform .15s, box-shadow .2s; }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+        .kpi-card.primary { border-color: rgba(91, 79, 207, 0.2); background: linear-gradient(160deg, #ede9ff, #f5f3ff); }
+        .kpi-card.green { border-color: rgba(16, 185, 129, 0.2); background: linear-gradient(160deg, #f0fdf4, #ecfdf5); }
+        .kpi-card.amber { border-color: rgba(245, 158, 11, 0.2); background: linear-gradient(160deg, #fffbeb, #fef3c7); }
+        .kpi-card.red { border-color: rgba(239, 68, 68, 0.18); background: linear-gradient(160deg, #fff1f1, #fee2e2); }
+        .kpi-card .num { font-size: 30px; font-weight: 800; letter-spacing: -1px; line-height: 1.2; }
+        .kpi-card.primary .num { color: var(--primary); }
+        .kpi-card.green .num { color: var(--green); }
+        .kpi-card.amber .num { color: var(--amber); }
+        .kpi-card.red .num { color: var(--red); }
+        .kpi-card .lbl { font-size: 12px; color: var(--slate-500); margin-top: 6px; font-weight: 500; }
+        .kpi-card .sub { font-size: 10.5px; color: var(--slate-500); margin-top: 3px; opacity: 0.7; }
+
+        /* PANEL */
+        .panel { background: var(--white); border: 1px solid rgba(91, 79, 207, 0.08); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-card); }
+        .panel-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; color: var(--slate-900); }
+        .panel-title i { color: var(--primary); font-size: 18px; }
+
+        /* ALERT CARDS */
+        .alert-card { padding: 14px 16px; border-radius: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; cursor: pointer; transition: transform .12s; }
+        .alert-card:hover { transform: translateX(3px); }
+        .alert-card.warning { background: #fef3c7; border-left: 4px solid #f59e0b; }
+        .alert-card.danger { background: #fee2e2; border-left: 4px solid #ef4444; }
+        .alert-card.success { background: #d1fae5; border-left: 4px solid #10b981; }
+        .alert-card.info { background: #dbeafe; border-left: 4px solid #3b82f6; }
+        .alert-avatar { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+        .alert-info { flex: 1; min-width: 0; }
+        .alert-name { font-size: 14px; font-weight: 700; }
+        .alert-detail { font-size: 12px; color: var(--slate-700); margin-top: 2px; }
+
+        /* MEMBER ROWS */
+        .member-row { background: var(--slate-50); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; transition: transform .12s; }
+        .member-row:hover { transform: translateX(3px); }
+        .member-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+        .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .member-info { flex: 1; min-width: 0; }
+        .member-name { font-size: 14px; font-weight: 700; color: var(--slate-900); }
+        .member-meta { font-size: 11.5px; color: var(--slate-500); margin-top: 2px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .member-stats { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 40px; font-size: 11px; font-weight: 600; }
+        .pill-green { background: #d1fae5; color: #065f46; }
+        .pill-amber { background: #fef3c7; color: #854d0e; }
+        .pill-red { background: #fee2e2; color: #991b1b; }
+        .pill-gray { background: #f1f5f9; color: #64748b; }
+        .pill-primary { background: var(--primary-light); color: var(--primary); }
+        .contact-btn { padding: 6px 10px; border: none; border-radius: 8px; background: var(--primary-light); color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+        .contact-btn:hover { opacity: .85; }
+        .contact-btn.gray { background: var(--slate-100); color: var(--slate-700); }
+
+        /* CONTROLS */
+        .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .search-input { flex: 1; min-width: 200px; padding: 10px 14px; border: 1.5px solid var(--slate-300); border-radius: 40px; font-size: 13px; font-family: inherit; outline: none; transition: border .15s; }
+        .search-input:focus { border-color: var(--primary); }
+        .filter-select { padding: 10px 14px; border: 1.5px solid var(--slate-300); border-radius: 40px; font-size: 13px; font-family: inherit; background: white; cursor: pointer; outline: none; transition: border .15s; }
+        .filter-select:focus { border-color: var(--primary); }
+
+        /* EMPTY */
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--slate-500); font-size: 13px; }
+        .empty-state i { font-size: 40px; color: var(--slate-300); display: block; margin-bottom: 10px; }
+
+        /* BOTTOM NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); display: flex; justify-content: space-around; padding: 8px 12px 12px; box-shadow: 0 -1px 0 rgba(91, 79, 207, 0.08); z-index: 100; overflow-x: auto; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--slate-500); font-size: 10px; font-weight: 600; gap: 2px; padding: 6px 10px; border-radius: 12px; cursor: pointer; background: none; border: none; font-family: inherit; transition: all 0.18s; white-space: nowrap; flex-shrink: 0; }
+        .bottom-nav-item i { font-size: 20px; }
+        .bottom-nav-item.active { color: var(--primary); background: var(--primary-light); }
+        .bottom-nav::-webkit-scrollbar { display: none; }
+        @media (min-width: 900px) { .bottom-nav { display: none; } .container { margin-bottom: 0; } }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) {
+            body { padding: 10px; }
+            .container { padding: 16px; border-radius: 24px; margin-bottom: 80px; }
+            .header h1 { font-size: 1.15rem; }
+            .hero { padding: 18px 20px; }
+            .hero-text h2 { font-size: 18px; }
+            .hero-icon { width: 56px; height: 56px; font-size: 26px; }
+            .kpi-grid { gap: 8px; }
+            .kpi-card { padding: 14px 10px; }
+            .kpi-card .num { font-size: 22px; }
+            .kpi-card .lbl { font-size: 11px; }
+            .tabs { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 10px; }
+            .tab-btn { white-space: nowrap; flex-shrink: 0; }
+            .member-row { flex-wrap: wrap; }
+            .member-stats { width: 100%; justify-content: flex-start; }
+            .controls { flex-direction: column; }
+            .search-input { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <h1><i class="fas fa-microphone"></i> My Section</h1>
+        <div class="header-actions">
+            <a href="dashboard.html" class="btn-outline"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-icon">🎤</div>
+        <div class="hero-text">
+            <h2 id="heroSectionName">Loading...</h2>
+            <p>Section leadership view — read-only</p>
+            <div class="hero-badge" id="heroRoleBadge">
+                <i class="fas fa-crown"></i> <span id="heroRoleText">Loading</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> Overview</button>
+        <button class="tab-btn" onclick="switchTab('members')"><i class="fas fa-users"></i> Members</button>
+        <button class="tab-btn" onclick="switchTab('analytics')"><i class="fas fa-chart-line"></i> Analytics</button>
+        <button class="tab-btn" onclick="switchTab('penalties')"><i class="fas fa-coins"></i> Penalties</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- TAB: DASHBOARD -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="dashboardTab" class="tab-content active">
+
+        <div class="kpi-grid">
+            <div class="kpi-card primary">
+                <div class="num" id="kpiMembers">-</div>
+                <div class="lbl">Section Members</div>
+                <div class="sub">Total in your section</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="num" id="kpiRate">-</div>
+                <div class="lbl">Attendance Rate</div>
+                <div class="sub">Last 30 days</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="num" id="kpiLow">-</div>
+                <div class="lbl">Below 70%</div>
+                <div class="sub">Need attention</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="num" id="kpiFines">-</div>
+                <div class="lbl">Pending Fines</div>
+                <div class="sub">Total KSh</div>
+            </div>
+        </div>
+
+        <!-- Needs Attention -->
+        <div class="panel" id="attentionPanel">
+            <div class="panel-title"><i class="fas fa-exclamation-triangle" style="color:var(--amber);"></i> Needs Attention</div>
+            <div id="attentionList">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+
+        <!-- Top Performers -->
+        <div class="panel">
+            <div class="panel-title"><i class="fas fa-trophy" style="color:var(--gold);"></i> Top Performers This Month</div>
+            <div id="topPerformersList">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="panel">
+            <div class="panel-title"><i class="fas fa-history"></i> Recent Section Activity</div>
+            <div id="recentActivityList">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- TAB: MEMBERS -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="membersTab" class="tab-content">
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fas fa-users"></i> Section Members
+                <span style="margin-left:auto; font-size:12px; color:var(--slate-500); font-weight:400;" id="membersCount">-</span>
+            </div>
+
+            <div class="controls">
+                <input type="text" id="memberSearch" class="search-input" placeholder="🔍 Search by name..." oninput="renderMembers()">
+                <select id="memberSort" class="filter-select" onchange="renderMembers()">
+                    <option value="name">Sort by name</option>
+                    <option value="attendance-desc">Highest attendance</option>
+                    <option value="attendance-asc">Lowest attendance</option>
+                    <option value="fines-desc">Highest fines</option>
+                </select>
+                <button class="btn-outline" onclick="exportMembersCSV()"><i class="fas fa-file-csv"></i> Export</button>
+            </div>
+
+            <div id="membersList">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- TAB: ANALYTICS -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="analyticsTab" class="tab-content">
+
+        <div class="panel">
+            <div class="panel-title"><i class="fas fa-chart-line"></i> Section Attendance Trend (Last 30 Days)</div>
+            <canvas id="trendChart" height="100"></canvas>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title"><i class="fas fa-calendar-week"></i> Weekly Breakdown</div>
+            <canvas id="weeklyChart" height="100"></canvas>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title"><i class="fas fa-chart-bar"></i> Your Section — Detailed Stats</div>
+            <div id="analyticsStats">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- TAB: PENALTIES -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="penaltiesTab" class="tab-content">
+        <div class="panel">
+            <div class="panel-title"><i class="fas fa-coins"></i> Section Penalties (Read-Only)</div>
+
+            <div class="kpi-grid" style="margin-bottom:16px;">
+                <div class="kpi-card red">
+                    <div class="num" id="penTotal">-</div>
+                    <div class="lbl">Total Fines</div>
+                </div>
+                <div class="kpi-card amber">
+                    <div class="num" id="penPending">-</div>
+                    <div class="lbl">Pending</div>
+                </div>
+                <div class="kpi-card green">
+                    <div class="num" id="penPaid">-</div>
+                    <div class="lbl">Paid</div>
+                </div>
+                <div class="kpi-card primary">
+                    <div class="num" id="penMembers">-</div>
+                    <div class="lbl">Members Owing</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <select id="penaltyFilter" class="filter-select" onchange="renderPenalties()">
+                    <option value="all">All penalties</option>
+                    <option value="pending">Pending only</option>
+                    <option value="paid">Paid only</option>
+                </select>
+                <button class="btn-outline" onclick="exportPenaltiesCSV()"><i class="fas fa-file-csv"></i> Export</button>
+            </div>
+
+            <div id="penaltiesList">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-chart-pie"></i><span>Stats</span></a>
+    <a href="my-section.html" class="bottom-nav-item active"><i class="fas fa-microphone"></i><span>My Section</span></a>
+    <a href="music-library.html" class="bottom-nav-item"><i class="fas fa-music"></i><span>Music</span></a>
+    <a href="my-events.html" class="bottom-nav-item"><i class="fas fa-calendar-check"></i><span>Events</span></a>
+    <a href="dashboard.html" class="bottom-nav-item"><i class="fas fa-wallet"></i><span>Finance</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentMember = null;
+    let leaderRecord = null;
+    let sectionMembers = [];
+    let memberStats = {};   // { member_id: { present, late, absent, total, rate, pendingFines } }
+    let sectionPenalties = [];
+    let trendChart, weeklyChart;
+
+    // ══════════════════════════════════════════
+    // HELPERS
+    // ══════════════════════════════════════════
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[m]));
+    }
+
+    function initials(name) {
+        if (!name) return '?';
+        return name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
+    }
+
+    function fmtMoney(n) {
+        return 'KSh ' + Number(n || 0).toLocaleString();
+    }
+
+    // ══════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+
+        const { data: { user } } = await sb.auth.getUser();
+        const { data: um } = await sb.from('user_members').select('member_id').eq('user_id', user.id).single();
+        if (!um) { alert('Account not linked'); window.location.href = 'dashboard.html'; return; }
+
+        const { data: member } = await sb.from('members').select('*').eq('member_id', um.member_id).single();
+        if (!member) { alert('Member record not found'); window.location.href = 'dashboard.html'; return; }
+        currentMember = member;
+
+        // Check if they're an active leader
+        const { data: leaders } = await sb
+            .from('voice_reps')
+            .select('*')
+            .eq('member_id', currentMember.member_id)
+            .eq('is_active', true);
+
+        if (!leaders || leaders.length === 0) {
+            alert('You are not registered as a section leader.');
+            window.location.href = 'dashboard.html';
+            return;
+        }
+
+        // Take the highest priority role (Section Leader > Assistant > Coordinator)
+        const priority = { 'Section Leader': 1, 'Assistant Leader': 2, 'Coordinator': 3 };
+        leaders.sort((a, b) => (priority[a.role] || 99) - (priority[b.role] || 99));
+        leaderRecord = leaders[0];
+
+        // Set hero
+        document.getElementById('heroSectionName').textContent = `${leaderRecord.voice_part} Section`;
+        document.getElementById('heroRoleText').textContent = `${leaderRecord.role} · Tier ${leaderRecord.privilege_tier || 1}`;
+
+        // Load everything
+        await loadSectionMembers();
+        await loadSectionAttendanceStats();
+        await loadSectionPenalties();
+
+        renderDashboard();
+        renderMembers();
+        renderPenalties();
+        renderAnalytics();
+    }
+
+    // ══════════════════════════════════════════
+    // LOAD MEMBERS OF SECTION
+    // ══════════════════════════════════════════
+    async function loadSectionMembers() {
+        const { data, error } = await sb
+            .from('members')
+            .select('member_id, name, voice_part, contact, email')
+            .eq('voice_part', leaderRecord.voice_part)
+            .eq('status', 'active')
+            .order('name');
+
+        if (error) {
+            console.warn(error);
+            sectionMembers = [];
+            return;
+        }
+        sectionMembers = data || [];
+    }
+
+    // ══════════════════════════════════════════
+    // LOAD ATTENDANCE STATS FOR SECTION
+    // ══════════════════════════════════════════
+    async function loadSectionAttendanceStats() {
+        const memberIds = sectionMembers.map(m => m.member_id);
+        if (!memberIds.length) return;
+
+        // Get last 30 days
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 30);
+        const cutoffStr = cutoff.toISOString().split('T')[0];
+
+        const { data: attendance, error } = await sb
+            .from('attendance')
+            .select('member_id, date, session, status')
+            .in('member_id', memberIds)
+            .gte('date', cutoffStr);
+
+        if (error) { console.warn(error); return; }
+
+        // Build per-member stats
+        memberStats = {};
+        memberIds.forEach(id => {
+            memberStats[id] = { present: 0, late: 0, absent: 0, total: 0, rate: 0, pendingFines: 0 };
+        });
+
+        (attendance || []).forEach(a => {
+            if (!memberStats[a.member_id]) return;
+            const s = memberStats[a.member_id];
+            if (a.status === 'Present') s.present++;
+            else if (a.status === 'Late') s.late++;
+            else if (a.status === 'Absent') s.absent++;
+            s.total++;
+        });
+
+        // Calculate rate for each
+        Object.values(memberStats).forEach(s => {
+            s.rate = s.total > 0 ? Math.round(((s.present + s.late) / s.total) * 100) : 0;
+        });
+
+        // Also fetch all-time attendance for "recent activity"
+        const { data: allAtt } = await sb
+            .from('attendance')
+            .select('member_id, date, session, status, marked_at')
+            .in('member_id', memberIds)
+            .order('marked_at', { ascending: false })
+            .limit(20);
+
+        window._recentActivity = allAtt || [];
+    }
+
+    // ══════════════════════════════════════════
+    // LOAD PENALTIES FOR SECTION
+    // ══════════════════════════════════════════
+    async function loadSectionPenalties() {
+        const memberIds = sectionMembers.map(m => m.member_id);
+        if (!memberIds.length) return;
+
+        const { data, error } = await sb
+            .from('penalties')
+            .select('*')
+            .in('member_id', memberIds)
+            .order('date', { ascending: false });
+
+        if (error) { console.warn(error); return; }
+        sectionPenalties = data || [];
+
+        // Update per-member pending fines
+        sectionPenalties.forEach(p => {
+            if (p.status === 'pending' && memberStats[p.member_id]) {
+                const amount = p.total_with_late_fee || p.amount || 0;
+                memberStats[p.member_id].pendingFines += amount;
+            }
+        });
+    }
+
+    // ══════════════════════════════════════════
+    // RENDER: DASHBOARD
+    // ══════════════════════════════════════════
+    function renderDashboard() {
+        const totalMembers = sectionMembers.length;
+
+        // Overall section rate
+        const totals = Object.values(memberStats).reduce((acc, s) => {
+            acc.present += s.present;
+            acc.late += s.late;
+            acc.total += s.total;
+            return acc;
+        }, { present: 0, late: 0, total: 0 });
+
+        const overallRate = totals.total > 0 ? Math.round(((totals.present + totals.late) / totals.total) * 100) : 0;
+
+        // Below 70%
+        const lowMembers = sectionMembers.filter(m => {
+            const s = memberStats[m.member_id];
+            return s && s.total > 0 && s.rate < 70;
+        });
+
+        // Pending fines total
+        const pendingFinesTotal = sectionPenalties
+            .filter(p => p.status === 'pending')
+            .reduce((sum, p) => sum + (p.total_with_late_fee || p.amount || 0), 0);
+
+        // KPIs
+        document.getElementById('kpiMembers').textContent = totalMembers;
+        document.getElementById('kpiRate').textContent = overallRate + '%';
+        document.getElementById('kpiLow').textContent = lowMembers.length;
+        document.getElementById('kpiFines').textContent = 'KSh ' + Math.round(pendingFinesTotal).toLocaleString();
+
+        // Needs Attention
+        const attention = [];
+
+        // Low attendance
+        lowMembers.sort((a, b) => (memberStats[a.member_id].rate - memberStats[b.member_id].rate));
+        lowMembers.slice(0, 5).forEach(m => {
+            const s = memberStats[m.member_id];
+            attention.push({
+                type: 'warning',
+                icon: 'fa-chart-line',
+                name: m.name,
+                detail: `Attendance ${s.rate}% — below 70%`,
+                memberId: m.member_id
+            });
+        });
+
+        // High fines
+        sectionMembers.forEach(m => {
+            const s = memberStats[m.member_id];
+            if (s && s.pendingFines >= 100) {
+                attention.push({
+                    type: 'danger',
+                    icon: 'fa-coins',
+                    name: m.name,
+                    detail: `KSh ${Math.round(s.pendingFines)} pending in fines`,
+                    memberId: m.member_id
+                });
+            }
+        });
+
+        const attentionList = document.getElementById('attentionList');
+        if (!attention.length) {
+            attentionList.innerHTML = `
+                <div class="alert-card success">
+                    <div class="alert-avatar" style="background:#10b981; color:white;"><i class="fas fa-check"></i></div>
+                    <div class="alert-info">
+                        <div class="alert-name">All good!</div>
+                        <div class="alert-detail">Everyone is above 70% with no major fines</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            attentionList.innerHTML = attention.slice(0, 8).map(a => `
+                <div class="alert-card ${a.type}">
+                    <div class="alert-avatar" style="background:${a.type === 'danger' ? '#ef4444' : '#f59e0b'}; color:white;">
+                        <i class="fas ${a.icon}"></i>
+                    </div>
+                    <div class="alert-info">
+                        <div class="alert-name">${escapeHtml(a.name)}</div>
+                        <div class="alert-detail">${escapeHtml(a.detail)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Top Performers
+        const ranked = sectionMembers
+            .map(m => ({ ...m, ...memberStats[m.member_id] }))
+            .filter(m => m.total > 0)
+            .sort((a, b) => b.rate - a.rate)
+            .slice(0, 5);
+
+        const topList = document.getElementById('topPerformersList');
+        if (!ranked.length) {
+            topList.innerHTML = '<div class="empty-state"><i class="fas fa-trophy"></i> No attendance data yet</div>';
+        } else {
+            topList.innerHTML = ranked.map((m, i) => {
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+                return `
+                    <div class="member-row">
+                        <div style="width:32px; text-align:center; font-size:18px;">${medal}</div>
+                        <div class="member-avatar">${initials(m.name)}</div>
+                        <div class="member-info">
+                            <div class="member-name">${escapeHtml(m.name)}</div>
+                            <div class="member-meta">
+                                <span><i class="fas fa-check"></i> ${m.present}</span>
+                                <span><i class="fas fa-clock"></i> ${m.late}</span>
+                                <span><i class="fas fa-times"></i> ${m.absent}</span>
+                            </div>
+                        </div>
+                        <div class="member-stats">
+                            <span class="pill pill-green">${m.rate}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Recent Activity
+        const recentList = document.getElementById('recentActivityList');
+        const activity = window._recentActivity || [];
+        if (!activity.length) {
+            recentList.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i> No recent activity</div>';
+        } else {
+            recentList.innerHTML = activity.slice(0, 8).map(a => {
+                const m = sectionMembers.find(x => x.member_id === a.member_id);
+                const name = m?.name || 'Unknown';
+                const pillClass = a.status === 'Present' ? 'pill-green' : a.status === 'Late' ? 'pill-amber' : 'pill-red';
+                const icon = a.status === 'Present' ? 'fa-check' : a.status === 'Late' ? 'fa-clock' : 'fa-times';
+                return `
+                    <div class="member-row" style="padding:8px 12px;">
+                        <div class="member-avatar" style="width:32px; height:32px; font-size:12px;">${initials(name)}</div>
+                        <div class="member-info">
+                            <div class="member-name" style="font-size:13px;">${escapeHtml(name)}</div>
+                            <div class="member-meta" style="font-size:11px;">${a.date} · ${a.session}</div>
+                        </div>
+                        <span class="pill ${pillClass}"><i class="fas ${icon}"></i> ${a.status}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    // ══════════════════════════════════════════
+    // RENDER: MEMBERS
+    // ══════════════════════════════════════════
+    function renderMembers() {
+        const q = (document.getElementById('memberSearch').value || '').toLowerCase().trim();
+        const sort = document.getElementById('memberSort').value;
+
+        let list = sectionMembers.map(m => ({
+            ...m,
+            ...(memberStats[m.member_id] || { present: 0, late: 0, absent: 0, total: 0, rate: 0, pendingFines: 0 })
+        }));
+
+        if (q) list = list.filter(m => m.name.toLowerCase().includes(q));
+
+        if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
+        else if (sort === 'attendance-desc') list.sort((a, b) => b.rate - a.rate);
+        else if (sort === 'attendance-asc') list.sort((a, b) => a.rate - b.rate);
+        else if (sort === 'fines-desc') list.sort((a, b) => b.pendingFines - a.pendingFines);
+
+        document.getElementById('membersCount').textContent = `${list.length} members`;
+
+        const container = document.getElementById('membersList');
+        if (!list.length) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i> No members found</div>';
+            return;
+        }
+
+        container.innerHTML = list.map(m => {
+            const ratePill = m.total === 0 ? 'pill-gray' : m.rate >= 80 ? 'pill-green' : m.rate >= 70 ? 'pill-amber' : 'pill-red';
+            const finePill = m.pendingFines > 0 ? 'pill-red' : 'pill-gray';
+            return `
+                <div class="member-row">
+                    <div class="member-avatar">${initials(m.name)}</div>
+                    <div class="member-info">
+                        <div class="member-name">${escapeHtml(m.name)}</div>
+                        <div class="member-meta">
+                            <span><i class="fas fa-id-card"></i> ${escapeHtml(m.member_id)}</span>
+                            ${m.contact ? `<span><i class="fas fa-phone"></i> ${escapeHtml(m.contact)}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="member-stats">
+                        <span class="pill ${ratePill}">${m.total === 0 ? 'No data' : m.rate + '%'}</span>
+                        ${m.pendingFines > 0 ? `<span class="pill ${finePill}"><i class="fas fa-coins"></i> ${Math.round(m.pendingFines)}</span>` : ''}
+                        ${m.contact ? `<a href="tel:${escapeHtml(m.contact)}" class="contact-btn" title="Call"><i class="fas fa-phone"></i></a>` : ''}
+                        ${m.email ? `<a href="mailto:${escapeHtml(m.email)}" class="contact-btn gray" title="Email"><i class="fas fa-envelope"></i></a>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ══════════════════════════════════════════
+    // RENDER: ANALYTICS
+    // ══════════════════════════════════════════
+    function renderAnalytics() {
+        const memberIds = sectionMembers.map(m => m.member_id);
+        if (!memberIds.length) return;
+
+        (async () => {
+            // Last 30 days
+            const days = [];
+            const presentData = [];
+            const lateData = [];
+            const absentData = [];
+
+            const { data: att } = await sb
+                .from('attendance')
+                .select('date, status')
+                .in('member_id', memberIds);
+
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                days.push(dateStr.substring(5));
+
+                const dayRecords = (att || []).filter(a => a.date === dateStr);
+                presentData.push(dayRecords.filter(a => a.status === 'Present').length);
+                lateData.push(dayRecords.filter(a => a.status === 'Late').length);
+                absentData.push(dayRecords.filter(a => a.status === 'Absent').length);
+            }
+
+            // Trend chart
+            if (trendChart) trendChart.destroy();
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [
+                        { label: 'Present', data: presentData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', tension: 0.3, fill: true },
+                        { label: 'Late', data: lateData, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.3, fill: true }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+                }
+            });
+
+            // Weekly breakdown by day of week
+            const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const dowPresent = [0, 0, 0, 0, 0, 0, 0];
+            const dowTotal = [0, 0, 0, 0, 0, 0, 0];
+
+            (att || []).forEach(a => {
+                const dow = new Date(a.date + 'T00:00:00').getDay();
+                const idx = dow === 0 ? 6 : dow - 1;
+                dowTotal[idx]++;
+                if (a.status === 'Present' || a.status === 'Late') dowPresent[idx]++;
+            });
+
+            const dowRates = daysOfWeek.map((_, i) =>
+                dowTotal[i] > 0 ? Math.round((dowPresent[i] / dowTotal[i]) * 100) : 0
+            );
+
+            if (weeklyChart) weeklyChart.destroy();
+            const ctx2 = document.getElementById('weeklyChart').getContext('2d');
+            weeklyChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: daysOfWeek,
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: dowRates,
+                        backgroundColor: ['#4f46e5', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#64748b'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+
+            // Detailed stats
+            const totals = Object.values(memberStats).reduce((acc, s) => {
+                acc.present += s.present;
+                acc.late += s.late;
+                acc.absent += s.absent;
+                acc.total += s.total;
+                return acc;
+            }, { present: 0, late: 0, absent: 0, total: 0 });
+
+            const rate = totals.total > 0 ? Math.round(((totals.present + totals.late) / totals.total) * 100) : 0;
+            const punctuality = totals.total > 0 ? Math.round((totals.present / totals.total) * 100) : 0;
+
+            document.getElementById('analyticsStats').innerHTML = `
+                <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px;">
+                    <div style="background:var(--slate-50); padding:14px; border-radius:12px; text-align:center;">
+                        <div style="font-size:24px; font-weight:800; color:var(--green);">${totals.present}</div>
+                        <div style="font-size:12px; color:var(--slate-500); margin-top:4px;">Present Records</div>
+                    </div>
+                    <div style="background:var(--slate-50); padding:14px; border-radius:12px; text-align:center;">
+                        <div style="font-size:24px; font-weight:800; color:var(--amber);">${totals.late}</div>
+                        <div style="font-size:12px; color:var(--slate-500); margin-top:4px;">Late Records</div>
+                    </div>
+                    <div style="background:var(--slate-50); padding:14px; border-radius:12px; text-align:center;">
+                        <div style="font-size:24px; font-weight:800; color:var(--red);">${totals.absent}</div>
+                        <div style="font-size:12px; color:var(--slate-500); margin-top:4px;">Absent Records</div>
+                    </div>
+                    <div style="background:var(--slate-50); padding:14px; border-radius:12px; text-align:center;">
+                        <div style="font-size:24px; font-weight:800; color:var(--primary);">${rate}%</div>
+                        <div style="font-size:12px; color:var(--slate-500); margin-top:4px;">Overall Rate</div>
+                    </div>
+                    <div style="background:var(--slate-50); padding:14px; border-radius:12px; text-align:center; grid-column:1/-1;">
+                        <div style="font-size:22px; font-weight:800; color:var(--primary);">${punctuality}%</div>
+                        <div style="font-size:12px; color:var(--slate-500); margin-top:4px;">Punctuality Rate (Present / Total)</div>
+                    </div>
+                </div>
+            `;
+        })();
+    }
+
+    // ══════════════════════════════════════════
+    // RENDER: PENALTIES
+    // ══════════════════════════════════════════
+    function renderPenalties() {
+        const filter = document.getElementById('penaltyFilter').value;
+        let list = sectionPenalties;
+        if (filter !== 'all') list = list.filter(p => p.status === filter);
+
+        // KPIs
+        const total = sectionPenalties.reduce((sum, p) => sum + (p.total_with_late_fee || p.amount || 0), 0);
+        const pending = sectionPenalties.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.total_with_late_fee || p.amount || 0), 0);
+        const paid = sectionPenalties.filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0);
+        const uniqueOwing = new Set(sectionPenalties.filter(p => p.status === 'pending').map(p => p.member_id)).size;
+
+        document.getElementById('penTotal').textContent = 'KSh ' + Math.round(total);
+        document.getElementById('penPending').textContent = 'KSh ' + Math.round(pending);
+        document.getElementById('penPaid').textContent = 'KSh ' + Math.round(paid);
+        document.getElementById('penMembers').textContent = uniqueOwing;
+
+        // List
+        const container = document.getElementById('penaltiesList');
+        if (!list.length) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i> No penalties found</div>';
+            return;
+        }
+
+        const memberLookup = {};
+        sectionMembers.forEach(m => { memberLookup[m.member_id] = m; });
+
+        container.innerHTML = list.slice(0, 50).map(p => {
+            const m = memberLookup[p.member_id];
+            const name = m?.name || 'Unknown';
+            const amount = p.total_with_late_fee || p.amount || 0;
+            const isPending = p.status === 'pending';
+            const type = p.penalty_type === 'late' ? '⏰ Late' : p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
+            return `
+                <div class="member-row" style="padding:10px 14px;">
+                    <div class="member-avatar" style="width:36px; height:36px; font-size:13px;">${initials(name)}</div>
+                    <div class="member-info">
+                        <div class="member-name" style="font-size:13px;">${escapeHtml(name)}</div>
+                        <div class="member-meta">
+                            <span>${type}</span>
+                            <span>${escapeHtml(p.date)}</span>
+                        </div>
+                    </div>
+                    <div class="member-stats">
+                        <span style="font-weight:700; color:${isPending ? 'var(--red)' : 'var(--green)'};">${fmtMoney(amount)}</span>
+                        <span class="pill ${isPending ? 'pill-red' : 'pill-green'}">${isPending ? 'PENDING' : 'PAID'}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ══════════════════════════════════════════
+    // EXPORTS
+    // ══════════════════════════════════════════
+    function exportMembersCSV() {
+        if (!sectionMembers.length) { alert('No members to export'); return; }
+
+        let csv = 'Name,Member ID,Contact,Email,Present,Late,Absent,Rate %,Pending Fines\n';
+        sectionMembers.forEach(m => {
+            const s = memberStats[m.member_id] || {};
+            csv += `"${m.name}","${m.member_id}","${m.contact || ''}","${m.email || ''}",${s.present || 0},${s.late || 0},${s.absent || 0},${s.rate || 0},${Math.round(s.pendingFines || 0)}\n`;
+        });
+
+        downloadCSV(csv, `section_${leaderRecord.voice_part}_${new Date().toISOString().split('T')[0]}.csv`);
+    }
+
+    function exportPenaltiesCSV() {
+        if (!sectionPenalties.length) { alert('No penalties to export'); return; }
+
+        const memberLookup = {};
+        sectionMembers.forEach(m => { memberLookup[m.member_id] = m; });
+
+        let csv = 'Name,Member ID,Date,Type,Amount,Status\n';
+        sectionPenalties.forEach(p => {
+            const m = memberLookup[p.member_id];
+            const name = m?.name || 'Unknown';
+            const amount = p.total_with_late_fee || p.amount || 0;
+            csv += `"${name}","${p.member_id}","${p.date}","${p.penalty_type || ''}",${amount},${p.status}\n`;
+        });
+
+        downloadCSV(csv, `section_penalties_${leaderRecord.voice_part}_${new Date().toISOString().split('T')[0]}.csv`);
+    }
+
+    function downloadCSV(content, filename) {
+        const blob = new Blob([content], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    // ══════════════════════════════════════════
+    // TAB SWITCH
+    // ══════════════════════════════════════════
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        document.querySelector(`.tab-btn[onclick*="${tab}"]`)?.classList.add('active');
+        document.getElementById(`${tab}Tab`)?.classList.add('active');
+
+        if (tab === 'analytics' && !trendChart) renderAnalytics();
+    }
+
+    window.switchTab = switchTab;
+    window.renderMembers = renderMembers;
+    window.renderPenalties = renderPenalties;
+    window.exportMembersCSV = exportMembersCSV;
+    window.exportPenaltiesCSV = exportPenaltiesCSV;
+
+    init();
+</script>
+</body>
+</html>

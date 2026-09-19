@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Voice Section Leaders | University of Embu Choir</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/cache-helper.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --amber: #f59e0b;
+            --amber-light: #fef9c3;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --cyan: #06b6d4;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --sidebar-w: 240px;
+            --shadow-card: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-hover: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); min-height: 100vh; display: flex; color: var(--text-primary); }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--indigo); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+        .nav-item.active { background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; overflow: hidden; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: var(--red-light); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+
+        /* MAIN */
+        .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar-left h2 { font-size: 16px; font-weight: 600; }
+        .topbar-left p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-chip { background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; padding: 5px 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text-primary); cursor: pointer; padding: 4px; }
+
+        /* CONTENT */
+        .content { padding: 24px 28px 40px; flex: 1; }
+
+        /* HERO */
+        .hero-banner { background: linear-gradient(135deg, var(--indigo) 0%, var(--purple) 100%); border-radius: 20px; padding: 24px 28px; color: #fff; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; position: relative; overflow: hidden; }
+        .hero-banner::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+        .hero-banner h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .hero-banner p { font-size: 13px; opacity: 0.85; }
+
+        /* KPI */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px 18px; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+        .kpi-card.indigo::before { background: var(--indigo); }
+        .kpi-card.green::before  { background: var(--green); }
+        .kpi-card.amber::before  { background: var(--amber); }
+        .kpi-card.cyan::before   { background: var(--cyan); }
+        .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .kpi-label i { font-size: 14px; }
+        .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; }
+        .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+
+        /* CONTROLS */
+        .controls-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .filter-select, .search-input { padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; font-family: inherit; outline: none; transition: border-color .15s; color: var(--text-primary); }
+        .filter-select:focus, .search-input:focus { border-color: var(--indigo); }
+        .search-box { position: relative; flex: 1; min-width: 200px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text-tertiary); }
+        .search-input { width: 100%; padding-left: 38px; }
+
+        .action-btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; font-family: inherit; white-space: nowrap; }
+        .action-btn:hover { opacity: .88; }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-primary { background: var(--indigo); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-amber { background: var(--amber); color: #fff; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-outline { background: transparent; border: 0.5px solid var(--border); color: var(--text-primary); }
+
+        /* REP CARDS */
+        .reps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+
+        .rep-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform .15s, box-shadow .15s; position: relative; box-shadow: var(--shadow-card); display: flex; flex-direction: column; }
+        .rep-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+        .rep-card.inactive { opacity: 0.6; }
+
+        .rep-card-head { padding: 20px 18px 16px; text-align: center; position: relative; }
+        .rep-avatar { width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; font-weight: 700; margin: 0 auto 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); position: relative; overflow: hidden; }
+        .rep-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .rep-voice-badge { position: absolute; top: 12px; right: 12px; padding: 3px 12px; border-radius: 40px; font-size: 10px; font-weight: 700; color: #fff; letter-spacing: 0.4px; }
+        .rep-inactive-badge { position: absolute; top: 12px; left: 12px; padding: 3px 10px; border-radius: 40px; font-size: 9px; font-weight: 700; color: #fff; background: var(--red); }
+
+        .rep-name { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .rep-role { font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+
+        .rep-body { padding: 0 18px 14px; flex: 1; }
+        .rep-info-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); padding: 6px 0; border-bottom: 0.5px dashed var(--border); }
+        .rep-info-row:last-child { border-bottom: none; }
+        .rep-info-row i { width: 16px; text-align: center; opacity: 0.7; }
+        .rep-info-row a { color: var(--text-secondary); text-decoration: none; }
+        .rep-info-row a:hover { color: var(--indigo); text-decoration: underline; }
+
+        .rep-year-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 40px; background: var(--bg); border: 0.5px solid var(--border); font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+
+        .rep-actions { padding: 12px 16px 14px; border-top: 0.5px solid var(--border); display: flex; gap: 6px; }
+        .rep-actions button { flex: 1; padding: 7px 10px; border: none; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: opacity .15s; font-family: inherit; }
+        .rep-actions button:hover { opacity: .85; }
+        .btn-edit { background: var(--indigo-light); color: var(--indigo); }
+        .btn-toggle { background: var(--amber-light); color: #854d0e; }
+        .btn-delete { background: var(--red-light); color: var(--red); }
+
+        /* VOICE GROUP HEADER */
+        .voice-group-header { grid-column: 1 / -1; margin-top: 8px; padding: 12px 0 10px; border-bottom: 2px solid var(--indigo-light); display: flex; align-items: center; gap: 10px; }
+        .voice-group-header h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+        .voice-group-header .count { font-size: 12px; color: var(--text-tertiary); font-weight: 400; }
+
+        /* EMPTY */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); font-size: 13px; grid-column: 1 / -1; background: var(--surface); border-radius: 16px; border: 1px dashed var(--border); }
+        .empty-state i { font-size: 44px; display: block; margin-bottom: 12px; color: var(--indigo); opacity: 0.4; }
+        .empty-state h3 { font-size: 16px; color: var(--text-primary); margin-bottom: 6px; }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--surface); border-radius: 20px; padding: 26px 24px; max-width: 560px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 72px rgba(0,0,0,0.25); animation: modalIn .25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .modal-header h3 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .modal-close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-tertiary); line-height: 1; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-secondary); font-size: 12px; display: flex; align-items: center; gap: 5px; }
+        .form-input, .form-select { width: 100%; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; background: var(--bg); font-family: inherit; color: var(--text-primary); outline: none; transition: border-color .15s; }
+        .form-input:focus, .form-select:focus { border-color: var(--indigo); }
+        .form-select:disabled { opacity: 0.6; cursor: not-allowed; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .helper-hint { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+
+        /* PHOTO UPLOAD */
+        .photo-upload-row { display: flex; align-items: center; gap: 12px; }
+        .photo-preview-sm { width: 56px; height: 56px; border-radius: 50%; background: var(--bg); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; color: var(--text-tertiary); font-size: 22px; }
+        .photo-preview-sm img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-upload-btn { padding: 8px 16px; background: var(--bg); border: 0.5px solid var(--border); border-radius: 40px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px; transition: background .15s; }
+        .photo-upload-btn:hover { background: var(--indigo-light); color: var(--indigo); }
+        input[type="file"] { display: none; }
+
+        /* TOAST */
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text-primary); color: #fff; padding: 12px 22px; border-radius: 40px; font-size: 13px; font-weight: 500; z-index: 300; opacity: 0; transition: opacity .22s, transform .22s; pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 90vw; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error { background: #991b1b; }
+        .toast.info { background: var(--indigo); }
+
+        /* BOTTOM NAV */
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); justify-content: space-around; padding: 8px 16px env(safe-area-inset-bottom, 12px); box-shadow: 0 -1px 0 var(--border); z-index: 50; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-secondary); font-size: 10px; gap: 3px; padding: 6px 12px; border-radius: 40px; }
+        .bottom-nav-item i { font-size: 22px; }
+        .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 14px 12px 80px; }
+            .topbar { padding: 0 14px; height: 52px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .kpi-card { padding: 12px; }
+            .kpi-value { font-size: 20px; }
+            .reps-grid { grid-template-columns: 1fr; gap: 12px; }
+            .hero-banner { padding: 18px 20px; }
+            .hero-banner h3 { font-size: 17px; }
+            .hero-banner .action-btn { width: 100%; justify-content: center; }
+            .form-row { grid-template-columns: 1fr; }
+            .controls-row { flex-direction: column; align-items: stretch; }
+            .search-box { min-width: 100%; }
+        }
+        button { cursor: pointer; touch-action: manipulation; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="events.html" class="nav-item"><i class="ti ti-calendar-event"></i> Events</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="music-scores.html" class="nav-item"><i class="ti ti-music"></i> Music Scores</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance</a>
+        <a href="registration-fees.html" class="nav-item"><i class="ti ti-id-badge"></i> Registration Fees</a>
+
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+        <a href="voice_reps.html" class="nav-item active"><i class="fas fa-microphone"></i> Voice Leaders</a>
+
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading...</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log out</div>
+    </div>
+</aside>
+
+<div class="main">
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-left">
+                <h2>Voice Section Leaders</h2>
+                <p>Assign section representatives for each voice part</p>
+            </div>
+        </div>
+        <div class="topbar-right"><div class="topbar-chip" id="topTime">--:--</div></div>
+    </header>
+
+    <main class="content">
+
+        <div class="hero-banner">
+            <div>
+                <h3>Section Leaders &amp; Coordinators</h3>
+                <p>These leaders appear on each member's dashboard for their specific voice part</p>
+            </div>
+            <button class="action-btn" style="background:#fff;color:var(--indigo);" onclick="openRepModal()">
+                <i class="fas fa-plus"></i> Add Voice Leader
+            </button>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card indigo">
+                <div class="kpi-label"><i class="fas fa-user-tie" style="color:var(--indigo)"></i> Total Leaders</div>
+                <div class="kpi-value" id="kpiTotal">-</div>
+                <div class="kpi-meta">All voice parts</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-label"><i class="fas fa-check-circle" style="color:var(--green)"></i> Active</div>
+                <div class="kpi-value" id="kpiActive">-</div>
+                <div class="kpi-meta">Visible to members</div>
+            </div>
+            <div class="kpi-card amber">
+                <div class="kpi-label"><i class="fas fa-eye-slash" style="color:var(--amber)"></i> Inactive</div>
+                <div class="kpi-value" id="kpiInactive">-</div>
+                <div class="kpi-meta">Hidden</div>
+            </div>
+            <div class="kpi-card cyan">
+                <div class="kpi-label"><i class="fas fa-microphone" style="color:var(--cyan)"></i> Voice Parts</div>
+                <div class="kpi-value" id="kpiVoices">-</div>
+                <div class="kpi-meta">With leaders</div>
+            </div>
+        </div>
+
+        <div class="controls-row">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by name, voice part, or role..." oninput="filterReps()">
+            </div>
+            <select id="voiceFilter" class="filter-select" onchange="filterReps()">
+                <option value="all">All voice parts</option>
+                <option value="Soprano">Soprano</option>
+                <option value="Alto">Alto</option>
+                <option value="Tenor">Tenor</option>
+                <option value="Bass">Bass</option>
+                <option value="Director">Director</option>
+                <option value="Brass">Brass</option>
+            </select>
+            <select id="statusFilter" class="filter-select" onchange="filterReps()">
+                <option value="all">All status</option>
+                <option value="active">Active only</option>
+                <option value="inactive">Inactive only</option>
+            </select>
+            <button class="action-btn btn-outline" onclick="loadReps()"><i class="fas fa-refresh"></i> Refresh</button>
+        </div>
+
+        <div class="reps-grid" id="repsGrid">
+            <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading voice leaders...</div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="repModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-tie" style="color:var(--indigo);"></i> <span id="repModalTitle">Add Voice Leader</span></h3>
+            <button class="modal-close-btn" onclick="closeRepModal()">&times;</button>
+        </div>
+
+        <form id="repForm" novalidate>
+            <input type="hidden" id="repEditId">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-microphone"></i> Voice Part *</label>
+                    <select id="repPart" class="form-select">
+                        <option value="">Select voice part</option>
+                        <option value="Soprano">Soprano</option>
+                        <option value="Alto">Alto</option>
+                        <option value="Tenor">Tenor</option>
+                        <option value="Bass">Bass</option>
+                        <option value="Director">Director</option>
+                        <option value="Brass">Brass</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-user-tag"></i> Role *</label>
+                    <select id="repRole" class="form-select">
+                        <option value="Section Leader">Section Leader</option>
+                        <option value="Assistant Leader">Assistant Leader</option>
+                        <option value="Coordinator">Coordinator</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Member *</label>
+                <select id="repMember" class="form-select" disabled>
+                    <option value="">Select voice part first</option>
+                </select>
+                <div class="helper-hint" id="memberCountHint">
+                    <i class="fas fa-info-circle"></i> <span>Choose a voice part to see matching members</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-image"></i> Photo (optional)</label>
+                <div class="photo-upload-row">
+                    <div class="photo-preview-sm" id="repPhotoPreview">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <label class="photo-upload-btn">
+                        <i class="fas fa-camera"></i> Choose Photo
+                        <input type="file" id="repPhotoInput" accept="image/*" onchange="previewRepPhoto(event)">
+                    </label>
+                    <button type="button" id="repPhotoClearBtn" onclick="clearRepPhoto()" style="display:none; padding:8px 12px; background:var(--red-light); color:var(--red); border:none; border-radius:40px; font-size:11px; font-weight:600; cursor:pointer;">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+                <div class="helper-hint">
+                    <i class="fas fa-info-circle"></i> <span>Override the member's default photo (optional)</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Phone (optional)</label>
+                    <input type="tel" id="repPhone" class="form-input" placeholder="Override default">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email (optional)</label>
+                    <input type="email" id="repEmail" class="form-input" placeholder="Override default">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Academic Year</label>
+                <input type="text" id="repYear" class="form-input" placeholder="e.g., 2025-2026">
+            </div>
+
+            <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="repActive" checked style="width:auto; margin:0; transform:scale(1.2);">
+                <label for="repActive" style="margin:0; font-weight:600; color:var(--text-secondary);">Active (visible to members)</label>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button type="button" onclick="closeRepModal()" class="action-btn btn-outline" style="flex:1; justify-content:center;">Cancel</button>
+                <button type="submit" class="action-btn btn-primary" id="repSubmitBtn" style="flex:2; justify-content:center;">
+                    <i class="fas fa-save"></i> <span id="repSubmitLabel">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="fas fa-dashboard"></i><span>Home</span></a>
+    <a href="members.html" class="bottom-nav-item"><i class="fas fa-users"></i><span>Members</span></a>
+    <a href="voice_reps.html" class="bottom-nav-item active"><i class="fas fa-microphone"></i><span>Leaders</span></a>
+    <a href="executive.html" class="bottom-nav-item"><i class="fas fa-users-cog"></i><span>Committee</span></a>
+</nav>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const CLOUD_NAME = 'surgtbdr';
+    const UPLOAD_PRESET = 'uoem_choir_uploads';
+
+    let allReps = [];
+    let allActiveMembers = [];
+    let memberMap = {};
+    let photoMap = {};
+    let repPhotoFile = null;
+
+    const VOICE_ORDER = ['Director', 'Soprano', 'Alto', 'Tenor', 'Bass', 'Brass'];
+
+    const VOICE_PART_COLORS = {
+        'Soprano': '#7c3aed',
+        'Alto': '#0891b2',
+        'Tenor': '#059669',
+        'Bass': '#d97706',
+        'Director': '#4f46e5',
+        'Brass': '#dc2626'
+    };
+
+    const VOICE_PART_ICONS = {
+        'Soprano': 'fa-microphone',
+        'Alto': 'fa-microphone',
+        'Tenor': 'fa-microphone',
+        'Bass': 'fa-microphone',
+        'Director': 'fa-music',
+        'Brass': 'fa-drum'
+    };
+
+    const ROLE_ICONS = {
+        'Section Leader': 'fa-crown',
+        'Assistant Leader': 'fa-user-tie',
+        'Coordinator': 'fa-users'
+    };
+
+    const ROLE_PRIORITY = {
+        'Section Leader': 1,
+        'Assistant Leader': 2,
+        'Coordinator': 3
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[m]));
+    }
+
+    function normalizeKey(id) {
+        return String(id || '').trim().toUpperCase();
+    }
+
+    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}); }
+    setInterval(tick, 1000); tick();
+
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
+        t.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
+        t.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    async function logout() {
+        try { await sb.auth.signOut(); } catch {}
+        window.location.href = '../login.html';
+    }
+
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            const { data: p } = await sb.from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (p) {
+                if (p.full_name) {
+                    const f = p.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = f;
+                    document.getElementById('userAvatar').textContent = f.charAt(0).toUpperCase();
+                }
+                if (p.role) document.getElementById('userRole').textContent = p.role;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    // ══════════════════════════════════════════
+    // LOAD REPS WITH PHOTOS
+    // ══════════════════════════════════════════
+    async function loadReps() {
+        const grid = document.getElementById('repsGrid');
+        grid.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading voice leaders...</div>';
+
+        const { data, error } = await sb
+            .from('voice_reps')
+            .select('*')
+            .order('voice_part')
+            .order('display_order')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            grid.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Error: ${escapeHtml(error.message)}</div>`;
+            return;
+        }
+
+        allReps = data || [];
+
+        // Get clean member IDs
+        const memberIds = [...new Set(
+            allReps.map(v => String(v.member_id || '').trim()).filter(Boolean)
+        )];
+
+        memberMap = {};
+        photoMap = {};
+
+        if (memberIds.length) {
+            // 1. Member details
+            const { data: members, error: mErr } = await sb
+                .from('members')
+                .select('member_id, name, voice_part, contact, email')
+                .in('member_id', memberIds);
+
+            if (mErr) console.warn('Member fetch error:', mErr);
+
+            (members || []).forEach(m => {
+                memberMap[normalizeKey(m.member_id)] = m;
+            });
+
+            // 2. Profile photos from user_profiles
+            const { data: profiles, error: pErr } = await sb
+                .from('user_profiles')
+                .select('member_id, profile_photo_url')
+                .in('member_id', memberIds);
+
+            if (pErr) console.warn('Profile photo fetch error:', pErr);
+
+            (profiles || []).forEach(p => {
+                if (p.member_id && p.profile_photo_url) {
+                    const cleanUrl = String(p.profile_photo_url).split(',')[0].trim();
+                    photoMap[normalizeKey(p.member_id)] = cleanUrl;
+                }
+            });
+        }
+
+        updateKpis();
+        filterReps();
+    }
+
+    function updateKpis() {
+        const total = allReps.length;
+        const active = allReps.filter(r => r.is_active !== false).length;
+        const inactive = total - active;
+        const uniqueVoices = new Set(allReps.map(r => r.voice_part)).size;
+
+        document.getElementById('kpiTotal').textContent = total;
+        document.getElementById('kpiActive').textContent = active;
+        document.getElementById('kpiInactive').textContent = inactive;
+        document.getElementById('kpiVoices').textContent = uniqueVoices;
+    }
+
+    function filterReps() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const voiceFilter = document.getElementById('voiceFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+
+        let filtered = [...allReps];
+
+        if (q) {
+            filtered = filtered.filter(r => {
+                const m = memberMap[normalizeKey(r.member_id)];
+                const memberName = (m?.name || '').toLowerCase();
+                const voicePart = (r.voice_part || '').toLowerCase();
+                const role = (r.role || '').toLowerCase();
+                return memberName.includes(q) || voicePart.includes(q) || role.includes(q);
+            });
+        }
+
+        if (voiceFilter !== 'all') {
+            const norm = voiceFilter.toLowerCase();
+            filtered = filtered.filter(r => (r.voice_part || '').toLowerCase() === norm);
+        }
+
+        if (statusFilter === 'active') filtered = filtered.filter(r => r.is_active !== false);
+        if (statusFilter === 'inactive') filtered = filtered.filter(r => r.is_active === false);
+
+        renderReps(filtered);
+    }
+
+    function renderReps(list) {
+        const grid = document.getElementById('repsGrid');
+
+        if (!list.length) {
+            grid.innerHTML = `<div class="empty-state">
+                <i class="fas fa-user-tie"></i>
+                <h3>No voice leaders found</h3>
+                <p>Add your first section leader to get started.</p>
+                <button class="action-btn btn-primary" style="margin-top:14px;" onclick="openRepModal()"><i class="fas fa-plus"></i> Add Voice Leader</button>
+            </div>`;
+            return;
+        }
+
+        // Group by voice part
+        const grouped = {};
+        list.forEach(r => {
+            const vp = r.voice_part || 'Other';
+            if (!grouped[vp]) grouped[vp] = [];
+            grouped[vp].push(r);
+        });
+
+        // Sort within groups by role priority
+        Object.values(grouped).forEach(arr => {
+            arr.sort((a, b) => {
+                const pa = ROLE_PRIORITY[a.role] || 99;
+                const pb = ROLE_PRIORITY[b.role] || 99;
+                return pa - pb;
+            });
+        });
+
+        let html = '';
+
+        VOICE_ORDER.forEach(voice => {
+            if (!grouped[voice]?.length) return;
+            const color = VOICE_PART_COLORS[voice] || '#4f46e5';
+            const icon = VOICE_PART_ICONS[voice] || 'fa-microphone';
+
+            html += `
+                <div class="voice-group-header">
+                    <h3><i class="fas ${icon}" style="color:${color};"></i> ${escapeHtml(voice)}</h3>
+                    <span class="count">(${grouped[voice].length} leader${grouped[voice].length !== 1 ? 's' : ''})</span>
+                </div>
+            `;
+
+            grouped[voice].forEach(r => {
+                html += renderRepCard(r, voice, color);
+            });
+        });
+
+        // Render any "Other" voice parts
+        Object.keys(grouped).forEach(voice => {
+            if (VOICE_ORDER.includes(voice)) return;
+            const color = '#64748b';
+            html += `
+                <div class="voice-group-header">
+                    <h3><i class="fas fa-microphone" style="color:${color};"></i> ${escapeHtml(voice)}</h3>
+                    <span class="count">(${grouped[voice].length})</span>
+                </div>
+            `;
+            grouped[voice].forEach(r => {
+                html += renderRepCard(r, voice, color);
+            });
+        });
+
+        grid.innerHTML = html;
+    }
+
+    function renderRepCard(r, voice, color) {
+        const key = normalizeKey(r.member_id);
+        const member = memberMap[key];
+        const memberName = member?.name || `Member (${r.member_id})`;
+        const phone = r.phone || member?.contact || '';
+        const email = r.email || member?.email || '';
+
+        // Priority: voice_reps.photo_url → user_profiles.profile_photo_url → initial
+        const photoUrl = r.photo_url || photoMap[key] || null;
+        const roleIcon = ROLE_ICONS[r.role] || 'fa-user';
+        const isActive = r.is_active !== false;
+        const initial = memberName.charAt(0).toUpperCase();
+
+        const avatarInner = photoUrl
+            ? `<img src="${escapeHtml(photoUrl)}?t=${Date.now()}"
+                    alt="${escapeHtml(memberName)}"
+                    onerror="this.onerror=null; this.parentElement.innerHTML='${initial}';">`
+            : initial;
+
+        return `
+            <div class="rep-card ${isActive ? '' : 'inactive'}">
+                <div class="rep-card-head" style="background:linear-gradient(135deg, ${color}18, ${color}30);">
+                    <span class="rep-voice-badge" style="background:${color};">${escapeHtml(voice).toUpperCase()}</span>
+                    ${!isActive ? '<span class="rep-inactive-badge">INACTIVE</span>' : ''}
+                    <div class="rep-avatar" style="background:${color};">
+                        ${avatarInner}
+                    </div>
+                    <div class="rep-name">${escapeHtml(memberName)}</div>
+                   <div class="rep-role" style="color:${color};">
+    <i class="fas ${roleIcon}"></i> ${escapeHtml(r.role)}
+</div>
+<div style="margin-top:6px;">
+    <span class="pill" style="background:${(r.privilege_tier || 1) === 1 ? '#e0e7ff' : (r.privilege_tier || 1) === 2 ? '#fef3c7' : '#fce7f3'}; color:${(r.privilege_tier || 1) === 1 ? '#4338ca' : (r.privilege_tier || 1) === 2 ? '#92400e' : '#9d174d'}; padding:3px 10px; border-radius:40px; font-size:10px; font-weight:700;">
+        <i class="fas fa-shield-alt"></i> Tier ${r.privilege_tier || 1}
+    </span>
+</div>
+                </div>
+                <div class="rep-body">
+                    ${phone ? `
+                        <div class="rep-info-row">
+                            <i class="fas fa-phone" style="color:${color};"></i>
+                            <a href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a>
+                        </div>
+                    ` : ''}
+                    ${email ? `
+                        <div class="rep-info-row">
+                            <i class="fas fa-envelope" style="color:${color};"></i>
+                            <a href="mailto:${escapeHtml(email)}" style="word-break:break-all;">${escapeHtml(email)}</a>
+                        </div>
+                    ` : ''}
+                    ${r.academic_year ? `
+                        <div class="rep-info-row" style="border-bottom:none;">
+                            <span class="rep-year-chip"><i class="fas fa-calendar"></i> ${escapeHtml(r.academic_year)}</span>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="rep-actions">
+                    <button class="btn-edit" onclick="editRep('${r.id}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn-toggle" onclick="toggleRepActive('${r.id}', ${isActive ? false : true})">
+                        <i class="fas ${isActive ? 'fa-eye-slash' : 'fa-eye'}"></i> ${isActive ? 'Hide' : 'Show'}
+                    </button>
+                    <button class="btn-delete" onclick="deleteRep('${r.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ══════════════════════════════════════════
+    // PHOTO PREVIEW / UPLOAD
+    // ══════════════════════════════════════════
+    function previewRepPhoto(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            showToast('Please choose an image file', 'error');
+            e.target.value = '';
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            showToast('Image too large (max 2MB)', 'error');
+            e.target.value = '';
+            return;
+        }
+
+        repPhotoFile = file;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('repPhotoPreview').innerHTML =
+                `<img src="${event.target.result}" alt="Preview">`;
+            document.getElementById('repPhotoClearBtn').style.display = 'inline-flex';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function clearRepPhoto() {
+        repPhotoFile = null;
+        document.getElementById('repPhotoInput').value = '';
+        document.getElementById('repPhotoPreview').innerHTML = '<i class="fas fa-user"></i>';
+        document.getElementById('repPhotoClearBtn').style.display = 'none';
+    }
+
+    async function uploadPhotoToCloudinary(file, memberId) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
+        formData.append('folder', 'choir/voice_reps');
+        formData.append('public_id', `rep_${memberId}_${Date.now()}`);
+
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+            { method: 'POST', body: formData }
+        );
+
+        const result = await response.json();
+        if (!result.secure_url) throw new Error('Upload failed');
+        return result.secure_url;
+    }
+
+    // ══════════════════════════════════════════
+    // MEMBER DROPDOWN
+    // ══════════════════════════════════════════
+    async function loadActiveMembers() {
+        const { data, error } = await sb
+            .from('members')
+            .select('member_id, name, voice_part, contact, email')
+            .eq('status', 'active')
+            .order('name');
+
+        if (error) {
+            console.error('loadActiveMembers error:', error);
+            showToast('Failed to load members: ' + error.message, 'error');
+            allActiveMembers = [];
+            return;
+        }
+
+        allActiveMembers = data || [];
+        console.log('Loaded active members:', allActiveMembers.length);
+    }
+
+    function updateMemberDropdown() {
+        const voice = document.getElementById('repPart').value;
+        const select = document.getElementById('repMember');
+        const hint = document.getElementById('memberCountHint');
+
+        select.innerHTML = '<option value="">Select member</option>';
+
+        if (!voice) {
+            select.innerHTML = '<option value="">Select voice part first</option>';
+            select.disabled = true;
+            hint.innerHTML = '<i class="fas fa-info-circle"></i> <span>Choose a voice part to see matching members</span>';
+            return;
+        }
+
+        select.disabled = false;
+
+        const voiceNorm = voice.toLowerCase().trim();
+        const matches = allActiveMembers.filter(m => {
+            if (!m.voice_part) return false;
+            const mv = String(m.voice_part).toLowerCase().trim();
+            return mv === voiceNorm || mv.startsWith(voiceNorm);
+        });
+
+        if (!matches.length) {
+            const availableVoices = [...new Set(allActiveMembers.map(m => m.voice_part).filter(Boolean))];
+            select.innerHTML = `<option value="">No members found in "${escapeHtml(voice)}"</option>`;
+            hint.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:var(--amber);"></i> <span>Available voice parts: <strong>${availableVoices.map(v => escapeHtml(v)).join(', ') || 'none'}</strong></span>`;
+            return;
+        }
+
+        matches.forEach(m => {
+            select.innerHTML += `<option value="${escapeHtml(m.member_id)}">${escapeHtml(m.name)} (${escapeHtml(m.member_id)})</option>`;
+        });
+
+        hint.innerHTML = `<i class="fas fa-check-circle" style="color:var(--green);"></i> <span>${matches.length} member${matches.length !== 1 ? 's' : ''} available</span>`;
+    }
+
+    // ══════════════════════════════════════════
+    // MODAL
+    // ══════════════════════════════════════════
+    async function openRepModal() {
+        await loadActiveMembers();
+        document.getElementById('repModalTitle').textContent = 'Add Voice Leader';
+        document.getElementById('repSubmitLabel').textContent = 'Save Voice Leader';
+        document.getElementById('repForm').reset();
+        document.getElementById('repEditId').value = '';
+        document.getElementById('repActive').checked = true;
+        document.getElementById('repMember').innerHTML = '<option value="">Select voice part first</option>';
+        document.getElementById('repMember').disabled = true;
+        document.getElementById('memberCountHint').innerHTML = '<i class="fas fa-info-circle"></i> <span>Choose a voice part to see matching members</span>';
+        clearRepPhoto();
+        document.getElementById('repModal').classList.add('open');
+    }
+
+    async function editRep(id) {
+        await loadActiveMembers();
+        const r = allReps.find(x => x.id === id);
+        if (!r) return;
+
+        document.getElementById('repModalTitle').textContent = 'Edit Voice Leader';
+        document.getElementById('repSubmitLabel').textContent = 'Save Changes';
+        document.getElementById('repEditId').value = id;
+        document.getElementById('repPart').value = r.voice_part || '';
+        document.getElementById('repRole').value = r.role || 'Section Leader';
+        document.getElementById('repPhone').value = r.phone || '';
+        document.getElementById('repEmail').value = r.email || '';
+        document.getElementById('repYear').value = r.academic_year || '';
+        document.getElementById('repActive').checked = r.is_active !== false;
+
+        updateMemberDropdown();
+        setTimeout(() => {
+            document.getElementById('repMember').value = r.member_id || '';
+        }, 100);
+
+        // Show current photo
+        repPhotoFile = null;
+        const key = normalizeKey(r.member_id);
+        const existingPhoto = r.photo_url || photoMap[key] || null;
+        if (existingPhoto) {
+            document.getElementById('repPhotoPreview').innerHTML =
+                `<img src="${escapeHtml(existingPhoto)}?t=${Date.now()}" alt="Photo">`;
+            document.getElementById('repPhotoClearBtn').style.display = 'inline-flex';
+        } else {
+            document.getElementById('repPhotoPreview').innerHTML = '<i class="fas fa-user"></i>';
+            document.getElementById('repPhotoClearBtn').style.display = 'none';
+        }
+
+        document.getElementById('repModal').classList.add('open');
+    }
+
+    function closeRepModal() {
+        document.getElementById('repModal').classList.remove('open');
+        clearRepPhoto();
+    }
+
+    document.getElementById('repPart').addEventListener('change', updateMemberDropdown);
+
+    document.getElementById('repForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const editId = document.getElementById('repEditId').value;
+        const voice_part = document.getElementById('repPart').value;
+        const role = document.getElementById('repRole').value;
+        const member_id = document.getElementById('repMember').value;
+
+        if (!voice_part || !role || !member_id) {
+            showToast('Please fill all required fields', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('repSubmitBtn');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            // Upload photo if selected
+            let photoUrl = null;
+            const existingRep = editId ? allReps.find(x => x.id === editId) : null;
+
+            if (repPhotoFile) {
+                try {
+                    photoUrl = await uploadPhotoToCloudinary(repPhotoFile, member_id);
+                } catch (err) {
+                    console.warn('Photo upload failed:', err);
+                    showToast('Photo upload failed, saving without photo', 'error');
+                }
+            } else if (existingRep?.photo_url) {
+                // Keep existing override photo if no new one uploaded
+                photoUrl = existingRep.photo_url;
+            }
+
+const payload = {
+    voice_part,
+    role,
+    member_id,
+    photo_url: photoUrl,   // null means "use member's default"
+    phone: document.getElementById('repPhone').value.trim() || null,
+    email: document.getElementById('repEmail').value.trim() || null,
+    academic_year: document.getElementById('repYear').value.trim() || null,
+    is_active: document.getElementById('repActive').checked,
+    privilege_tier: existingRep?.privilege_tier || 1,   // 👈 ADD THIS LINE
+    updated_at: new Date().toISOString()
+};
+
+            if (editId) {
+                const { error } = await sb.from('voice_reps').update(payload).eq('id', editId);
+                if (error) throw error;
+                showToast('Voice leader updated!', 'success');
+            } else {
+                const { error } = await sb.from('voice_reps').insert(payload);
+                if (error) throw error;
+                showToast('Voice leader added!', 'success');
+            }
+
+            closeRepModal();
+            await loadReps();
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    });
+
+    async function toggleRepActive(id, active) {
+        const { error } = await sb.from('voice_reps').update({ is_active: active, updated_at: new Date().toISOString() }).eq('id', id);
+        if (error) { showToast('Error: ' + error.message, 'error'); return; }
+        showToast(active ? 'Voice leader activated' : 'Voice leader hidden', 'success');
+        await loadReps();
+    }
+
+    async function deleteRep(id) {
+        const r = allReps.find(x => x.id === id);
+        if (!r) return;
+        const member = memberMap[normalizeKey(r.member_id)];
+        const name = member?.name || 'this leader';
+
+        if (!confirm(`Remove ${name} as a voice section leader?\n\nThis will remove them from the member dashboard.`)) return;
+
+        const { error } = await sb.from('voice_reps').delete().eq('id', id);
+        if (error) { showToast('Error: ' + error.message, 'error'); return; }
+        showToast('Voice leader removed', 'success');
+        await loadReps();
+    }
+
+    // ══════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        await loadUserInfo();
+        await loadReps();
+    }
+    init();
+
+    document.getElementById('repModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRepModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeRepModal();
+    });
+
+    window.openRepModal = openRepModal;
+    window.editRep = editRep;
+    window.closeRepModal = closeRepModal;
+    window.toggleRepActive = toggleRepActive;
+    window.deleteRep = deleteRep;
+    window.filterReps = filterReps;
+    window.loadReps = loadReps;
+    window.previewRepPhoto = previewRepPhoto;
+    window.clearRepPhoto = clearRepPhoto;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
+    window.logout = logout;
+</script>
+</body>
+</html>

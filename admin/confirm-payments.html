@@ -2,9 +2,7 @@
 <html lang="en">
 <head>
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
     <meta charset="UTF-8">
-    <meta name="google-site-verification" content="9B0aEWHLVVsKurOwYXzYI-2kswRtSRcJPDlWQ4sm6Cg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Confirm Penalties | University of Embu Choir</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -29,8 +27,6 @@
             --red-light: #fee2e2;
             --purple: #7c3aed;
             --purple-light: #ede9fe;
-            --blue-light: #dbeafe;
-            --blue-text: #1e40af;
             --bg: #f8fafc;
             --surface: #ffffff;
             --border: rgba(0,0,0,0.08);
@@ -41,13 +37,16 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             min-height: 100vh;
             display: flex;
             color: var(--text-primary);
         }
 
+        /* ═══════════════════════════════════
+           SIDEBAR
+           ═══════════════════════════════════ */
         .sidebar {
             width: var(--sidebar-w);
             min-height: 100vh;
@@ -100,17 +99,7 @@
             color: var(--indigo); font-weight: 600;
         }
 
-        .nav-item.active i { color: var(--indigo); }
         .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
-
-        .nav-badge {
-            margin-left: auto;
-            background: var(--indigo); color: #fff;
-            font-size: 10px; font-weight: 600;
-            padding: 2px 8px; border-radius: 40px;
-        }
-
-        .nav-badge.amber { background: var(--amber); }
 
         .sidebar-bottom {
             padding: 12px 8px;
@@ -150,6 +139,9 @@
             background: rgba(0,0,0,0.35); z-index: 40;
         }
 
+        /* ═══════════════════════════════════
+           MAIN
+           ═══════════════════════════════════ */
         .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
 
         .topbar {
@@ -172,8 +164,6 @@
             display: flex; align-items: center; gap: 6px;
         }
 
-        .topbar-chip i { font-size: 14px; }
-
         .hamburger {
             display: none; background: none; border: none;
             font-size: 22px; color: var(--text-primary);
@@ -182,6 +172,9 @@
 
         .content { padding: 24px 28px 40px; flex: 1; }
 
+        /* ═══════════════════════════════════
+           KPI CARDS
+           ═══════════════════════════════════ */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -197,8 +190,6 @@
             position: relative; overflow: hidden;
             transition: box-shadow .15s;
         }
-
-        .kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
 
         .kpi-card::before {
             content: '';
@@ -221,6 +212,9 @@
         .kpi-value { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
         .kpi-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
 
+        /* ═══════════════════════════════════
+           FILTERS
+           ═══════════════════════════════════ */
         .controls-panel {
             background: var(--surface);
             border: 0.5px solid var(--border);
@@ -237,8 +231,6 @@
             display: flex; align-items: center; gap: 5px;
         }
 
-        .form-group label i { font-size: 14px; }
-
         .form-select {
             padding: 9px 14px;
             border: 0.5px solid var(--border);
@@ -246,6 +238,7 @@
             background: var(--bg); font-family: inherit;
             color: var(--text-primary);
             transition: border-color .15s; outline: none; width: 100%;
+            cursor: pointer;
         }
 
         .form-select:focus { border-color: var(--indigo); }
@@ -255,12 +248,16 @@
             font-size: 13px; font-weight: 600; cursor: pointer;
             display: inline-flex; align-items: center; gap: 7px;
             transition: opacity .15s, transform .1s; white-space: nowrap;
+            font-family: inherit;
         }
 
         .action-btn:hover { opacity: .88; }
         .action-btn:active { transform: scale(0.97); }
         .btn-primary { background: var(--indigo); color: #fff; }
 
+        /* ═══════════════════════════════════
+           TABLE (DESKTOP)
+           ═══════════════════════════════════ */
         .table-panel {
             background: var(--surface);
             border: 0.5px solid var(--border);
@@ -283,14 +280,9 @@
 
         .table-scroll {
             overflow-x: auto; overflow-y: auto;
-            max-height: 58vh;
+            max-height: 60vh;
             scrollbar-width: thin;
-            -webkit-overflow-scrolling: touch;
         }
-
-        .table-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
-        .table-scroll::-webkit-scrollbar-track { background: var(--bg); }
-        .table-scroll::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 4px; }
 
         .pay-table {
             min-width: 820px; width: 100%;
@@ -325,7 +317,6 @@
             font-size: 11px; font-weight: 600; white-space: nowrap;
         }
 
-        .pill i { font-size: 12px; }
         .pill-green  { background: var(--green-light);  color: #065f46; }
         .pill-amber  { background: var(--amber-light);  color: #854d0e; }
         .pill-red    { background: var(--red-light);    color: #991b1b; }
@@ -334,17 +325,17 @@
         .pill-purple { background: var(--purple-light); color: #5b21b6; }
 
         .row-btn {
-            padding: 6px 12px; border: none; border-radius: 8px;
+            padding: 8px 14px; border: none; border-radius: 8px;
             font-size: 12px; font-weight: 600; cursor: pointer;
             display: inline-flex; align-items: center; gap: 5px;
             transition: opacity .15s, transform .1s;
+            font-family: inherit;
         }
 
-        .row-btn:hover { opacity: .85; }
+        .row-btn:hover { opacity: .88; }
         .row-btn:active { transform: scale(0.96); }
-        .row-btn.confirm { background: var(--green-light); color: #065f46; }
-        .row-btn.reject  { background: var(--red-light);   color: #991b1b; }
-        .row-btn i { font-size: 13px; }
+        .row-btn.confirm { background: var(--green); color: #fff; }
+        .row-btn.reject  { background: var(--red); color: #fff; }
 
         .ref-code {
             font-family: 'SF Mono', 'Fira Mono', monospace;
@@ -365,10 +356,153 @@
         .empty-state p { font-size: 14px; color: var(--text-secondary); }
         .empty-state .hint { font-size: 12px; color: var(--text-tertiary); margin-top: 6px; }
 
+        /* ═══════════════════════════════════
+           MOBILE CARDS
+           ═══════════════════════════════════ */
+        .payments-cards { display: none; }
+
+        .payment-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .payment-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 0.5px dashed var(--border);
+        }
+
+        .payment-card-member {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .payment-card-avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--indigo);
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .payment-card-info { flex: 1; min-width: 0; }
+        .payment-card-name {
+            font-size: 14px; font-weight: 700;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .payment-card-voice {
+            font-size: 11.5px;
+            color: var(--indigo);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .payment-card-amount {
+            font-size: 18px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .payment-card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+            font-size: 12.5px;
+        }
+
+        .payment-detail-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .payment-detail-row i {
+            width: 16px;
+            text-align: center;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .payment-detail-row strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .payment-card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 0.5px solid var(--border);
+        }
+
+        .payment-card-actions button {
+            padding: 11px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-family: inherit;
+            transition: opacity .15s, transform .1s;
+            color: #fff;
+        }
+
+        .payment-card-actions button:active { transform: scale(0.97); }
+        .payment-card-actions button:hover { opacity: .9; }
+        .payment-card-actions .act-confirm { background: var(--green); }
+        .payment-card-actions .act-reject { background: var(--red); }
+
+        .payment-card-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 700;
+        }
+
+        .payment-card-status.confirmed {
+            background: var(--green-light);
+            color: #065f46;
+        }
+
+        .payment-card-status.rejected {
+            background: var(--red-light);
+            color: #991b1b;
+        }
+
+        /* ═══════════════════════════════════
+           TOAST
+           ═══════════════════════════════════ */
         .toast {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
             background: var(--text-primary); color: #fff;
-            padding: 11px 20px; border-radius: 40px;
+            padding: 12px 22px; border-radius: 40px;
             font-size: 13px; font-weight: 500;
             z-index: 300; opacity: 0;
             transition: opacity .22s, transform .22s;
@@ -383,19 +517,31 @@
         .toast.error   { background: #991b1b; }
         .toast.info    { background: var(--indigo); }
 
+        /* ═══════════════════════════════════
+           MODAL
+           ═══════════════════════════════════ */
         .modal-overlay {
             display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45); z-index: 200;
-            align-items: center; justify-content: center; padding: 20px;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center; justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
         }
 
         .modal-overlay.open { display: flex; }
 
         .modal-box {
             background: var(--surface); border-radius: 20px;
-            padding: 28px 24px; max-width: 340px; width: 100%;
+            padding: 28px 24px; max-width: 380px; width: 100%;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: modalIn .25s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .modal-box .modal-icon {
@@ -414,6 +560,7 @@
             flex: 1; padding: 12px; border: none; border-radius: 40px;
             font-size: 14px; font-weight: 600; cursor: pointer;
             transition: opacity .15s;
+            font-family: inherit;
         }
 
         .modal-buttons button:hover { opacity: .85; }
@@ -421,6 +568,9 @@
         .btn-reject-modal  { background: var(--red);   color: #fff; }
         .btn-cancel-modal  { background: var(--bg); color: var(--text-secondary); }
 
+        /* ═══════════════════════════════════
+           FOOTER
+           ═══════════════════════════════════ */
         .footer {
             padding: 16px 28px;
             border-top: 0.5px solid var(--border);
@@ -428,6 +578,9 @@
             font-size: 12px; color: var(--text-tertiary);
         }
 
+        /* ═══════════════════════════════════
+           BOTTOM NAV
+           ═══════════════════════════════════ */
         .bottom-nav {
             display: none; position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(255,255,255,0.96);
@@ -446,36 +599,74 @@
         .bottom-nav-item i { font-size: 22px; }
         .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
 
+        /* ═══════════════════════════════════
+           RESPONSIVE - TABLET
+           ═══════════════════════════════════ */
         @media (max-width: 1024px) {
             .kpi-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
+        /* ═══════════════════════════════════
+           RESPONSIVE - MOBILE
+           ═══════════════════════════════════ */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
             .sidebar-overlay.open { display: block; }
             .hamburger { display: block; }
             .main { margin-left: 0; }
-            .content { padding: 16px 16px 90px; }
+            .content { padding: 14px 12px 90px; }
             .footer { display: none; }
             .bottom-nav { display: flex; }
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .controls-panel { flex-direction: column; align-items: stretch; }
-            .action-btn { width: 100%; justify-content: center; }
+
+            .topbar { padding: 0 14px; height: 52px; }
+            .topbar-left h2 { font-size: 15px; }
+            .topbar-left p { font-size: 11px; }
+            .topbar-chip { padding: 4px 10px; font-size: 11px; }
+            .topbar-right .action-btn { padding: 6px 12px !important; font-size: 11px !important; }
+
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+            .kpi-card { padding: 12px 14px; }
+            .kpi-value { font-size: 20px; }
+            .kpi-label { font-size: 11px; }
+
+            .controls-panel { flex-direction: column; align-items: stretch; padding: 14px; }
+            .form-group { min-width: 100%; }
+
+            /* Hide desktop table */
+            .table-panel { background: transparent; border: none; }
+            .table-panel-header { padding: 0 0 12px; border: none; background: transparent; }
+            .table-scroll { display: none; }
+
+            /* Show mobile cards */
+            .payments-cards { display: block; }
         }
+
+        @media (max-width: 400px) {
+            .kpi-grid { grid-template-columns: 1fr 1fr; }
+            .kpi-value { font-size: 18px; }
+            .payment-card-actions { grid-template-columns: 1fr; }
+        }
+
+        /* Hide mobile cards on desktop */
+        @media (min-width: 769px) {
+            .payments-cards { display: none !important; }
+        }
+
+        button { cursor: pointer; touch-action: manipulation; }
     </style>
 </head>
 <body>
-    
+
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
         <div class="logo-icon"><i class="ti ti-music"></i></div>
         <div class="logo-title">University of Embu Choir</div>
-        <div class="logo-sub">Attendance System · </div>
+        <div class="logo-sub">Attendance System</div>
     </div>
-    
+
     <nav class="sidebar-nav">
         <div class="nav-section-label">Main</div>
         <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
@@ -489,11 +680,10 @@
         <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
         <a href="confirm-payments.html" class="nav-item active"><i class="ti ti-cash"></i> Confirm penalties</a>
         <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance Management</a>
-            <a href="registration-fees.html" class="nav-item">
-    <i class="ti ti-id-badge"></i> Registration Fees
-</a>
-<a href="events.html" class="nav-item"><i class="ti ti-calendar-event"></i> Events</a>
+        <a href="registration-fees.html" class="nav-item"><i class="ti ti-id-badge"></i> Registration Fees</a>
+        <a href="events.html" class="nav-item"><i class="ti ti-calendar-event"></i> Events</a>
         <a href="music-scores.html" class="nav-item"><i class="ti ti-music"></i> Music Scores</a>
+
         <div class="nav-section-label">Committee</div>
         <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
         <a href="voice_reps.html" class="nav-item"><i class="fas fa-microphone"></i> Voice Leaders</a>
@@ -501,7 +691,7 @@
         <div class="nav-section-label">Recognition</div>
         <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
     </nav>
-    
+
     <div class="sidebar-bottom">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar">A</div>
@@ -524,7 +714,7 @@
             </button>
             <div class="topbar-left">
                 <h2>Confirm Penalties</h2>
-                <p>Review and approve member payment submissions</p>
+                <p>Review payment submissions</p>
             </div>
         </div>
         <div class="topbar-right">
@@ -539,19 +729,19 @@
 
         <div class="kpi-grid">
             <div class="kpi-card amber">
-                <div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Pending payments</div>
+                <div class="kpi-label"><i class="ti ti-clock" style="color:var(--amber)"></i> Pending</div>
                 <div class="kpi-value" id="kpiPendingCount">—</div>
                 <div class="kpi-meta">Awaiting review</div>
             </div>
             <div class="kpi-card indigo">
-                <div class="kpi-label"><i class="ti ti-cash" style="color:var(--indigo)"></i> Pending amount</div>
+                <div class="kpi-label"><i class="ti ti-cash" style="color:var(--indigo)"></i> Pending KSh</div>
                 <div class="kpi-value" id="kpiPendingAmt">—</div>
-                <div class="kpi-meta">KSh outstanding</div>
+                <div class="kpi-meta">To confirm</div>
             </div>
             <div class="kpi-card green">
-                <div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i> Total collected</div>
+                <div class="kpi-label"><i class="ti ti-circle-check" style="color:var(--green)"></i> Confirmed</div>
                 <div class="kpi-value" id="kpiConfirmed">—</div>
-                <div class="kpi-meta">KSh confirmed</div>
+                <div class="kpi-meta">KSh collected</div>
             </div>
             <div class="kpi-card red">
                 <div class="kpi-label"><i class="ti ti-circle-x" style="color:var(--red)"></i> Rejected</div>
@@ -564,10 +754,10 @@
             <div class="form-group">
                 <label><i class="ti ti-filter"></i> Filter by status</label>
                 <select id="statusFilter" class="form-select">
-                    <option value="pending">Pending payments</option>
-                    <option value="confirmed">Confirmed payments</option>
-                    <option value="rejected">Rejected payments</option>
-                    <option value="all" selected>All payments</option>
+                    <option value="pending" selected>Pending requests</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="all">All submissions</option>
                 </select>
             </div>
         </div>
@@ -580,19 +770,21 @@
                 </div>
                 <span class="pill pill-gray" id="rowCount">— records</span>
             </div>
-            <div class="table-scroll">
+
+            <!-- Desktop table -->
+            <div class="table-scroll" id="tableScroll">
                 <div class="empty-state" id="emptyState">
                     <i class="ti ti-receipt"></i>
-                    <p>Loading payments…</p>
+                    <p>Loading payment requests…</p>
                 </div>
                 <table class="pay-table" id="payTable" style="display:none">
                     <thead>
                         <tr>
                             <th>Member</th>
-                            <th>Voice part</th>
+                            <th>Voice</th>
                             <th>Amount</th>
                             <th>Method</th>
-                            <th>Payment date</th>
+                            <th>Date</th>
                             <th>Reference</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -601,12 +793,20 @@
                     <tbody id="paymentsList"></tbody>
                 </table>
             </div>
+
+            <!-- Mobile cards -->
+            <div class="payments-cards" id="paymentsCards">
+                <div class="empty-state">
+                    <i class="ti ti-receipt"></i>
+                    <p>Loading payment requests…</p>
+                </div>
+            </div>
         </div>
 
     </main>
 
     <footer class="footer">
-        <span>🎶 University of Embu Students' Choir ·</span>
+        <span>🎶 University of Embu Students' Choir</span>
         <span id="lastRefreshed">—</span>
     </footer>
 </div>
@@ -614,19 +814,20 @@
 <nav class="bottom-nav">
     <a href="index.html" class="bottom-nav-item"><i class="ti ti-layout-dashboard"></i><span>Home</span></a>
     <a href="mark-attendance.html" class="bottom-nav-item"><i class="ti ti-circle-check"></i><span>Mark</span></a>
+    <a href="confirm-payments.html" class="bottom-nav-item active"><i class="ti ti-cash"></i><span>Penalties</span></a>
     <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
-    <a href="analytics.html" class="bottom-nav-item"><i class="ti ti-trending-up"></i><span>Analytics</span></a>
 </nav>
 
 <div class="toast" id="toast"></div>
 
+<!-- Confirm Modal -->
 <div class="modal-overlay" id="confirmModal">
     <div class="modal-box">
         <div class="modal-icon" style="background:var(--green-light)">
             <i class="ti ti-circle-check" style="color:var(--green)"></i>
         </div>
         <h3>Confirm payment?</h3>
-        <p>This will mark the fine as <strong>paid</strong> and close the penalty record.</p>
+        <p>This will mark the fine as <strong>paid</strong>. The member will see it as resolved.</p>
         <div class="modal-buttons">
             <button class="btn-cancel-modal" onclick="closeModals()">Cancel</button>
             <button class="btn-confirm-modal" id="confirmYesBtn">Yes, confirm</button>
@@ -634,13 +835,14 @@
     </div>
 </div>
 
+<!-- Reject Modal -->
 <div class="modal-overlay" id="rejectModal">
     <div class="modal-box">
         <div class="modal-icon" style="background:var(--red-light)">
             <i class="ti ti-circle-x" style="color:var(--red)"></i>
         </div>
         <h3>Reject payment?</h3>
-        <p>The member's fine will remain <strong>unpaid</strong> and they'll need to resubmit.</p>
+        <p>The member's fine will stay <strong>unpaid</strong>. They can resubmit.</p>
         <div class="modal-buttons">
             <button class="btn-cancel-modal" onclick="closeModals()">Cancel</button>
             <button class="btn-reject-modal" id="rejectYesBtn">Yes, reject</button>
@@ -664,6 +866,11 @@
         return Number(n || 0).toLocaleString();
     }
 
+    function initials(name) {
+        if (!name) return '?';
+        return name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
+    }
+
     function tick() {
         document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US', {
             hour: '2-digit', minute: '2-digit'
@@ -684,6 +891,13 @@
         document.getElementById('confirmModal').classList.remove('open');
         document.getElementById('rejectModal').classList.remove('open');
         pendingAction = null;
+
+        const cb = document.getElementById('confirmYesBtn');
+        cb.disabled = false;
+        cb.textContent = 'Yes, confirm';
+        const rb = document.getElementById('rejectYesBtn');
+        rb.disabled = false;
+        rb.textContent = 'Yes, reject';
     }
 
     function openConfirmModal(paymentId, penaltyId) {
@@ -706,16 +920,21 @@
         };
     }
 
+    // ══════════════════════════════════════════════════════
+    // CONFIRM PAYMENT
+    // ══════════════════════════════════════════════════════
     async function doConfirm(paymentId, penaltyId) {
         showToast('Processing confirmation…', 'info');
-        
+
         const confirmBtn = document.getElementById('confirmYesBtn');
         confirmBtn.disabled = true;
         confirmBtn.textContent = 'Processing...';
 
         const { data: { user } } = await sb.auth.getUser();
+        const now = new Date().toISOString();
 
         try {
+            // 1. Fetch payment
             const { data: payment, error: fetchError } = await sb
                 .from('payments')
                 .select('*')
@@ -724,121 +943,80 @@
 
             if (fetchError) throw fetchError;
 
-            const updateData = { 
-                status: 'confirmed', 
-                confirmed_at: new Date().toISOString(), 
-                confirmed_by: user?.email || 'admin'
-            };
-            
+            // 2. Update payment status
             const { error: pErr } = await sb
                 .from('payments')
-                .update(updateData)
+                .update({
+                    status: 'confirmed',
+                    confirmed_at: now,
+                    confirmed_by: user?.email || 'admin'
+                })
                 .eq('id', paymentId);
 
             if (pErr) throw pErr;
 
-            let penaltyIds = [];
+            // 3. Identify penalty IDs
             const memberId = payment.member_id;
-            const now = new Date().toISOString();
+            let penaltyIds = [];
 
             if (payment.notes && payment.notes.includes('Penalty IDs:')) {
                 const match = payment.notes.match(/Penalty IDs:\s*([\d,\s]+)/i);
                 if (match) {
-                    penaltyIds = match[1].split(',').map(id => id.trim()).filter(id => id && id !== 'null' && id !== 'undefined');
+                    penaltyIds = match[1]
+                        .split(',')
+                        .map(id => Number(id.trim()))
+                        .filter(id => !isNaN(id) && id > 0);
                 }
             }
 
-            if (payment.penalty_id && payment.penalty_id !== 'null' && payment.penalty_id !== 'undefined') {
-                if (!penaltyIds.includes(payment.penalty_id)) {
-                    penaltyIds.push(payment.penalty_id);
-                }
+            if (payment.penalty_id && !isNaN(Number(payment.penalty_id))) {
+                const pid = Number(payment.penalty_id);
+                if (!penaltyIds.includes(pid)) penaltyIds.push(pid);
             }
 
-            if (penaltyIds.length === 0 && penaltyId && penaltyId !== 'null' && penaltyId !== 'undefined') {
-                penaltyIds.push(penaltyId);
+            if (penaltyIds.length === 0 && penaltyId && !isNaN(Number(penaltyId))) {
+                penaltyIds.push(Number(penaltyId));
             }
 
+            // 4. Mark penalties as paid
             let updatedCount = 0;
 
             if (penaltyIds.length > 0) {
                 for (const pid of penaltyIds) {
-                    if (pid) {
-                        const { error: updateErr } = await sb
-                            .from('penalties')
-                            .update({ 
-                                status: 'paid', 
-                                payment_id: paymentId,
-                                paid_at: now,
-                                updated_at: now
-                            })
-                            .eq('id', pid);
-                        
-                        if (!updateErr) updatedCount++;
-                    }
+                    const { error: ue } = await sb
+                        .from('penalties')
+                        .update({
+                            status: 'paid',
+                            payment_id: paymentId,
+                            paid_at: now,
+                            updated_at: now
+                        })
+                        .eq('id', pid);
+                    if (!ue) updatedCount++;
                 }
-                
-                const { error: bulkUpdateErr } = await sb
+            } else if (memberId) {
+                const { data: updated } = await sb
                     .from('penalties')
-                    .update({ 
-                        status: 'paid', 
+                    .update({
+                        status: 'paid',
                         payment_id: paymentId,
                         paid_at: now,
                         updated_at: now
                     })
                     .eq('member_id', memberId)
                     .eq('status', 'pending')
-                    .is('payment_id', null);
-                
-                if (!bulkUpdateErr) {
-                    const { count } = await sb
-                        .from('penalties')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('member_id', memberId)
-                        .eq('status', 'paid')
-                        .eq('payment_id', paymentId);
-                    
-                    updatedCount = Math.max(updatedCount, count || 0);
-                }
-                
-            } else if (memberId) {
-                const { error: fallbackUpdateErr } = await sb
-                    .from('penalties')
-                    .update({ 
-                        status: 'paid', 
-                        payment_id: paymentId,
-                        paid_at: now,
-                        updated_at: now
-                    })
-                    .eq('member_id', memberId)
-                    .eq('status', 'pending');
-                
-                if (!fallbackUpdateErr) {
-                    const { count } = await sb
-                        .from('penalties')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('member_id', memberId)
-                        .eq('status', 'paid')
-                        .eq('payment_id', paymentId);
-                    
-                    updatedCount = count || 0;
-                }
+                    .select('id');
+                updatedCount = updated?.length || 0;
             }
-
-            const { data: updatedPenalties } = await sb
-                .from('penalties')
-                .select('status, id')
-                .eq('payment_id', paymentId);
-
-            const actualUpdated = updatedPenalties?.length || 0;
 
             closeModals();
-            
-            if (actualUpdated > 0) {
-                showToast(`✅ Payment confirmed! ${actualUpdated} penalty(ies) marked as paid.`, 'success');
+
+            if (updatedCount > 0) {
+                showToast(`✅ Confirmed! ${updatedCount} penalty(ies) marked paid.`, 'success');
             } else {
-                showToast(`⚠️ Payment confirmed but no penalties were updated. Please check manually.`, 'error');
+                showToast(`✅ Payment confirmed.`, 'success');
             }
-            
+
             await loadPayments();
 
         } catch (error) {
@@ -849,47 +1027,78 @@
         }
     }
 
+    // ══════════════════════════════════════════════════════
+    // REJECT PAYMENT
+    // ══════════════════════════════════════════════════════
     async function doReject(paymentId) {
         showToast('Processing rejection…', 'info');
-        
+
         const rejectBtn = document.getElementById('rejectYesBtn');
         rejectBtn.disabled = true;
         rejectBtn.textContent = 'Processing...';
 
         try {
-            const { error } = await sb.from('payments')
-                .update({ status: 'rejected', notes: 'Payment rejected by admin' })
+            // Try to save rejected_at, but don't fail if column doesn't exist
+            const updateData = {
+                status: 'rejected',
+                notes: 'Payment rejected by admin'
+            };
+
+            // Attempt rejected_at — if it fails, retry without it
+            let { error } = await sb
+                .from('payments')
+                .update({
+                    ...updateData,
+                    rejected_at: new Date().toISOString()
+                })
                 .eq('id', paymentId);
+
+            if (error && error.message.includes('rejected_at')) {
+                // Column doesn't exist — retry without it
+                const retry = await sb
+                    .from('payments')
+                    .update(updateData)
+                    .eq('id', paymentId);
+                error = retry.error;
+            }
 
             if (error) throw error;
 
             closeModals();
-            showToast('Payment rejected', 'error');
+            showToast('❌ Payment rejected. Member can resubmit.', 'error');
             await loadPayments();
+
         } catch (error) {
+            console.error('Reject error:', error);
             showToast('Error: ' + error.message, 'error');
             rejectBtn.disabled = false;
             rejectBtn.textContent = 'Yes, reject';
         }
     }
 
-    // ── FULLY WORKING LOAD PAYMENTS ──
+    // ══════════════════════════════════════════════════════
+    // LOAD PAYMENTS (renders BOTH table + cards)
+    // ══════════════════════════════════════════════════════
     async function loadPayments() {
         const statusFilter = document.getElementById('statusFilter').value;
-        
-        console.log('🔄 Loading payments with filter:', statusFilter);
 
-        document.getElementById('emptyState').innerHTML = `
+        console.log('Loading payments with filter:', statusFilter);
+
+        const emptyEl = document.getElementById('emptyState');
+        const tableEl = document.getElementById('payTable');
+        const cardsEl = document.getElementById('paymentsCards');
+
+        emptyEl.innerHTML = `
             <i class="ti ti-loader" style="font-size:32px;color:var(--indigo-mid);display:block;margin-bottom:12px;animation:spin 1s linear infinite"></i>
             <p>Loading payments…</p>`;
-        document.getElementById('emptyState').style.display = 'block';
-        document.getElementById('payTable').style.display = 'none';
+        emptyEl.style.display = 'block';
+        tableEl.style.display = 'none';
+        cardsEl.innerHTML = `<div class="empty-state"><i class="ti ti-loader" style="font-size:32px;color:var(--indigo-mid);display:block;margin-bottom:12px;animation:spin 1s linear infinite"></i><p>Loading…</p></div>`;
 
         try {
-            // ✅ Get ALL payments first (no join)
             let query = sb
                 .from('payments')
-                .select(`*`)
+                .select('*')
                 .order('created_at', { ascending: false });
 
             if (statusFilter !== 'all') {
@@ -899,27 +1108,28 @@
             const { data: payments, error } = await query;
 
             if (error) {
-                console.error('❌ Error loading payments:', error);
-                document.getElementById('emptyState').innerHTML = `
+                console.error('Error:', error);
+                emptyEl.innerHTML = `
                     <i class="ti ti-alert-circle" style="font-size:32px;color:var(--red);display:block;margin-bottom:12px"></i>
                     <p style="color:var(--red)">Error loading payments</p>
                     <p class="hint">${esc(error.message)}</p>`;
+                cardsEl.innerHTML = `<div class="empty-state"><i class="ti ti-alert-circle" style="color:var(--red);font-size:32px;display:block;margin-bottom:12px"></i><p style="color:var(--red)">Error loading</p></div>`;
                 return;
             }
 
-            console.log(`✅ Loaded ${payments?.length || 0} payments from database`);
+            console.log(`Loaded ${payments?.length || 0} payments`);
 
-            // ✅ Get ALL member names in one query
+            // Fetch member info
             const memberIds = [...new Set(payments.map(p => p.member_id).filter(id => id))];
             let memberMap = {};
-            
+
             if (memberIds.length > 0) {
-                const { data: members, error: memberError } = await sb
+                const { data: members } = await sb
                     .from('members')
                     .select('member_id, name, voice_part')
                     .in('member_id', memberIds);
-                
-                if (!memberError && members) {
+
+                if (members) {
                     memberMap = members.reduce((acc, m) => {
                         acc[m.member_id] = m;
                         return acc;
@@ -927,8 +1137,7 @@
                 }
             }
 
-            // ✅ Build payment records with member info
-            const paymentsWithMembers = payments.map(payment => {
+            const paymentsWithMembers = (payments || []).map(payment => {
                 const member = memberMap[payment.member_id];
                 return {
                     ...payment,
@@ -937,37 +1146,41 @@
                 };
             });
 
-            console.log(`✅ Processed ${paymentsWithMembers.length} payments with member info`);
-
-            // ✅ Update KPIs
+            // KPIs
             const { data: allPayments } = await sb.from('payments').select('status, amount');
-            
+
             if (allPayments) {
                 const pCount = allPayments.filter(p => p.status === 'pending').length;
-                const pAmt   = allPayments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
-                const cAmt   = allPayments.filter(p => p.status === 'confirmed').reduce((s, p) => s + (p.amount || 0), 0);
-                const rAmt   = allPayments.filter(p => p.status === 'rejected').reduce((s, p) => s + (p.amount || 0), 0);
-                
+                const pAmt = allPayments.filter(p => p.status === 'pending').reduce((s, p) => s + Number(p.amount || 0), 0);
+                const cAmt = allPayments.filter(p => p.status === 'confirmed').reduce((s, p) => s + Number(p.amount || 0), 0);
+                const rAmt = allPayments.filter(p => p.status === 'rejected').reduce((s, p) => s + Number(p.amount || 0), 0);
+
                 document.getElementById('kpiPendingCount').textContent = pCount;
-                document.getElementById('kpiPendingAmt').textContent   = `${fmt(pAmt)}`;
-                document.getElementById('kpiConfirmed').textContent    = `${fmt(cAmt)}`;
-                document.getElementById('kpiRejected').textContent     = `${fmt(rAmt)}`;
+                document.getElementById('kpiPendingAmt').textContent = `KSh ${fmt(pAmt)}`;
+                document.getElementById('kpiConfirmed').textContent = `KSh ${fmt(cAmt)}`;
+                document.getElementById('kpiRejected').textContent = `KSh ${fmt(rAmt)}`;
             }
 
             document.getElementById('lastRefreshed').textContent =
                 `Last refreshed: ${new Date().toLocaleTimeString()}`;
 
-            if (!paymentsWithMembers || paymentsWithMembers.length === 0) {
-                document.getElementById('emptyState').innerHTML = `
+            if (!paymentsWithMembers.length) {
+                const msgs = {
+                    pending: 'No pending payment requests',
+                    confirmed: 'No confirmed payments yet',
+                    rejected: 'No rejected payments',
+                    all: 'No payment submissions yet'
+                };
+                emptyEl.innerHTML = `
                     <i class="ti ti-receipt" style="font-size:36px;color:var(--indigo-mid);display:block;margin-bottom:12px"></i>
-                    <p>No ${statusFilter === 'all' ? '' : statusFilter + ' '}payments found</p>
-                    <p class="hint">Change the filter to see other records</p>`;
+                    <p>${msgs[statusFilter] || 'No records'}</p>`;
+                cardsEl.innerHTML = `<div class="empty-state"><i class="ti ti-receipt" style="font-size:36px;color:var(--indigo-mid);display:block;margin-bottom:12px"></i><p>${msgs[statusFilter] || 'No records'}</p></div>`;
                 document.getElementById('rowCount').textContent = '0 records';
                 return;
             }
 
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('payTable').style.display = 'table';
+            emptyEl.style.display = 'none';
+            tableEl.style.display = 'table';
             document.getElementById('rowCount').textContent = `${paymentsWithMembers.length} record${paymentsWithMembers.length !== 1 ? 's' : ''}`;
 
             const methodIcon = m => {
@@ -976,7 +1189,7 @@
                 return 'ti-credit-card';
             };
 
-            // ✅ Render table rows
+            // ═══ RENDER DESKTOP TABLE ═══
             let tableHtml = '';
             for (const p of paymentsWithMembers) {
                 const isBulk = p.notes && p.notes.includes('Bulk payment');
@@ -984,14 +1197,19 @@
 
                 let statusPill = '';
                 let actions = '';
-                
+
                 if (p.status === 'confirmed') {
                     statusPill = `<span class="pill pill-green"><i class="ti ti-check"></i> Confirmed</span>`;
-                    const confirmDate = p.confirmed_at ? new Date(p.confirmed_at).toLocaleDateString() : '—';
-                    actions = `<span style="font-size:11px;color:var(--text-tertiary)">✅ ${confirmDate}</span>`;
+                    const d = p.confirmed_at ? new Date(p.confirmed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+                    actions = `<span style="font-size:11px;color:var(--text-tertiary);">
+                        <i class="ti ti-circle-check" style="color:var(--green);"></i> ${d}
+                    </span>`;
                 } else if (p.status === 'rejected') {
                     statusPill = `<span class="pill pill-red"><i class="ti ti-x"></i> Rejected</span>`;
-                    actions = `<span style="font-size:11px;color:var(--text-tertiary)">—</span>`;
+                    const d = p.rejected_at ? new Date(p.rejected_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+                    actions = `<span style="font-size:11px;color:var(--text-tertiary);">
+                        <i class="ti ti-circle-x" style="color:var(--red);"></i> ${d}
+                    </span>`;
                 } else {
                     statusPill = `<span class="pill pill-amber"><i class="ti ti-clock"></i> Pending</span>`;
                     actions = `<div style="display:flex;gap:6px;">
@@ -1006,19 +1224,17 @@
 
                 const payDate = p.payment_date
                     ? new Date(p.payment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                    : '—';
+                    : (p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—');
 
                 tableHtml += `<tr>
                     <td style="font-weight:600">${esc(p.member_name)}</td>
                     <td>
                         <span class="pill pill-indigo">${esc(p.voice_part)}</span>
-                        ${isBulk ? ` 
-                            <span class="pill pill-purple" style="margin-left:6px;">
-                                📦 Bulk (${penaltyCount})
-                            </span>
-                        ` : ''}
+                        ${isBulk ? `<span class="pill pill-purple" style="margin-left:6px;"><i class="ti ti-package"></i> Bulk (${penaltyCount})</span>` : ''}
                     </td>
-                    <td style="font-weight:700;color:${p.status === 'pending' ? 'var(--red)' : 'var(--green)'}">KSh ${fmt(p.amount)}</td>
+                    <td style="font-weight:700;color:${p.status === 'pending' ? 'var(--red)' : p.status === 'confirmed' ? 'var(--green)' : 'var(--text-tertiary)'}">
+                        KSh ${fmt(p.amount)}
+                    </td>
                     <td>
                         <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);">
                             <i class="ti ${methodIcon(p.payment_method)}" style="font-size:14px"></i>
@@ -1031,16 +1247,88 @@
                     <td>${actions}</td>
                 </tr>`;
             }
-            
             document.getElementById('paymentsList').innerHTML = tableHtml;
-            console.log(`✅ Rendered ${paymentsWithMembers.length} rows`);
+
+            // ═══ RENDER MOBILE CARDS ═══
+            let cardsHtml = '';
+            for (const p of paymentsWithMembers) {
+                const isBulk = p.notes && p.notes.includes('Bulk payment');
+                const penaltyCount = isBulk ? (p.notes.match(/clearing (\d+) penalties/)?.[1] || '?') : '1';
+
+                const amountColor = p.status === 'pending' ? 'var(--red)' : p.status === 'confirmed' ? 'var(--green)' : 'var(--text-tertiary)';
+
+                const payDate = p.payment_date
+                    ? new Date(p.payment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : (p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—');
+
+                let actionHtml = '';
+                if (p.status === 'confirmed') {
+                    const d = p.confirmed_at ? new Date(p.confirmed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Confirmed';
+                    actionHtml = `<div class="payment-card-status confirmed"><i class="ti ti-circle-check"></i> Confirmed ${d}</div>`;
+                } else if (p.status === 'rejected') {
+                    const d = p.rejected_at ? new Date(p.rejected_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Rejected';
+                    actionHtml = `<div class="payment-card-status rejected"><i class="ti ti-circle-x"></i> Rejected ${d}</div>`;
+                } else {
+                    actionHtml = `
+                        <div class="payment-card-actions">
+                            <button class="act-confirm" onclick="openConfirmModal('${p.id}','${p.penalty_id || ''}')">
+                                <i class="ti ti-check"></i> Confirm
+                            </button>
+                            <button class="act-reject" onclick="openRejectModal('${p.id}')">
+                                <i class="ti ti-x"></i> Reject
+                            </button>
+                        </div>`;
+                }
+
+                cardsHtml += `
+                    <div class="payment-card">
+                        <div class="payment-card-head">
+                            <div class="payment-card-member">
+                                <div class="payment-card-avatar">${initials(p.member_name)}</div>
+                                <div class="payment-card-info">
+                                    <div class="payment-card-name">${esc(p.member_name)}</div>
+                                    <div class="payment-card-voice">${esc(p.voice_part)}</div>
+                                </div>
+                            </div>
+                            <div class="payment-card-amount" style="color:${amountColor};">
+                                KSh ${fmt(p.amount)}
+                            </div>
+                        </div>
+                        <div class="payment-card-details">
+                            <div class="payment-detail-row">
+                                <i class="ti ${methodIcon(p.payment_method)}"></i>
+                                <span>Method: <strong>${esc((p.payment_method || 'M-Pesa').toUpperCase())}</strong></span>
+                            </div>
+                            <div class="payment-detail-row">
+                                <i class="ti ti-calendar"></i>
+                                <span>Date: <strong>${payDate}</strong></span>
+                            </div>
+                            ${p.reference ? `
+                                <div class="payment-detail-row">
+                                    <i class="ti ti-hash"></i>
+                                    <span>Ref: <strong>${esc(p.reference)}</strong></span>
+                                </div>
+                            ` : ''}
+                            ${isBulk ? `
+                                <div class="payment-detail-row">
+                                    <i class="ti ti-package"></i>
+                                    <span>Bulk payment (${penaltyCount} penalties)</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${actionHtml}
+                    </div>
+                `;
+            }
+            cardsEl.innerHTML = cardsHtml;
 
         } catch (error) {
             console.error('Load payments error:', error);
-            document.getElementById('emptyState').innerHTML = `
+            emptyEl.innerHTML = `
                 <i class="ti ti-alert-circle" style="font-size:32px;color:var(--red);display:block;margin-bottom:12px"></i>
                 <p style="color:var(--red)">Error loading payments</p>
                 <p class="hint">${esc(error.message)}</p>`;
+            cardsEl.innerHTML = `<div class="empty-state"><i class="ti ti-alert-circle" style="color:var(--red);font-size:32px;display:block;margin-bottom:12px"></i><p style="color:var(--red)">Error</p><p class="hint">${esc(error.message)}</p></div>`;
         }
     }
 
@@ -1107,8 +1395,6 @@
     window.logout = logout;
     window.toggleSidebar = toggleSidebar;
     window.closeSidebar = closeSidebar;
-    window.doConfirm = doConfirm;
-    window.doReject = doReject;
 </script>
 </body>
 </html>

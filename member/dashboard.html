@@ -891,9 +891,6 @@
             .container { margin-bottom: 0; }
         }
 
-        /* ═══════════════════════════════════════════════
-           RESPONSIVE - MOBILE FIRST POLISH
-           ═══════════════════════════════════════════════ */
         @media (max-width: 900px) {
             .container { margin-bottom: 90px; }
         }
@@ -987,8 +984,8 @@
 
         <div class="tabs">
             <button class="tab-btn" id="mySectionBtn" onclick="window.location.href='my-section.html'" style="display:none; background:linear-gradient(135deg, #7c3aed, #4f46e5); color:white;">
-    <i class="fas fa-microphone"></i> My Section
-</button>
+                <i class="fas fa-microphone"></i> My Section
+            </button>
             <button class="tab-btn active" onclick="switchTab('stats')"><i class="fas fa-chart-pie"></i> Stats</button>
             <button class="tab-btn" onclick="switchTab('profile')"><i class="fas fa-user"></i> Profile</button>
             <button class="tab-btn" onclick="switchTab('apology')"><i class="fas fa-pen"></i> Apology</button>
@@ -1280,8 +1277,8 @@
 
     <nav class="bottom-nav">
         <a href="my-section.html" class="bottom-nav-item" id="mySectionBottomNav" style="display:none;">
-    <i class="fas fa-microphone"></i><span>My Section</span>
-</a>
+            <i class="fas fa-microphone"></i><span>My Section</span>
+        </a>
         <button class="bottom-nav-item" onclick="switchTab('stats')"><i class="fas fa-chart-pie"></i><span>Stats</span></button>
         <button class="bottom-nav-item" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
         <button class="bottom-nav-item" onclick="switchTab('apology')"><i class="fas fa-pen"></i><span>Apology</span></button>
@@ -1325,7 +1322,6 @@
             }[m]));
         }
 
-        // Escape for use inside JS string in onclick attribute
         function escapeAttr(str) {
             if (!str) return '';
             return String(str).replace(/[\\'"<>\n\r]/g, m => ({
@@ -1722,60 +1718,52 @@
             return currentMember;
         }
 
-async function loadMemberData() {
-    const member = await getCurrentMember();
-    if (!member) return;
+        async function loadMemberData() {
+            const member = await getCurrentMember();
+            if (!member) return;
 
-    // Set basic profile info first
-    document.getElementById('memberName').textContent = member.name;
-    document.getElementById('memberVoice').textContent = member.voice_part;
-    document.getElementById('memberId').textContent = member.member_id;
+            document.getElementById('memberName').textContent = member.name;
+            document.getElementById('memberVoice').textContent = member.voice_part;
+            document.getElementById('memberId').textContent = member.member_id;
 
-    // ══════════════════════════════════════════
-    // CHECK IF THIS MEMBER IS A SECTION LEADER
-    // ══════════════════════════════════════════
-    try {
-        const { data: leaderRecord, error: leaderError } = await supabaseClient
-            .from('voice_reps')
-            .select('*')
-            .eq('member_id', currentMember.member_id)
-            .eq('is_active', true)
-            .maybeSingle();
+            try {
+                const { data: leaderRecord, error: leaderError } = await supabaseClient
+                    .from('voice_reps')
+                    .select('*')
+                    .eq('member_id', currentMember.member_id)
+                    .eq('is_active', true)
+                    .maybeSingle();
 
-        if (leaderError) {
-            console.warn('Leader check error:', leaderError);
-        }
+                if (leaderError) {
+                    console.warn('Leader check error:', leaderError);
+                }
 
-        if (leaderRecord) {
-            console.log('✅ Section leader detected:', leaderRecord);
+                if (leaderRecord) {
+                    console.log('Section leader detected:', leaderRecord);
 
-            // 1. Show the "My Section" tab button (in tab bar)
-            const mySectionBtn = document.getElementById('mySectionBtn');
-            if (mySectionBtn) mySectionBtn.style.display = 'inline-flex';
+                    const mySectionBtn = document.getElementById('mySectionBtn');
+                    if (mySectionBtn) mySectionBtn.style.display = 'inline-flex';
 
-            // 2. Show the "My Section" bottom nav item (mobile)
-            const bottomNavBtn = document.getElementById('mySectionBottomNav');
-            if (bottomNavBtn) bottomNavBtn.style.display = 'flex';
+                    const bottomNavBtn = document.getElementById('mySectionBottomNav');
+                    if (bottomNavBtn) bottomNavBtn.style.display = 'flex';
 
-            // 3. Add "Section Leader" badge next to their name
-            const nameEl = document.getElementById('memberName');
-            if (nameEl && !document.getElementById('leaderBadge')) {
-                const badge = document.createElement('span');
-                badge.id = 'leaderBadge';
-                badge.style.cssText = 'margin-left:8px; padding:3px 12px; border-radius:40px; background:rgba(255,255,255,0.25); color:white; font-size:11px; font-weight:700; display:inline-flex; align-items:center; gap:4px; vertical-align:middle;';
-                badge.innerHTML = '<i class="fas fa-crown"></i> Section Leader';
-                nameEl.appendChild(badge);
+                    const nameEl = document.getElementById('memberName');
+                    if (nameEl && !document.getElementById('leaderBadge')) {
+                        const badge = document.createElement('span');
+                        badge.id = 'leaderBadge';
+                        badge.style.cssText = 'margin-left:8px; padding:3px 12px; border-radius:40px; background:rgba(255,255,255,0.25); color:white; font-size:11px; font-weight:700; display:inline-flex; align-items:center; gap:4px; vertical-align:middle;';
+                        badge.innerHTML = '<i class="fas fa-crown"></i> Section Leader';
+                        nameEl.appendChild(badge);
+                    }
+                }
+            } catch (e) {
+                console.warn('Section leader check failed:', e);
             }
-        }
-    } catch (e) {
-        console.warn('Section leader check failed:', e);
-    }
 
-    // Load the rest of the data
-    await loadAttendanceStats();
-    await loadPenalties();
-    await loadProfileData();
-}
+            await loadAttendanceStats();
+            await loadPenalties();
+            await loadProfileData();
+        }
 
         async function loadAttendanceStats() {
             if (!currentMember) return;
@@ -1827,6 +1815,9 @@ async function loadMemberData() {
             });
         }
 
+        // ═══════════════════════════════════════════════════════
+        // LOAD PENALTIES (with "Pending Approval" state)
+        // ═══════════════════════════════════════════════════════
         async function loadPenalties() {
             if (!currentMember) return;
 
@@ -1843,6 +1834,28 @@ async function loadMemberData() {
                 return;
             }
 
+            // Load pending payment submissions to detect "Pending Approval" state
+            const { data: pendingPayments } = await supabaseClient
+                .from('payments')
+                .select('id, penalty_id, amount, notes')
+                .eq('member_id', currentMember.member_id)
+                .eq('status', 'pending');
+
+            const pendingPenaltyIds = new Set();
+            (pendingPayments || []).forEach(p => {
+                if (p.penalty_id) {
+                    pendingPenaltyIds.add(Number(p.penalty_id));
+                } else if (p.notes && p.notes.includes('Penalty IDs:')) {
+                    const match = p.notes.match(/Penalty IDs:\s*([\d,\s]+)/i);
+                    if (match) {
+                        match[1].split(',').forEach(id => {
+                            const numId = Number(id.trim());
+                            if (!isNaN(numId)) pendingPenaltyIds.add(numId);
+                        });
+                    }
+                }
+            });
+
             let pendingTotal = 0;
             let paidTotal = 0;
             let pendingCount = 0;
@@ -1850,12 +1863,12 @@ async function loadMemberData() {
 
             penalties?.forEach(p => {
                 if (p.status === 'pending') {
-                    const totalAmount = p.total_with_late_fee || p.amount || 0;
+                    const totalAmount = Number(p.total_with_late_fee) || Number(p.amount) || 0;
                     pendingTotal += totalAmount;
                     pendingCount++;
-                    if (p.late_fee_amount > 0) hasLateFees = true;
+                    if (Number(p.late_fee_amount) > 0) hasLateFees = true;
                 } else if (p.status === 'paid') {
-                    paidTotal += p.amount || 0;
+                    paidTotal += Number(p.amount) || 0;
                 }
             });
 
@@ -1877,14 +1890,22 @@ async function loadMemberData() {
                 </div>` : ''}
             `;
 
-            if (pendingCount > 0) {
+            // Only show "Pay All" if there are unpaid penalties WITHOUT a pending payment
+            const unpaidWithoutSubmission = (penalties || []).filter(p => 
+                p.status === 'pending' && !pendingPenaltyIds.has(Number(p.id))
+            );
+
+            if (unpaidWithoutSubmission.length > 0) {
+                const unpaidTotal = unpaidWithoutSubmission.reduce((sum, p) => 
+                    sum + (Number(p.total_with_late_fee) || Number(p.amount) || 0), 0
+                );
                 summaryHTML += `
                     <div style="margin-top:12px;">
                         <button onclick="payAllPenalties()" class="btn-success" style="padding:12px 24px; font-size:15px; width:auto;">
-                            <i class="fas fa-hand-holding-dollar"></i> Pay All (KSh ${pendingTotal.toFixed(2)})
+                            <i class="fas fa-hand-holding-dollar"></i> Pay All (KSh ${unpaidTotal.toFixed(2)})
                         </button>
                         <span style="font-size:12px; color:var(--slate-500); margin-left:10px;">
-                            ${pendingCount} pending fine${pendingCount > 1 ? 's' : ''}
+                            ${unpaidWithoutSubmission.length} pending fine${unpaidWithoutSubmission.length > 1 ? 's' : ''}
                         </span>
                     </div>
                 `;
@@ -1901,9 +1922,11 @@ async function loadMemberData() {
             document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
                 const isCustom = p.is_custom || p.penalty_type === 'custom';
                 const isPending = p.status === 'pending';
-                const totalAmount = p.total_with_late_fee || p.amount || 0;
-                const lateFee = p.late_fee_amount || 0;
-                const daysLate = p.late_fee_days || 0;
+                const isPaid = p.status === 'paid';
+                const totalAmount = Number(p.total_with_late_fee) || Number(p.amount) || 0;
+                const lateFee = Number(p.late_fee_amount) || 0;
+                const daysLate = Number(p.late_fee_days) || 0;
+                const hasPendingPayment = pendingPenaltyIds.has(Number(p.id));
 
                 let displayReason = '';
                 let displayIcon = '';
@@ -1930,6 +1953,38 @@ async function loadMemberData() {
 
                 const penaltyDesc = `${displayType} - ${p.date}`;
 
+                // Build action area
+                let actionHtml = '';
+
+                if (isPaid) {
+                    actionHtml = `
+                        <span class="status-badge status-approved">
+                            <i class="fas fa-circle-check"></i> PAID
+                        </span>
+                    `;
+                } else if (isPending && hasPendingPayment) {
+                    actionHtml = `
+                        <div style="background:#dbeafe; color:#1e40af; padding:6px 14px; border-radius:40px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; width:100%; justify-content:center;">
+                            <i class="fas fa-hourglass-half"></i> Pending Approval
+                        </div>
+                        <div style="font-size:10px; color:var(--slate-500); margin-top:4px; text-align:center;">
+                            Waiting for admin to confirm
+                        </div>
+                    `;
+                } else {
+                    actionHtml = `
+                        <span class="status-badge status-pending" style="display:inline-block; margin-bottom:6px;">
+                            PENDING
+                        </span>
+                        <div style="margin-top:4px;">
+                            <button onclick="showPaymentModal(${p.id}, ${Number(totalAmount).toFixed(2)}, '${escapeAttr(penaltyDesc)}')"
+                                    style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;">
+                                <i class="fas fa-hand-holding-dollar"></i> Pay
+                            </button>
+                        </div>
+                    `;
+                }
+
                 return `
                     <div class="apology-item">
                         <div>
@@ -1947,14 +2002,13 @@ async function loadMemberData() {
                                 ${isPending && lateFee > 0 ? ` - <span style="color:var(--red);font-weight:500;">+${lateFee.toFixed(2)} late fee</span>` : ''}
                             </div>
                             ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;"><i class="fas fa-pen"></i> ${escapeHtml(displayReason)}</div>` : ''}
-                            ${isPending && daysLate > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px;"><i class="fas fa-clock"></i> ${daysLate} day${daysLate > 1 ? 's' : ''} overdue (10% per day)</div>` : ''}
+                            ${isPending && !hasPendingPayment && daysLate > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px;"><i class="fas fa-clock"></i> ${daysLate} day${daysLate > 1 ? 's' : ''} overdue (10% per day)</div>` : ''}
                         </div>
-                        <div style="text-align:right;">
-                            <div style="font-size:18px; font-weight:700; color:${isPending ? 'var(--red)' : 'var(--green)'};">
+                        <div style="text-align:right; min-width:140px;">
+                            <div style="font-size:18px; font-weight:700; color:${isPaid ? 'var(--green)' : 'var(--red)'};">
                                 KSh ${totalAmount.toFixed(2)}
                             </div>
-                            <span class="status-badge ${isPending ? 'status-pending' : 'status-approved'}">${p.status.toUpperCase()}</span>
-                            ${isPending ? `<div style="margin-top:8px;"><button onclick="showPaymentModal('${p.id}', ${totalAmount}, '${escapeAttr(penaltyDesc)}')" style="background:var(--green); color:white; border:none; padding:6px 14px; border-radius:40px; cursor:pointer; font-size:13px; font-weight:600; width:100%;"><i class="fas fa-hand-holding-dollar"></i> Pay</button></div>` : ''}
+                            ${actionHtml}
                         </div>
                     </div>
                 `;
@@ -1976,7 +2030,7 @@ async function loadMemberData() {
                 if (!penalties || penalties.length === 0) return;
 
                 for (const p of penalties) {
-                    const originalAmount = p.original_amount || p.amount || 0;
+                    const originalAmount = Number(p.original_amount) || Number(p.amount) || 0;
                     const createdDate = new Date(p.created_at);
                     const now = new Date();
                     const hoursLate = (now - createdDate) / (1000 * 60 * 60);
@@ -2068,11 +2122,46 @@ async function loadMemberData() {
                 return;
             }
 
+            // Exclude penalties that already have a pending payment
+            const { data: pendingPayments } = await supabaseClient
+                .from('payments')
+                .select('penalty_id, notes')
+                .eq('member_id', currentMember.member_id)
+                .eq('status', 'pending');
+
+            const alreadySubmitted = new Set();
+            (pendingPayments || []).forEach(p => {
+                if (p.penalty_id) alreadySubmitted.add(Number(p.penalty_id));
+                if (p.notes && p.notes.includes('Penalty IDs:')) {
+                    const match = p.notes.match(/Penalty IDs:\s*([\d,\s]+)/i);
+                    if (match) match[1].split(',').forEach(id => {
+                        const n = Number(id.trim());
+                        if (!isNaN(n)) alreadySubmitted.add(n);
+                    });
+                }
+            });
+
+            const unpaid = penalties.filter(p => !alreadySubmitted.has(Number(p.id)));
+            const skippedCount = penalties.length - unpaid.length;
+
+            if (unpaid.length === 0) {
+                alert(`All your pending fines already have payment submissions awaiting admin confirmation. Please wait for approval.`);
+                return;
+            }
+
+            if (skippedCount > 0) {
+                const proceed = confirm(
+                    `${skippedCount} fine(s) already have a pending payment and will be skipped.\n\n` +
+                    `The remaining ${unpaid.length} fine(s) will be submitted now.\n\nProceed?`
+                );
+                if (!proceed) return;
+            }
+
             let totalAmount = 0;
             let penaltyDescriptions = [];
 
-            penalties.forEach(p => {
-                const amount = p.total_with_late_fee || p.amount || 0;
+            unpaid.forEach(p => {
+                const amount = Number(p.total_with_late_fee) || Number(p.amount) || 0;
                 totalAmount += amount;
 
                 let desc = '';
@@ -2086,9 +2175,9 @@ async function loadMemberData() {
                 penaltyDescriptions.push(`${desc} (${p.date}) - KSh ${amount.toFixed(2)}`);
             });
 
-            const confirmMessage = `You have ${penalties.length} pending fine(s) totaling KSh ${totalAmount.toFixed(2)}.\n\n` +
+            const confirmMessage = `You have ${unpaid.length} pending fine(s) totaling KSh ${totalAmount.toFixed(2)}.\n\n` +
                 penaltyDescriptions.join('\n') +
-                `\n\nThis will record ONE payment for ALL pending fines.\n\nProceed?`;
+                `\n\nThis will record ONE payment for ALL these pending fines.\n\nProceed?`;
 
             if (!confirm(confirmMessage)) return;
 
@@ -2099,9 +2188,11 @@ async function loadMemberData() {
             }
 
             const btn = document.querySelector('.btn-success[onclick="payAllPenalties()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                btn.disabled = true;
+            }
 
             try {
                 const { data: payment, error: paymentError } = await supabaseClient
@@ -2114,40 +2205,81 @@ async function loadMemberData() {
                         status: 'pending',
                         payment_date: new Date().toISOString().split('T')[0],
                         reference: transactionCode.trim(),
-                        notes: `Bulk payment - clearing ${penalties.length} penalties. Penalty IDs: ${penalties.map(p => p.id).join(', ')}`
+                        notes: `Bulk payment - clearing ${unpaid.length} penalties. Penalty IDs: ${unpaid.map(p => p.id).join(', ')}`
                     })
                     .select()
                     .single();
 
                 if (paymentError) throw paymentError;
 
-                alert(`Bulk payment recorded!\n\nTotal: KSh ${totalAmount.toFixed(2)}\n${penalties.length} penalties\n\nAdmin will confirm within 24 hours.\nAll penalties will be cleared upon approval.`);
+                alert(`Bulk payment recorded!\n\nTotal: KSh ${totalAmount.toFixed(2)}\n${unpaid.length} penalties\n\nAdmin will confirm within 24 hours.`);
 
-                loadPenalties();
+                await loadPenalties();
 
             } catch (error) {
                 alert('Error recording payment: ' + error.message);
             } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
             }
         }
 
         async function showPaymentModal(penaltyId, amount, description) {
-            const { data: penalty, error } = await supabaseClient
-                .from('penalties')
-                .select('status, is_custom, custom_reason, reason, late_fee_amount, total_with_late_fee')
-                .eq('id', penaltyId)
-                .single();
+            const numericId = typeof penaltyId === 'string' ? Number(penaltyId) : penaltyId;
 
-            if (error || !penalty || penalty.status !== 'pending') {
-                alert('This fine has already been paid or does not exist.');
+            if (isNaN(numericId)) {
+                alert('Invalid penalty ID. Please refresh the page.');
                 return;
             }
 
-            currentPenaltyId = penaltyId;
+            const { data: penalty, error } = await supabaseClient
+                .from('penalties')
+                .select('status, is_custom, custom_reason, reason, late_fee_amount, total_with_late_fee')
+                .eq('id', numericId)
+                .maybeSingle();
 
-            const totalAmount = penalty.total_with_late_fee || amount;
+            if (error) {
+                console.warn('Penalty lookup error:', error);
+                alert('Could not load this fine. Please refresh the page and try again.');
+                return;
+            }
+
+            if (!penalty) {
+                alert('This fine no longer exists. Please refresh the page.');
+                return;
+            }
+
+            if (penalty.status === 'paid') {
+                alert('This fine has already been paid. Refreshing your dashboard…');
+                await loadPenalties();
+                return;
+            }
+
+            if (penalty.status !== 'pending') {
+                alert(`This fine is marked as "${penalty.status}". Please contact the admin.`);
+                return;
+            }
+
+            // Check if there's already a pending payment for this penalty
+            const { data: existingPending } = await supabaseClient
+                .from('payments')
+                .select('id')
+                .eq('member_id', currentMember.member_id)
+                .eq('penalty_id', numericId)
+                .eq('status', 'pending')
+                .maybeSingle();
+
+            if (existingPending) {
+                alert('You have already submitted a payment for this fine. Please wait for admin confirmation.');
+                await loadPenalties();
+                return;
+            }
+
+            currentPenaltyId = numericId;
+
+            const totalAmount = Number(penalty.total_with_late_fee) || Number(amount) || 0;
             currentPenaltyAmount = totalAmount;
 
             let displayDescription = description;
@@ -2156,8 +2288,9 @@ async function loadMemberData() {
                 displayDescription = `Custom Penalty: ${customText}`;
             }
 
-            if (penalty.late_fee_amount > 0) {
-                displayDescription += ` (includes KSh ${penalty.late_fee_amount.toFixed(2)} late fee)`;
+            const lateFee = Number(penalty.late_fee_amount) || 0;
+            if (lateFee > 0) {
+                displayDescription += ` (includes KSh ${lateFee.toFixed(2)} late fee)`;
             }
 
             currentPenaltyDescription = displayDescription;
@@ -2168,14 +2301,16 @@ async function loadMemberData() {
                 .eq('member_id', currentMember.member_id)
                 .eq('status', 'pending');
 
-            const pendingTotal = penalties?.reduce((sum, p) => sum + (p.total_with_late_fee || p.amount || 0), 0) || 0;
+            const pendingTotal = penalties?.reduce((sum, p) => 
+                sum + (Number(p.total_with_late_fee) || Number(p.amount) || 0), 0
+            ) || 0;
 
-            document.getElementById('modalAmount').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+            document.getElementById('modalAmount').innerHTML = `KSh ${Number(totalAmount).toFixed(2)}`;
             document.getElementById('modalDescription').innerHTML = escapeHtml(displayDescription);
             document.getElementById('modalAccountNumber').innerHTML = escapeHtml(currentMember.member_id);
-            document.getElementById('modalAmount2').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+            document.getElementById('modalAmount2').innerHTML = `KSh ${Number(totalAmount).toFixed(2)}`;
             document.getElementById('pendingTotalDisplay').innerHTML = `KSh ${pendingTotal.toFixed(2)}`;
-            document.getElementById('instructionAmount').innerHTML = `KSh ${totalAmount.toFixed(2)}`;
+            document.getElementById('instructionAmount').innerHTML = `KSh ${Number(totalAmount).toFixed(2)}`;
             document.getElementById('transactionCode').value = '';
 
             updatePaymentModalWithSettings();
@@ -2198,7 +2333,25 @@ async function loadMemberData() {
 
         async function recordPayment() {
             if (!currentPenaltyId) { alert('No payment selected'); return; }
+
             const transactionCode = document.getElementById('transactionCode').value.trim();
+
+            // Prevent duplicate submissions
+            const { data: existingPending } = await supabaseClient
+                .from('payments')
+                .select('id')
+                .eq('member_id', currentMember.member_id)
+                .eq('penalty_id', currentPenaltyId)
+                .eq('status', 'pending')
+                .maybeSingle();
+
+            if (existingPending) {
+                alert('You have already submitted a payment for this fine. Please wait for admin confirmation.');
+                closePaymentModal();
+                await loadPenalties();
+                return;
+            }
+
             const { error } = await supabaseClient.from('payments').insert({
                 member_id: currentMember.member_id,
                 penalty_id: currentPenaltyId,
@@ -2208,11 +2361,15 @@ async function loadMemberData() {
                 payment_date: new Date().toISOString().split('T')[0],
                 reference: transactionCode || null
             });
-            if (error) alert('Error recording payment: ' + error.message);
-            else {
-                alert('Payment recorded! Admin will confirm within 24 hours.');
+
+            if (error) {
+                alert('Error recording payment: ' + error.message);
+            } else {
+                alert('Payment submitted! Admin will confirm within 24 hours.');
                 closePaymentModal();
-                loadPenalties();
+                await loadPenalties();
+                await checkPendingPenalties();
+                await updateFloatingReminder();
             }
         }
 
@@ -2233,169 +2390,154 @@ async function loadMemberData() {
                 }
             }
 
-            // ════════════════════════════════════════════════════
-// SECTION LEADERS — with robust matching + photos
-// ════════════════════════════════════════════════════
+            // Cache voice reps
+            if (!voiceRepsCache || voiceRepsCache.voice_part !== currentMember.voice_part) {
+                const { data: reps, error: repsError } = await supabaseClient
+                    .from('voice_reps')
+                    .select('*')
+                    .eq('voice_part', currentMember.voice_part)
+                    .eq('is_active', true)
+                    .order('display_order')
+                    .order('created_at', { ascending: true });
 
-// Cache voice reps to avoid repeated fetches
-if (!voiceRepsCache || voiceRepsCache.voice_part !== currentMember.voice_part) {
-    const { data: reps, error: repsError } = await supabaseClient
-        .from('voice_reps')
-        .select('*')
-        .eq('voice_part', currentMember.voice_part)
-        .eq('is_active', true)
-        .order('display_order')
-        .order('created_at', { ascending: true });
-
-    if (repsError) console.warn('Voice reps fetch error:', repsError);
-    voiceRepsCache = { voice_part: currentMember.voice_part, reps: reps || [] };
-}
-
-const reps = voiceRepsCache.reps;
-
-if (reps && reps.length > 0) {
-    // ── Robust member lookup (handles whitespace/case mismatches) ──
-    const repMemberIdsRaw = reps.map(r => String(r.member_id || '').trim()).filter(Boolean);
-    const repMemberIdsUpper = repMemberIdsRaw.map(id => id.toUpperCase());
-
-    // Fetch by exact AND case-insensitive match
-    const { data: repMembers, error: membersError } = await supabaseClient
-        .from('members')
-        .select('member_id, name, voice_part, contact, email')
-        .in('member_id', repMemberIdsRaw);
-
-    if (membersError) console.warn('Member lookup error:', membersError);
-
-    // Build map with normalized keys (trim + uppercase)
-    const memberMap = {};
-    (repMembers || []).forEach(m => {
-        if (m.member_id) memberMap[String(m.member_id).trim().toUpperCase()] = m;
-    });
-
-    // If some members weren't found, try case-insensitive fallback query
-    const foundIds = new Set(Object.keys(memberMap));
-    const missingIds = repMemberIdsUpper.filter(id => !foundIds.has(id));
-    if (missingIds.length > 0) {
-        // Fetch all active members and match case-insensitively
-        const { data: allMembers } = await supabaseClient
-            .from('members')
-            .select('member_id, name, voice_part, contact, email');
-        (allMembers || []).forEach(m => {
-            const key = String(m.member_id || '').trim().toUpperCase();
-            if (missingIds.includes(key) && !memberMap[key]) {
-                memberMap[key] = m;
+                if (repsError) console.warn('Voice reps fetch error:', repsError);
+                voiceRepsCache = { voice_part: currentMember.voice_part, reps: reps || [] };
             }
-        });
-    }
 
-    // ── Fetch profile photos for these member IDs ──
-    const { data: photoProfiles } = await supabaseClient
-        .from('user_profiles')
-        .select('member_id, profile_photo_url')
-        .in('member_id', repMemberIdsRaw);
+            const reps = voiceRepsCache.reps;
 
-    const photoMap = {};
-    (photoProfiles || []).forEach(p => {
-        if (p.member_id && p.profile_photo_url) {
-            const cleanUrl = String(p.profile_photo_url).split(',')[0].trim();
-            photoMap[String(p.member_id).trim().toUpperCase()] = cleanUrl;
-        }
-    });
+            if (reps && reps.length > 0) {
+                const repMemberIdsRaw = reps.map(r => String(r.member_id || '').trim()).filter(Boolean);
+                const repMemberIdsUpper = repMemberIdsRaw.map(id => id.toUpperCase());
 
-    // ── Sort by role priority ──
-    const ROLE_PRIORITY = { 'Section Leader': 1, 'Assistant Leader': 2, 'Coordinator': 3 };
-    const sortedReps = [...reps].sort((a, b) => {
-        const pa = ROLE_PRIORITY[a.role] || 99;
-        const pb = ROLE_PRIORITY[b.role] || 99;
-        return pa - pb;
-    });
+                const { data: repMembers, error: membersError } = await supabaseClient
+                    .from('members')
+                    .select('member_id, name, voice_part, contact, email')
+                    .in('member_id', repMemberIdsRaw);
 
-    const roleColors = {
-        'Section Leader': '#4f46e5',
-        'Assistant Leader': '#7c3aed',
-        'Coordinator': '#0891b2'
-    };
+                if (membersError) console.warn('Member lookup error:', membersError);
 
-    const roleIcons = {
-        'Section Leader': 'fa-crown',
-        'Assistant Leader': 'fa-user-tie',
-        'Coordinator': 'fa-users'
-    };
+                const memberMap = {};
+                (repMembers || []).forEach(m => {
+                    if (m.member_id) memberMap[String(m.member_id).trim().toUpperCase()] = m;
+                });
 
-    document.getElementById('leaderInfo').innerHTML = sortedReps.map(r => {
-        const lookupKey = String(r.member_id || '').trim().toUpperCase();
-        const member = memberMap[lookupKey];
-        const name = member?.name || 'Unknown Member';
-        const phone = r.phone || member?.contact || '';
-        const email = r.email || member?.email || '';
-        const photoUrl = photoMap[lookupKey];
-        const color = roleColors[r.role] || '#4f46e5';
-        const icon = roleIcons[r.role] || 'fa-user';
-        const initial = name.charAt(0).toUpperCase();
+                const foundIds = new Set(Object.keys(memberMap));
+                const missingIds = repMemberIdsUpper.filter(id => !foundIds.has(id));
+                if (missingIds.length > 0) {
+                    const { data: allMembers } = await supabaseClient
+                        .from('members')
+                        .select('member_id, name, voice_part, contact, email');
+                    (allMembers || []).forEach(m => {
+                        const key = String(m.member_id || '').trim().toUpperCase();
+                        if (missingIds.includes(key) && !memberMap[key]) {
+                            memberMap[key] = m;
+                        }
+                    });
+                }
 
-        // Avatar: photo if available, else initial
-        const avatarInner = photoUrl
-            ? `<img src="${escapeHtml(photoUrl)}?t=${Date.now()}"
-                    alt="${escapeHtml(name)}"
-                    style="width:100%; height:100%; object-fit:cover; border-radius:50%;"
-                    onerror="this.onerror=null; this.parentElement.innerHTML='${initial}';">`
-            : initial;
+                const { data: photoProfiles } = await supabaseClient
+                    .from('user_profiles')
+                    .select('member_id, profile_photo_url')
+                    .in('member_id', repMemberIdsRaw);
 
-        return `
-            <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px; padding-bottom:14px; border-bottom:0.5px dashed #e2e8f0;">
-                <div style="width:56px; height:56px; border-radius:50%; background:${color}; display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; font-weight:700; flex-shrink:0; box-shadow:0 4px 12px ${color}44; overflow:hidden;">
-                    ${avatarInner}
-                </div>
-                <div style="flex:1; min-width:0;">
-                    <div style="font-size:15px; font-weight:700; color:var(--slate-900); margin-bottom:2px;">${escapeHtml(name)}</div>
-                    <div style="font-size:12px; color:${color}; font-weight:600; margin-bottom:6px;">
-                        <i class="fas ${icon}"></i> ${escapeHtml(r.role)} - ${escapeHtml(r.voice_part)}
+                const photoMap = {};
+                (photoProfiles || []).forEach(p => {
+                    if (p.member_id && p.profile_photo_url) {
+                        const cleanUrl = String(p.profile_photo_url).split(',')[0].trim();
+                        photoMap[String(p.member_id).trim().toUpperCase()] = cleanUrl;
+                    }
+                });
+
+                const ROLE_PRIORITY = { 'Section Leader': 1, 'Assistant Leader': 2, 'Coordinator': 3 };
+                const sortedReps = [...reps].sort((a, b) => {
+                    const pa = ROLE_PRIORITY[a.role] || 99;
+                    const pb = ROLE_PRIORITY[b.role] || 99;
+                    return pa - pb;
+                });
+
+                const roleColors = {
+                    'Section Leader': '#4f46e5',
+                    'Assistant Leader': '#7c3aed',
+                    'Coordinator': '#0891b2'
+                };
+
+                const roleIcons = {
+                    'Section Leader': 'fa-crown',
+                    'Assistant Leader': 'fa-user-tie',
+                    'Coordinator': 'fa-users'
+                };
+
+                document.getElementById('leaderInfo').innerHTML = sortedReps.map(r => {
+                    const lookupKey = String(r.member_id || '').trim().toUpperCase();
+                    const member = memberMap[lookupKey];
+                    const name = member?.name || 'Unknown Member';
+                    const phone = r.phone || member?.contact || '';
+                    const email = r.email || member?.email || '';
+                    const photoUrl = photoMap[lookupKey];
+                    const color = roleColors[r.role] || '#4f46e5';
+                    const icon = roleIcons[r.role] || 'fa-user';
+                    const initial = name.charAt(0).toUpperCase();
+
+                    const avatarInner = photoUrl
+                        ? `<img src="${escapeHtml(photoUrl)}?t=${Date.now()}" alt="${escapeHtml(name)}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" onerror="this.onerror=null; this.parentElement.innerHTML='${initial}';">`
+                        : initial;
+
+                    return `
+                        <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px; padding-bottom:14px; border-bottom:0.5px dashed #e2e8f0;">
+                            <div style="width:56px; height:56px; border-radius:50%; background:${color}; display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; font-weight:700; flex-shrink:0; box-shadow:0 4px 12px ${color}44; overflow:hidden;">
+                                ${avatarInner}
+                            </div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:15px; font-weight:700; color:var(--slate-900); margin-bottom:2px;">${escapeHtml(name)}</div>
+                                <div style="font-size:12px; color:${color}; font-weight:600; margin-bottom:6px;">
+                                    <i class="fas ${icon}"></i> ${escapeHtml(r.role)} - ${escapeHtml(r.voice_part)}
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:4px; font-size:12.5px;">
+                                    ${phone ? `<span><i class="fas fa-phone" style="color:${color}; width:16px;"></i> <a href="tel:${escapeHtml(phone)}" style="color:var(--slate-700); text-decoration:none;">${escapeHtml(phone)}</a></span>` : ''}
+                                    ${email ? `<span><i class="fas fa-envelope" style="color:${color}; width:16px;"></i> <a href="mailto:${escapeHtml(email)}" style="color:var(--slate-700); text-decoration:none;">${escapeHtml(email)}</a></span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('') + `
+                    <div style="display:flex; gap:8px; margin-top:4px;">
+                        ${(() => {
+                            const firstRep = sortedReps[0];
+                            if (!firstRep) return '';
+                            const key = String(firstRep.member_id || '').trim().toUpperCase();
+                            const m = memberMap[key];
+                            const phone = firstRep.phone || m?.contact || '';
+                            return phone ? `
+                                <a href="tel:${escapeHtml(phone)}"
+                                   style="flex:1; padding:10px; border-radius:10px; background:var(--primary); color:#fff; font-weight:600; font-size:12.5px; text-decoration:none; text-align:center;">
+                                    <i class="fas fa-phone"></i> Call Leader
+                                </a>
+                            ` : '';
+                        })()}
+                        ${(() => {
+                            const firstRep = sortedReps[0];
+                            if (!firstRep) return '';
+                            const key = String(firstRep.member_id || '').trim().toUpperCase();
+                            const m = memberMap[key];
+                            const email = firstRep.email || m?.email || '';
+                            return email ? `
+                                <a href="mailto:${escapeHtml(email)}"
+                                   style="flex:1; padding:10px; border-radius:10px; background:var(--slate-100); color:var(--slate-700); font-weight:600; font-size:12.5px; text-decoration:none; text-align:center;">
+                                    <i class="fas fa-envelope"></i> Email
+                                </a>
+                            ` : '';
+                        })()}
                     </div>
-                    <div style="display:flex; flex-direction:column; gap:4px; font-size:12.5px;">
-                        ${phone ? `<span><i class="fas fa-phone" style="color:${color}; width:16px;"></i> <a href="tel:${escapeHtml(phone)}" style="color:var(--slate-700); text-decoration:none;">${escapeHtml(phone)}</a></span>` : ''}
-                        ${email ? `<span><i class="fas fa-envelope" style="color:${color}; width:16px;"></i> <a href="mailto:${escapeHtml(email)}" style="color:var(--slate-700); text-decoration:none;">${escapeHtml(email)}</a></span>` : ''}
+                `;
+            } else {
+                document.getElementById('leaderInfo').innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px; color:var(--slate-500); font-size:13px; padding:8px 0;">
+                        <i class="fas fa-info-circle" style="font-size:20px; color:var(--primary);"></i>
+                        <span>Section leader for <strong>${escapeHtml(currentMember.voice_part)}</strong> will be assigned soon.</span>
                     </div>
-                </div>
-            </div>
-        `;
-    }).join('') + `
-        <div style="display:flex; gap:8px; margin-top:4px;">
-            ${(() => {
-                const firstRep = sortedReps[0];
-                if (!firstRep) return '';
-                const key = String(firstRep.member_id || '').trim().toUpperCase();
-                const m = memberMap[key];
-                const phone = firstRep.phone || m?.contact || '';
-                return phone ? `
-                    <a href="tel:${escapeHtml(phone)}"
-                       style="flex:1; padding:10px; border-radius:10px; background:var(--primary); color:#fff; font-weight:600; font-size:12.5px; text-decoration:none; text-align:center;">
-                        <i class="fas fa-phone"></i> Call Leader
-                    </a>
-                ` : '';
-            })()}
-            ${(() => {
-                const firstRep = sortedReps[0];
-                if (!firstRep) return '';
-                const key = String(firstRep.member_id || '').trim().toUpperCase();
-                const m = memberMap[key];
-                const email = firstRep.email || m?.email || '';
-                return email ? `
-                    <a href="mailto:${escapeHtml(email)}"
-                       style="flex:1; padding:10px; border-radius:10px; background:var(--slate-100); color:var(--slate-700); font-weight:600; font-size:12.5px; text-decoration:none; text-align:center;">
-                        <i class="fas fa-envelope"></i> Email
-                    </a>
-                ` : '';
-            })()}
-        </div>
-    `;
-} else {
-    document.getElementById('leaderInfo').innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; color:var(--slate-500); font-size:13px; padding:8px 0;">
-            <i class="fas fa-info-circle" style="font-size:20px; color:var(--primary);"></i>
-            <span>Section leader for <strong>${escapeHtml(currentMember.voice_part)}</strong> will be assigned soon.</span>
-        </div>
-    `;
-}
+                `;
+            }
         }
 
         async function saveProfile() {
@@ -2499,17 +2641,53 @@ if (reps && reps.length > 0) {
 
         async function checkPendingPenalties() {
             if (!currentMember) return;
-            const { data: penalties } = await supabaseClient.from('penalties').select('*').eq('member_id', currentMember.member_id).eq('status', 'pending');
-            const pendingCount = penalties?.length || 0;
-            const pendingTotal = penalties?.reduce((sum, p) => sum + (p.total_with_late_fee || p.amount || 0), 0) || 0;
+
+            const { data: penalties } = await supabaseClient
+                .from('penalties')
+                .select('*')
+                .eq('member_id', currentMember.member_id)
+                .eq('status', 'pending');
+
+            const { data: pendingPayments } = await supabaseClient
+                .from('payments')
+                .select('penalty_id, notes')
+                .eq('member_id', currentMember.member_id)
+                .eq('status', 'pending');
+
+            const submittedIds = new Set();
+            (pendingPayments || []).forEach(p => {
+                if (p.penalty_id) submittedIds.add(Number(p.penalty_id));
+                if (p.notes && p.notes.includes('Penalty IDs:')) {
+                    const match = p.notes.match(/Penalty IDs:\s*([\d,\s]+)/i);
+                    if (match) match[1].split(',').forEach(id => {
+                        const n = Number(id.trim());
+                        if (!isNaN(n)) submittedIds.add(n);
+                    });
+                }
+            });
+
+            const unpaidPenalties = (penalties || []).filter(p => !submittedIds.has(Number(p.id)));
+            const submittedCount = (penalties || []).length - unpaidPenalties.length;
+
+            const pendingCount = unpaidPenalties.length;
+            const pendingTotal = unpaidPenalties.reduce((sum, p) => 
+                sum + (Number(p.total_with_late_fee) || Number(p.amount) || 0), 0
+            );
+
             const reminderDiv = document.getElementById('paymentReminder');
             const reminderText = document.getElementById('reminderText');
+
             if (pendingCount > 0) {
                 reminderDiv.style.display = 'block';
                 reminderText.innerHTML = pendingCount === 1 ?
                     `You have 1 pending fine of KSh ${pendingTotal.toFixed(2)}. Please clear it.` :
                     `You have ${pendingCount} pending fines totaling KSh ${pendingTotal.toFixed(2)}.`;
-            } else { reminderDiv.style.display = 'none'; }
+            } else if (submittedCount > 0) {
+                reminderDiv.style.display = 'block';
+                reminderText.innerHTML = `${submittedCount} payment${submittedCount > 1 ? 's' : ''} awaiting admin confirmation.`;
+            } else {
+                reminderDiv.style.display = 'none';
+            }
         }
 
         function scrollToPenalties() {
@@ -2534,20 +2712,42 @@ if (reps && reps.length > 0) {
 
         async function updateFloatingReminder() {
             if (!currentMember) return;
+
             const { data: penalties } = await supabaseClient
                 .from('penalties')
-                .select('id, status')
+                .select('id')
                 .eq('member_id', currentMember.member_id)
                 .eq('status', 'pending');
 
-            const pendingCount = penalties?.length || 0;
+            const { data: pendingPayments } = await supabaseClient
+                .from('payments')
+                .select('penalty_id, notes')
+                .eq('member_id', currentMember.member_id)
+                .eq('status', 'pending');
+
+            const submittedIds = new Set();
+            (pendingPayments || []).forEach(p => {
+                if (p.penalty_id) submittedIds.add(Number(p.penalty_id));
+                if (p.notes && p.notes.includes('Penalty IDs:')) {
+                    const match = p.notes.match(/Penalty IDs:\s*([\d,\s]+)/i);
+                    if (match) match[1].split(',').forEach(id => {
+                        const n = Number(id.trim());
+                        if (!isNaN(n)) submittedIds.add(n);
+                    });
+                }
+            });
+
+            const unpaidCount = (penalties || []).filter(p => !submittedIds.has(Number(p.id))).length;
+
             const floatingBtn = document.getElementById('floatingReminderBtn');
             if (floatingBtn) {
-                if (pendingCount > 0) {
+                if (unpaidCount > 0) {
                     floatingBtn.style.display = 'block';
                     const countSpan = floatingBtn.querySelector('#floatingCount');
-                    if (countSpan) countSpan.textContent = pendingCount;
-                } else { floatingBtn.style.display = 'none'; }
+                    if (countSpan) countSpan.textContent = unpaidCount;
+                } else {
+                    floatingBtn.style.display = 'none';
+                }
             }
         }
 

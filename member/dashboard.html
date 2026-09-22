@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E🎶%3C/text%3E%3C/svg%3E">
- <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>UoEm Choir - Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1816,13 +1815,8 @@
             });
         }
 
-        // ═══════════════════════════════════════════════════════
-        // LOAD PENALTIES (with "Pending Approval" state)
-        // ═══════════════════════════════════════════════════════
         async function loadPenalties() {
             if (!currentMember) return;
-
-            await calculateLateFeesForMember(currentMember.member_id);
 
             const { data: penalties, error } = await supabaseClient
                 .from('penalties')
@@ -1835,7 +1829,7 @@
                 return;
             }
 
-            // Load pending payment submissions to detect "Pending Approval" state
+            // Load pending payments
             const { data: pendingPayments } = await supabaseClient
                 .from('payments')
                 .select('id, penalty_id, amount, notes')
@@ -1860,14 +1854,11 @@
             let pendingTotal = 0;
             let paidTotal = 0;
             let pendingCount = 0;
-            let hasLateFees = false;
 
             penalties?.forEach(p => {
                 if (p.status === 'pending') {
-                    const totalAmount = Number(p.total_with_late_fee) || Number(p.amount) || 0;
-                    pendingTotal += totalAmount;
+                    pendingTotal += Number(p.amount) || 0;
                     pendingCount++;
-                    if (Number(p.late_fee_amount) > 0) hasLateFees = true;
                 } else if (p.status === 'paid') {
                     paidTotal += Number(p.amount) || 0;
                 }
@@ -1881,24 +1872,19 @@
                     <span><strong><i class="fas fa-coins"></i> Total:</strong> KSh ${(pendingTotal + paidTotal).toFixed(2)}</span>
                     <span><strong><i class="fas fa-hourglass-half"></i> Pending:</strong> KSh ${pendingTotal.toFixed(2)}</span>
                     <span><strong><i class="fas fa-circle-check"></i> Paid:</strong> KSh ${paidTotal.toFixed(2)}</span>
-                    ${hasLateFees ? `<span style="color:var(--red);"><strong><i class="fas fa-triangle-exclamation"></i> Late Fees:</strong> Included in pending</span>` : ''}
                 </div>
                 <div style="margin-top:8px; font-size:12px; color:var(--slate-500);">
                     <i class="fas fa-phone"></i> Payment: POCHI ${phone} | ${name}
                 </div>
-                ${hasLateFees ? `<div style="margin-top:6px; font-size:11px; color:var(--red); background:#fee2e2; padding:6px 12px; border-radius:8px; display:inline-block;">
-                    <i class="fas fa-clock"></i> Late fees (10%/day after 48hrs) applied to overdue penalties
-                </div>` : ''}
             `;
 
-            // Only show "Pay All" if there are unpaid penalties WITHOUT a pending payment
             const unpaidWithoutSubmission = (penalties || []).filter(p => 
                 p.status === 'pending' && !pendingPenaltyIds.has(Number(p.id))
             );
 
             if (unpaidWithoutSubmission.length > 0) {
                 const unpaidTotal = unpaidWithoutSubmission.reduce((sum, p) => 
-                    sum + (Number(p.total_with_late_fee) || Number(p.amount) || 0), 0
+                    sum + (Number(p.amount) || 0), 0
                 );
                 summaryHTML += `
                     <div style="margin-top:12px;">
@@ -1924,9 +1910,7 @@
                 const isCustom = p.is_custom || p.penalty_type === 'custom';
                 const isPending = p.status === 'pending';
                 const isPaid = p.status === 'paid';
-                const totalAmount = Number(p.total_with_late_fee) || Number(p.amount) || 0;
-                const lateFee = Number(p.late_fee_amount) || 0;
-                const daysLate = Number(p.late_fee_days) || 0;
+                const totalAmount = Number(p.amount) || 0;
                 const hasPendingPayment = pendingPenaltyIds.has(Number(p.id));
 
                 let displayReason = '';
@@ -1947,14 +1931,8 @@
                     displayType = 'Absent';
                 }
 
-                const lateFeeBadge = (isPending && lateFee > 0) ?
-                    `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:40px; font-size:9px; font-weight:600; margin-left:6px;">
-                        +${lateFee.toFixed(2)} fee (${daysLate}d late)
-                    </span>` : '';
-
                 const penaltyDesc = `${displayType} - ${p.date}`;
 
-                // Build action area
                 let actionHtml = '';
 
                 if (isPaid) {
@@ -1993,17 +1971,14 @@
                                 <strong>
                                     <i class="fas ${displayIcon}"></i> ${displayType}
                                     ${isCustom ? '<span style="background:var(--amber-light);color:#854d0e;padding:2px 8px;border-radius:40px;font-size:10px;margin-left:6px;">Custom</span>' : ''}
-                                    ${lateFeeBadge}
                                 </strong>
                                 ${p.reason && !isCustom ? `<div style="font-size:12px;color:var(--slate-500);margin-top:2px;">${escapeHtml(p.reason)}</div>` : ''}
                             </div>
                             <div style="font-size:13px; color:var(--slate-500);">
                                 ${p.date} - ${p.session || 'Custom'}
                                 ${isCustom ? ` - <span style="color:var(--amber);font-weight:500;">${escapeHtml(displayReason)}</span>` : ''}
-                                ${isPending && lateFee > 0 ? ` - <span style="color:var(--red);font-weight:500;">+${lateFee.toFixed(2)} late fee</span>` : ''}
                             </div>
                             ${isCustom ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px;background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block;"><i class="fas fa-pen"></i> ${escapeHtml(displayReason)}</div>` : ''}
-                            ${isPending && !hasPendingPayment && daysLate > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px;"><i class="fas fa-clock"></i> ${daysLate} day${daysLate > 1 ? 's' : ''} overdue (10% per day)</div>` : ''}
                         </div>
                         <div style="text-align:right; min-width:140px;">
                             <div style="font-size:18px; font-weight:700; color:${isPaid ? 'var(--green)' : 'var(--red)'};">
@@ -2017,49 +1992,6 @@
 
             await checkPendingPenalties();
             await updateFloatingReminder();
-        }
-
-        async function calculateLateFeesForMember(memberId) {
-            try {
-                const { data: penalties, error } = await supabaseClient
-                    .from('penalties')
-                    .select('id, created_at, original_amount, amount')
-                    .eq('member_id', memberId)
-                    .eq('status', 'pending');
-
-                if (error) throw error;
-                if (!penalties || penalties.length === 0) return;
-
-                for (const p of penalties) {
-                    const originalAmount = Number(p.original_amount) || Number(p.amount) || 0;
-                    const createdDate = new Date(p.created_at);
-                    const now = new Date();
-                    const hoursLate = (now - createdDate) / (1000 * 60 * 60);
-
-                    let daysLate = 0;
-                    let lateFee = 0;
-                    let totalAmount = originalAmount;
-
-                    if (hoursLate > 48) {
-                        daysLate = Math.floor((hoursLate - 48) / 24) + 1;
-                        lateFee = originalAmount * 0.10 * daysLate;
-                        totalAmount = originalAmount + lateFee;
-                    }
-
-                    await supabaseClient
-                        .from('penalties')
-                        .update({
-                            original_amount: originalAmount,
-                            late_fee_amount: lateFee,
-                            total_with_late_fee: totalAmount,
-                            late_fee_days: daysLate,
-                            last_late_fee_calculated: new Date().toISOString()
-                        })
-                        .eq('id', p.id);
-                }
-            } catch (error) {
-                console.error('Error calculating late fees:', error);
-            }
         }
 
         async function loadPaymentSettings() {
@@ -2109,7 +2041,7 @@
         async function payAllPenalties() {
             const { data: penalties, error } = await supabaseClient
                 .from('penalties')
-                .select('id, amount, total_with_late_fee, penalty_type, date, reason, is_custom, custom_reason')
+                .select('id, amount, penalty_type, date, reason, is_custom, custom_reason')
                 .eq('member_id', currentMember.member_id)
                 .eq('status', 'pending');
 
@@ -2162,7 +2094,7 @@
             let penaltyDescriptions = [];
 
             unpaid.forEach(p => {
-                const amount = Number(p.total_with_late_fee) || Number(p.amount) || 0;
+                const amount = Number(p.amount) || 0;
                 totalAmount += amount;
 
                 let desc = '';
@@ -2237,7 +2169,7 @@
 
             const { data: penalty, error } = await supabaseClient
                 .from('penalties')
-                .select('status, is_custom, custom_reason, reason, late_fee_amount, total_with_late_fee')
+                .select('status, is_custom, custom_reason, reason, amount')
                 .eq('id', numericId)
                 .maybeSingle();
 
@@ -2263,7 +2195,7 @@
                 return;
             }
 
-            // Check if there's already a pending payment for this penalty
+            // Check existing pending payment
             const { data: existingPending } = await supabaseClient
                 .from('payments')
                 .select('id')
@@ -2280,7 +2212,7 @@
 
             currentPenaltyId = numericId;
 
-            const totalAmount = Number(penalty.total_with_late_fee) || Number(amount) || 0;
+            const totalAmount = Number(penalty.amount) || Number(amount) || 0;
             currentPenaltyAmount = totalAmount;
 
             let displayDescription = description;
@@ -2289,21 +2221,16 @@
                 displayDescription = `Custom Penalty: ${customText}`;
             }
 
-            const lateFee = Number(penalty.late_fee_amount) || 0;
-            if (lateFee > 0) {
-                displayDescription += ` (includes KSh ${lateFee.toFixed(2)} late fee)`;
-            }
-
             currentPenaltyDescription = displayDescription;
 
             const { data: penalties } = await supabaseClient
                 .from('penalties')
-                .select('total_with_late_fee, amount')
+                .select('amount')
                 .eq('member_id', currentMember.member_id)
                 .eq('status', 'pending');
 
             const pendingTotal = penalties?.reduce((sum, p) => 
-                sum + (Number(p.total_with_late_fee) || Number(p.amount) || 0), 0
+                sum + (Number(p.amount) || 0), 0
             ) || 0;
 
             document.getElementById('modalAmount').innerHTML = `KSh ${Number(totalAmount).toFixed(2)}`;
@@ -2672,7 +2599,7 @@
 
             const pendingCount = unpaidPenalties.length;
             const pendingTotal = unpaidPenalties.reduce((sum, p) => 
-                sum + (Number(p.total_with_late_fee) || Number(p.amount) || 0), 0
+                sum + (Number(p.amount) || 0), 0
             );
 
             const reminderDiv = document.getElementById('paymentReminder');

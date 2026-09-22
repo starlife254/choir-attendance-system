@@ -316,16 +316,7 @@
         }
         .member-link:hover { text-decoration: underline; }
 
-        .late-fee-badge {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 2px 8px;
-            border-radius: 40px;
-            font-size: 10px;
-            font-weight: 600;
-            display: inline-block;
-            margin-left: 6px;
-        }
+        
 
         .voice-tag {
             display: inline-block;
@@ -504,7 +495,7 @@
             </button>
             <div class="topbar-left">
                 <h2>Penalties Report</h2>
-                <p>View and export penalty records with late fees</p>
+             <p>View and export penalty records</p>
             </div>
         </div>
         <div class="topbar-right">
@@ -688,180 +679,141 @@
         }
     }
 
-    function updateSummary(filtered) {
-        // Calculate totals with late fees
-        let totalOriginal = 0;
-        let totalLateFees = 0;
-        let totalDue = 0;
-        let pendingCount = 0;
-        let paidCount = 0;
+function updateSummary(filtered) {
+    let totalAmount = 0;
+    let pendingCount = 0;
+    let pendingAmount = 0;
+    let paidCount = 0;
+    let paidAmount = 0;
 
-        filtered.forEach(p => {
-            const original = p.original_amount || p.amount || 0;
-            const lateFee = p.late_fee_amount || 0;
-            const total = p.total_with_late_fee || original + lateFee;
-            
-            totalOriginal += original;
-            totalLateFees += lateFee;
-            totalDue += total;
-            
-            if (p.status === 'pending') pendingCount++;
-            if (p.status === 'paid') paidCount++;
-        });
+    filtered.forEach(p => {
+        const amount = Number(p.amount) || 0;
+        totalAmount += amount;
+        
+        if (p.status === 'pending') { pendingCount++; pendingAmount += amount; }
+        if (p.status === 'paid')    { paidCount++;    paidAmount += amount; }
+    });
 
-        const uniqueMembers = new Set(filtered.map(p => p.member_id)).size;
+    const uniqueMembers = new Set(filtered.map(p => p.member_id)).size;
 
-        document.getElementById('summaryStats').innerHTML = `
-            <div class="summary-card indigo">
-                <div class="summary-number">${fmt(totalDue)}</div>
-                <div class="summary-label">Total Due (with late fees)</div>
-            </div>
-            <div class="summary-card amber">
-                <div class="summary-number">${fmt(totalLateFees)}</div>
-                <div class="summary-label">Total Late Fees</div>
-            </div>
-            <div class="summary-card red">
-                <div class="summary-number">${pendingCount}</div>
-                <div class="summary-label">Pending Penalties</div>
-            </div>
-            <div class="summary-card green">
-                <div class="summary-number">${paidCount}</div>
-                <div class="summary-label">Paid Penalties</div>
-            </div>
-            <div class="summary-card indigo">
-                <div class="summary-number">${uniqueMembers}</div>
-                <div class="summary-label">Members with Penalties</div>
-            </div>
-        `;
+    document.getElementById('summaryStats').innerHTML = `
+        <div class="summary-card indigo">
+            <div class="summary-number">${fmt(totalAmount)}</div>
+            <div class="summary-label">Total Penalties</div>
+        </div>
+        <div class="summary-card amber">
+            <div class="summary-number">${pendingCount}</div>
+            <div class="summary-label">Pending (${fmt(pendingAmount)})</div>
+        </div>
+        <div class="summary-card green">
+            <div class="summary-number">${paidCount}</div>
+            <div class="summary-label">Paid (${fmt(paidAmount)})</div>
+        </div>
+        <div class="summary-card indigo">
+            <div class="summary-number">${uniqueMembers}</div>
+            <div class="summary-label">Members with Penalties</div>
+        </div>
+    `;
+}
+
+   function renderTable(filtered) {
+    const container = document.getElementById('penaltiesTableContainer');
+
+    if (!filtered.length) {
+        container.innerHTML = `<div class="no-data">
+            <i class="ti ti-mood-happy"></i> No penalties found matching your filters!
+        </div>`;
+        return;
     }
 
-    function renderTable(filtered) {
-        const container = document.getElementById('penaltiesTableContainer');
-
-        if (!filtered.length) {
-            container.innerHTML = `
-                <div class="no-data">
-                    <i class="ti ti-mood-happy"></i>
-                    No penalties found matching your filters!
-                </div>`;
-            return;
+    const grouped = {};
+    filtered.forEach(p => {
+        const key = p.member_id || 'unknown';
+        if (!grouped[key]) {
+            grouped[key] = {
+                member_id: key,
+                member_name: p.member_name || 'Unknown Member',
+                voice_part: p.voice_part || '—',
+                penalties: [],
+                totalAmount: 0,
+                pendingCount: 0,
+                paidCount: 0
+            };
         }
+        grouped[key].penalties.push(p);
+        const amount = Number(p.amount) || 0;
+        grouped[key].totalAmount += amount;
+        if (p.status === 'pending') grouped[key].pendingCount++;
+        if (p.status === 'paid')    grouped[key].paidCount++;
+    });
 
-        // Group by member
-        const grouped = {};
-        filtered.forEach(p => {
-            const key = p.member_id || 'unknown';
-            if (!grouped[key]) {
-                grouped[key] = {
-                    member_id: key,
-                    member_name: p.member_name || 'Unknown Member',
-                    voice_part: p.voice_part || '—',
-                    penalties: [],
-                    totalOriginal: 0,
-                    totalLateFees: 0,
-                    totalDue: 0,
-                    pendingCount: 0,
-                    paidCount: 0
-                };
-            }
-            grouped[key].penalties.push(p);
-            
-            const original = p.original_amount || p.amount || 0;
-            const lateFee = p.late_fee_amount || 0;
-            const total = p.total_with_late_fee || original + lateFee;
-            
-            grouped[key].totalOriginal += original;
-            grouped[key].totalLateFees += lateFee;
-            grouped[key].totalDue += total;
-            
-            if (p.status === 'pending') grouped[key].pendingCount++;
-            if (p.status === 'paid') grouped[key].paidCount++;
-        });
+    const sortedGroups = Object.values(grouped).sort((a, b) =>
+        a.member_name.localeCompare(b.member_name)
+    );
 
-        const sortedGroups = Object.values(grouped).sort((a, b) => 
-            a.member_name.localeCompare(b.member_name)
-        );
-
-        let html = `
-            <table class="penalties-table" id="pdfTable">
-                <thead>
-                    <tr>
-                        <th>Member</th>
-                        <th>Voice</th>
-                        <th>Penalties</th>
-                        <th>Original</th>
-                        <th>Late Fees</th>
-                        <th>Total Due</th>
-                        <th>Status</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        sortedGroups.forEach(group => {
-            const hasPending = group.pendingCount > 0;
-            const totalCount = group.penalties.length;
-            const statusLabel = hasPending ? '⚠️ Has Pending' : '✅ All Paid';
-            const statusClass = hasPending ? 'status-pending' : 'status-paid';
-            const initials = group.member_name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
-
-            html += `
-                <tr class="member-group">
-                    <td>
-                        <span style="display:flex;align-items:center;gap:8px;">
-                            <span style="width:28px;height:28px;border-radius:50%;background:#4f46e5;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${initials}</span>
-                            ${esc(group.member_name)}
-                            <span class="penalty-count-badge">${totalCount}</span>
-                        </span>
-                    </td>
-                    <td><span class="voice-tag">${esc(group.voice_part)}</span></td>
-                    <td>${totalCount}</td>
-                    <td>${fmt(group.totalOriginal)}</td>
-                    <td style="color:${group.totalLateFees > 0 ? '#dc2626' : '#64748b'};">${group.totalLateFees > 0 ? fmt(group.totalLateFees) : '—'}</td>
-                    <td style="font-weight:700;color:${hasPending ? '#dc2626' : '#10b981'};">${fmt(group.totalDue)}</td>
-                    <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-                    <td>
-                        ${group.penalties.map(p => {
-                            const isPending = p.status === 'pending';
-                            const original = p.original_amount || p.amount || 0;
-                            const lateFee = p.late_fee_amount || 0;
-                            const total = p.total_with_late_fee || original + lateFee;
-                            const daysLate = p.late_fee_days || 0;
-                            
-                            const typeLabel = p.penalty_type === 'late' ? '⏰ Late' : 
-                                              p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
-                            
-                            const statusClass = p.status === 'paid' ? 'status-paid' : 
-                                               (isPending && daysLate > 0) ? 'status-late' : 'status-pending';
-                            const statusLabel = p.status === 'paid' ? 'Paid' : 
-                                               (isPending && daysLate > 0) ? '⚠️ Late' : 'Pending';
-                            
-                            let customReason = '';
-                            if (p.is_custom && p.custom_reason) {
-                                customReason = `📝 ${esc(p.custom_reason)}`;
-                            }
-                            
-                            return `
-                                <div class="child-penalty" style="border-bottom:1px solid #f1f5f9; padding:4px 0;">
-                                    <span class="date">${p.date || '—'}</span>
-                                    <span class="type">${typeLabel}</span>
-                                    <span style="font-size:11px;color:#64748b;">${p.session || '—'}</span>
-                                    ${customReason ? `<span style="font-size:11px;color:#92400e;">${customReason}</span>` : ''}
-                                    <span class="amount" style="color:${isPending ? '#dc2626' : '#10b981'};">${fmt(total)}</span>
-                                    ${lateFee > 0 ? `<span class="late-fee-text">+${fmt(lateFee)} (${daysLate}d late)</span>` : ''}
-                                    <span class="status-badge ${statusClass}" style="font-size:10px;padding:2px 10px;">${statusLabel}</span>
-                                </div>
-                            `;
-                        }).join('')}
-                    </td>
+    let html = `
+        <table class="penalties-table" id="pdfTable">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Voice</th>
+                    <th>Count</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Details</th>
                 </tr>
-            `;
-        });
+            </thead>
+            <tbody>
+    `;
 
-        html += `</tbody></table>`;
-        container.innerHTML = html;
-    }
+    sortedGroups.forEach(group => {
+        const hasPending = group.pendingCount > 0;
+        const statusLabel = hasPending ? '⚠️ Has Pending' : '✅ All Paid';
+        const statusClass = hasPending ? 'status-pending' : 'status-paid';
+        const initials = group.member_name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
+
+        html += `
+            <tr class="member-group">
+                <td>
+                    <span style="display:flex;align-items:center;gap:8px;">
+                        <span style="width:28px;height:28px;border-radius:50%;background:#4f46e5;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${initials}</span>
+                        ${esc(group.member_name)}
+                        <span class="penalty-count-badge">${group.penalties.length}</span>
+                    </span>
+                </td>
+                <td><span class="voice-tag">${esc(group.voice_part)}</span></td>
+                <td>${group.penalties.length}</td>
+                <td style="font-weight:700;color:${hasPending ? '#dc2626' : '#10b981'};">${fmt(group.totalAmount)}</td>
+                <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                <td>
+                    ${group.penalties.map(p => {
+                        const isPending = p.status === 'pending';
+                        const amount = Number(p.amount) || 0;
+                        const typeLabel = p.penalty_type === 'late' ? '⏰ Late' :
+                                          p.penalty_type === 'custom' ? '📌 Custom' : '❌ Absent';
+                        const statusLabel = isPending ? 'Pending' : 'Paid';
+                        const statusClass = isPending ? 'status-pending' : 'status-paid';
+                        const reason = p.is_custom ? (p.custom_reason || p.reason || '') : (p.reason || '');
+
+                        return `
+                            <div class="child-penalty" style="border-bottom:1px solid #f1f5f9; padding:4px 0;">
+                                <span class="date">${p.date || '—'}</span>
+                                <span class="type">${typeLabel}</span>
+                                <span style="font-size:11px;color:#64748b;">${p.session || '—'}</span>
+                                ${reason ? `<span style="font-size:11px;color:#92400e;">📝 ${esc(reason)}</span>` : ''}
+                                <span class="amount" style="color:${isPending ? '#dc2626' : '#10b981'};">${fmt(amount)}</span>
+                                <span class="status-badge ${statusClass}" style="font-size:10px;padding:2px 10px;">${statusLabel}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
 
     // ── EXPORT PDF ──
     async function exportToPDF() {
@@ -885,90 +837,69 @@
             return;
         }
 
-        // Group for PDF
-        const grouped = {};
-        filtered.forEach(p => {
-            const key = p.member_id || 'unknown';
-            if (!grouped[key]) {
-                grouped[key] = {
-                    member_name: p.member_name || 'Unknown',
-                    voice_part: p.voice_part || '—',
-                    penalties: [],
-                    totalOriginal: 0,
-                    totalLateFees: 0,
-                    totalDue: 0
-                };
-            }
-            grouped[key].penalties.push(p);
-            const original = p.original_amount || p.amount || 0;
-            const lateFee = p.late_fee_amount || 0;
-            const total = p.total_with_late_fee || original + lateFee;
-            grouped[key].totalOriginal += original;
-            grouped[key].totalLateFees += lateFee;
-            grouped[key].totalDue += total;
-        });
+// Group for PDF — SIMPLIFIED
+const grouped = {};
+filtered.forEach(p => {
+    const key = p.member_id || 'unknown';
+    if (!grouped[key]) {
+        grouped[key] = {
+            member_name: p.member_name || 'Unknown',
+            voice_part: p.voice_part || '—',
+            penalties: [],
+            totalAmount: 0
+        };
+    }
+    grouped[key].penalties.push(p);
+    grouped[key].totalAmount += Number(p.amount) || 0;
+});
 
-        let tableRows = '';
-        let grandTotalOriginal = 0;
-        let grandTotalLateFees = 0;
-        let grandTotalDue = 0;
+let tableRows = '';
+let grandTotal = 0;
 
-        Object.values(grouped).forEach(g => {
-            const hasPending = g.penalties.some(p => p.status === 'pending');
-            tableRows += `
-                <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
-                    <td colspan="9" style="padding: 10px 12px; font-weight: 700; font-size: 13px;">
-                        ${esc(g.member_name)} · ${esc(g.voice_part)} 
-                        (${g.penalties.length} penalty${g.penalties.length !== 1 ? 's' : ''})
-                        <span style="margin-left: 20px; color: ${hasPending ? '#dc2626' : '#10b981'};">
-                            Total Due: ${fmt(g.totalDue)}
-                        </span>
-                        <span style="margin-left: 20px; color: #64748b; font-size: 11px;">
-                            (Original: ${fmt(g.totalOriginal)} | Late Fees: ${fmt(g.totalLateFees)})
-                        </span>
-                    </td>
-                </tr>
-            `;
+Object.values(grouped).forEach(g => {
+    const hasPending = g.penalties.some(p => p.status === 'pending');
+    tableRows += `
+        <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+            <td colspan="7" style="padding: 10px 12px; font-weight: 700; font-size: 13px;">
+                ${esc(g.member_name)} · ${esc(g.voice_part)} 
+                (${g.penalties.length} penalty${g.penalties.length !== 1 ? 's' : ''})
+                <span style="margin-left: 20px; color: ${hasPending ? '#dc2626' : '#10b981'};">
+                    Total: ${fmt(g.totalAmount)}
+                </span>
+            </td>
+        </tr>
+    `;
 
-            g.penalties.forEach((p, idx) => {
-                const original = p.original_amount || p.amount || 0;
-                const lateFee = p.late_fee_amount || 0;
-                const total = p.total_with_late_fee || original + lateFee;
-                const isPending = p.status === 'pending';
-                const daysLate = p.late_fee_days || 0;
-                const statusLabel = p.status === 'paid' ? 'Paid' : (isPending && daysLate > 0 ? '⚠️ Late' : 'Pending');
-                const typeLabel = p.penalty_type === 'late' ? 'Late' : p.penalty_type === 'custom' ? 'Custom' : 'Absent';
-                const reason = p.is_custom ? (p.custom_reason || p.reason || '') : (p.reason || '');
+    g.penalties.forEach((p, idx) => {
+        const amount = Number(p.amount) || 0;
+        const isPending = p.status === 'pending';
+        const typeLabel = p.penalty_type === 'late' ? 'Late' :
+                          p.penalty_type === 'custom' ? 'Custom' : 'Absent';
+        const reason = p.is_custom ? (p.custom_reason || p.reason || '') : (p.reason || '');
 
-                grandTotalOriginal += original;
-                grandTotalLateFees += lateFee;
-                grandTotalDue += total;
+        grandTotal += amount;
 
-                tableRows += `
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 6px 10px; text-align: center;">${idx + 1}</td>
-                        <td style="padding: 6px 10px;">${esc(g.member_name)}</td>
-                        <td style="padding: 6px 10px;">${esc(g.voice_part)}</td>
-                        <td style="padding: 6px 10px; text-align: center;">${typeLabel}</td>
-                        <td style="padding: 6px 10px; text-align: center;">${p.date || '—'}</td>
-                        <td style="padding: 6px 10px; text-align: center;">${p.session || '—'}</td>
-                        <td style="padding: 6px 10px;">${reason ? esc(reason) : '—'}</td>
-                        <td style="padding: 6px 10px; text-align: right;">${fmt(original)}</td>
-                        <td style="padding: 6px 10px; text-align: right; color: ${lateFee > 0 ? '#dc2626' : '#64748b'};">
-                            ${lateFee > 0 ? `${fmt(lateFee)} (${daysLate}d late)` : '—'}
-                        </td>
-                        <td style="padding: 6px 10px; text-align: right; font-weight: 700; color: ${isPending ? '#dc2626' : '#10b981'};">
-                            ${fmt(total)}
-                        </td>
-                        <td style="padding: 6px 10px; text-align: center;">
-                            <span style="background: ${isPending ? '#fef3c7' : '#d1fae5'}; padding: 2px 10px; border-radius: 12px; color: ${isPending ? '#92400e' : '#065f46'};">
-                                ${statusLabel}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            });
-        });
+        tableRows += `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 6px 10px; text-align: center;">${idx + 1}</td>
+                <td style="padding: 6px 10px;">${esc(g.member_name)}</td>
+                <td style="padding: 6px 10px;">${esc(g.voice_part)}</td>
+                <td style="padding: 6px 10px; text-align: center;">${typeLabel}</td>
+                <td style="padding: 6px 10px; text-align: center;">${p.date || '—'}</td>
+                <td style="padding: 6px 10px; text-align: center;">${p.session || '—'}</td>
+                <td style="padding: 6px 10px;">${reason ? esc(reason) : '—'}</td>
+                <td style="padding: 6px 10px; text-align: right; font-weight: 700; color: ${isPending ? '#dc2626' : '#10b981'};">
+                    ${fmt(amount)}
+                </td>
+                <td style="padding: 6px 10px; text-align: center;">
+                    <span style="background: ${isPending ? '#fef3c7' : '#d1fae5'}; padding: 2px 10px; border-radius: 12px; color: ${isPending ? '#92400e' : '#065f46'};">
+                        ${isPending ? 'Pending' : 'Paid'}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+});
 
         const filterLabel = statusFilter === 'all' ? 'All' : statusFilter === 'pending' ? 'Pending Only' : 'Paid Only';
 
@@ -978,73 +909,65 @@
         pdfContent.style.backgroundColor = 'white';
         pdfContent.style.color = '#1a1a2e';
 
-        pdfContent.innerHTML = `
-            <div style="text-align: center; margin-bottom: 24px; border-bottom: 2px solid #4f46e5; padding-bottom: 16px;">
-                <h1 style="color: #4f46e5; font-size: 24px; margin-bottom: 4px;">🎵 University of Embu Students' Choir</h1>
-                <h2 style="color: #1a1f36; font-size: 20px;">Penalties Report (with Late Fees)</h2>
-                <p style="color: #64748b; font-size: 13px; margin-top: 4px;">
-                    ${filterLabel} · Generated on ${new Date().toLocaleString()}
-                </p>
-            </div>
+       pdfContent.innerHTML = `
+    <div style="text-align: center; margin-bottom: 24px; border-bottom: 2px solid #4f46e5; padding-bottom: 16px;">
+        <h1 style="color: #4f46e5; font-size: 24px; margin-bottom: 4px;">🎵 University of Embu Students' Choir</h1>
+        <h2 style="color: #1a1f36; font-size: 20px;">Penalties Report</h2>
+        <p style="color: #64748b; font-size: 13px; margin-top: 4px;">
+            ${filterLabel} · Generated on ${new Date().toLocaleString()}
+        </p>
+    </div>
 
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;">
-                <div style="background: #eef2ff; padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Due</div>
-                    <div style="font-size: 20px; font-weight: 700; color: #4f46e5;">${fmt(grandTotalDue)}</div>
-                </div>
-                <div style="background: #fee2e2; padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Late Fees</div>
-                    <div style="font-size: 20px; font-weight: 700; color: #dc2626;">${fmt(grandTotalLateFees)}</div>
-                </div>
-                <div style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Original</div>
-                    <div style="font-size: 20px; font-weight: 700; color: #92400e;">${fmt(grandTotalOriginal)}</div>
-                </div>
-                <div style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Penalties</div>
-                    <div style="font-size: 20px; font-weight: 700; color: #065f46;">${filtered.length}</div>
-                </div>
-                <div style="background: #ede9fe; padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Members</div>
-                    <div style="font-size: 20px; font-weight: 700; color: #7c3aed;">${Object.keys(grouped).length}</div>
-                </div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+        <div style="background: #eef2ff; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total</div>
+            <div style="font-size: 20px; font-weight: 700; color: #4f46e5;">${fmt(grandTotal)}</div>
+        </div>
+        <div style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Total Penalties</div>
+            <div style="font-size: 20px; font-weight: 700; color: #065f46;">${filtered.length}</div>
+        </div>
+        <div style="background: #ede9fe; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Members</div>
+            <div style="font-size: 20px; font-weight: 700; color: #7c3aed;">${Object.keys(grouped).length}</div>
+        </div>
+        <div style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Pending</div>
+            <div style="font-size: 20px; font-weight: 700; color: #92400e;">
+                ${filtered.filter(p => p.status === 'pending').length}
             </div>
+        </div>
+    </div>
 
-            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-                <thead>
-                    <tr style="background: #1a1f36; color: white;">
-                        <th style="padding: 6px 10px; text-align: center;">#</th>
-                        <th style="padding: 6px 10px; text-align: left;">Member</th>
-                        <th style="padding: 6px 10px; text-align: left;">Voice</th>
-                        <th style="padding: 6px 10px; text-align: center;">Type</th>
-                        <th style="padding: 6px 10px; text-align: center;">Date</th>
-                        <th style="padding: 6px 10px; text-align: center;">Session</th>
-                        <th style="padding: 6px 10px;">Reason</th>
-                        <th style="padding: 6px 10px; text-align: right;">Original</th>
-                        <th style="padding: 6px 10px; text-align: right;">Late Fee</th>
-                        <th style="padding: 6px 10px; text-align: right;">Total Due</th>
-                        <th style="padding: 6px 10px; text-align: center;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-                <tfoot>
-                    <tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #4f46e5;">
-                        <td colspan="7" style="padding: 8px 10px; text-align: right; font-size: 12px;">GRAND TOTALS:</td>
-                        <td style="padding: 8px 10px; text-align: right; font-size: 12px;">${fmt(grandTotalOriginal)}</td>
-                        <td style="padding: 8px 10px; text-align: right; font-size: 12px; color: #dc2626;">${fmt(grandTotalLateFees)}</td>
-                        <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 700; color: #4f46e5;">${fmt(grandTotalDue)}</td>
-                        <td style="padding: 8px 10px; text-align: center;"></td>
-                    </tr>
-                </tfoot>
-            </table>
+    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+        <thead>
+            <tr style="background: #1a1f36; color: white;">
+                <th style="padding: 6px 10px; text-align: center;">#</th>
+                <th style="padding: 6px 10px; text-align: left;">Member</th>
+                <th style="padding: 6px 10px; text-align: left;">Voice</th>
+                <th style="padding: 6px 10px; text-align: center;">Type</th>
+                <th style="padding: 6px 10px; text-align: center;">Date</th>
+                <th style="padding: 6px 10px; text-align: center;">Session</th>
+                <th style="padding: 6px 10px;">Reason</th>
+                <th style="padding: 6px 10px; text-align: right;">Amount</th>
+                <th style="padding: 6px 10px; text-align: center;">Status</th>
+            </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+        <tfoot>
+            <tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #4f46e5;">
+                <td colspan="7" style="padding: 8px 10px; text-align: right; font-size: 12px;">GRAND TOTAL:</td>
+                <td style="padding: 8px 10px; text-align: right; font-size: 12px; color: #4f46e5;">${fmt(grandTotal)}</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
 
-            <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
-                <p>University of Embu Students' Choir ·</p>
-                <p>Report generated on ${new Date().toLocaleString()}</p>
-            </div>
-        `;
+    <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 2px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
+        <p>University of Embu Students' Choir ·</p>
+        <p>Report generated on ${new Date().toLocaleString()}</p>
+    </div>
+`;
 
         const opt = {
             margin: [0.5, 0.5, 0.5, 0.5],

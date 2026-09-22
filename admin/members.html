@@ -146,16 +146,7 @@
         .status-pending { background: var(--amber-light); color: #d97706; }
         .status-paid    { background: var(--green-light);  color: #059669; }
 
-        .late-fee-badge {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 2px 8px;
-            border-radius: 40px;
-            font-size: 9px;
-            font-weight: 600;
-            margin-left: 6px;
-            display: inline-block;
-        }
+        
 
         .empty-state { text-align: center; padding: 40px; color: var(--text-tertiary); font-size: 13px; }
         .empty-state i { font-size: 28px; display: block; margin-bottom: 8px; }
@@ -719,65 +710,12 @@
         await loadMemberData(selectedMember);
     }
 
-    // ── CALCULATE LATE FEES FOR MEMBER ──
-    async function calculateLateFeesForMember(memberId) {
-        try {
-            // Get all pending penalties for this member
-            const { data: penalties, error } = await supabaseClient
-                .from('penalties')
-                .select('id, created_at, original_amount, amount')
-                .eq('member_id', memberId)
-                .eq('status', 'pending');
-
-            if (error) throw error;
-            if (!penalties || penalties.length === 0) return;
-
-            let updated = 0;
-
-            for (const p of penalties) {
-                const originalAmount = p.original_amount || p.amount || 0;
-                const createdDate = new Date(p.created_at);
-                const now = new Date();
-                const hoursLate = (now - createdDate) / (1000 * 60 * 60);
-
-                let daysLate = 0;
-                let lateFee = 0;
-                let totalAmount = originalAmount;
-
-                // If more than 48 hours, calculate late fees
-                if (hoursLate > 48) {
-                    daysLate = Math.floor((hoursLate - 48) / 24) + 1;
-                    lateFee = originalAmount * 0.10 * daysLate;
-                    totalAmount = originalAmount + lateFee;
-                }
-
-                // Update the penalty with late fee calculation
-                const { error: updateError } = await supabaseClient
-                    .from('penalties')
-                    .update({
-                        original_amount: originalAmount,
-                        late_fee_amount: lateFee,
-                        total_with_late_fee: totalAmount,
-                        late_fee_days: daysLate,
-                        last_late_fee_calculated: new Date().toISOString()
-                    })
-                    .eq('id', p.id);
-
-                if (!updateError) updated++;
-            }
-
-            console.log(`✅ Updated late fees for ${updated} penalties for member ${memberId}`);
-
-        } catch (error) {
-            console.error('Error calculating late fees:', error);
-        }
-    }
-
+    
     async function loadMemberData(member) {
         if (!member) return;
         
         // Calculate late fees before loading penalties
-        await calculateLateFeesForMember(member.member_id);
+       
         
         const photoUrl = profilePhotoMap[member.member_id];
         let avatarHtml = '';
@@ -892,84 +830,78 @@
     }
 
     async function loadPenalties(memberId) {
-        const { data: penalties, error } = await supabaseClient
-            .from('penalties')
-            .select('*')
-            .eq('member_id', memberId)
-            .order('date', { ascending: false });
+    const { data: penalties, error } = await supabaseClient
+        .from('penalties')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('date', { ascending: false });
+    
+    if (error) {
+        console.warn('Error loading penalties:', error);
+        document.getElementById('penaltiesList').innerHTML = 
+            '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading penalties</div>';
+        return;
+    }
         
-        if (error) {
-            console.warn('Error loading penalties:', error);
-            document.getElementById('penaltiesList').innerHTML = '<div class="empty-state"><i class="ti ti-alert-circle"></i> Error loading penalties</div>';
-            return;
-        }
-            
-        let pendingTotal = 0;
-        let paidTotal = 0;
-        let customCount = 0;
-        let hasLateFees = false;
+    let pendingTotal = 0;
+    let paidTotal = 0;
+    let customCount = 0;
 
-        penalties?.forEach(p => {
-            if (p.status === 'pending') {
-                const totalAmount = p.total_with_late_fee || p.amount || 0;
-                pendingTotal += totalAmount;
-                if (p.late_fee_amount > 0) hasLateFees = true;
-            } else if (p.status === 'paid') {
-                paidTotal += p.amount || 0;
-            }
-            if (p.is_custom || p.penalty_type === 'custom') customCount++;
-        });
-        
-        document.getElementById('penaltySummary').innerHTML = `
-            <span><strong>💰 Total:</strong> KSh ${(pendingTotal + paidTotal).toFixed(2)}</span>
-            <span><strong>⏳ Pending:</strong> KSh ${pendingTotal.toFixed(2)}</span>
-            <span><strong>✅ Paid:</strong> KSh ${paidTotal.toFixed(2)}</span>
-            <span style="color:var(--amber);"><strong>📌 Custom:</strong> ${customCount}</span>
-            ${hasLateFees ? `<span style="color:var(--red);"><strong>⚠️ Late Fees:</strong> Included in pending</span>` : ''}
-        `;
-        
-        if (!penalties?.length) { 
-            document.getElementById('penaltiesList').innerHTML = '<div class="empty-state"><i class="ti ti-mood-happy"></i> No penalties recorded! Keep up the good attendance!</div>'; 
-            return; 
+    penalties?.forEach(p => {
+        if (p.status === 'pending') {
+            pendingTotal += Number(p.amount) || 0;
+        } else if (p.status === 'paid') {
+            paidTotal += Number(p.amount) || 0;
         }
+        if (p.is_custom || p.penalty_type === 'custom') customCount++;
+    });
+    
+    document.getElementById('penaltySummary').innerHTML = `
+        <span><strong>💰 Total:</strong> KSh ${(pendingTotal + paidTotal).toFixed(2)}</span>
+        <span><strong>⏳ Pending:</strong> KSh ${pendingTotal.toFixed(2)}</span>
+        <span><strong>✅ Paid:</strong> KSh ${paidTotal.toFixed(2)}</span>
+        <span style="color:var(--amber);"><strong>📌 Custom:</strong> ${customCount}</span>
+    `;
+    
+    if (!penalties?.length) { 
+        document.getElementById('penaltiesList').innerHTML = 
+            '<div class="empty-state"><i class="ti ti-mood-happy"></i> No penalties recorded! Keep up the good attendance!</div>'; 
+        return; 
+    }
+    
+    document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
+        const isCustom = p.is_custom || p.penalty_type === 'custom';
+        const isPending = p.status === 'pending';
+        const amount = Number(p.amount) || 0;
         
-        document.getElementById('penaltiesList').innerHTML = penalties.map(p => {
-            const isCustom = p.is_custom || p.penalty_type === 'custom';
-            const isPending = p.status === 'pending';
-            const totalAmount = p.total_with_late_fee || p.amount || 0;
-            const lateFee = p.late_fee_amount || 0;
-            const daysLate = p.late_fee_days || 0;
-            
-            const typeIcon = isCustom ? '📌' : (p.penalty_type === 'late' ? '⏰' : '❌');
-            const typeLabel = isCustom ? 'Custom' : (p.penalty_type === 'late' ? 'Late' : 'Absent');
-            const reasonText = p.custom_reason || p.reason || '';
-            
-            const lateFeeBadge = (isPending && lateFee > 0) ? 
-                `<span class="late-fee-badge">+${lateFee.toFixed(2)} fee (${daysLate}d late)</span>` : '';
-            
-            return `
-                <div class="penalty-item">
-                    <div>
-                        <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                            ${typeIcon} ${typeLabel}
-                            ${isCustom ? '<span class="pill pill-amber" style="font-size:9px;padding:1px 8px;">Custom</span>' : ''}
-                            ${lateFeeBadge}
-                        </div>
-                        <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">
-                            ${p.date} · ${p.session || 'Custom'}
-                            ${reasonText ? ` · 📝 ${escapeHtml(reasonText)}` : ''}
-                            ${isPending && lateFee > 0 ? ` · <span style="color:var(--red);font-weight:500;">+${lateFee.toFixed(2)} late fee</span>` : ''}
-                        </div>
-                        ${isPending && daysLate > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px;">⏰ ${daysLate} day${daysLate > 1 ? 's' : ''} overdue (10% per day)</div>` : ''}
+        const typeIcon = isCustom ? '📌' : (p.penalty_type === 'late' ? '⏰' : '❌');
+        const typeLabel = isCustom ? 'Custom' : (p.penalty_type === 'late' ? 'Late' : 'Absent');
+        const reasonText = p.custom_reason || p.reason || '';
+        
+        return `
+            <div class="penalty-item">
+                <div>
+                    <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        ${typeIcon} ${typeLabel}
+                        ${isCustom ? '<span class="pill pill-amber" style="font-size:9px;padding:1px 8px;">Custom</span>' : ''}
                     </div>
-                    <div style="text-align:right;">
-                        <div class="penalty-amount" style="color:${isPending ? 'var(--red)' : 'var(--green)'};">KSh ${totalAmount.toFixed(2)}</div>
-                        <span class="penalty-status-badge ${p.status === 'pending' ? 'status-pending' : 'status-paid'}">${p.status.toUpperCase()}</span>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">
+                        ${p.date} · ${p.session || 'Custom'}
+                        ${reasonText ? ` · 📝 ${escapeHtml(reasonText)}` : ''}
                     </div>
                 </div>
-            `;
-        }).join('');
-    }
+                <div style="text-align:right;">
+                    <div class="penalty-amount" style="color:${isPending ? 'var(--red)' : 'var(--green)'};">
+                        KSh ${amount.toFixed(2)}
+                    </div>
+                    <span class="penalty-status-badge ${isPending ? 'status-pending' : 'status-paid'}">
+                        ${p.status.toUpperCase()}
+                    </span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
    // ── CUSTOM PENALTY FUNCTIONS ──
 

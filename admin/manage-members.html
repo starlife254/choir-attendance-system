@@ -80,18 +80,31 @@
         .form-panel h3 i { font-size: 16px; color: var(--indigo); }
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary); font-size: 12px; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px;
-            font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary); outline: none; transition: border-color .15s;
+        .form-group input, .form-group select { width: 100%; padding: 9px 14px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary); outline: none; transition: border-color .15s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--indigo); }
+        .form-group input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Duplicate warning inline */
+        .duplicate-warning {
+            background: #fef3c7;
+            border-left: 3px solid var(--amber);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #92400e;
+            display: none;
         }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--indigo); }
+        .duplicate-warning.show { display: block; }
+        .duplicate-warning strong { display: block; margin-bottom: 3px; }
 
         /* ═══════════════════════════════════
            BUTTONS
            ═══════════════════════════════════ */
         .action-btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: opacity .15s, transform .1s; font-family: inherit; }
-        .action-btn:hover { opacity: .88; }
-        .action-btn:active { transform: scale(0.97); }
+        .action-btn:hover:not(:disabled) { opacity: .88; }
+        .action-btn:active:not(:disabled) { transform: scale(0.97); }
+        .action-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
         .btn-green  { background: var(--green);  color: #fff; }
         .btn-red    { background: var(--red);    color: #fff; }
         .btn-amber  { background: var(--amber);  color: #fff; }
@@ -124,93 +137,27 @@
         /* ═══════════════════════════════════
            MESSAGE
            ═══════════════════════════════════ */
-        .message { padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 13px; }
+        .message { padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 13px; line-height: 1.5; }
         .message.success { background: var(--green-light); color: #065f46; }
         .message.error   { background: var(--red-light);   color: #991b1b; }
         .message.info    { background: var(--blue-light);  color: #0369a1; }
+        .message.warning { background: var(--amber-light); color: #92400e; }
 
         /* ═══════════════════════════════════
-           MOBILE CARD VIEW (hidden on desktop)
+           MOBILE CARD VIEW
            ═══════════════════════════════════ */
         .members-cards { display: none; }
-        .member-card {
-            background: var(--surface);
-            border: 0.5px solid var(--border);
-            border-radius: 14px;
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .member-card-head {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .member-card-avatar {
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            background: var(--indigo);
-            color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 15px; font-weight: 700;
-            flex-shrink: 0;
-        }
+        .member-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .member-card-head { display: flex; align-items: center; gap: 12px; }
+        .member-card-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--indigo); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; }
         .member-card-info { flex: 1; min-width: 0; }
-        .member-card-name {
-            font-size: 14px; font-weight: 700;
-            color: var(--text-primary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .member-card-voice {
-            font-size: 12px;
-            color: var(--indigo);
-            font-weight: 600;
-            margin-top: 2px;
-        }
-        .member-card-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            padding-top: 8px;
-            border-top: 0.5px dashed var(--border);
-        }
-        .member-card-meta span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        .member-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .member-card-voice { font-size: 12px; color: var(--indigo); font-weight: 600; margin-top: 2px; }
+        .member-card-meta { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-secondary); padding-top: 8px; border-top: 0.5px dashed var(--border); }
+        .member-card-meta span { display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .member-card-meta i { width: 14px; text-align: center; color: var(--text-tertiary); flex-shrink: 0; }
-        .member-card-actions {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            padding-top: 10px;
-            border-top: 0.5px solid var(--border);
-        }
-        .member-card-actions button {
-            padding: 8px 6px;
-            font-size: 11px;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            font-family: inherit;
-            transition: opacity .15s;
-            color: #fff;
-        }
+        .member-card-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding-top: 10px; border-top: 0.5px solid var(--border); }
+        .member-card-actions button { padding: 8px 6px; font-size: 11px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; font-family: inherit; transition: opacity .15s; color: #fff; }
         .member-card-actions button i { font-size: 15px; }
         .member-card-actions button:hover { opacity: .88; }
         .member-card-actions button:active { transform: scale(0.96); }
@@ -228,17 +175,10 @@
         .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
 
         /* ═══════════════════════════════════
-           RESPONSIVE - TABLET
+           RESPONSIVE
            ═══════════════════════════════════ */
-        @media (max-width: 1024px) {
-            .content { padding: 20px; }
-        }
-
-        /* ═══════════════════════════════════
-           RESPONSIVE - MOBILE
-           ═══════════════════════════════════ */
+        @media (max-width: 1024px) { .content { padding: 20px; } }
         @media (max-width: 768px) {
-            /* Sidebar off-canvas */
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
             .sidebar-overlay.open { display: block; }
@@ -249,40 +189,22 @@
             .topbar-left h2 { font-size: 15px; }
             .topbar-left p { font-size: 11px; }
 
-            /* Tabs - full width, horizontal scroll */
-            .tabs-bar {
-                width: 100%;
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                padding: 4px;
-                margin-bottom: 16px;
-                scrollbar-width: none;
-                -webkit-overflow-scrolling: touch;
-            }
+            .tabs-bar { width: 100%; flex-wrap: nowrap; overflow-x: auto; padding: 4px; margin-bottom: 16px; scrollbar-width: none; }
             .tabs-bar::-webkit-scrollbar { display: none; }
             .tab-btn { padding: 8px 14px; font-size: 12px; flex-shrink: 0; }
-            .tab-btn i { font-size: 14px; }
 
-            /* Form panel full width */
             .form-panel { padding: 18px 16px; max-width: 100%; border-radius: 14px; }
             .form-group input, .form-group select { padding: 10px 12px; font-size: 14px; }
-
-            /* Add member button - full width */
             .form-panel > .action-btn { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
 
-            /* Filters stack */
             .filters-row { flex-direction: column; gap: 8px; }
             .search-input { width: 100%; min-width: 100%; }
             .voice-filter { width: 100%; }
 
-            /* TABLE → CARDS */
             .table-wrapper { display: none; }
             .members-cards { display: block; }
-
-            /* Bottom nav */
             .bottom-nav { display: flex; }
         }
-
         @media (max-width: 400px) {
             .content { padding: 12px 10px 90px; }
             .topbar { padding: 0 12px; height: 50px; }
@@ -293,8 +215,6 @@
             .member-card-actions button i { font-size: 14px; }
             .status-badge { font-size: 10px; padding: 2px 8px; }
         }
-
-        /* Hide desktop table on mobile */
         @media (min-width: 769px) {
             .members-cards { display: none !important; }
             .table-wrapper { display: block !important; }
@@ -370,8 +290,14 @@
             <div id="addMessage" class="message" style="display:none"></div>
             <div class="form-panel">
                 <h3><i class="ti ti-user-plus"></i> Add new member</h3>
-                <div class="form-group"><label>Full name *</label><input type="text" id="newName" placeholder="e.g., John Doe"></div>
-                <div class="form-group"><label>Voice part *</label>
+
+                <div class="form-group">
+                    <label>Full name *</label>
+                    <input type="text" id="newName" placeholder="e.g., John Doe" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Voice part *</label>
                     <select id="newVoicePart">
                         <option value="Soprano">Soprano</option>
                         <option value="Alto">Alto</option>
@@ -381,11 +307,32 @@
                         <option value="Brass">Brass</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Email address</label><input type="email" id="newEmail" placeholder="member@choir.com"></div>
-                <div class="form-group"><label>Phone number</label><input type="tel" id="newPhone" placeholder="e.g., 0712345678"></div>
-                <div class="form-group"><label>Student ID (optional)</label><input type="text" id="newStudentId" placeholder="e.g., UoEM/ABC123"></div>
-                <div class="form-group"><label>Joined date</label><input type="date" id="newJoinedDate"></div>
-                <button onclick="addMember()" class="action-btn btn-green"><i class="ti ti-user-plus"></i> Add member</button>
+
+                <div class="form-group">
+                    <label>Email address</label>
+                    <input type="email" id="newEmail" placeholder="member@choir.com" autocomplete="off">
+                    <div id="emailWarning" class="duplicate-warning"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone number</label>
+                    <input type="tel" id="newPhone" placeholder="e.g., 0712345678" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Student ID (optional)</label>
+                    <input type="text" id="newStudentId" placeholder="e.g., UoEM/ABC123" autocomplete="off">
+                    <div id="studentWarning" class="duplicate-warning"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Joined date</label>
+                    <input type="date" id="newJoinedDate">
+                </div>
+
+                <button onclick="addMember()" class="action-btn btn-green" id="addMemberBtn">
+                    <i class="ti ti-user-plus"></i> Add member
+                </button>
             </div>
         </div>
 
@@ -405,7 +352,6 @@
                 </select>
             </div>
 
-            <!-- Desktop: table -->
             <div class="table-wrapper">
                 <table class="members-table">
                     <thead><tr><th>Name</th><th>Voice Part</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
@@ -413,7 +359,6 @@
                 </table>
             </div>
 
-            <!-- Mobile: cards -->
             <div class="members-cards" id="membersCards">
                 <div style="text-align:center;padding:30px;color:var(--text-tertiary)">Loading members…</div>
             </div>
@@ -426,7 +371,6 @@
                 <input type="text" id="alumniSearchInput" class="search-input" placeholder="Search alumni…" onkeyup="filterAlumni()">
             </div>
 
-            <!-- Desktop: table -->
             <div class="table-wrapper">
                 <table class="members-table">
                     <thead><tr><th>Name</th><th>Voice Part</th><th>Email</th><th>Graduation Year</th><th>Actions</th></tr></thead>
@@ -434,7 +378,6 @@
                 </table>
             </div>
 
-            <!-- Mobile: cards -->
             <div class="members-cards" id="alumniCards">
                 <div style="text-align:center;padding:30px;color:var(--text-tertiary)">Loading alumni…</div>
             </div>
@@ -455,16 +398,36 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let allMembers = [], alumniMembers = [];
+    let lastAddTime = 0;
+    const ADD_COOLDOWN_MS = 3000; // 3 seconds between adds
 
     document.getElementById('newJoinedDate').value = new Date().toISOString().split('T')[0];
 
-    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-    function initials(name) { if (!name) return '?'; return name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2); }
-    function tick() { document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    function initials(name) {
+        if (!name) return '?';
+        return name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
+    }
+    function tick() {
+        document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    }
     setInterval(tick,1000); tick();
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
-    function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
-    async function doLogout() { try { await supabaseClient.auth.signOut(); } catch {} window.location.href = '../login.html'; }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+    async function doLogout() {
+        try { await supabaseClient.auth.signOut(); } catch {}
+        window.location.href = '../login.html';
+    }
 
     async function loadUserInfo() {
         try {
@@ -475,8 +438,12 @@
             document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
             const { data: p } = await supabaseClient.from('user_profiles').select('*').eq('user_id', user.id).single();
             if (p) {
-                if (p.full_name) { const f=p.full_name.split(' ')[0]; document.getElementById('userName').textContent=f; document.getElementById('userAvatar').textContent=f.charAt(0).toUpperCase(); }
-                if (p.role) document.getElementById('userRole').textContent=p.role;
+                if (p.full_name) {
+                    const f = p.full_name.split(' ')[0];
+                    document.getElementById('userName').textContent = f;
+                    document.getElementById('userAvatar').textContent = f.charAt(0).toUpperCase();
+                }
+                if (p.role) document.getElementById('userRole').textContent = p.role;
             }
         } catch(e) { console.warn(e); }
     }
@@ -490,47 +457,332 @@
         if (tab === 'alumni') loadAlumniMembers();
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       ADD MEMBER — with full duplicate prevention
+       ═══════════════════════════════════════════════════════════ */
     async function addMember() {
-        const name = document.getElementById('newName').value.trim();
-        const voicePart = document.getElementById('newVoicePart').value;
-        const email = document.getElementById('newEmail').value.trim();
-        const phone = document.getElementById('newPhone').value.trim();
-        const studentId = document.getElementById('newStudentId').value.trim();
-        const joinedDate = document.getElementById('newJoinedDate').value;
-        if (!name) { showMessage('addMessage', 'Please enter member name', 'error'); return; }
-        const prefix = voicePart.substring(0,3).toUpperCase();
-        const memberId = `${prefix}${Date.now().toString().slice(-6)}`;
-        const { error } = await supabaseClient.from('members').insert({ member_id: memberId, name, voice_part: voicePart, email: email||null, contact: phone||null, student_id: studentId||null, joined_date: joinedDate, status: 'active' }).select();
-        if (error) { showMessage('addMessage', 'Error adding member: ' + error.message, 'error'); }
-        else {
-            showMessage('addMessage', `Member "${name}" added successfully!`, 'success');
-            document.getElementById('newName').value = '';
-            document.getElementById('newEmail').value = '';
-            document.getElementById('newPhone').value = '';
-            document.getElementById('newStudentId').value = '';
-            document.getElementById('newJoinedDate').value = new Date().toISOString().split('T')[0];
-            loadActiveMembers();
+        const name          = document.getElementById('newName').value.trim();
+        const voicePart     = document.getElementById('newVoicePart').value;
+        const email         = document.getElementById('newEmail').value.trim().toLowerCase();
+        const phone         = document.getElementById('newPhone').value.trim();
+        const studentId     = document.getElementById('newStudentId').value.trim();
+        const joinedDate    = document.getElementById('newJoinedDate').value;
+        const btn           = document.getElementById('addMemberBtn');
+        const originalText  = btn.innerHTML;
+
+        /* ─── Basic validation ─── */
+        if (!name) {
+            showMessage('addMessage', 'Please enter member name', 'error');
+            document.getElementById('newName').focus();
+            return;
+        }
+        if (name.length < 3) {
+            showMessage('addMessage', 'Name must be at least 3 characters', 'error');
+            return;
+        }
+
+        /* ─── Cooldown (prevent double-click) ─── */
+        const now = Date.now();
+        if (now - lastAddTime < ADD_COOLDOWN_MS) {
+            const wait = Math.ceil((ADD_COOLDOWN_MS - (now - lastAddTime)) / 1000);
+            showMessage('addMessage', `⏳ Please wait ${wait}s before adding another member.`, 'warning');
+            return;
+        }
+
+        /* ─── Disable button ─── */
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ti ti-loader"></i> Checking duplicates…';
+
+        try {
+            /* ═══ DUPLICATE CHECK 1: Email (active OR alumni) ═══ */
+            if (email) {
+                const { data: dupEmail, error: dupEmailErr } = await supabaseClient
+                    .from('members')
+                    .select('member_id, name, status')
+                    .ilike('email', email)
+                    .in('status', ['active', 'alumni'])
+                    .maybeSingle();
+
+                if (dupEmailErr) console.warn('Email dup check error:', dupEmailErr);
+
+                if (dupEmail) {
+                    const statusLabel = dupEmail.status === 'alumni' ? ' (alumni)' : '';
+                    showMessage('addMessage',
+                        `❌ A member with this email already exists${statusLabel}: <strong>${escapeHtml(dupEmail.name)}</strong> (${escapeHtml(dupEmail.member_id)}).<br>` +
+                        `<span style="font-size:12px;">Try searching in the Members or Alumni tab, or use a different email.</span>`,
+                        'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    return;
+                }
+            }
+
+            /* ═══ DUPLICATE CHECK 2: Student ID ═══ */
+            if (studentId) {
+                const { data: dupStudent, error: dupStudentErr } = await supabaseClient
+                    .from('members')
+                    .select('member_id, name, status')
+                    .eq('student_id', studentId)
+                    .maybeSingle();
+
+                if (dupStudentErr) console.warn('Student ID dup check error:', dupStudentErr);
+
+                if (dupStudent) {
+                    showMessage('addMessage',
+                        `❌ A member with this student ID already exists: <strong>${escapeHtml(dupStudent.name)}</strong> (${escapeHtml(dupStudent.member_id)}, ${escapeHtml(dupStudent.status)}).`,
+                        'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    return;
+                }
+            }
+
+            /* ═══ DUPLICATE CHECK 3: Removed record with same email ═══ */
+            if (email) {
+                const { data: removedRecord, error: removedErr } = await supabaseClient
+                    .from('members')
+                    .select('member_id, name, status, graduation_year')
+                    .ilike('email', email)
+                    .eq('status', 'removed')
+                    .maybeSingle();
+
+                if (removedErr) console.warn('Removed dup check error:', removedErr);
+
+                if (removedRecord) {
+                    const reactivate = confirm(
+                        `⚠️  Found a previously removed record with this email:\n\n` +
+                        `Name: ${removedRecord.name}\n` +
+                        `Member ID: ${removedRecord.member_id}\n` +
+                        `Status: removed\n\n` +
+                        `Reactivate this member instead of creating a new record?\n\n` +
+                        `(Recommended — preserves any historical data tied to this member ID)`
+                    );
+
+                    if (reactivate) {
+                        btn.innerHTML = '<i class="ti ti-loader"></i> Reactivating…';
+                        const { error: reactErr } = await supabaseClient
+                            .from('members')
+                            .update({
+                                status: 'active',
+                                name,
+                                voice_part: voicePart,
+                                contact: phone || null,
+                                student_id: studentId || null,
+                                joined_date: joinedDate,
+                                updated_at: new Date()
+                            })
+                            .eq('member_id', removedRecord.member_id);
+
+                        if (reactErr) {
+                            showMessage('addMessage', '❌ Reactivation failed: ' + reactErr.message, 'error');
+                        } else {
+                            showMessage('addMessage',
+                                `✅ Reactivated <strong>${escapeHtml(name)}</strong> as member ${escapeHtml(removedRecord.member_id)}!`,
+                                'success');
+                            resetAddForm();
+                            lastAddTime = Date.now();
+                            await loadActiveMembers();
+                        }
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                        return;
+                    }
+                    // If user said no, continue with a brand-new record below
+                }
+            }
+
+            /* ═══ DUPLICATE CHECK 4: Same name + same voice part (warning only) ═══ */
+            const { data: dupName, error: dupNameErr } = await supabaseClient
+                .from('members')
+                .select('member_id, name, voice_part, email')
+                .eq('status', 'active')
+                .ilike('name', name)
+                .eq('voice_part', voicePart)
+                .maybeSingle();
+
+            if (dupNameErr) console.warn('Name dup check error:', dupNameErr);
+
+            if (dupName) {
+                const proceed = confirm(
+                    `⚠️  Possible duplicate:\n\n` +
+                    `A member named "${dupName.name}" in ${dupName.voice_part} already exists.\n` +
+                    `Member ID: ${dupName.member_id}${dupName.email ? '\nEmail: ' + dupName.email : ''}\n\n` +
+                    `Add a NEW member with the same name and voice part anyway?`
+                );
+                if (!proceed) {
+                    showMessage('addMessage', 'Add cancelled — possible duplicate.', 'info');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    return;
+                }
+            }
+
+            /* ═══ ALL CHECKS PASSED — Insert ═══ */
+            btn.innerHTML = '<i class="ti ti-loader"></i> Adding member…';
+
+            const prefix = voicePart.substring(0, 3).toUpperCase();
+            const memberId = `${prefix}${Date.now().toString().slice(-6)}`;
+
+            const { error: insertErr } = await supabaseClient
+                .from('members')
+                .insert({
+                    member_id: memberId,
+                    name,
+                    voice_part: voicePart,
+                    email: email || null,
+                    contact: phone || null,
+                    student_id: studentId || null,
+                    joined_date: joinedDate,
+                    status: 'active'
+                })
+                .select();
+
+            if (insertErr) {
+                /* Map Postgres unique violations to friendly messages */
+                if (insertErr.code === '23505') {
+                    if (insertErr.message.includes('email')) {
+                        showMessage('addMessage', '❌ This email is already registered to an active member.', 'error');
+                    } else if (insertErr.message.includes('student_id')) {
+                        showMessage('addMessage', '❌ This student ID is already in use.', 'error');
+                    } else if (insertErr.message.includes('member_id')) {
+                        showMessage('addMessage', '❌ Member ID collision — please try again.', 'error');
+                    } else {
+                        showMessage('addMessage', '❌ A duplicate record already exists.', 'error');
+                    }
+                } else {
+                    showMessage('addMessage', 'Error adding member: ' + insertErr.message, 'error');
+                }
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                return;
+            }
+
+            /* ═══ SUCCESS ═══ */
+            showMessage('addMessage',
+                `✅ Member <strong>${escapeHtml(name)}</strong> added successfully as ${escapeHtml(memberId)}!`,
+                'success');
+
+            resetAddForm();
+            lastAddTime = Date.now();
+            await loadActiveMembers();
+
+        } catch (err) {
+            console.error('addMember error:', err);
+            showMessage('addMessage', 'Unexpected error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
     }
 
+    function resetAddForm() {
+        document.getElementById('newName').value = '';
+        document.getElementById('newEmail').value = '';
+        document.getElementById('newPhone').value = '';
+        document.getElementById('newStudentId').value = '';
+        document.getElementById('newVoicePart').value = 'Soprano';
+        document.getElementById('newJoinedDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('emailWarning').classList.remove('show');
+        document.getElementById('studentWarning').classList.remove('show');
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LIVE DUPLICATE WARNINGS (as user types)
+       ═══════════════════════════════════════════════════════════ */
+    let emailCheckTimer, studentCheckTimer;
+
+    document.getElementById('newEmail').addEventListener('input', function() {
+        clearTimeout(emailCheckTimer);
+        const email = this.value.trim().toLowerCase();
+        const warningEl = document.getElementById('emailWarning');
+
+        if (!email || !email.includes('@')) {
+            warningEl.classList.remove('show');
+            return;
+        }
+
+        emailCheckTimer = setTimeout(async () => {
+            const { data } = await supabaseClient
+                .from('members')
+                .select('name, status, member_id')
+                .ilike('email', email)
+                .in('status', ['active', 'alumni'])
+                .maybeSingle();
+
+            if (data) {
+                const label = data.status === 'alumni' ? 'alumni' : 'active';
+                warningEl.innerHTML = `
+                    <strong>⚠️ Email already in use (${label})</strong>
+                    ${escapeHtml(data.name)} — ${escapeHtml(data.member_id)}
+                `;
+                warningEl.classList.add('show');
+            } else {
+                warningEl.classList.remove('show');
+            }
+        }, 500);
+    });
+
+    document.getElementById('newStudentId').addEventListener('input', function() {
+        clearTimeout(studentCheckTimer);
+        const sid = this.value.trim();
+        const warningEl = document.getElementById('studentWarning');
+
+        if (!sid || sid.length < 3) {
+            warningEl.classList.remove('show');
+            return;
+        }
+
+        studentCheckTimer = setTimeout(async () => {
+            const { data } = await supabaseClient
+                .from('members')
+                .select('name, status, member_id')
+                .eq('student_id', sid)
+                .maybeSingle();
+
+            if (data) {
+                warningEl.innerHTML = `
+                    <strong>⚠️ Student ID already in use</strong>
+                    ${escapeHtml(data.name)} — ${escapeHtml(data.member_id)} (${escapeHtml(data.status)})
+                `;
+                warningEl.classList.add('show');
+            } else {
+                warningEl.classList.remove('show');
+            }
+        }, 500);
+    });
+
+    /* ═══════════════════════════════════════════════════════════
+       LOAD / DISPLAY MEMBERS
+       ═══════════════════════════════════════════════════════════ */
     async function loadActiveMembers() {
-        const { data, error } = await supabaseClient.from('members').select('*').eq('status','active').order('name');
-        if (error) { showMessage('manageMessage','Error loading members: '+error.message,'error'); return; }
-        allMembers = data;
+        const { data, error } = await supabaseClient
+            .from('members')
+            .select('*')
+            .eq('status', 'active')
+            .order('name');
+        if (error) {
+            showMessage('manageMessage', 'Error loading members: ' + error.message, 'error');
+            return;
+        }
+        allMembers = data || [];
         displayMembers(allMembers);
     }
 
     async function loadAlumniMembers() {
-        const { data, error } = await supabaseClient.from('members').select('*').eq('status','alumni').order('graduation_year',{ascending:false}).order('name');
-        if (error) { showMessage('alumniMessage','Error loading alumni: '+error.message,'error'); return; }
-        alumniMembers = data;
+        const { data, error } = await supabaseClient
+            .from('members')
+            .select('*')
+            .eq('status', 'alumni')
+            .order('graduation_year', { ascending: false })
+            .order('name');
+        if (error) {
+            showMessage('alumniMessage', 'Error loading alumni: ' + error.message, 'error');
+            return;
+        }
+        alumniMembers = data || [];
         displayAlumni(alumniMembers);
     }
 
-    /* ═══════════════════════════════════
-       DISPLAY: ACTIVE MEMBERS
-       Renders BOTH table (desktop) and cards (mobile)
-       ═══════════════════════════════════ */
     function displayMembers(members) {
         const tbody = document.getElementById('membersList');
         const cards = document.getElementById('membersCards');
@@ -541,25 +793,23 @@
             return;
         }
 
-        // Desktop table
         tbody.innerHTML = members.map(m => `
             <tr>
                 <td style="font-weight:500">${escapeHtml(m.name)}</td>
                 <td>${escapeHtml(m.voice_part)}</td>
-                <td>${escapeHtml(m.email||'-')}</td>
-                <td>${escapeHtml(m.contact||'-')}</td>
+                <td>${escapeHtml(m.email || '-')}</td>
+                <td>${escapeHtml(m.contact || '-')}</td>
                 <td><span class="status-badge status-active">Active</span></td>
                 <td>
                     <div class="row-actions">
                         <button class="action-btn btn-blue" onclick="resetMemberPassword('${m.member_id}')" title="Reset to temp password"><i class="ti ti-key"></i> Pass Reset</button>
-                        <button class="action-btn btn-amber" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name)}')"><i class="ti ti-school"></i> Alumni</button>
-                        <button class="action-btn btn-red" onclick="removeMember('${m.member_id}')"><i class="ti ti-trash"></i> Remove</button>
+                        <button class="action-btn btn-amber" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-school"></i> Alumni</button>
+                        <button class="action-btn btn-red" onclick="removeMember('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-trash"></i> Remove</button>
                     </div>
                 </td>
             </tr>
         `).join('');
 
-        // Mobile cards
         cards.innerHTML = members.map(m => `
             <div class="member-card">
                 <div class="member-card-head">
@@ -576,27 +826,14 @@
                     ${m.student_id ? `<span><i class="ti ti-id-badge"></i> ${escapeHtml(m.student_id)}</span>` : ''}
                 </div>
                 <div class="member-card-actions">
-                    <button class="act-key" onclick="resetMemberPassword('${m.member_id}')">
-                        <i class="ti ti-key"></i>
-                        <span>Reset</span>
-                    </button>
-                    <button class="act-alum" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name)}')">
-                        <i class="ti ti-school"></i>
-                        <span>Alumni</span>
-                    </button>
-                    <button class="act-del" onclick="removeMember('${m.member_id}')">
-                        <i class="ti ti-trash"></i>
-                        <span>Remove</span>
-                    </button>
+                    <button class="act-key" onclick="resetMemberPassword('${m.member_id}')"><i class="ti ti-key"></i><span>Reset</span></button>
+                    <button class="act-alum" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-school"></i><span>Alumni</span></button>
+                    <button class="act-del" onclick="removeMember('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-trash"></i><span>Remove</span></button>
                 </div>
             </div>
         `).join('');
     }
 
-    /* ═══════════════════════════════════
-       DISPLAY: ALUMNI
-       Renders BOTH table (desktop) and cards (mobile)
-       ═══════════════════════════════════ */
     function displayAlumni(members) {
         const tbody = document.getElementById('alumniList');
         const cards = document.getElementById('alumniCards');
@@ -607,23 +844,21 @@
             return;
         }
 
-        // Desktop table
         tbody.innerHTML = members.map(m => `
             <tr>
                 <td style="font-weight:500">${escapeHtml(m.name)}</td>
                 <td>${escapeHtml(m.voice_part)}</td>
-                <td>${escapeHtml(m.email||'-')}</td>
-                <td>${escapeHtml(m.graduation_year||'-')}</td>
+                <td>${escapeHtml(m.email || '-')}</td>
+                <td>${escapeHtml(m.graduation_year || '-')}</td>
                 <td>
                     <div class="row-actions">
-                        <button class="action-btn btn-blue" onclick="reactivateMember('${m.member_id}','${escapeHtml(m.name)}')"><i class="ti ti-refresh"></i> Reactivate</button>
-                        <button class="action-btn btn-red"  onclick="permanentlyRemove('${m.member_id}','${escapeHtml(m.name)}')"><i class="ti ti-trash"></i> Delete</button>
+                        <button class="action-btn btn-blue" onclick="reactivateMember('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-refresh"></i> Reactivate</button>
+                        <button class="action-btn btn-red"  onclick="permanentlyRemove('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-trash"></i> Delete</button>
                     </div>
                 </td>
             </tr>
         `).join('');
 
-        // Mobile cards
         cards.innerHTML = members.map(m => `
             <div class="member-card">
                 <div class="member-card-head">
@@ -639,51 +874,101 @@
                     <span><i class="ti ti-calendar"></i> Graduated: ${escapeHtml(m.graduation_year || '-')}</span>
                 </div>
                 <div class="member-card-actions" style="grid-template-columns: 1fr 1fr;">
-                    <button class="act-react" onclick="reactivateMember('${m.member_id}','${escapeHtml(m.name)}')">
-                        <i class="ti ti-refresh"></i>
-                        <span>Reactivate</span>
-                    </button>
-                    <button class="act-del" onclick="permanentlyRemove('${m.member_id}','${escapeHtml(m.name)}')">
-                        <i class="ti ti-trash"></i>
-                        <span>Delete</span>
-                    </button>
+                    <button class="act-react" onclick="reactivateMember('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-refresh"></i><span>Reactivate</span></button>
+                    <button class="act-del" onclick="permanentlyRemove('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-trash"></i><span>Delete</span></button>
                 </div>
             </div>
         `).join('');
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       MEMBER LIFECYCLE ACTIONS
+       ═══════════════════════════════════════════════════════════ */
     async function moveToAlumni(memberId, name) {
         const graduationYear = prompt(`Enter graduation year for ${name}:`, new Date().getFullYear());
         if (!graduationYear) return;
-        const { error } = await supabaseClient.from('members').update({ status: 'alumni', graduation_year: graduationYear, updated_at: new Date() }).eq('member_id', memberId);
-        if (error) showMessage('manageMessage','Error: '+error.message,'error');
-        else { showMessage('manageMessage',`${name} moved to alumni`,'success'); loadActiveMembers(); loadAlumniMembers(); }
+
+        const { error } = await supabaseClient
+            .from('members')
+            .update({
+                status: 'alumni',
+                graduation_year: graduationYear,
+                updated_at: new Date()
+            })
+            .eq('member_id', memberId);
+
+        if (error) showMessage('manageMessage', 'Error: ' + error.message, 'error');
+        else {
+            showMessage('manageMessage', `✅ ${name} moved to alumni`, 'success');
+            await loadActiveMembers();
+            await loadAlumniMembers();
+        }
     }
 
     async function reactivateMember(memberId, name) {
-        const { error } = await supabaseClient.from('members').update({ status: 'active', graduation_year: null, updated_at: new Date() }).eq('member_id', memberId);
-        if (error) showMessage('alumniMessage','Error: '+error.message,'error');
-        else { showMessage('alumniMessage',`${name} reactivated`,'success'); loadActiveMembers(); loadAlumniMembers(); }
+        const { error } = await supabaseClient
+            .from('members')
+            .update({
+                status: 'active',
+                graduation_year: null,
+                updated_at: new Date()
+            })
+            .eq('member_id', memberId);
+
+        if (error) showMessage('alumniMessage', 'Error: ' + error.message, 'error');
+        else {
+            showMessage('alumniMessage', `✅ ${name} reactivated`, 'success');
+            await loadActiveMembers();
+            await loadAlumniMembers();
+        }
     }
 
     async function removeMember(memberId, name) {
-        if (confirm(`Remove "${name}" from active members?\n\nThey will no longer appear in attendance marking.`)) {
-            const { error } = await supabaseClient.from('members').update({ status: 'removed', updated_at: new Date() }).eq('member_id', memberId);
-            if (error) showMessage('manageMessage','Error: '+error.message,'error');
-            else { showMessage('manageMessage',`${name} removed from active members`,'success'); loadActiveMembers(); }
+        if (!confirm(`Remove "${name}" from active members?\n\nThey will no longer appear in attendance marking, but their record will be preserved for historical data.`)) return;
+
+        const { error } = await supabaseClient
+            .from('members')
+            .update({
+                status: 'removed',
+                is_active: false,   // keep in sync with status
+                updated_at: new Date()
+            })
+            .eq('member_id', memberId);
+
+        if (error) showMessage('manageMessage', 'Error: ' + error.message, 'error');
+        else {
+            showMessage('manageMessage', `✅ ${name} removed from active members`, 'success');
+            await loadActiveMembers();
         }
     }
 
     async function permanentlyRemove(memberId, name) {
-        if (confirm(`PERMANENT DELETE!\n\nAre you absolutely sure you want to permanently delete "${name}"?\n\nThis CANNOT be undone.`)) {
+        if (!confirm(`⚠️  PERMANENT DELETE!\n\nAre you absolutely sure you want to permanently delete "${name}"?\n\nThis will remove:\n• Member record\n• All attendance history\n• All linked penalties\n• All linked apologies\n• Any linked user accounts\n\nThis CANNOT be undone.`)) return;
+
+        try {
+            // Delete linked data first (in order to avoid FK violations)
             await supabaseClient.from('attendance').delete().eq('member_id', memberId);
             await supabaseClient.from('penalties').delete().eq('member_id', memberId);
             await supabaseClient.from('apology_requests').delete().eq('member_id', memberId);
+            await supabaseClient.from('registration_fees').delete().eq('member_id', memberId);
+            await supabaseClient.from('payments').delete().eq('member_id', memberId);
+            await supabaseClient.from('event_attendance').delete().eq('member_id', memberId);
+            await supabaseClient.from('score_downloads').delete().eq('member_id', memberId);
+            await supabaseClient.from('voice_reps').delete().eq('member_id', memberId);
             await supabaseClient.from('user_members').delete().eq('member_id', memberId);
             await supabaseClient.from('user_profiles').delete().eq('member_id', memberId);
+
+            // Finally the member
             const { error } = await supabaseClient.from('members').delete().eq('member_id', memberId);
-            if (error) showMessage('alumniMessage','Error: '+error.message,'error');
-            else { showMessage('alumniMessage',`${name} permanently deleted`,'success'); loadActiveMembers(); loadAlumniMembers(); }
+
+            if (error) showMessage('alumniMessage', 'Error: ' + error.message, 'error');
+            else {
+                showMessage('alumniMessage', `✅ ${name} permanently deleted`, 'success');
+                await loadActiveMembers();
+                await loadAlumniMembers();
+            }
+        } catch (err) {
+            showMessage('alumniMessage', 'Delete error: ' + err.message, 'error');
         }
     }
 
@@ -720,10 +1005,9 @@
 
             showMessage(
                 'manageMessage',
-                `Password reset! Tell the member to log in with "UOEMCHOIR". They will be asked to change it immediately.`,
+                `✅ Password reset! Tell the member to log in with "UOEMCHOIR". They will be asked to change it immediately.`,
                 'success'
             );
-
         } catch (err) {
             console.error('Reset password error:', err);
             showMessage('manageMessage', 'Error: ' + err.message, 'error');
@@ -734,14 +1018,21 @@
         const q = document.getElementById('searchInput').value.toLowerCase();
         const v = document.getElementById('voiceFilter').value;
         let f = allMembers;
-        if (q) f = f.filter(m => m.name.toLowerCase().includes(q) || (m.email && m.email.toLowerCase().includes(q)) || (m.student_id && m.student_id.toLowerCase().includes(q)));
+        if (q) f = f.filter(m =>
+            m.name.toLowerCase().includes(q) ||
+            (m.email && m.email.toLowerCase().includes(q)) ||
+            (m.student_id && m.student_id.toLowerCase().includes(q))
+        );
         if (v !== 'all') f = f.filter(m => m.voice_part === v);
         displayMembers(f);
     }
 
     function filterAlumni() {
         const q = document.getElementById('alumniSearchInput').value.toLowerCase();
-        displayAlumni(alumniMembers.filter(m => m.name.toLowerCase().includes(q) || (m.email && m.email.toLowerCase().includes(q))));
+        displayAlumni(alumniMembers.filter(m =>
+            m.name.toLowerCase().includes(q) ||
+            (m.email && m.email.toLowerCase().includes(q))
+        ));
     }
 
     function showMessage(elementId, msg, type) {
@@ -749,7 +1040,13 @@
         d.innerHTML = msg;
         d.className = `message ${type}`;
         d.style.display = 'block';
-        setTimeout(() => { d.style.display = 'none'; d.className = 'message'; }, 5000);
+        // Success/info/warning auto-hide; errors stay until next action
+        if (type !== 'error') {
+            setTimeout(() => {
+                d.style.display = 'none';
+                d.className = 'message';
+            }, 5000);
+        }
     }
 
     async function checkAdmin() {
@@ -757,7 +1054,11 @@
         if (!session) { window.location.href = '../login.html'; return; }
     }
 
-    async function init() { await checkAdmin(); await loadUserInfo(); loadActiveMembers(); }
+    async function init() {
+        await checkAdmin();
+        await loadUserInfo();
+        await loadActiveMembers();
+    }
     init();
 
     window.doLogout = doLogout;

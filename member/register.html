@@ -137,10 +137,11 @@ $("#registerForm").addEventListener("submit", async (e) => {
     show("Verifying your email…", "info");
 
     const { data: member, error: memberError } = await sb
-      .from('members')
-      .select('member_id, name, voice_part, email')
-      .eq('email', email)
-      .single();
+    .from('members')
+    .select('member_id, name, voice_part, email, status')
+    .eq('email', email)
+    .eq('status', 'active')
+    .maybeSingle();
 
     if (memberError || !member) {
       show("Email not found in choir records. Please contact the choir administrator.");

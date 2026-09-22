@@ -1368,16 +1368,16 @@
             return new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
         }
 
-        const SESSION_CONFIG = {
-            Evening: {
-                startTime: "4:00 PM",
-                endTime: "7:00 PM",
-                lateCutoff: "3:30 PM",
-                absentCutoff: "3:00 PM",
-                lateCutoffMinutes: 15 * 60 + 30,
-                absentCutoffMinutes: 15 * 60
-            }
-        };
+       const SESSION_CONFIG = {
+    Evening: {
+        startTime: "5:00 PM",
+        endTime: "7:30 PM",
+        lateCutoff: "4:30 PM",
+        absentCutoff: "4:00 PM",
+        lateCutoffMinutes: 16 * 60 + 30,   // 16:30 in minutes → 990
+        absentCutoffMinutes: 16 * 60       // 16:00 in minutes → 960
+    }
+};
 
         function switchTab(tab) {
             document.querySelectorAll('button.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -2736,7 +2736,7 @@
             } else {
                 warningDiv.style.display = 'none';
                 select.innerHTML = available.map(s =>
-                    `<option value="${s}">Evening (4:00 PM - 7:00 PM)</option>`
+                    `<option value="${s}">Evening (5:00 PM - 7:30 PM)</option>`
                 ).join('');
             }
         }
@@ -2766,7 +2766,7 @@
             } else {
                 warningDiv.style.display = 'none';
                 select.innerHTML = available.map(s =>
-                    `<option value="${s}">Evening (4:00 PM - 7:00 PM)</option>`
+                    `<option value="${s}">Evening (5:00 PM - 7:30 PM)</option>`
                 ).join('');
             }
         }

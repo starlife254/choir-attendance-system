@@ -73,6 +73,42 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ═══════════════════════════════════
+           KPI CARDS
+           ═══════════════════════════════════ */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .kpi-mini {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 3px solid var(--indigo);
+        }
+        .kpi-mini.green { border-left-color: var(--green); }
+        .kpi-mini.amber { border-left-color: var(--amber); }
+        .kpi-mini.blue  { border-left-color: var(--blue); }
+        .kpi-mini-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .kpi-mini-icon.indigo { background: var(--indigo-light); color: var(--indigo); }
+        .kpi-mini-icon.green  { background: var(--green-light);  color: var(--green); }
+        .kpi-mini-icon.amber  { background: var(--amber-light);  color: #92400e; }
+        .kpi-mini-icon.blue   { background: var(--blue-light);   color: var(--blue); }
+        .kpi-mini-val { font-size: 22px; font-weight: 700; line-height: 1.1; }
+        .kpi-mini-lbl { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+        /* ═══════════════════════════════════
            FORM
            ═══════════════════════════════════ */
         .form-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 20px; max-width: 540px; }
@@ -84,7 +120,6 @@
         .form-group input:focus, .form-group select:focus { border-color: var(--indigo); }
         .form-group input:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Duplicate warning inline */
         .duplicate-warning {
             background: #fef3c7;
             border-left: 3px solid var(--amber);
@@ -116,23 +151,62 @@
         .filters-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
         .search-input { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; flex: 1; min-width: 200px; font-size: 13px; background: var(--bg); font-family: inherit; outline: none; }
         .search-input:focus { border-color: var(--indigo); }
-        .voice-filter { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; font-family: inherit; outline: none; cursor: pointer; }
+        .voice-filter, .status-filter { padding: 8px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; font-family: inherit; outline: none; cursor: pointer; }
 
         /* ═══════════════════════════════════
            TABLE (DESKTOP)
            ═══════════════════════════════════ */
         .table-wrapper { overflow-x: auto; max-height: 520px; overflow-y: auto; border-radius: 14px; border: 0.5px solid var(--border); background: var(--surface); }
-        .members-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .members-table { width: 100%; border-collapse: collapse; min-width: 780px; }
         .members-table th, .members-table td { padding: 11px 14px; text-align: left; border-bottom: 0.5px solid var(--border); font-size: 13px; }
         .members-table th { background: var(--bg); font-weight: 600; position: sticky; top: 0; font-size: 12px; color: var(--text-secondary); z-index: 5; }
         .members-table tr:last-child td { border-bottom: none; }
 
-        .status-badge { padding: 3px 10px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .status-badge { padding: 3px 10px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
         .status-active  { background: var(--green-light); color: #059669; }
         .status-alumni  { background: var(--blue-light);  color: #0369a1; }
         .status-removed { background: var(--red-light);   color: #dc2626; }
+        .status-registered { background: var(--green-light); color: #065f46; }
+        .status-pending    { background: var(--amber-light); color: #854d0e; }
 
         .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        /* Copy button (small icon button) */
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--indigo);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background .15s;
+            vertical-align: middle;
+        }
+        .copy-btn:hover { background: var(--indigo-light); }
+
+        /* Source tag (shows where phone came from) */
+        .source-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 1px 6px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .source-tag.profile { background: var(--indigo-light); color: var(--indigo); }
+        .source-tag.admin   { background: #f1f5f9; color: var(--text-secondary); }
+
+        .phone-empty {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-style: italic;
+        }
 
         /* ═══════════════════════════════════
            MESSAGE
@@ -165,6 +239,7 @@
         .member-card-actions .act-alum  { background: var(--amber); }
         .member-card-actions .act-del   { background: var(--red); }
         .member-card-actions .act-react { background: var(--blue); }
+        .member-card-actions .act-mail  { background: var(--indigo); }
 
         /* ═══════════════════════════════════
            BOTTOM NAV
@@ -175,9 +250,32 @@
         .bottom-nav-item.active { color: var(--indigo); background: var(--indigo-light); }
 
         /* ═══════════════════════════════════
+           TOAST
+           ═══════════════════════════════════ */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px);
+            background: var(--text-primary); color: #fff;
+            padding: 12px 22px; border-radius: 40px;
+            font-size: 13px; font-weight: 500;
+            z-index: 999; opacity: 0;
+            transition: opacity .22s, transform .22s;
+            pointer-events: none;
+            display: flex; align-items: center; gap: 8px;
+            max-width: 90vw;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error   { background: #991b1b; }
+        .toast.info    { background: var(--indigo); }
+
+        /* ═══════════════════════════════════
            RESPONSIVE
            ═══════════════════════════════════ */
-        @media (max-width: 1024px) { .content { padding: 20px; } }
+        @media (max-width: 1024px) {
+            .content { padding: 20px; }
+            .kpi-row { grid-template-columns: repeat(4, 1fr); }
+        }
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
@@ -193,13 +291,19 @@
             .tabs-bar::-webkit-scrollbar { display: none; }
             .tab-btn { padding: 8px 14px; font-size: 12px; flex-shrink: 0; }
 
+            .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+            .kpi-mini { padding: 12px; gap: 8px; }
+            .kpi-mini-icon { width: 34px; height: 34px; font-size: 17px; }
+            .kpi-mini-val { font-size: 18px; }
+            .kpi-mini-lbl { font-size: 10px; }
+
             .form-panel { padding: 18px 16px; max-width: 100%; border-radius: 14px; }
             .form-group input, .form-group select { padding: 10px 12px; font-size: 14px; }
             .form-panel > .action-btn { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
 
             .filters-row { flex-direction: column; gap: 8px; }
             .search-input { width: 100%; min-width: 100%; }
-            .voice-filter { width: 100%; }
+            .voice-filter, .status-filter { width: 100%; }
 
             .table-wrapper { display: none; }
             .members-cards { display: block; }
@@ -214,6 +318,7 @@
             .member-card-actions button { font-size: 10px; padding: 7px 4px; }
             .member-card-actions button i { font-size: 14px; }
             .status-badge { font-size: 10px; padding: 2px 8px; }
+            .kpi-row { grid-template-columns: 1fr 1fr; }
         }
         @media (min-width: 769px) {
             .members-cards { display: none !important; }
@@ -339,6 +444,39 @@
         <!-- MANAGE TAB -->
         <div id="manageTab" class="tab-content">
             <div id="manageMessage" class="message" style="display:none"></div>
+
+            <!-- KPI row -->
+            <div class="kpi-row" id="accountKpis">
+                <div class="kpi-mini indigo">
+                    <div class="kpi-mini-icon indigo"><i class="ti ti-users"></i></div>
+                    <div>
+                        <div class="kpi-mini-val" id="kpiTotal">—</div>
+                        <div class="kpi-mini-lbl">Total active</div>
+                    </div>
+                </div>
+                <div class="kpi-mini green">
+                    <div class="kpi-mini-icon green"><i class="ti ti-user-check"></i></div>
+                    <div>
+                        <div class="kpi-mini-val" id="kpiRegistered">—</div>
+                        <div class="kpi-mini-lbl">✅ Account created</div>
+                    </div>
+                </div>
+                <div class="kpi-mini amber">
+                    <div class="kpi-mini-icon amber"><i class="ti ti-user-exclamation"></i></div>
+                    <div>
+                        <div class="kpi-mini-val" id="kpiPending">—</div>
+                        <div class="kpi-mini-lbl">⏳ Not registered</div>
+                    </div>
+                </div>
+                <div class="kpi-mini blue">
+                    <div class="kpi-mini-icon blue"><i class="ti ti-phone"></i></div>
+                    <div>
+                        <div class="kpi-mini-val" id="kpiWithPhone">—</div>
+                        <div class="kpi-mini-lbl">📱 Have phone</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="filters-row">
                 <input type="text" id="searchInput" class="search-input" placeholder="Search by name, email or student ID…" onkeyup="filterMembers()">
                 <select id="voiceFilter" class="voice-filter" onchange="filterMembers()">
@@ -350,11 +488,27 @@
                     <option value="Director">Director</option>
                     <option value="Brass">Brass</option>
                 </select>
+                <select id="accountFilter" class="status-filter" onchange="filterMembers()">
+                    <option value="all">All accounts</option>
+                    <option value="registered">✅ Registered only</option>
+                    <option value="pending">⏳ Not registered only</option>
+                    <option value="has_phone">📱 Have phone</option>
+                    <option value="no_phone">📵 No phone</option>
+                </select>
             </div>
 
             <div class="table-wrapper">
                 <table class="members-table">
-                    <thead><tr><th>Name</th><th>Voice Part</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Voice Part</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Account</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
                     <tbody id="membersList"><tr><td colspan="6">Loading members…</td></tr></tbody>
                 </table>
             </div>
@@ -392,14 +546,19 @@
     <a href="reports.html" class="bottom-nav-item"><i class="ti ti-chart-bar"></i><span>Reports</span></a>
 </nav>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
     const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let allMembers = [], alumniMembers = [];
+    let registeredMemberIds = new Set();   // member_ids that have created an account
+    let profileData = {};                  // member_id → { phone, profile_photo_url, emergency_* }
     let lastAddTime = 0;
-    const ADD_COOLDOWN_MS = 3000; // 3 seconds between adds
+    const ADD_COOLDOWN_MS = 3000;
 
     document.getElementById('newJoinedDate').value = new Date().toISOString().split('T')[0];
 
@@ -415,6 +574,19 @@
         document.getElementById('topTime').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     }
     setInterval(tick,1000); tick();
+
+    /* ═══════════════════════════════════════════════════════════
+       TOAST
+       ═══════════════════════════════════════════════════════════ */
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        const icons = { success: 'ti-circle-check', error: 'ti-circle-x', info: 'ti-info-circle' };
+        t.innerHTML = `<i class="ti ${icons[type] || icons.info}" style="font-size:16px"></i> ${msg}`;
+        t.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+    }
 
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
@@ -458,7 +630,88 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ADD MEMBER — with full duplicate prevention
+       LOAD REGISTERED IDS + PROFILE DATA (phone, etc.)
+       ═══════════════════════════════════════════════════════════ */
+    async function loadRegisteredMemberIds() {
+        registeredMemberIds = new Set();
+        profileData = {};
+
+        try {
+            /* 1. user_members → which member_ids have accounts */
+            const { data: links, error: linkErr } = await supabaseClient
+                .from('user_members')
+                .select('member_id')
+                .not('member_id', 'is', null);
+
+            if (linkErr) console.warn('user_members fetch error:', linkErr);
+            registeredMemberIds = new Set((links || []).map(r => r.member_id).filter(Boolean));
+
+            /* 2. user_profiles → fetch phone + emergency + photo for those members */
+            const { data: profiles, error: profErr } = await supabaseClient
+                .from('user_profiles')
+                .select('member_id, phone, emergency_contact, emergency_phone, emergency_relationship, profile_photo_url')
+                .not('member_id', 'is', null);
+
+            if (profErr) console.warn('user_profiles fetch error:', profErr);
+
+            (profiles || []).forEach(p => {
+                if (p.member_id) {
+                    profileData[p.member_id] = {
+                        phone: (p.phone || '').trim(),
+                        emergency_contact: p.emergency_contact || '',
+                        emergency_phone: p.emergency_phone || '',
+                        emergency_relationship: p.emergency_relationship || '',
+                        profile_photo_url: p.profile_photo_url || ''
+                    };
+                }
+            });
+
+            console.log(`✅ ${registeredMemberIds.size} registered accounts · ${Object.keys(profileData).length} profiles with details`);
+        } catch (e) {
+            console.warn('Failed to load accounts/profiles:', e);
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       PHONE RESOLUTION — pick the best available phone
+       Priority: user_profiles.phone → members.contact
+       ═══════════════════════════════════════════════════════════ */
+    function getBestPhone(member) {
+        const profile = profileData[member.member_id];
+        const profilePhone = profile?.phone;
+        const adminPhone = (member.contact || '').trim();
+
+        if (profilePhone && profilePhone.trim() !== '') {
+            return { value: profilePhone.trim(), source: 'profile' };
+        }
+        if (adminPhone !== '') {
+            return { value: adminPhone, source: 'admin' };
+        }
+        return { value: '', source: 'none' };
+    }
+
+    function renderPhone(member) {
+        const { value, source } = getBestPhone(member);
+
+        if (!value) {
+            return `<span class="phone-empty">—</span>`;
+        }
+
+        const sourceTag = source === 'profile'
+            ? `<span class="source-tag profile" title="Added by member on their profile"><i class="ti ti-user"></i> member</span>`
+            : `<span class="source-tag admin" title="Added by admin when creating member"><i class="ti ti-user-shield"></i> admin</span>`;
+
+        return `
+            <span style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                <a href="tel:${escapeHtml(value)}" style="color:var(--text-primary);text-decoration:none;">${escapeHtml(value)}</a>
+                ${sourceTag}
+                <button class="copy-btn" onclick="copyText('${escapeHtml(value)}','phone')" title="Copy phone"><i class="ti ti-copy"></i></button>
+            </span>
+        `;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       ADD MEMBER
        ═══════════════════════════════════════════════════════════ */
     async function addMember() {
         const name          = document.getElementById('newName').value.trim();
@@ -470,7 +723,6 @@
         const btn           = document.getElementById('addMemberBtn');
         const originalText  = btn.innerHTML;
 
-        /* ─── Basic validation ─── */
         if (!name) {
             showMessage('addMessage', 'Please enter member name', 'error');
             document.getElementById('newName').focus();
@@ -481,7 +733,6 @@
             return;
         }
 
-        /* ─── Cooldown (prevent double-click) ─── */
         const now = Date.now();
         if (now - lastAddTime < ADD_COOLDOWN_MS) {
             const wait = Math.ceil((ADD_COOLDOWN_MS - (now - lastAddTime)) / 1000);
@@ -489,27 +740,22 @@
             return;
         }
 
-        /* ─── Disable button ─── */
         btn.disabled = true;
         btn.innerHTML = '<i class="ti ti-loader"></i> Checking duplicates…';
 
         try {
-            /* ═══ DUPLICATE CHECK 1: Email (active OR alumni) ═══ */
             if (email) {
-                const { data: dupEmail, error: dupEmailErr } = await supabaseClient
+                const { data: dupEmail } = await supabaseClient
                     .from('members')
                     .select('member_id, name, status')
                     .ilike('email', email)
                     .in('status', ['active', 'alumni'])
                     .maybeSingle();
 
-                if (dupEmailErr) console.warn('Email dup check error:', dupEmailErr);
-
                 if (dupEmail) {
                     const statusLabel = dupEmail.status === 'alumni' ? ' (alumni)' : '';
                     showMessage('addMessage',
-                        `❌ A member with this email already exists${statusLabel}: <strong>${escapeHtml(dupEmail.name)}</strong> (${escapeHtml(dupEmail.member_id)}).<br>` +
-                        `<span style="font-size:12px;">Try searching in the Members or Alumni tab, or use a different email.</span>`,
+                        `❌ A member with this email already exists${statusLabel}: <strong>${escapeHtml(dupEmail.name)}</strong> (${escapeHtml(dupEmail.member_id)}).`,
                         'error');
                     btn.disabled = false;
                     btn.innerHTML = originalText;
@@ -517,15 +763,12 @@
                 }
             }
 
-            /* ═══ DUPLICATE CHECK 2: Student ID ═══ */
             if (studentId) {
-                const { data: dupStudent, error: dupStudentErr } = await supabaseClient
+                const { data: dupStudent } = await supabaseClient
                     .from('members')
                     .select('member_id, name, status')
                     .eq('student_id', studentId)
                     .maybeSingle();
-
-                if (dupStudentErr) console.warn('Student ID dup check error:', dupStudentErr);
 
                 if (dupStudent) {
                     showMessage('addMessage',
@@ -537,23 +780,19 @@
                 }
             }
 
-            /* ═══ DUPLICATE CHECK 3: Removed record with same email ═══ */
             if (email) {
-                const { data: removedRecord, error: removedErr } = await supabaseClient
+                const { data: removedRecord } = await supabaseClient
                     .from('members')
-                    .select('member_id, name, status, graduation_year')
+                    .select('member_id, name, status')
                     .ilike('email', email)
                     .eq('status', 'removed')
                     .maybeSingle();
-
-                if (removedErr) console.warn('Removed dup check error:', removedErr);
 
                 if (removedRecord) {
                     const reactivate = confirm(
                         `⚠️  Found a previously removed record with this email:\n\n` +
                         `Name: ${removedRecord.name}\n` +
-                        `Member ID: ${removedRecord.member_id}\n` +
-                        `Status: removed\n\n` +
+                        `Member ID: ${removedRecord.member_id}\n\n` +
                         `Reactivate this member instead of creating a new record?\n\n` +
                         `(Recommended — preserves any historical data tied to this member ID)`
                     );
@@ -564,6 +803,7 @@
                             .from('members')
                             .update({
                                 status: 'active',
+                                is_active: true,
                                 name,
                                 voice_part: voicePart,
                                 contact: phone || null,
@@ -576,6 +816,7 @@
                         if (reactErr) {
                             showMessage('addMessage', '❌ Reactivation failed: ' + reactErr.message, 'error');
                         } else {
+                            showToast(`✅ Reactivated ${name}`, 'success');
                             showMessage('addMessage',
                                 `✅ Reactivated <strong>${escapeHtml(name)}</strong> as member ${escapeHtml(removedRecord.member_id)}!`,
                                 'success');
@@ -587,20 +828,16 @@
                         btn.innerHTML = originalText;
                         return;
                     }
-                    // If user said no, continue with a brand-new record below
                 }
             }
 
-            /* ═══ DUPLICATE CHECK 4: Same name + same voice part (warning only) ═══ */
-            const { data: dupName, error: dupNameErr } = await supabaseClient
+            const { data: dupName } = await supabaseClient
                 .from('members')
                 .select('member_id, name, voice_part, email')
                 .eq('status', 'active')
                 .ilike('name', name)
                 .eq('voice_part', voicePart)
                 .maybeSingle();
-
-            if (dupNameErr) console.warn('Name dup check error:', dupNameErr);
 
             if (dupName) {
                 const proceed = confirm(
@@ -617,7 +854,6 @@
                 }
             }
 
-            /* ═══ ALL CHECKS PASSED — Insert ═══ */
             btn.innerHTML = '<i class="ti ti-loader"></i> Adding member…';
 
             const prefix = voicePart.substring(0, 3).toUpperCase();
@@ -633,12 +869,12 @@
                     contact: phone || null,
                     student_id: studentId || null,
                     joined_date: joinedDate,
-                    status: 'active'
+                    status: 'active',
+                    is_active: true
                 })
                 .select();
 
             if (insertErr) {
-                /* Map Postgres unique violations to friendly messages */
                 if (insertErr.code === '23505') {
                     if (insertErr.message.includes('email')) {
                         showMessage('addMessage', '❌ This email is already registered to an active member.', 'error');
@@ -657,9 +893,10 @@
                 return;
             }
 
-            /* ═══ SUCCESS ═══ */
+            showToast(`✅ ${name} added successfully`, 'success');
             showMessage('addMessage',
-                `✅ Member <strong>${escapeHtml(name)}</strong> added successfully as ${escapeHtml(memberId)}!`,
+                `✅ Member <strong>${escapeHtml(name)}</strong> added as ${escapeHtml(memberId)}!<br>` +
+                `<span style="font-size:12px;">They can now create their account at the registration page using their email.</span>`,
                 'success');
 
             resetAddForm();
@@ -686,9 +923,7 @@
         document.getElementById('studentWarning').classList.remove('show');
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       LIVE DUPLICATE WARNINGS (as user types)
-       ═══════════════════════════════════════════════════════════ */
+    /* LIVE DUPLICATE WARNINGS */
     let emailCheckTimer, studentCheckTimer;
 
     document.getElementById('newEmail').addEventListener('input', function() {
@@ -755,6 +990,8 @@
        LOAD / DISPLAY MEMBERS
        ═══════════════════════════════════════════════════════════ */
     async function loadActiveMembers() {
+        await loadRegisteredMemberIds();
+
         const { data, error } = await supabaseClient
             .from('members')
             .select('*')
@@ -765,7 +1002,20 @@
             return;
         }
         allMembers = data || [];
+        updateAccountKpis();
         displayMembers(allMembers);
+    }
+
+    function updateAccountKpis() {
+        const total = allMembers.length;
+        const registered = allMembers.filter(m => registeredMemberIds.has(m.member_id)).length;
+        const pending = total - registered;
+        const withPhone = allMembers.filter(m => getBestPhone(m).value !== '').length;
+
+        document.getElementById('kpiTotal').textContent = total;
+        document.getElementById('kpiRegistered').textContent = registered;
+        document.getElementById('kpiPending').textContent = pending;
+        document.getElementById('kpiWithPhone').textContent = withPhone;
     }
 
     async function loadAlumniMembers() {
@@ -783,6 +1033,16 @@
         displayAlumni(alumniMembers);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       DISPLAY — with account status + best phone
+       ═══════════════════════════════════════════════════════════ */
+    function accountBadge(memberId) {
+        if (registeredMemberIds.has(memberId)) {
+            return `<span class="status-badge status-registered"><i class="ti ti-user-check"></i> Registered</span>`;
+        }
+        return `<span class="status-badge status-pending"><i class="ti ti-user-exclamation"></i> Not registered</span>`;
+    }
+
     function displayMembers(members) {
         const tbody = document.getElementById('membersList');
         const cards = document.getElementById('membersCards');
@@ -793,45 +1053,56 @@
             return;
         }
 
-        tbody.innerHTML = members.map(m => `
-            <tr>
-                <td style="font-weight:500">${escapeHtml(m.name)}</td>
-                <td>${escapeHtml(m.voice_part)}</td>
-                <td>${escapeHtml(m.email || '-')}</td>
-                <td>${escapeHtml(m.contact || '-')}</td>
-                <td><span class="status-badge status-active">Active</span></td>
-                <td>
-                    <div class="row-actions">
-                        <button class="action-btn btn-blue" onclick="resetMemberPassword('${m.member_id}')" title="Reset to temp password"><i class="ti ti-key"></i> Pass Reset</button>
-                        <button class="action-btn btn-amber" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-school"></i> Alumni</button>
-                        <button class="action-btn btn-red" onclick="removeMember('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-trash"></i> Remove</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = members.map(m => {
+            const isRegistered = registeredMemberIds.has(m.member_id);
+            return `
+                <tr>
+                    <td style="font-weight:500">${escapeHtml(m.name)}</td>
+                    <td>${escapeHtml(m.voice_part)}</td>
+                    <td>
+                        ${escapeHtml(m.email || '-')}
+                        ${m.email && !isRegistered ? `<button class="copy-btn" onclick="copyText('${escapeHtml(m.email)}','email')" title="Copy email"><i class="ti ti-copy"></i></button>` : ''}
+                    </td>
+                    <td>${renderPhone(m)}</td>
+                    <td>${accountBadge(m.member_id)}</td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="action-btn btn-blue" onclick="resetMemberPassword('${m.member_id}')" title="Reset to temp password"><i class="ti ti-key"></i> Pass Reset</button>
+                            <button class="action-btn btn-amber" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-school"></i> Alumni</button>
+                            <button class="action-btn btn-red" onclick="removeMember('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-trash"></i> Remove</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
 
-        cards.innerHTML = members.map(m => `
-            <div class="member-card">
-                <div class="member-card-head">
-                    <div class="member-card-avatar">${initials(m.name)}</div>
-                    <div class="member-card-info">
-                        <div class="member-card-name">${escapeHtml(m.name)}</div>
-                        <div class="member-card-voice">${escapeHtml(m.voice_part)}</div>
+        cards.innerHTML = members.map(m => {
+            const isRegistered = registeredMemberIds.has(m.member_id);
+            const { value: phone } = getBestPhone(m);
+            return `
+                <div class="member-card">
+                    <div class="member-card-head">
+                        <div class="member-card-avatar">${initials(m.name)}</div>
+                        <div class="member-card-info">
+                            <div class="member-card-name">${escapeHtml(m.name)}</div>
+                            <div class="member-card-voice">${escapeHtml(m.voice_part)}</div>
+                        </div>
+                        ${accountBadge(m.member_id)}
                     </div>
-                    <span class="status-badge status-active">Active</span>
+                    <div class="member-card-meta">
+                        <span><i class="ti ti-mail"></i> ${escapeHtml(m.email || 'No email')}</span>
+                        <span><i class="ti ti-phone"></i> ${phone ? `<a href="tel:${escapeHtml(phone)}" style="color:inherit;text-decoration:none;">${escapeHtml(phone)}</a>` : '<span class="phone-empty">No phone</span>'}</span>
+                        ${m.student_id ? `<span><i class="ti ti-id-badge"></i> ${escapeHtml(m.student_id)}</span>` : ''}
+                    </div>
+                    <div class="member-card-actions">
+                        <button class="act-key" onclick="resetMemberPassword('${m.member_id}')"><i class="ti ti-key"></i><span>Reset</span></button>
+                        ${phone ? `<button class="act-mail" onclick="copyText('${escapeHtml(phone)}','phone')"><i class="ti ti-copy"></i><span>Phone</span></button>` : ''}
+                        <button class="act-alum" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-school"></i><span>Alumni</span></button>
+                        <button class="act-del" onclick="removeMember('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-trash"></i><span>Remove</span></button>
+                    </div>
                 </div>
-                <div class="member-card-meta">
-                    <span><i class="ti ti-mail"></i> ${escapeHtml(m.email || 'No email')}</span>
-                    <span><i class="ti ti-phone"></i> ${escapeHtml(m.contact || 'No phone')}</span>
-                    ${m.student_id ? `<span><i class="ti ti-id-badge"></i> ${escapeHtml(m.student_id)}</span>` : ''}
-                </div>
-                <div class="member-card-actions">
-                    <button class="act-key" onclick="resetMemberPassword('${m.member_id}')"><i class="ti ti-key"></i><span>Reset</span></button>
-                    <button class="act-alum" onclick="moveToAlumni('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-school"></i><span>Alumni</span></button>
-                    <button class="act-del" onclick="removeMember('${m.member_id}','${escapeHtml(m.name).replace(/'/g, "\\'")}')"><i class="ti ti-trash"></i><span>Remove</span></button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function displayAlumni(members) {
@@ -882,6 +1153,24 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
+       COPY HELPER
+       ═══════════════════════════════════════════════════════════ */
+    async function copyText(text, label = 'text') {
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast(`📋 Copied ${label}: ${text}`, 'success');
+        } catch (err) {
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            showToast(`📋 Copied ${label}: ${text}`, 'success');
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
        MEMBER LIFECYCLE ACTIONS
        ═══════════════════════════════════════════════════════════ */
     async function moveToAlumni(memberId, name) {
@@ -899,6 +1188,7 @@
 
         if (error) showMessage('manageMessage', 'Error: ' + error.message, 'error');
         else {
+            showToast(`✅ ${name} moved to alumni`, 'success');
             showMessage('manageMessage', `✅ ${name} moved to alumni`, 'success');
             await loadActiveMembers();
             await loadAlumniMembers();
@@ -910,6 +1200,7 @@
             .from('members')
             .update({
                 status: 'active',
+                is_active: true,
                 graduation_year: null,
                 updated_at: new Date()
             })
@@ -917,6 +1208,7 @@
 
         if (error) showMessage('alumniMessage', 'Error: ' + error.message, 'error');
         else {
+            showToast(`✅ ${name} reactivated`, 'success');
             showMessage('alumniMessage', `✅ ${name} reactivated`, 'success');
             await loadActiveMembers();
             await loadAlumniMembers();
@@ -930,13 +1222,14 @@
             .from('members')
             .update({
                 status: 'removed',
-                is_active: false,   // keep in sync with status
+                is_active: false,
                 updated_at: new Date()
             })
             .eq('member_id', memberId);
 
         if (error) showMessage('manageMessage', 'Error: ' + error.message, 'error');
         else {
+            showToast(`✅ ${name} removed`, 'success');
             showMessage('manageMessage', `✅ ${name} removed from active members`, 'success');
             await loadActiveMembers();
         }
@@ -946,7 +1239,6 @@
         if (!confirm(`⚠️  PERMANENT DELETE!\n\nAre you absolutely sure you want to permanently delete "${name}"?\n\nThis will remove:\n• Member record\n• All attendance history\n• All linked penalties\n• All linked apologies\n• Any linked user accounts\n\nThis CANNOT be undone.`)) return;
 
         try {
-            // Delete linked data first (in order to avoid FK violations)
             await supabaseClient.from('attendance').delete().eq('member_id', memberId);
             await supabaseClient.from('penalties').delete().eq('member_id', memberId);
             await supabaseClient.from('apology_requests').delete().eq('member_id', memberId);
@@ -958,11 +1250,11 @@
             await supabaseClient.from('user_members').delete().eq('member_id', memberId);
             await supabaseClient.from('user_profiles').delete().eq('member_id', memberId);
 
-            // Finally the member
             const { error } = await supabaseClient.from('members').delete().eq('member_id', memberId);
 
             if (error) showMessage('alumniMessage', 'Error: ' + error.message, 'error');
             else {
+                showToast(`✅ ${name} permanently deleted`, 'success');
                 showMessage('alumniMessage', `✅ ${name} permanently deleted`, 'success');
                 await loadActiveMembers();
                 await loadAlumniMembers();
@@ -1003,6 +1295,7 @@
                 throw new Error(result.error || 'Failed to reset password');
             }
 
+            showToast(`✅ Password reset to UOEMCHOIR`, 'success');
             showMessage(
                 'manageMessage',
                 `✅ Password reset! Tell the member to log in with "UOEMCHOIR". They will be asked to change it immediately.`,
@@ -1014,16 +1307,37 @@
         }
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       FILTERS
+       ═══════════════════════════════════════════════════════════ */
     function filterMembers() {
         const q = document.getElementById('searchInput').value.toLowerCase();
         const v = document.getElementById('voiceFilter').value;
+        const accountFilter = document.getElementById('accountFilter').value;
+
         let f = allMembers;
-        if (q) f = f.filter(m =>
-            m.name.toLowerCase().includes(q) ||
-            (m.email && m.email.toLowerCase().includes(q)) ||
-            (m.student_id && m.student_id.toLowerCase().includes(q))
-        );
+
+        if (q) {
+            f = f.filter(m =>
+                m.name.toLowerCase().includes(q) ||
+                (m.email && m.email.toLowerCase().includes(q)) ||
+                (m.student_id && m.student_id.toLowerCase().includes(q)) ||
+                getBestPhone(m).value.includes(q)
+            );
+        }
+
         if (v !== 'all') f = f.filter(m => m.voice_part === v);
+
+        if (accountFilter === 'registered') {
+            f = f.filter(m => registeredMemberIds.has(m.member_id));
+        } else if (accountFilter === 'pending') {
+            f = f.filter(m => !registeredMemberIds.has(m.member_id));
+        } else if (accountFilter === 'has_phone') {
+            f = f.filter(m => getBestPhone(m).value !== '');
+        } else if (accountFilter === 'no_phone') {
+            f = f.filter(m => getBestPhone(m).value === '');
+        }
+
         displayMembers(f);
     }
 
@@ -1040,7 +1354,6 @@
         d.innerHTML = msg;
         d.className = `message ${type}`;
         d.style.display = 'block';
-        // Success/info/warning auto-hide; errors stay until next action
         if (type !== 'error') {
             setTimeout(() => {
                 d.style.display = 'none';
@@ -1071,6 +1384,7 @@
     window.filterAlumni = filterAlumni;
     window.switchTab = switchTab;
     window.resetMemberPassword = resetMemberPassword;
+    window.copyText = copyText;
     window.toggleSidebar = toggleSidebar;
     window.closeSidebar = closeSidebar;
 </script>

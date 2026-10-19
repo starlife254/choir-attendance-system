@@ -1765,48 +1765,50 @@
             await loadProfileData();
         }
 
-            async function loadAttendanceStats() {
+                    async function loadAttendanceStats() {
             if (!currentMember) return;
             
-            // FIX: Fetch the apology_approved flag along with the other data
+            // Fetch both apology flags
             const { data: attendance, error } = await supabaseClient
                 .from('attendance')
-                .select('date, session, status, apology_approved')
+                .select('date, session, status, apology_approved, has_apology')
                 .eq('member_id', currentMember.member_id);
 
             if (error) {
                 console.warn('Error fetching attendance:', error);
             }
 
-            // Initialize counters
             let present = 0;
             let late = 0;
             let absentUnexcused = 0;
             let absentExcused = 0;
 
-                       // Calculate new math
             (attendance || []).forEach(a => {
+                // If it's present, count it
                 if (a.status === 'Present') {
                     present++;
-                } else if (a.status === 'Late') {
+                } 
+                // If it's late, count it
+                else if (a.status === 'Late') {
                     late++;
-                } else if (a.status === 'Absent') {
-                    if (a.apology_approved) {
+                } 
+                // If it's absent, check if it was excused
+                else if (a.status === 'Absent') {
+                    if (a.apology_approved || a.has_apology) {
                         absentExcused++;
                     } else {
                         absentUnexcused++;
                     }
                 }
             });
-            // Only count unexcused absences in the denominator
+
+            // Only count unexcused absences against them
             const totalCountedSessions = present + late + absentUnexcused;
             
-            // (Present + Late) count as attended
             const percentage = totalCountedSessions > 0 
                 ? (((present + late) / totalCountedSessions) * 100).toFixed(1) 
                 : 0;
 
-            // Update the UI cards
             document.getElementById('statsGrid').innerHTML = `
                 <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label"><i class="fas fa-circle-check"></i> Present</div></div>
                 <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label"><i class="fas fa-clock"></i> Late</div></div>
@@ -1814,7 +1816,7 @@
                 <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label"><i class="fas fa-percent"></i> Attendance Rate</div></div>
             `;
 
-            // ── CHART LOGIC ──
+            // Chart logic stays the same
             const last30Days = [], presentData = [], lateData = [];
             for (let i = 29; i >= 0; i--) {
                 const date = new Date();

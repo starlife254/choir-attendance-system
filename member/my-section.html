@@ -1,3 +1,8 @@
+Here is the **complete, clean `my-section.html`** with the updated attendance math (excluding excused absences), the new UI badges, and the 5:00 PM – 7:30 PM schedule integrated.
+
+You can copy and paste this directly over your existing file.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -126,7 +131,7 @@
         .pill-green { background: #d1fae5; color: #065f46; }
         .pill-amber { background: #fef3c7; color: #854d0e; }
         .pill-red { background: #fee2e2; color: #991b1b; }
-        .pill-gray { background: #f1f5f9; color: #64748b; }
+        .pill-gray { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
         .pill-primary { background: var(--primary-light); color: var(--primary); }
         .contact-btn { padding: 6px 10px; border: none; border-radius: 8px; background: var(--primary-light); color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
         .contact-btn:hover { opacity: .85; }
@@ -367,7 +372,7 @@
     let currentMember = null;
     let leaderRecord = null;
     let sectionMembers = [];
-    let memberStats = {};   // { member_id: { present, late, absent, total, rate, pendingFines } }
+    let memberStats = {};
     let sectionPenalties = [];
     let trendChart, weeklyChart;
 
@@ -471,7 +476,7 @@
 
         const { data: attendance, error } = await sb
             .from('attendance')
-            .select('member_id, date, session, status')
+            .select('member_id, date, session, status, apology_approved') // ADDED FLAG
             .in('member_id', memberIds)
             .gte('date', cutoffStr);
 
@@ -480,27 +485,31 @@
         // Build per-member stats
         memberStats = {};
         memberIds.forEach(id => {
-            memberStats[id] = { present: 0, late: 0, absent: 0, total: 0, rate: 0, pendingFines: 0 };
+            memberStats[id] = { present: 0, late: 0, absent: 0, excused: 0, total: 0, rate: 0, pendingFines: 0 };
         });
 
         (attendance || []).forEach(a => {
             if (!memberStats[a.member_id]) return;
             const s = memberStats[a.member_id];
-            if (a.status === 'Present') s.present++;
-else if (a.status === 'Late') s.late++;
-else if (a.status === 'Absent') {
-    if (a.apology_approved) {
-        s.absentExcused = (s.absentExcused || 0) + 1;
-    } else {
-        s.absent++;
-    }
-}
-s.total++; // Keep total for raw data if needed
+            
+            if (a.status === 'Present') {
+                s.present++;
+            } else if (a.status === 'Late') {
+                s.late++;
+            } else if (a.status === 'Absent') {
+                if (a.apology_approved) {
+                    s.excused++;
+                } else {
+                    s.absent++;
+                }
+            }
+            s.total++;
         });
 
-        // Calculate rate for each
+        // Calculate rate for each (Excluding excused from the math)
         Object.values(memberStats).forEach(s => {
-            s.rate = s.total > 0 ? Math.round(((s.present + s.late) / s.total) * 100) : 0;
+            const countedTotal = s.present + s.late + s.absent;
+            s.rate = countedTotal > 0 ? Math.round(((s.present + s.late) / countedTotal) * 100) : 0;
         });
 
         // Also fetch all-time attendance for "recent activity"
@@ -549,9 +558,10 @@ s.total++; // Keep total for raw data if needed
         const totals = Object.values(memberStats).reduce((acc, s) => {
             acc.present += s.present;
             acc.late += s.late;
-            acc.total += s.total;
+            acc.absent += s.absent;
+            acc.total += (s.present + s.late + s.absent); // Exclude excused
             return acc;
-        }, { present: 0, late: 0, total: 0 });
+        }, { present: 0, late: 0, absent: 0, total: 0 });
 
         const overallRate = totals.total > 0 ? Math.round(((totals.present + totals.late) / totals.total) * 100) : 0;
 
@@ -694,7 +704,7 @@ s.total++; // Keep total for raw data if needed
 
         let list = sectionMembers.map(m => ({
             ...m,
-            ...(memberStats[m.member_id] || { present: 0, late: 0, absent: 0, total: 0, rate: 0, pendingFines: 0 })
+            ...(memberStats[m.member_id] || { present: 0, late: 0, absent: 0, excused: 0, total: 0, rate: 0, pendingFines: 0 })
         }));
 
         if (q) list = list.filter(m => m.name.toLowerCase().includes(q));
@@ -727,6 +737,7 @@ s.total++; // Keep total for raw data if needed
                     </div>
                     <div class="member-stats">
                         <span class="pill ${ratePill}">${m.total === 0 ? 'No data' : m.rate + '%'}</span>
+                        ${m.excused > 0 ? `<span class="pill pill-gray" style="background:#f1f5f9; color:#64748b; border: 1px solid #cbd5e1;">${m.excused} excused</span>` : ''}
                         ${m.pendingFines > 0 ? `<span class="pill ${finePill}"><i class="fas fa-coins"></i> ${Math.round(m.pendingFines)}</span>` : ''}
                         ${m.contact ? `<a href="tel:${escapeHtml(m.contact)}" class="contact-btn" title="Call"><i class="fas fa-phone"></i></a>` : ''}
                         ${m.email ? `<a href="mailto:${escapeHtml(m.email)}" class="contact-btn gray" title="Email"><i class="fas fa-envelope"></i></a>` : ''}
@@ -828,7 +839,7 @@ s.total++; // Keep total for raw data if needed
                 acc.present += s.present;
                 acc.late += s.late;
                 acc.absent += s.absent;
-                acc.total += s.total;
+                acc.total += (s.present + s.late + s.absent);
                 return acc;
             }, { present: 0, late: 0, absent: 0, total: 0 });
 
@@ -922,10 +933,10 @@ s.total++; // Keep total for raw data if needed
     function exportMembersCSV() {
         if (!sectionMembers.length) { alert('No members to export'); return; }
 
-        let csv = 'Name,Member ID,Contact,Email,Present,Late,Absent,Rate %,Pending Fines\n';
+        let csv = 'Name,Member ID,Contact,Email,Present,Late,Absent,Excused,Rate %,Pending Fines\n';
         sectionMembers.forEach(m => {
             const s = memberStats[m.member_id] || {};
-            csv += `"${m.name}","${m.member_id}","${m.contact || ''}","${m.email || ''}",${s.present || 0},${s.late || 0},${s.absent || 0},${s.rate || 0},${Math.round(s.pendingFines || 0)}\n`;
+            csv += `"${m.name}","${m.member_id}","${m.contact || ''}","${m.email || ''}",${s.present || 0},${s.late || 0},${s.absent || 0},${s.excused || 0},${s.rate || 0},${Math.round(s.pendingFines || 0)}\n`;
         });
 
         downloadCSV(csv, `section_${leaderRecord.voice_part}_${new Date().toISOString().split('T')[0]}.csv`);
@@ -980,3 +991,4 @@ s.total++; // Keep total for raw data if needed
 </script>
 </body>
 </html>
+```

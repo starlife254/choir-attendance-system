@@ -1784,7 +1784,7 @@
             let absentUnexcused = 0;
             let absentExcused = 0;
 
-            // Calculate new math
+                       // Calculate new math
             (attendance || []).forEach(a => {
                 if (a.status === 'Present') {
                     present++;
@@ -1798,7 +1798,6 @@
                     }
                 }
             });
-
             // Only count unexcused absences in the denominator
             const totalCountedSessions = present + late + absentUnexcused;
             

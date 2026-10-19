@@ -377,13 +377,13 @@ const totalCounted = present + late + absentUnexcused;
 const percentage = totalCounted > 0 ? (((present + late) / totalCounted) * 100).toFixed(1) : 0;
 
 
-            // Display stats
+                      // Display stats
             document.getElementById('statsGrid').innerHTML = `
                 <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label">✅ Present</div></div>
                 <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label">⏰ Late</div></div>
                 <div class="stat-card absent"><div class="stat-number">${absentUnexcused}</div><div class="stat-label">❌ Absent</div></div>
                 <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label">Attendance Rate</div></div>
-            `;
+            `; 
 
             // Create trend chart (last 30 days)
             const last30Days = [];

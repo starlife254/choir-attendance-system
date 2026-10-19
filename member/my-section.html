@@ -501,12 +501,12 @@
             s.total++;
         });
 
-        // Calculate rate for each (Excluding excused from the math)
+               // Calculate rate for each (Including excused in the denominator)
         Object.values(memberStats).forEach(s => {
-            const countedTotal = s.present + s.late + s.absent;
+            const countedTotal = s.present + s.late + s.absent + (s.excused || 0);
             s.rate = countedTotal > 0 ? Math.round(((s.present + s.late) / countedTotal) * 100) : 0;
         });
-
+        
         // Also fetch all-time attendance for "recent activity"
         const { data: allAtt } = await sb
             .from('attendance')

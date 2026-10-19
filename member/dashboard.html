@@ -1778,7 +1778,7 @@
                 console.warn('Error fetching attendance:', error);
             }
 
-            let present = 0;
+                       let present = 0;
             let late = 0;
             let absentUnexcused = 0;
             let absentExcused = 0;
@@ -1797,12 +1797,12 @@
                 }
             });
             
-            // The exact math used in the admin member-detail page
-            const totalCountedSessions = present + late + absentUnexcused;
+            // THE FIX: Include excused absences in the total possible sessions
+            const totalCountedSessions = present + late + absentExcused + absentUnexcused;
+            
             const percentage = totalCountedSessions > 0 
                 ? (((present + late) / totalCountedSessions) * 100).toFixed(1) 
                 : 0;
-
                 // Update the UI cards (using exact layout from admin side)
             document.getElementById('statsGrid').innerHTML = `
                 <div class="stat-card present">

@@ -370,10 +370,12 @@
 
             // Calculate stats
             const present = attendance?.filter(a => a.status === 'Present').length || 0;
-            const late = attendance?.filter(a => a.status === 'Late').length || 0;
-            const absent = attendance?.filter(a => a.status === 'Absent').length || 0;
-            const total = present + late + absent;
-            const percentage = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
+const late = attendance?.filter(a => a.status === 'Late').length || 0;
+const absentUnexcused = attendance?.filter(a => a.status === 'Absent' && !a.apology_approved).length || 0;
+
+const totalCounted = present + late + absentUnexcused;
+const percentage = totalCounted > 0 ? (((present + late) / totalCounted) * 100).toFixed(1) : 0;
+
 
             // Display stats
             document.getElementById('statsGrid').innerHTML = `

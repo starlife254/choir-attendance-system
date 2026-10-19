@@ -487,9 +487,15 @@
             if (!memberStats[a.member_id]) return;
             const s = memberStats[a.member_id];
             if (a.status === 'Present') s.present++;
-            else if (a.status === 'Late') s.late++;
-            else if (a.status === 'Absent') s.absent++;
-            s.total++;
+else if (a.status === 'Late') s.late++;
+else if (a.status === 'Absent') {
+    if (a.apology_approved) {
+        s.absentExcused = (s.absentExcused || 0) + 1;
+    } else {
+        s.absent++;
+    }
+}
+s.total++; // Keep total for raw data if needed
         });
 
         // Calculate rate for each

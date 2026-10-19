@@ -563,9 +563,16 @@
         memberAttendanceCache = {};
         (att || []).forEach(a => {
             if (!memberAttendanceCache[a.member_id]) memberAttendanceCache[a.member_id] = { present: 0, late: 0, absent: 0 };
-            if (a.status === 'Present') memberAttendanceCache[a.member_id].present++;
-            else if (a.status === 'Late')    memberAttendanceCache[a.member_id].late++;
-            else if (a.status === 'Absent')  memberAttendanceCache[a.member_id].absent++;
+           if (a.status === 'Present') memberAttendanceCache[a.member_id].present++;
+else if (a.status === 'Late')    memberAttendanceCache[a.member_id].late++;
+else if (a.status === 'Absent') {
+    if (a.apology_approved) {
+        // Don't count it as absent, or count it in a separate "Excused" bucket
+        memberAttendanceCache[a.member_id].excused = (memberAttendanceCache[a.member_id].excused || 0) + 1;
+    } else {
+        memberAttendanceCache[a.member_id].absent++;
+    }
+}
         });
 
         displayMembers(allMembers);

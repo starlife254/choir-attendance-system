@@ -1765,25 +1765,50 @@
             await loadProfileData();
         }
 
-        async function loadAttendanceStats() {
-            if (!currentMember) return;
-            const { data: attendance } = await supabaseClient
-                .from('attendance')
-                .select('date, session, status')
-                .eq('member_id', currentMember.member_id);
+    async function loadAttendanceStats() {
+    if (!currentMember) return;
+    
+    // Fetch attendance AND whether they had an approved apology
+    const { data: attendance } = await supabaseClient
+        .from('attendance')
+        .select('date, session, status, apology_approved') 
+        .eq('member_id', currentMember.member_id);
 
-            const present = attendance?.filter(a => a.status === 'Present').length || 0;
-            const late = attendance?.filter(a => a.status === 'Late').length || 0;
-            const absent = attendance?.filter(a => a.status === 'Absent').length || 0;
-            const total = present + late + absent;
-            const percentage = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
+    let present = 0;
+    let late = 0;
+    let absentUnexcused = 0;
+    let absentExcused = 0;
 
-            document.getElementById('statsGrid').innerHTML = `
-                <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label"><i class="fas fa-circle-check"></i> Present</div></div>
-                <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label"><i class="fas fa-clock"></i> Late</div></div>
-                <div class="stat-card absent"><div class="stat-number">${absent}</div><div class="stat-label"><i class="fas fa-circle-xmark"></i> Absent</div></div>
-                <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label"><i class="fas fa-percent"></i> Attendance Rate</div></div>
-            `;
+    attendance?.forEach(a => {
+        if (a.status === 'Present') present++;
+        else if (a.status === 'Late') late++;
+        else if (a.status === 'Absent') {
+            if (a.apology_approved) {
+                absentExcused++;
+            } else {
+                absentUnexcused++;
+            }
+        }
+    });
+
+    // THE FIX: Only count Present, Late, and Unexcused Absences
+    const totalCountedSessions = present + late + absentUnexcused;
+    
+    // Calculate percentage (Present + Late count as attended)
+    const percentage = totalCountedSessions > 0 
+        ? (((present + late) / totalCountedSessions) * 100).toFixed(1) 
+        : 0;
+
+    // Update the UI cards
+    document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label"><i class="fas fa-circle-check"></i> Present</div></div>
+        <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label"><i class="fas fa-clock"></i> Late</div></div>
+        <div class="stat-card absent"><div class="stat-number">${absentUnexcused}</div><div class="stat-label"><i class="fas fa-circle-xmark"></i> Absent</div></div>
+        <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label"><i class="fas fa-percent"></i> Attendance Rate</div></div>
+    `;
+
+   
+}
 
             const last30Days = [], presentData = [], lateData = [];
             for (let i = 29; i >= 0; i--) {
@@ -1813,7 +1838,7 @@
                     plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
                 }
             });
-        }
+        
 
         async function loadPenalties() {
             if (!currentMember) return;

@@ -1784,38 +1784,44 @@
             let absentExcused = 0;
 
             (attendance || []).forEach(a => {
-                // If it's present, count it
                 if (a.status === 'Present') {
                     present++;
-                } 
-                // If it's late, count it
-                else if (a.status === 'Late') {
+                } else if (a.status === 'Late') {
                     late++;
-                } 
-                // If it's absent, check if it was excused
-                else if (a.status === 'Absent') {
-                    if (a.apology_approved || a.has_apology) {
+                } else if (a.status === 'Absent') {
+                    if (a.apology_approved) {
                         absentExcused++;
                     } else {
                         absentUnexcused++;
                     }
                 }
             });
-
-            // Only count unexcused absences against them
-            const totalCountedSessions = present + late + absentUnexcused;
             
+            // The exact math used in the admin member-detail page
+            const totalCountedSessions = present + late + absentUnexcused;
             const percentage = totalCountedSessions > 0 
                 ? (((present + late) / totalCountedSessions) * 100).toFixed(1) 
                 : 0;
 
+            // Update the UI cards (using exact colors and layout from admin side)
             document.getElementById('statsGrid').innerHTML = `
-                <div class="stat-card present"><div class="stat-number">${present}</div><div class="stat-label"><i class="fas fa-circle-check"></i> Present</div></div>
-                <div class="stat-card late"><div class="stat-number">${late}</div><div class="stat-label"><i class="fas fa-clock"></i> Late</div></div>
-                <div class="stat-card absent"><div class="stat-number">${absentUnexcused}</div><div class="stat-label"><i class="fas fa-circle-xmark"></i> Absent</div></div>
-                <div class="stat-card percentage"><div class="stat-number">${percentage}%</div><div class="stat-label"><i class="fas fa-percent"></i> Attendance Rate</div></div>
+                <div class="stat-card present">
+                    <div class="stat-number" style="color: var(--green)">${present}</div>
+                    <div class="stat-label">✅ Present</div>
+                </div>
+                <div class="stat-card late">
+                    <div class="stat-number" style="color: var(--amber)">${late}</div>
+                    <div class="stat-label">⏰ Late</div>
+                </div>
+                <div class="stat-card absent">
+                    <div class="stat-number" style="color: var(--red)">${absentUnexcused}</div>
+                    <div class="stat-label">❌ Absent</div>
+                </div>
+                <div class="stat-card percentage">
+                    <div class="stat-number" style="color: var(--primary)">${percentage}%</div>
+                    <div class="stat-label">Attendance Rate</div>
+                </div>
             `;
-
             // Chart logic stays the same
             const last30Days = [], presentData = [], lateData = [];
             for (let i = 29; i >= 0; i--) {

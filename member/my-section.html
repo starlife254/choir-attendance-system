@@ -735,9 +735,12 @@ You can copy and paste this directly over your existing file.
                             ${m.contact ? `<span><i class="fas fa-phone"></i> ${escapeHtml(m.contact)}</span>` : ''}
                         </div>
                     </div>
-                    <div class="member-stats">
-                        <span class="pill ${ratePill}">${m.total === 0 ? 'No data' : m.rate + '%'}</span>
-                        ${m.excused > 0 ? `<span class="pill pill-gray" style="background:#f1f5f9; color:#64748b; border: 1px solid #cbd5e1;">${m.excused} excused</span>` : ''}
+                            <div class="member-stats">
+                        <span class="pill pill-green"><i class="fas fa-check"></i> ${m.present}</span>
+                        <span class="pill pill-amber"><i class="fas fa-clock"></i> ${m.late}</span>
+                        <span class="pill pill-red"><i class="fas fa-times"></i> ${m.absent}</span>
+                        ${m.excused > 0 ? `<span class="pill" style="background:#f1f5f9; color:#64748b; border: 1px solid #cbd5e1;">${m.excused} Excused</span>` : ''}
+                        <span class="pill pill-indigo" style="margin-left: 4px;">${m.total === 0 ? 'No data' : m.rate + '%'}</span>
                         ${m.pendingFines > 0 ? `<span class="pill ${finePill}"><i class="fas fa-coins"></i> ${Math.round(m.pendingFines)}</span>` : ''}
                         ${m.contact ? `<a href="tel:${escapeHtml(m.contact)}" class="contact-btn" title="Call"><i class="fas fa-phone"></i></a>` : ''}
                         ${m.email ? `<a href="mailto:${escapeHtml(m.email)}" class="contact-btn gray" title="Email"><i class="fas fa-envelope"></i></a>` : ''}

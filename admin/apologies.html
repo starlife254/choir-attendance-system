@@ -567,7 +567,7 @@
             }
             
             if (status === 'approved') {
-                const attendanceStatus = apology.apology_type === 'late' ? 'Late' : 'Present';
+              const attendanceStatus = apology.apology_type === 'late' ? 'Late' : 'Absent';
                 
                 // Check if attendance record exists
                 const { data: existingAttendance } = await supabaseClient

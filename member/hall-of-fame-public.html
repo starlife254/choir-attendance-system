@@ -755,7 +755,9 @@
         const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+                const CLOUD_NAME = 'surgtbdr';
+        const CLOUDINARY_UPLOAD_PRESET = 'uoem_choir_uploads'; // Note: it must match this exact variable name
+        
         let honoreesData = [];
 
         function escapeHtml(str) {

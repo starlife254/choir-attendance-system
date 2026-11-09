@@ -56,6 +56,11 @@
         .progress-bar { width: 100%; height: 12px; background: var(--border); border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--green); width: 0%; transition: width .3s; }
         
+        .search-bar { margin-bottom: 16px; position: relative; }
+        .search-bar i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 18px; }
+        .search-bar input { padding: 12px 14px 12px 42px; border: 1.5px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 14px; width: 100%; outline: none; transition: .15s; }
+        .search-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
         .edit-table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; border-radius: 8px; overflow: hidden; }
         .edit-table th { background: var(--bg); text-align: left; padding: 12px; border-bottom: 2px solid var(--border); font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 700; }
         .edit-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
@@ -65,13 +70,35 @@
         input, select { padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; color: var(--text); transition: .15s; width: 100%; outline: none; }
         input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 
-        /* ── MOBILE ── */
+        /* ── MOBILE VIEW (CARDS) ── */
+        .mobile-list { display: none; flex-direction: column; gap: 10px; }
+        .mobile-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.15s; }
+        .mobile-card:active { transform: scale(0.98); }
+        .mobile-card-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .mobile-card-info p { font-size: 12px; color: var(--muted); }
+
+        /* ── MOBILE MODAL ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: #fff; border-radius: 20px; width: 100%; max-width: 400px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { font-size: 18px; font-weight: 800; }
+        .close-btn { background: var(--bg); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+
+        /* ── RESPONSIVE ── */
         .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer; }
+        
         @media (max-width: 900px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,.1); }
             .main { margin-left: 0; padding: 16px 14px 90px; }
             .hamburger { display: block; }
+            
+            .table-container { display: none; }
+            .mobile-list { display: flex; }
         }
     </style>
 </head>
@@ -133,11 +160,12 @@
         </div>
     </div>
 
+    <!-- PROGRESS -->
     <div class="card" style="margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <div>
                 <h3 style="font-size:16px;font-weight:800;">Voice Part Assignment</h3>
-                <p style="font-size:12.5px;color:var(--muted)">Changes are saved automatically. Email changes sync to login instantly.</p>
+                <p style="font-size:12.5px;color:var(--muted)">Changes are saved automatically.</p>
             </div>
             <div style="text-align:right">
                 <div style="font-size:18px;font-weight:800" id="progressText">0 / 0</div>
@@ -147,7 +175,14 @@
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     </div>
 
-    <div class="card" style="padding:0;overflow:hidden">
+    <!-- SEARCH -->
+    <div class="search-bar">
+        <i class="ti ti-search"></i>
+        <input type="text" id="searchInput" placeholder="Search by name, email, or student ID..." oninput="renderTable()">
+    </div>
+
+    <!-- DESKTOP TABLE -->
+    <div class="card table-container" style="padding:0;overflow:hidden">
         <div style="overflow-x:auto">
             <table class="edit-table" id="editTable">
                 <thead>
@@ -166,12 +201,60 @@
             </table>
         </div>
     </div>
+
+    <!-- MOBILE LIST -->
+    <div class="mobile-list" id="mobileList">
+        <div style="text-align:center;padding:30px;color:var(--muted)">Loading members…</div>
+    </div>
 </main>
+
+<!-- MOBILE EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Edit Member</h3>
+            <button class="close-btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="form-group">
+            <label>Name</label>
+            <div id="modalName" style="font-weight:700; font-size:16px; padding:4px 0;"></div>
+            <div id="modalMemberId" style="font-size:12px; color:var(--muted);"></div>
+        </div>
+        <div class="form-group">
+            <label>Student ID</label>
+            <input type="text" id="modalStudentId" onchange="saveModalField('student_id', this.value)">
+        </div>
+        <div class="form-group">
+            <label>Voice Part</label>
+            <select id="modalVoicePart" onchange="saveModalField('voice_part', this.value)">
+                <option value="">— Unassigned —</option>
+                <option value="Soprano">Soprano</option>
+                <option value="Alto">Alto</option>
+                <option value="Tenor">Tenor</option>
+                <option value="Bass">Bass</option>
+                <option value="Director">Director</option>
+                <option value="Brass">Brass</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Phone</label>
+            <input type="text" id="modalPhone" onchange="saveModalField('contact', this.value)">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="modalEmail" onchange="saveModalField('email', this.value)">
+        </div>
+    </div>
+</div>
 
 <script>
     const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let members = [];
+    let profileData = {};
+    let currentModalMember = null;
 
     function openSidebar() {
         document.getElementById('sidebar').classList.add('open');
@@ -188,7 +271,7 @@
         if (!t) {
             t = document.createElement('div');
             t.id = 'toast';
-            t.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:40px; color:#fff; font-weight:600; font-size:14px; z-index:999; opacity:0; transition:opacity .3s; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.2);';
+            t.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:40px; color:#fff; font-weight:600; font-size:14px; z-index:9999; opacity:0; transition:opacity .3s; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.2);';
             document.body.appendChild(t);
         }
         clearTimeout(toastTimer);
@@ -223,11 +306,8 @@
         await loadMembers();
     }
 
-        let members = [];
-    let profileData = {}; // NEW: To store member's self-filled profile info
-
-        async function loadMembers() {
-        // 1. Fetch user profiles to get the phone numbers they filled in
+    async function loadMembers() {
+        // 1. Fetch profiles for phone numbers
         const { data: profiles } = await sb.from('user_profiles').select('member_id, phone');
         profileData = {};
         (profiles || []).forEach(p => {
@@ -251,53 +331,81 @@
     }
 
     function renderTable() {
-        const tbody = document.getElementById('tableBody');
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
         
-        if (!members.length) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No active members found.</td></tr>';
-            return;
+        // Filter logic
+        let filtered = members;
+        if (q) {
+            filtered = members.filter(m => 
+                m.name.toLowerCase().includes(q) ||
+                (m.student_id && m.student_id.toLowerCase().includes(q)) ||
+                (m.email && m.email.toLowerCase().includes(q))
+            );
         }
 
-        tbody.innerHTML = members.map(m => `
-            <tr>
-                <td>
-                    <strong>${m.name}</strong>
-                    <span class="member-id">${m.member_id}</span>
-                </td>
-                <td>
-                    <input type="text" value="${m.student_id || ''}" 
-                           onchange="updateField('${m.member_id}', 'student_id', this.value, this)" placeholder="Student ID">
-                </td>
-                <td>
-                    <select onchange="updateField('${m.member_id}', 'voice_part', this.value, this)" style="font-weight:600">
-                        <option value="" ${!m.voice_part ? 'selected' : ''}>— Unassigned —</option>
-                        <option value="Soprano" ${m.voice_part === 'Soprano' ? 'selected' : ''}>Soprano</option>
-                        <option value="Alto" ${m.voice_part === 'Alto' ? 'selected' : ''}>Alto</option>
-                        <option value="Tenor" ${m.voice_part === 'Tenor' ? 'selected' : ''}>Tenor</option>
-                        <option value="Bass" ${m.voice_part === 'Bass' ? 'selected' : ''}>Bass</option>
-                        <option value="Director" ${m.voice_part === 'Director' ? 'selected' : ''}>Director</option>
-                        <option value="Brass" ${m.voice_part === 'Brass' ? 'selected' : ''}>Brass</option>
-                    </select>
-                </td>
-                               <td>
-                    <input type="text" 
-                           value="${profileData[m.member_id]?.phone || m.contact || ''}" 
-                           onchange="updateField('${m.member_id}', 'contact', this.value, this)" 
-                           placeholder="Phone">
-                </td>
-                <td>
-                    <input type="email" value="${m.email || ''}" 
-                           onchange="updateField('${m.member_id}', 'email', this.value, this)" placeholder="Email">
-                </td>
-                <td>
-                    <span style="display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; background:#d1fae5; color:#065f46;">
-                        Active
-                    </span>
-                </td>
-            </tr>
-        `).join('');
+        // ── RENDER DESKTOP TABLE ──
+        const tbody = document.getElementById('tableBody');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No members found.</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map(m => `
+                <tr>
+                    <td>
+                        <strong>${m.name}</strong>
+                        <span class="member-id">${m.member_id}</span>
+                    </td>
+                    <td>
+                        <input type="text" value="${m.student_id || ''}" 
+                               onchange="updateField('${m.member_id}', 'student_id', this.value, this)" placeholder="Student ID">
+                    </td>
+                    <td>
+                        <select onchange="updateField('${m.member_id}', 'voice_part', this.value, this)" style="font-weight:600">
+                            <option value="" ${!m.voice_part ? 'selected' : ''}>— Unassigned —</option>
+                            <option value="Soprano" ${m.voice_part === 'Soprano' ? 'selected' : ''}>Soprano</option>
+                            <option value="Alto" ${m.voice_part === 'Alto' ? 'selected' : ''}>Alto</option>
+                            <option value="Tenor" ${m.voice_part === 'Tenor' ? 'selected' : ''}>Tenor</option>
+                            <option value="Bass" ${m.voice_part === 'Bass' ? 'selected' : ''}>Bass</option>
+                            <option value="Director" ${m.voice_part === 'Director' ? 'selected' : ''}>Director</option>
+                            <option value="Brass" ${m.voice_part === 'Brass' ? 'selected' : ''}>Brass</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" 
+                               value="${profileData[m.member_id]?.phone || m.contact || ''}" 
+                               onchange="updateField('${m.member_id}', 'contact', this.value, this)" 
+                               placeholder="Phone">
+                    </td>
+                    <td>
+                        <input type="email" value="${m.email || ''}" 
+                               onchange="updateField('${m.member_id}', 'email', this.value, this)" placeholder="Email">
+                    </td>
+                    <td>
+                        <span style="display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; background:#d1fae5; color:#065f46;">
+                            Active
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ── RENDER MOBILE LIST ──
+        const mobileList = document.getElementById('mobileList');
+        if (!filtered.length) {
+            mobileList.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">No members found.</div>';
+        } else {
+            mobileList.innerHTML = filtered.map(m => `
+                <div class="mobile-card" onclick="openModal('${m.member_id}')">
+                    <div class="mobile-card-info">
+                        <h4>${m.name}</h4>
+                        <p>${m.voice_part || 'No voice part'} • ${m.student_id || m.member_id}</p>
+                    </div>
+                    <i class="ti ti-chevron-right" style="color:var(--muted); font-size:20px;"></i>
+                </div>
+            `).join('');
+        }
     }
 
+    // ── DESKTOP AUTO-SAVE ──
     async function updateField(memberId, field, value, inputElement) {
         const memIndex = members.findIndex(m => m.member_id === memberId);
         if (memIndex !== -1) {
@@ -318,8 +426,53 @@
             console.error(error);
             toast('Failed to save: ' + error.message, 'error');
             inputElement.style.backgroundColor = '#fee2e2';
-        } else if (field === 'email') {
-            toast('Record updated. Syncing login email...', 'info');
+        }
+    }
+
+    // ── MOBILE MODAL LOGIC ──
+    function openModal(memberId) {
+        currentModalMember = members.find(m => m.member_id === memberId);
+        if (!currentModalMember) return;
+
+        document.getElementById('modalName').textContent = currentModalMember.name;
+        document.getElementById('modalMemberId').textContent = currentModalMember.member_id;
+        
+        document.getElementById('modalStudentId').value = currentModalMember.student_id || '';
+        document.getElementById('modalVoicePart').value = currentModalMember.voice_part || '';
+        document.getElementById('modalPhone').value = profileData[memberId]?.phone || currentModalMember.contact || '';
+        document.getElementById('modalEmail').value = currentModalMember.email || '';
+
+        document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').classList.remove('open');
+        currentModalMember = null;
+    }
+
+    async function saveModalField(field, value) {
+        if (!currentModalMember) return;
+        
+        // Update local array
+        currentModalMember[field] = value;
+        const memIndex = members.findIndex(m => m.member_id === currentModalMember.member_id);
+        if (memIndex !== -1) {
+            members[memIndex][field] = value;
+        }
+
+        if (field === 'voice_part') updateProgress();
+
+        toast('Saving...', 'info');
+
+        const { error } = await sb.from('members')
+            .update({ [field]: value || null, updated_at: new Date().toISOString() })
+            .eq('member_id', currentModalMember.member_id);
+
+        if (error) {
+            console.error(error);
+            toast('Failed to save: ' + error.message, 'error');
+        } else {
+            toast('✅ Saved!', 'success');
         }
     }
 
@@ -339,6 +492,11 @@
             document.getElementById('progressFill').style.background = '#cbd5e1';
         }
     }
+
+    // Close modal on outside click
+    document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
 
     init();
 </script>

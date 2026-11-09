@@ -664,9 +664,9 @@
     <div class="sidebar-logo">
         <div class="logo-icon"><i class="ti ti-music"></i></div>
         <div class="logo-title">University of Embu Choir</div>
-        <div class="logo-sub">Attendance System</div>
+        <div class="logo-sub">Attendance System ·</div>
     </div>
-
+       
     <nav class="sidebar-nav">
         <div class="nav-section-label">Main</div>
         <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
@@ -675,19 +675,20 @@
         <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
 
         <div class="nav-section-label">Management</div>
-        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="apologies.html" class="nav-item active"><i class="ti ti-file-text"></i> Apologies</a>
         <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="edit-members.html" class="nav-item"><i class="ti ti-users"></i> Edit Members</a>
         <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
-        <a href="confirm-payments.html" class="nav-item active"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
         <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance Management</a>
-        <a href="registration-fees.html" class="nav-item"><i class="ti ti-id-badge"></i> Registration Fees</a>
-        <a href="events.html" class="nav-item"><i class="ti ti-calendar-event"></i> Events</a>
-        <a href="music-scores.html" class="nav-item"><i class="ti ti-music"></i> Music Scores</a>
-
+            <a href="registration-fees.html" class="nav-item">
+    <i class="ti ti-id-badge"></i> Registration Fees
+</a>
+<a href="events.html" class="nav-item"><i class="ti ti-calendar-event"></i> Events</a>
+<a href="music-scores.html" class="nav-item"><i class="ti ti-music"></i> Music Scores</a>
         <div class="nav-section-label">Committee</div>
         <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
         <a href="voice_reps.html" class="nav-item"><i class="fas fa-microphone"></i> Voice Leaders</a>
-
         <div class="nav-section-label">Recognition</div>
         <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
     </nav>
@@ -695,14 +696,9 @@
     <div class="sidebar-bottom">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar">A</div>
-            <div>
-                <div class="user-name" id="userName">Loading…</div>
-                <div class="user-role" id="userRole">Admin</div>
-            </div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
         </div>
-        <div class="logout-link" onclick="logout()">
-            <i class="ti ti-logout"></i> Log out
-        </div>
+        <div class="logout-link" onclick="doLogout()"><i class="ti ti-logout"></i> Log out</div>
     </div>
 </aside>
 

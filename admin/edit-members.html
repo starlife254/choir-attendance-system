@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='%234f46e5' font-family='Arial'%3E𝄞%3C/text%3E%3C/svg%3E">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Edit Members — UoEm Students' Choir</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/cache-helper.js"></script>
+    
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3d35a8; --primary-light: #eef2ff;
+            --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+            --bg: #f8fafc; --surface: #fff; --text: #0f172a; --muted: #64748b;
+            --border: #e2e8f0; --sidebar-w: 240px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+        /* ── SIDEBAR ── */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; overflow-y: auto; transition: transform .25s ease; }
+        .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--border); }
+        .logo-icon { width: 38px; height: 38px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon i { color: #fff; font-size: 20px; }
+        .logo-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+        .logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .sidebar-nav { padding: 12px 8px; flex: 1; }
+        .nav-section-label { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .8px; padding: 10px 10px 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--muted); font-size: 13px; cursor: pointer; transition: background .12s, color .12s; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg); color: var(--text); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+        .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-bottom { padding: 12px 8px; border-top: 0.5px solid var(--border); }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text); }
+        .user-role { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .logout-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: var(--red); font-size: 13px; cursor: pointer; margin-top: 4px; transition: background .12s; }
+        .logout-link:hover { background: #fee2e2; }
+        .logout-link i { font-size: 17px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+        .sidebar-overlay.open { display: block; }
+
+        /* ── MAIN ── */
+        .main { margin-left: var(--sidebar-w); padding: 24px 28px 80px; min-height: 100vh; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+        .topbar h1 { font-size: 22px; font-weight: 800; }
+        .topbar .user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); font-weight: 600; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+        /* ── CARDS & TABLES ── */
+        .card { background: var(--surface); border-radius: 16px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,.03); }
+        .progress-bar { width: 100%; height: 12px; background: var(--border); border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--green); width: 0%; transition: width .3s; }
+        
+        .edit-table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; border-radius: 8px; overflow: hidden; }
+        .edit-table th { background: var(--bg); text-align: left; padding: 12px; border-bottom: 2px solid var(--border); font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+        .edit-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .edit-table tr:hover td { background: #f8fafc; }
+        .edit-table .member-id { font-size: 11px; color: var(--muted); margin-top: 2px; display: block; }
+        
+        input, select { padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; color: var(--text); transition: .15s; width: 100%; outline: none; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+        /* ── MOBILE ── */
+        .hamburger { display: none; background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer; }
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,.1); }
+            .main { margin-left: 0; padding: 16px 14px 90px; }
+            .hamburger { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-music"></i></div>
+        <div class="logo-title">University of Embu Choir</div>
+        <div class="logo-sub">Attendance System ·</div>
+    </div>
+       
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="mark-attendance.html" class="nav-item"><i class="ti ti-circle-check"></i> Mark attendance</a>
+        <a href="reports.html" class="nav-item"><i class="ti ti-chart-bar"></i> Reports</a>
+        <a href="analytics.html" class="nav-item"><i class="ti ti-trending-up"></i> Analytics</a>
+
+        <div class="nav-section-label">Management</div>
+        <a href="apologies.html" class="nav-item"><i class="ti ti-file-text"></i> Apologies</a>
+        <a href="members.html" class="nav-item"><i class="ti ti-users"></i> Members view</a>
+        <a href="edit-members.html" class="nav-item active"><i class="ti ti-users"></i> Edit Members</a>
+        <a href="manage-members.html" class="nav-item"><i class="ti ti-user-edit"></i> Manage members</a>
+        <a href="confirm-payments.html" class="nav-item"><i class="ti ti-cash"></i> Confirm penalties</a>
+        <a href="finance.html" class="nav-item"><i class="ti ti-currency-dollar"></i> Finance Management</a>
+        <a href="registration-fees.html" class="nav-item"><i class="ti ti-id-badge"></i> Registration Fees</a>
+        <a href="events.html" class="nav-item"><i class="ti ti-calendar-event"></i> Events</a>
+        <a href="music-scores.html" class="nav-item"><i class="ti ti-music"></i> Music Scores</a>
+
+        <div class="nav-section-label">Committee</div>
+        <a href="executive.html" class="nav-item"><i class="fas fa-users-cog"></i> Executive Committee</a>
+        <a href="voice_reps.html" class="nav-item"><i class="fas fa-microphone"></i> Voice Leaders</a>
+
+        <div class="nav-section-label">Recognition</div>
+        <a href="hall-of-fame.html" class="nav-item"><i class="ti ti-trophy"></i> Hall of Fame</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div><div class="user-name" id="userName">Loading…</div><div class="user-role" id="userRole">Admin</div></div>
+        </div>
+        <div class="logout-link" onclick="doLogout()"><i class="ti ti-logout"></i> Log out</div>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button class="hamburger" onclick="openSidebar()"><i class="ti ti-menu-2"></i></button>
+            <h1>Quick Edit List</h1>
+        </div>
+        <div class="user">
+            <div class="avatar" id="topAvatar">A</div>
+            <span id="userEmail">Loading...</span>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+                <h3 style="font-size:16px;font-weight:800;">Voice Part Assignment</h3>
+                <p style="font-size:12.5px;color:var(--muted)">Changes are saved automatically. Email changes sync to login instantly.</p>
+            </div>
+            <div style="text-align:right">
+                <div style="font-size:18px;font-weight:800" id="progressText">0 / 0</div>
+                <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600">Assigned</div>
+            </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+        <div style="overflow-x:auto">
+            <table class="edit-table" id="editTable">
+                <thead>
+                    <tr>
+                        <th style="width:20%">Name</th>
+                        <th style="width:12%">Student ID</th>
+                        <th style="width:15%">Voice Part</th>
+                        <th style="width:18%">Phone</th>
+                        <th style="width:20%">Email</th>
+                        <th style="width:15%">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Loading members…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    const SUPABASE_URL = 'https://skrvassehezrynudbahn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcnZhc3NlaGV6cnludWRiYWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzUyMzAsImV4cCI6MjA5MjExMTIzMH0.iA93tmu9TCdmEhUxBLGRUE0fRdDha9-WPps8qNzd5a0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    let toastTimer;
+    function toast(msg, type = 'info') {
+        let t = document.getElementById('toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'toast';
+            t.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:40px; color:#fff; font-weight:600; font-size:14px; z-index:999; opacity:0; transition:opacity .3s; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.2);';
+            document.body.appendChild(t);
+        }
+        clearTimeout(toastTimer);
+        t.textContent = msg;
+        t.style.background = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#4f46e5';
+        t.style.opacity = '1';
+        toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+    }
+
+    async function doLogout() {
+        try { await sb.auth.signOut(); } catch {}
+        window.location.href = '../login.html';
+    }
+
+    async function loadUserInfo() {
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) return;
+            const name = user.email?.split('@')[0] || 'Admin';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('topAvatar').textContent = name.charAt(0).toUpperCase();
+        } catch(e) { console.warn(e); }
+    }
+
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        
+        await loadUserInfo();
+        await loadMembers();
+    }
+
+        let members = [];
+    let profileData = {}; // NEW: To store member's self-filled profile info
+
+        async function loadMembers() {
+        // 1. Fetch user profiles to get the phone numbers they filled in
+        const { data: profiles } = await sb.from('user_profiles').select('member_id, phone');
+        profileData = {};
+        (profiles || []).forEach(p => {
+            if (p.member_id) profileData[p.member_id] = p;
+        });
+
+        // 2. Fetch members
+        const { data, error } = await sb.from('members')
+            .select('*')
+            .eq('status', 'active')
+            .order('name');
+
+        if (error) {
+            toast(error.message, 'error');
+            return;
+        }
+
+        members = data || [];
+        renderTable();
+        updateProgress();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        
+        if (!members.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No active members found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = members.map(m => `
+            <tr>
+                <td>
+                    <strong>${m.name}</strong>
+                    <span class="member-id">${m.member_id}</span>
+                </td>
+                <td>
+                    <input type="text" value="${m.student_id || ''}" 
+                           onchange="updateField('${m.member_id}', 'student_id', this.value, this)" placeholder="Student ID">
+                </td>
+                <td>
+                    <select onchange="updateField('${m.member_id}', 'voice_part', this.value, this)" style="font-weight:600">
+                        <option value="" ${!m.voice_part ? 'selected' : ''}>— Unassigned —</option>
+                        <option value="Soprano" ${m.voice_part === 'Soprano' ? 'selected' : ''}>Soprano</option>
+                        <option value="Alto" ${m.voice_part === 'Alto' ? 'selected' : ''}>Alto</option>
+                        <option value="Tenor" ${m.voice_part === 'Tenor' ? 'selected' : ''}>Tenor</option>
+                        <option value="Bass" ${m.voice_part === 'Bass' ? 'selected' : ''}>Bass</option>
+                        <option value="Director" ${m.voice_part === 'Director' ? 'selected' : ''}>Director</option>
+                        <option value="Brass" ${m.voice_part === 'Brass' ? 'selected' : ''}>Brass</option>
+                    </select>
+                </td>
+                               <td>
+                    <input type="text" 
+                           value="${profileData[m.member_id]?.phone || m.contact || ''}" 
+                           onchange="updateField('${m.member_id}', 'contact', this.value, this)" 
+                           placeholder="Phone">
+                </td>
+                <td>
+                    <input type="email" value="${m.email || ''}" 
+                           onchange="updateField('${m.member_id}', 'email', this.value, this)" placeholder="Email">
+                </td>
+                <td>
+                    <span style="display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; background:#d1fae5; color:#065f46;">
+                        Active
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function updateField(memberId, field, value, inputElement) {
+        const memIndex = members.findIndex(m => m.member_id === memberId);
+        if (memIndex !== -1) {
+            members[memIndex][field] = value;
+        }
+
+        const originalBg = inputElement.style.backgroundColor;
+        inputElement.style.backgroundColor = '#d1fae5';
+        setTimeout(() => inputElement.style.backgroundColor = originalBg, 500);
+
+        if (field === 'voice_part') updateProgress();
+
+        const { error } = await sb.from('members')
+            .update({ [field]: value || null, updated_at: new Date().toISOString() })
+            .eq('member_id', memberId);
+
+        if (error) {
+            console.error(error);
+            toast('Failed to save: ' + error.message, 'error');
+            inputElement.style.backgroundColor = '#fee2e2';
+        } else if (field === 'email') {
+            toast('Record updated. Syncing login email...', 'info');
+        }
+    }
+
+    function updateProgress() {
+        const total = members.length;
+        const assigned = members.filter(m => m.voice_part && m.voice_part.trim() !== '').length;
+        const pct = total ? Math.round(assigned / total * 100) : 0;
+        
+        document.getElementById('progressText').textContent = `${assigned} / ${total}`;
+        document.getElementById('progressFill').style.width = `${pct}%`;
+        
+        if (pct === 100) {
+            document.getElementById('progressFill').style.background = 'var(--green)';
+        } else if (pct > 0) {
+            document.getElementById('progressFill').style.background = 'var(--amber)';
+        } else {
+            document.getElementById('progressFill').style.background = '#cbd5e1';
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
